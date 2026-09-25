@@ -161,7 +161,8 @@ def build(output: Path = OUTPUT) -> Path:
 def main() -> int:
     path = build()
     check = Document(str(path))
-    assert any(s.style_id == TABLE_STYLE_ID for s in check.styles), "table style missing"
+    if not any(s.style_id == TABLE_STYLE_ID for s in check.styles):
+        raise SystemExit(f"{path} was written without the {TABLE_STYLE_ID} table style.")
     print(f"Wrote {path}")
     return 0
 

@@ -794,7 +794,8 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
         errors="replace",
         **_SUBPROCESS_KWARGS,
     )
-    assert process.stdout is not None
+    if process.stdout is None:
+        raise RuntimeError(f"{script.name} started without a readable stdout pipe.")
     pending_child_line: str | None = None
     for raw_line in process.stdout:
         line = raw_line.rstrip("\r\n")

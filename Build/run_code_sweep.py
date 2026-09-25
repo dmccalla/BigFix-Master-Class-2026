@@ -158,8 +158,6 @@ def build_steps(*, apply_ruff_fixes: bool, skip_pip_audit: bool) -> list[SweepSt
                     "environment",
                     "--of",
                     "JSON",
-                    "--outfile",
-                    "-",
                     py,
                 ],
                 output_file="cyclonedx-bom.json",
@@ -194,6 +192,8 @@ def build_steps(*, apply_ruff_fixes: bool, skip_pip_audit: bool) -> list[SweepSt
                     "mypy",
                     "--ignore-missing-imports",
                     "--no-error-summary",
+                    "--exclude",
+                    r"(^|/)sitecustomize\.py$",
                     *_shipped_targets(),
                 ],
                 output_file="mypy.txt",
@@ -259,6 +259,13 @@ def run_step(step: SweepStep, output_dir: Path) -> StepResult:
         status = "failed"
     else:
         status = "warning"
+    # bandit exits 1 whenever it reports anything, Low included. The gate
+    # reads the severities instead: High fails, anything lower is a warning
+    # that the executive summary escalates to Review Recommended.
+    if step.name == "bandit" and returncode == 1 and parsed_file is not None:
+        counts = _bandit_counts(output_dir)
+        status = "failed" if counts["High"] else "warning"
+        notes = f"High {counts['High']}, Medium {counts['Medium']}, Low {counts['Low']}."
     # gitleaks exits 1 when it finds something: a warning worth reading, not a
     # broken tool. A broken tool is exit 2 or worse.
     if step.name == "gitleaks" and returncode == 1:
@@ -292,13 +299,12 @@ def _bandit_counts(output_dir: Path) -> dict[str, int]:
     return counts
 
 
-def _pip_audit_clean(output_dir: Path) -> bool | None:
-    path = output_dir / "pip-audit.txt"
-    try:
-        text = path.read_text(encoding="utf-8")
-    except OSError:
+def _pip_audit_clean(output_dir: Path, results: list[StepResult]) -> bool | None:
+    """pip-audit exits 0 on a clean environment and 1 with findings."""
+    result = next((r for r in results if r.name == "pip-audit"), None)
+    if result is None or result.returncode is None:
         return None
-    return "No known vulnerabilities found" in text
+    return result.returncode == 0
 
 
 def _license_summary(output_dir: Path) -> dict[str, int]:
@@ -326,8 +332,9 @@ def _sbom_component_count(output_dir: Path) -> int | None:
 def write_third_party_notices(output_dir: Path) -> Path | None:
     """Render pip-licenses.json as THIRD_PARTY_NOTICES.md beside the reports.
 
-    The packaging script copies this file into the release, so attendees get
-    the license inventory of everything the launcher installs.
+    This is the developer environment's inventory, tools included, for the
+    sweep report. The release's own notices are written at packaging time by
+    Build/third_party_notices.py from a runtime-only environment.
     """
     path = output_dir / "pip-licenses.json"
     try:
@@ -386,7 +393,7 @@ def write_reports(
     output_dir: Path, results: list[StepResult], generated: str
 ) -> tuple[Path, str]:
     bandit = _bandit_counts(output_dir)
-    pip_clean = _pip_audit_clean(output_dir)
+    pip_clean = _pip_audit_clean(output_dir, results)
     licenses = _license_summary(output_dir)
     components = _sbom_component_count(output_dir)
     status, note = _overall_status(results, bandit, pip_clean)

@@ -24,6 +24,10 @@
 .EXAMPLE
     .\Build\package_release.ps1 -ValidateOnly
     Lists what would be packaged without building anything.
+
+.EXAMPLE
+    .\Build\package_release.ps1 -AllowDevVersion -AllowDirtyTree
+    Local test build of a development version. Never upload one of these.
 #>
 
 [CmdletBinding()]
@@ -31,7 +35,8 @@ param(
     [string]$OutputPath = "Dist\Releases",
     [switch]$ValidateOnly,
     [switch]$KeepStaging,
-    [switch]$AllowDirtyTree
+    [switch]$AllowDirtyTree,
+    [switch]$AllowDevVersion
 )
 
 $ErrorActionPreference = "Stop"
@@ -74,7 +79,7 @@ function Test-IncludedTrackedFile {
 }
 
 $version = Get-DeclaredVersion
-if ($version -match '[-+]' -and -not $ValidateOnly) {
+if ($version -match '[-+]' -and -not $ValidateOnly -and -not $AllowDevVersion) {
     throw "Refusing to package development version '$version'. Cut the release first (see Docs/Release_Process.md)."
 }
 
@@ -129,29 +134,32 @@ foreach ($relativePath in $includedFiles) {
     Copy-Item -LiteralPath $source -Destination $destination
 }
 
-# SBOM and third-party notices from the environment the launcher builds.
-$python = Get-RepoPython
-Write-Host "Python  : $python"
-& $python -m cyclonedx_py environment --of JSON --outfile (Join-Path $stagingPath "sbom.cyclonedx.json") $python
-if ($LASTEXITCODE -ne 0) { throw "cyclonedx-py failed (exit $LASTEXITCODE)" }
-$licensesJson = & $python -m piplicenses --format=json --with-urls
-if ($LASTEXITCODE -ne 0) { throw "pip-licenses failed (exit $LASTEXITCODE)" }
-$rows = $licensesJson | ConvertFrom-Json
-$notices = @(
-    "# Third-Party Notices",
-    "",
-    "Packages installed into the Workbench's private environment, with their",
-    "declared licenses. Generated at packaging time from pip-licenses.",
-    "",
-    "| Package | Version | License | Project |",
-    "|---|---|---|---|"
-)
-foreach ($row in ($rows | Sort-Object { $_.Name.ToLowerInvariant() })) {
-    $project = if ($row.URL -and $row.URL -ne "UNKNOWN") { "<$($row.URL)>" } else { "" }
-    $notices += "| $($row.Name) | $($row.Version) | $($row.License) | $project |"
+# SBOM and third-party notices describe exactly what the launcher installs:
+# a throwaway environment built from requirements.txt alone. The SBOM tools
+# stay in the repo's own environment and inspect that runtime environment,
+# so developer tools never leak into the inventory attendees receive.
+$toolPython = Get-RepoPython
+& $toolPython -c "import cyclonedx_py, piplicenses" 2>$null
+if ($LASTEXITCODE -ne 0) {
+    & $toolPython -m pip install --quiet --disable-pip-version-check cyclonedx-bom pip-licenses
+    if ($LASTEXITCODE -ne 0) { throw "Installing the SBOM tools failed (exit $LASTEXITCODE)" }
 }
-$notices += ""
-[IO.File]::WriteAllText((Join-Path $stagingPath "THIRD_PARTY_NOTICES.md"), ($notices -join "`n"), (New-Object Text.UTF8Encoding($false)))
+$sbomEnv = Join-Path $outputRoot "_sbom_env"
+if (Test-Path -LiteralPath $sbomEnv) { Remove-Item -Recurse -Force -LiteralPath $sbomEnv }
+Write-Host "Building the runtime-only environment for the SBOM..."
+& $toolPython -m venv $sbomEnv
+if ($LASTEXITCODE -ne 0) { throw "Could not create the SBOM environment (exit $LASTEXITCODE)" }
+$runtimePython = Join-Path $sbomEnv "Scripts\python.exe"
+& $runtimePython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot "requirements.txt")
+if ($LASTEXITCODE -ne 0) { throw "Installing requirements.txt into the SBOM environment failed (exit $LASTEXITCODE)" }
+& $toolPython -m cyclonedx_py environment --of JSON -o (Join-Path $stagingPath "sbom.cyclonedx.json") $runtimePython
+if ($LASTEXITCODE -ne 0) { throw "cyclonedx-py failed (exit $LASTEXITCODE)" }
+# The notices are written from inside the runtime environment so the
+# inventory is exactly what the launcher installs. See the script's docstring
+# for why pip-licenses cannot be pointed at it from here.
+& $runtimePython (Join-Path $repoRoot "Build\third_party_notices.py") (Join-Path $stagingPath "THIRD_PARTY_NOTICES.md") --ignore pip
+if ($LASTEXITCODE -ne 0) { throw "Writing the third-party notices failed (exit $LASTEXITCODE)" }
+Remove-Item -Recurse -Force -LiteralPath $sbomEnv
 
 $startHere = @"
 $productName $version

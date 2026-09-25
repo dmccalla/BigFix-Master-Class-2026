@@ -95,7 +95,7 @@ PNG_DPI = 200
 PERFMON_SCORECARD_TITLE = "PerfMon Counters Analysis Scorecard"
 PERFMON_SCORECARD_FIGSIZE = (15.08, 9.08)
 PERFMON_SCORE_WEIGHTS = {
-    "PASS": 1.0,
+    "PASS": 1.0,  # nosec B105: a status label, not a credential
     "ADVISORY": 0.55,
     "FAIL": 0.0,
     "CANNOT VERIFY": 0.25,

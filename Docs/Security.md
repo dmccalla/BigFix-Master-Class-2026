@@ -44,6 +44,22 @@ Run before every release, from the repository root:
 The executive summary written by the sweep states the overall result as
 **Clean**, **Review Recommended** or **Action Required**.
 
+## Accepted Findings
+
+Bandit reports these at Low severity on every sweep. Each is a deliberate
+design choice with a compensating control, recorded here so the next reader
+does not re-triage them.
+
+| Finding | Where | Why it is accepted |
+|---|---|---|
+| B404, B603, B607 subprocess use and partial executable paths | `App/run_diagnostics.py`, `App/diagnostics_workbench_ui.py`, `Get/get_perfmon_charts.py`, `Lib/Analysis/filldb_perf_log.py`, `Lib/Core/input_utils.py`, `Lib/Design/html_charts.py`, `Lib/Core/subprocess_window.py` | The Workbench runs `relog.exe`, `pythonw.exe`, `MXFillDBPerf.exe` and the system browser by design. Every call passes an argument list with `shell=False`, which `Tests/test_security_guardrails.py` enforces. `relog.exe` is resolved on PATH because it ships with Windows. |
+| B606 `os.startfile` | `Lib/Core/input_utils.py` | Opens the run folder or a produced file in the user's default application. The path is one the Workbench wrote itself. |
+| B110, B112 broad except in fallbacks | `Get/get_perfmon_charts.py`, `Inject/inject_perfmon_charts.py`, `Lib/Themes/chart_theme.py` | Best-effort paths (font registration, optional observation files, chart mapping) where failure means falling back to a default, never hiding a security error. |
+| B105 "hardcoded password" | `Inject/inject_perfmon_charts.py` | The string is the status label `PASS` in a scoring table, not a credential. Annotated in place. |
+
+A new Low finding outside this table is not accepted until it is added here
+with a reason.
+
 ## Reporting A Problem
 
 Attendees who find a security problem should report it to the presenter

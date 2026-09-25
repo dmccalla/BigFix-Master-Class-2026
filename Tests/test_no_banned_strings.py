@@ -54,6 +54,7 @@ _EXCL_DIRS = {
     "SampleData",
     "Fonts",
     "Temp",
+    "Dist",
 }
 _TEXT_EXT = {
     ".py",

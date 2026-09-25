@@ -34,6 +34,7 @@ _EXCL_DIRS = {
     "Temp",
     ".claude",
     "SampleData",
+    "Dist",
 }
 _TEXT_EXT = {
     ".py",

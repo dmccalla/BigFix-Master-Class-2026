@@ -1,0 +1,40 @@
+[project]
+name = "master-class-diagnostics-workbench"
+version = "1.0.0"
+description = "Master Class Diagnostics Workbench: automated performance and configuration analysis for BigFix."
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.11"
+dependencies = [
+    "python-docx>=1.1.0",
+    "defusedxml>=0.7.1",
+    "Pillow>=9.0.0",
+    "matplotlib>=3.7.0",
+    "numpy>=1.26",
+    # playwright drives a headless SYSTEM browser (Edge or Chrome) to render
+    # the Infographic outputs from Assets/chart_template.html. It uses the
+    # installed browser via channel="msedge"/"chrome", so no Chromium download
+    # is needed. Edge ships with Windows.
+    "playwright>=1.40.0",
+    "openpyxl>=3.1.0",
+    "pandas>=2.0.0",
+    "xlsxwriter>=3.0.0",
+    # customtkinter powers the desktop UI.
+    "customtkinter>=5.2.0,<6.0.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+]
+
+[tool.ruff]
+line-length = 90
+target-version = "py311"
+extend-exclude = ["SampleData", "Fonts", "Templates"]
+
+[tool.ruff.lint]
+# E402: the scripts extend sys.path before importing shared modules.
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E402", "E501"]

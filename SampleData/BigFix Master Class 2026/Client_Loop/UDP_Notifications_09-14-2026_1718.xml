@@ -1,0 +1,24 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it &amp; &quot;, &quot; &amp; item 1 of it &amp; &quot;, &quot; &amp; item 2 of it &amp; &quot;, &quot; &amp; item 3 of it) of (item 0 of it, item 1 of it, item 2 of it, item 3 of it) of ((name of item 0 of it,(if (size of item 1 of it = 1) then ((if it = &quot;&quot; then &quot;Not Reported&quot; else it) of concatenation &quot;;&quot; of values of results (item 0 of it, elements of item 1 of it)) else (if (size of item 1 of it &gt; 1) then ((&quot;IP Address Duplicates: &quot; &amp; concatenation &quot;|&quot; of ((name of it) &amp; &quot;=&quot; &amp; (id of it as string)) of elements of item 1 of it) as string) else (&quot;IP Address Property Does Not Exist&quot;))),(if (size of item 2 of it = 1) then ((if it = &quot;&quot; then &quot;Not Reported&quot; else it) of concatenation &quot;;&quot; of values of results (item 0 of it, elements of item 2 of it)) else (if (size of item 2 of it &gt; 1) then ((&quot;Relay Duplicates: &quot; &amp; concatenation &quot;|&quot; of ((name of it) &amp; &quot;=&quot; &amp; (id of it as string)) of elements of item 2 of it) as string) else (&quot;Relay Property Does Not Exist&quot;))),(if (size of item 3 of it = 1) then ((if it = &quot;&quot; then &quot;Not Reported&quot; else it) of concatenation &quot;;&quot; of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it &gt; 1) then ((&quot;Platform Health Check - Receiving UDP Pings Duplicates: &quot; &amp; concatenation &quot;|&quot; of ((name of it) &amp; &quot;=&quot; &amp; (id of it as string)) of elements of item 3 of it) as string) else (&quot;Platform Health Check - Receiving UDP Pings Property Does Not Exist&quot;)))) of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it)) of (set of BES computers whose (id of it &gt;= 1257968 and id of it &lt;= 1612907910), set of bes properties whose (reserved flag of it AND name of it as lowercase = (&quot;IP Address&quot;) as lowercase), set of bes properties whose (name of it as lowercase = (&quot;Relay&quot;) as lowercase), set of bes properties whose (name of it as lowercase = (&quot;Platform Health Check - Receiving UDP Pings&quot;) as lowercase))">
+		<Result>
+			<Answer type="string">BFRELAY1, 192.168.4.8, BFROOT1.dmc.lab:52311, True</Answer>
+			<Answer type="string">BFPLUGINPORTAL, 192.168.4.7, BFROOT1.dmc.lab:52311, True</Answer>
+			<Answer type="string">BFWEBUI, 192.168.4.4, BFROOT1.dmc.lab:52311, True</Answer>
+			<Answer type="string">BFROOT1, 192.168.4.3, BES Root Server, True</Answer>
+			<Answer type="string">BFINVENTORY, 192.168.4.5, BFROOT1.dmc.lab:52311, False</Answer>
+			<Answer type="string">DM1WIN1103, 192.168.4.127, bfrelay1.dmc.lab:52311, True</Answer>
+			<Answer type="string">BFWEBRPT02, 192.168.4.9, BFROOT1.dmc.lab:52311, True</Answer>
+			<Answer type="string">WIN2025-01, 192.168.4.32, BFROOT1.dmc.lab:52311, True</Answer>
+			<Answer type="string">DC1, 192.168.4.2, bfrelay1.dmc.lab:52311, True</Answer>
+			<Answer type="string">DUNCAN-WIN11, 192.168.4.201, bfrelay1.dmc.lab:52311, True</Answer>
+			<Answer type="string">BFCOMPLIANCE, 192.168.4.6, BFROOT1.dmc.lab:52311, False</Answer>
+			<Answer type="string">DESKTOP-4QHO360, 192.168.4.19, bfrelay1.dmc.lab:52311, Not Reported</Answer>
+			<Answer type="string">BFOSDRELAY1, 192.168.4.34, BFROOT1.dmc.lab:52311, True</Answer>
+		</Result>
+		<Evaluation>
+			<Time>103.9ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>

@@ -1,0 +1,40 @@
+# ---------------------------------------------------------------------------
+# Master Class Diagnostics Workbench: ignore rules
+# Keep the repo to source, sample data, and the shipped utilities. Anything a
+# script regenerates or a tool produces does not belong in git.
+# ---------------------------------------------------------------------------
+
+# Python bytecode and caches
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.uv-cache/
+
+# Private per-tool virtual environment created by the launcher
+.venv/
+venv/
+
+# Per-user local UI state (not source)
+*.ui.config.json
+
+# Editor settings and agent scratch
+.vscode/
+.claude/
+.agents/
+.codex/
+
+# OS and editor junk
+.DS_Store
+Thumbs.db
+*.stackdump
+*~
+
+# Microsoft Office lock files
+~$*
+
+# Scratch space and generated output
+Temp/
+Output/

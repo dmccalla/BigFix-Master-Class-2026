@@ -24,6 +24,7 @@ App/run_diagnostics.py as a child process, streaming its output into the log.
 
 from __future__ import annotations
 
+import calendar
 import contextlib
 import ctypes
 import json
@@ -73,11 +74,6 @@ from Lib.Core.input_utils import (  # noqa: E402
 )
 from Lib.Core.subprocess_window import hidden_subprocess_kwargs  # noqa: E402
 from Lib.Design.design_system import DESIGN_SYSTEM as DS  # noqa: E402
-
-try:  # The calendar popup needs tkcalendar. Without it the date fields are typed.
-    from tkcalendar import Calendar
-except Exception:  # pragma: no cover - optional dependency
-    Calendar = None
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
@@ -468,7 +464,13 @@ class HoverTip:
 
 
 class DatePopup(ctk.CTkToplevel):
-    """Floating calendar. Calls on_pick(date) on a pick, on_clear() on Clear."""
+    """Floating calendar. Calls on_pick(date) on a pick, on_clear() on Clear.
+
+    The month grid is plain tkinter, so the runtime carries no calendar
+    package. Weeks start on Monday and days outside the month are blank.
+    """
+
+    WEEKDAYS = ("Mo", "Tu", "We", "Th", "Fr", "Sa", "Su")
 
     def __init__(
         self, master, anchor_widget, initial: date | None, on_pick, on_clear
@@ -477,7 +479,10 @@ class DatePopup(ctk.CTkToplevel):
         self._on_pick = on_pick
         self._on_clear = on_clear
         self._selected = initial or date.today()
-        self._calendar = None
+        self._shown = self._selected.replace(day=1)
+        self._cells: list[tk.Label] = []
+        self._cell_dates: dict[tk.Label, date | None] = {}
+        self._month_label: tk.Label | None = None
         self.title("Pick a date")
         self.configure(fg_color=CANVAS)
         self.resizable(False, False)
@@ -487,43 +492,56 @@ class DatePopup(ctk.CTkToplevel):
         self._place_near(anchor_widget)
         self.after(50, self._lift_and_grab)
         self.bind("<Escape>", lambda _e: self._close())
+        self.bind("<Left>", lambda _e: self._shift_month(-1))
+        self.bind("<Right>", lambda _e: self._shift_month(1))
         self.protocol("WM_DELETE_WINDOW", self._close)
 
     def _build_widgets(self) -> None:
         outer = ctk.CTkFrame(self, fg_color=PAPER, corner_radius=14)
         outer.pack(padx=12, pady=12, fill="both", expand=True)
-        self._calendar = Calendar(
-            outer,
-            year=self._selected.year,
-            month=self._selected.month,
-            day=self._selected.day,
-            firstweekday="monday",
-            showweeknumbers=False,
-            showothermonthdays=False,
-            date_pattern="mm-dd-yyyy",
-            selectmode="day",
-            font=(UI_FONT, 11),
-            background=PLUM,
-            foreground=PAPER,
-            bordercolor=PLUM_SOFT,
-            headersbackground=PAPER,
-            headersforeground=MUTED,
-            normalbackground=PAPER,
-            normalforeground=INK,
-            weekendbackground=PAPER,
-            weekendforeground=INK,
-            othermonthbackground=PAPER,
-            othermonthforeground=MUTED,
-            othermonthwebackground=PAPER,
-            othermonthweforeground=MUTED,
-            selectbackground=PLUM,
-            selectforeground=PAPER,
+        header = tk.Frame(outer, bg=PLUM)
+        header.pack(fill="x", padx=12, pady=(12, 0))
+        nav_style = {
+            "bg": PLUM,
+            "fg": PAPER,
+            "activebackground": PLUM_SOFT,
+            "activeforeground": PLUM,
+            "relief": "flat",
+            "bd": 0,
+            "font": (UI_FONT, 11, "bold"),
+            "width": 3,
+            "cursor": "hand2",
+        }
+        tk.Button(
+            header, text="<", command=lambda: self._shift_month(-1), **nav_style
+        ).pack(side="left", padx=(6, 0), pady=4)
+        tk.Button(
+            header, text=">", command=lambda: self._shift_month(1), **nav_style
+        ).pack(side="right", padx=(0, 6), pady=4)
+        self._month_label = tk.Label(
+            header, bg=PLUM, fg=PAPER, font=(UI_FONT, 11, "bold")
         )
-        self._calendar.pack(padx=12, pady=(12, 8), fill="both", expand=True)
-        self._calendar.bind(
-            "<<CalendarSelected>>",
-            lambda _e: self._do_pick(self._calendar.selection_get() or self._selected),
+        self._month_label.pack(side="left", expand=True, fill="x", pady=4)
+
+        grid = tk.Frame(
+            outer, bg=PAPER, highlightthickness=1, highlightbackground=PLUM_SOFT
         )
+        grid.pack(padx=12, pady=(0, 8))
+        for col, name in enumerate(self.WEEKDAYS):
+            tk.Label(
+                grid, text=name, bg=PAPER, fg=MUTED, font=(UI_FONT, 10), width=4, pady=4
+            ).grid(row=0, column=col)
+        for index in range(42):
+            cell = tk.Label(
+                grid, text="", bg=PAPER, fg=INK, font=(UI_FONT, 11), width=4, pady=5
+            )
+            cell.grid(row=1 + index // 7, column=index % 7, padx=1, pady=1)
+            cell.bind("<Button-1>", lambda _e, c=cell: self._pick_cell(c))
+            cell.bind("<Enter>", lambda _e, c=cell: self._style_cell(c, hovered=True))
+            cell.bind("<Leave>", lambda _e, c=cell: self._style_cell(c))
+            self._cells.append(cell)
+        self._paint_month()
+
         footer = ctk.CTkFrame(outer, fg_color="transparent")
         footer.pack(fill="x", padx=12, pady=(4, 12))
         footer.grid_columnconfigure(1, weight=1)
@@ -549,6 +567,44 @@ class DatePopup(ctk.CTkToplevel):
             hover_color=PLUM,
             command=self._do_clear,
         ).grid(row=0, column=2, sticky="e", padx=(8, 0))
+
+    def _shift_month(self, step: int) -> None:
+        index = self._shown.month - 1 + step
+        self._shown = date(self._shown.year + index // 12, index % 12 + 1, 1)
+        self._paint_month()
+
+    def _paint_month(self) -> None:
+        if self._month_label is not None:
+            self._month_label.configure(text=self._shown.strftime("%B %Y"))
+        weeks = calendar.Calendar(firstweekday=calendar.MONDAY).monthdayscalendar(
+            self._shown.year, self._shown.month
+        )
+        days = [day for week in weeks for day in week]
+        days += [0] * (len(self._cells) - len(days))
+        for cell, day in zip(self._cells, days):
+            self._cell_dates[cell] = self._shown.replace(day=day) if day else None
+            cell.configure(
+                text=str(day) if day else "", cursor="hand2" if day else "arrow"
+            )
+            self._style_cell(cell)
+
+    def _style_cell(self, cell: tk.Label, hovered: bool = False) -> None:
+        cell_date = self._cell_dates.get(cell)
+        if cell_date is None:
+            cell.configure(bg=PAPER, fg=INK, font=(UI_FONT, 11))
+        elif cell_date == self._selected:
+            cell.configure(bg=PLUM, fg=PAPER, font=(UI_FONT, 11, "bold"))
+        elif hovered:
+            cell.configure(bg=PLUM_SOFT, fg=PLUM, font=(UI_FONT, 11))
+        elif cell_date == date.today():
+            cell.configure(bg=PAPER, fg=MOSS, font=(UI_FONT, 11, "bold"))
+        else:
+            cell.configure(bg=PAPER, fg=INK, font=(UI_FONT, 11))
+
+    def _pick_cell(self, cell: tk.Label) -> None:
+        picked = self._cell_dates.get(cell)
+        if picked is not None:
+            self._do_pick(picked)
 
     def _do_pick(self, picked: date) -> None:
         try:
@@ -2623,9 +2679,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _open_date_picker(self, module_key: str, field_key: str, anchor_widget) -> None:
         var = self.date_field_vars.get((module_key, field_key))
         if var is None:
-            return
-        if Calendar is None:
-            anchor_widget.focus_set()
             return
         current = self._parse_date_field_value(var.get())
 

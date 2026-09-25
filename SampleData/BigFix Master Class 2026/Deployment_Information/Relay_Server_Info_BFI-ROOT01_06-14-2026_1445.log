@@ -1,0 +1,38 @@
+RELAY SERVER INFORMATION
+ 
+Report Generated: Sun, 14 Jun 2026 14:46:48 -0400
+Report Version: 1.0
+ 
+BES Relay Version Counts: 11.0.6.137--2
+Number of Active BES Relays: 1
+Number of Computers Using Automatic Relay Selection: 4
+Number of Computers Using Manual Relay Selection: 10
+Average Number of Clients per Relay: 6
+Distances to Relays: 0--14, 255--0--1
+Average Distance to Relays: 0
+Maximum Distance to Relays: 0
+Latest relay Report Time timestamp: Sun, 14 Jun 2026 14:46:27 -0400
+Number of relays reported within the last 24 hours: 1
+Number of relays reported within the last 1 hours: 1
+Number of relays reported within the last 15 minutes: 1
+Number of relays that have not reported within the last 1 hour: 1
+Number of relays that have not reported within the last 1 day: 1
+Number of relays that have not reported within the last 1 day: 1
+Number of Relays with over 1000 Clients: 0
+ 
+Current Actionsite Version: 1326
+Relays with Stale Actionsite Versions (based upon BES Health Checks::Actionsite Version) - Version, Relay Name
+BFOSDRELAY1 - 1308
+ 
+Relay Server Aggregation Statistics (Total Child Count) - Relay Name, Number of Machines
+BES Root Server, 1
+BFI-ROOT01.bigfixinc.lab:52311, 10
+bfi-root01.bigfixinc.lab:52311, 3
+ 
+Relay Server Aggregation Statistics (Client Child Count) - Relay Name, Number of Machines
+BES Root Server, 1
+BFI-ROOT01.bigfixinc.lab:52311, 8
+bfi-root01.bigfixinc.lab:52311, 3
+ 
+Relay Server Aggregation Statistics (Relay Child Count) - Relay Name, Number of Machines
+BFI-ROOT01.bigfixinc.lab:52311, 2

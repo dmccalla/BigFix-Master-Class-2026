@@ -1,0 +1,218 @@
+PROPERTY INFORMATION
+ 
+Report Generated: Sun, 14 Jun 2026 14:51:51 -0400
+Report Version: 1.0
+ 
+Number of Properties: 10342
+Number of Custom Properties: 34
+Number of Active Properties: 877
+Number of Activated Analysis: 140
+Number of Property Activations sourced within custom sites: 138
+Number of Property Activations sourced from opsite content: 0
+Number of Property Activations sourced from actionsite content: 34
+Number of Property Activations sourced from external site content: 540
+Column Headers: Property Name, Source Analysis Site Name, Property ID, Issued By, Evaluation Interval
+ 
+Chrysalis Scan Results
+Test
+2299764711
+5797
+1
+bigfix
+00:00:00
+Chrysalis Scan Results
+Test
+2299764711
+5802
+1
+bigfix
+00:00:00
+Notpad++ Vulnerable Status
+Test
+2299764711
+5802
+3
+bigfix
+00:00:00
+Next Patch Window
+Staples
+2299764711
+6082
+1
+bigfix
+00:00:00
+Last Patch Window
+Staples
+2299764711
+6082
+2
+bigfix
+00:00:00
+Patch Window Values (week, day, start, end, patch offset, exclusion)
+Staples
+2299764711
+6082
+5
+bigfix
+00:00:00
+Patch Window Opt-Out
+Staples
+2299764711
+6082
+8
+bigfix
+00:00:00
+BitLocker - Partition Status
+ActionSite
+2299764711
+6507
+1
+bigfix
+00:00:00
+BitLocker - Disk Partition Tables
+ActionSite
+2299764711
+6507
+2
+bigfix
+00:00:00
+BitLocker - Encrypted Volumes Details
+ActionSite
+2299764711
+6507
+3
+bigfix
+00:00:00
+BitLocker - Encrypted Volumes
+ActionSite
+2299764711
+6507
+4
+bigfix
+00:00:00
+MicrosoftVolumeEncryption available?
+ActionSite
+2299764711
+6509
+1
+bigfix
+00:05:00
+# of Bitlocker available disks?
+ActionSite
+2299764711
+6509
+2
+bigfix
+00:05:00
+OS Should Support BitLocker?
+ActionSite
+2299764711
+6509
+3
+bigfix
+00:05:00
+* from win32_EncryptableVolume
+ActionSite
+2299764711
+6509
+4
+bigfix
+00:05:00
+# of encrypted volumes?
+ActionSite
+2299764711
+6509
+5
+bigfix
+00:05:00
+ProtectionStatus
+ActionSite
+2299764711
+6509
+6
+bigfix
+00:05:00
+EncryptionMethod
+ActionSite
+2299764711
+6509
+7
+bigfix
+00:05:00
+ConversionStatus
+ActionSite
+2299764711
+6509
+8
+bigfix
+00:05:00
+VolumeType
+ActionSite
+2299764711
+6509
+9
+bigfix
+00:05:00
+IsVolumeInitializedForProtection
+ActionSite
+2299764711
+6509
+10
+bigfix
+00:05:00
+Errors
+ActionSite
+2299764711
+6509
+11
+bigfix
+00:05:00
+TPM - Enabled in OS
+ActionSite
+2299764711
+6511
+1
+bigfix
+00:00:00
+TPM - Activated in OS
+ActionSite
+2299764711
+6511
+2
+bigfix
+00:00:00
+TPM - Owned in OS
+ActionSite
+2299764711
+6511
+3
+bigfix
+00:00:00
+TPM - Visible to OS
+ActionSite
+2299764711
+6511
+4
+bigfix
+00:00:00
+TPM - Version
+ActionSite
+2299764711
+6511
+5
+bigfix
+00:00:00
+BitLocker - TPM Protected
+ActionSite
+2299764711
+6519
+1
+bigfix
+00:00:00
+BitLocker - Recovery Password Enabled
+ActionSite
+2299764711
+6519
+2
+bigfix
+00:00:00

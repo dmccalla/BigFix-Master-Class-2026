@@ -1,0 +1,279 @@
+CONTENT INFORMATION
+ 
+Report Generated: Sun, 14 Jun 2026 14:50:23 -0400
+Report Version: 1.0
+ 
+Number of Fixlets: 5701 / 34130
+Number of Tasks: 1008 / 2144
+Number of Analyses: 121 / 6702
+Number of Master Operator Fixlets: 15
+Number of Master Operator Tasks: 30
+Total Number of Master Operator Fixlets and Tasks: 45
+Number of Master Operator Analyses: 10
+Number of Hidden Fixlets: 0 / 0
+Number of Hidden Tasks: 0 / 0
+Number of Hidden Analyses: 0 / 0
+Number of Baselines: 18
+Number of Properties: 10342
+Number of Actived Properties: 877
+Number of Custom Properties: 34
+Number of Activated Analyses: 140
+Number of Automatic Computer Groups: 6
+Number of Manual Computer Groups: 5
+Number of External Sites: 57
+Number of Custom Sites: 23
+Number of Automatic Computer Groups: 6
+Number of Manual Computer Groups: 5
+Names of External Sites: AVP Federal User Group, ActionSite, BES Asset Discovery, BES Inventory and License, BES Support, BES UEM Mobile, BESUEM, BigFix Application Control, BigFix DEX, BigFix Insights for Vulnerability Remediation, BigFix Inventory, BigFix Inventory Discovery, BigFix Reports, BigFix Resolve, BigFix Scanner, BigFix ServiceNow Data Flow, CIS Checklist for MS SQL Server 2019, CIS Checklist for MS SQL Server 2022, CIS Checklist for Windows 11, CIS Checklist for Windows 2022 DC, CIS Checklist for Windows 2022 MS, CIS Checklist for Windows 2025 MS, Client Manager for Anti-Virus, CyberFOCUS, DISA STIG Checklist for RHEL 9, DISA STIG Checklist for Windows 11, DISA STIG Checklist for Windows 2022, DISA checklist for Windows server 2019 STIG, Enterprise Security, HIPAA Checklist for Windows Server, Insights, Known Exploited Vulnerabilities Content Pack, Known Exploited Vulnerabilities Content Pack for NIX, Known Exploited Vulnerabilities Content Pack for Windows, OS Deployment and Bare Metal Imaging, PCI DSS Checklist for Windows 2019, PCI DSS Checklist for Windows 2022, PCI DSS Checklist for Windows Server (PCI v4.0), PCI DSS Checklist for Windows Workstation (Consolidated), PCI DSS Reporting, Patches for Alma Linux 9, Patches for RHEL 9, Patching Support, Power Management, SCM Reporting, Software Distribution, Software Installer Library for Mac, Software Installer Library for Windows, Universal Checklist for Windows Server, Universal Checklist for Windows Workstation, Updates for Mac Applications Extended, Updates for NIX Applications Extended, Updates for Windows Applications, Updates for Windows Applications Extended, Updates for Windows Applications Middleware, Vulnerability Reporting, Win2012ESU
+Names of Custom Sites: Austin, Bethesda, Development, Diem, Finance, Health Check 4 Dev, Health Check 4 Test, Health Check 5 Dev, Health Check 5 QA, Marsh, Master Class, Production, QA, Resolve, Server Automation Plan Log Files, ServiceNow CMDB Attributes, Software Distribution, Staples, Stuff, Superman, Test, Wellness Check, swd app group
+ 
+//===== EXTERNAL SITES INFORMATION  ==================================
+Column Headers: Display Name, Site Version, Number of Subscribed Computers, Most Recent Fixlet Modification, Number of Fixlets Within the Site
+ 
+BES Support
+1512
+14
+Tue, 31 Mar 2026 09:25:09 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/bessupport
+Patches for Windows
+4741
+12
+Sun, 14 Jun 2026 09:19:28 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/bessecurity
+Client Manager for Endpoint Protection
+5845
+0
+Mon, 29 Jun 2026 19:07:46 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/avclient
+BES Inventory and License
+208
+14
+Tue, 10 Mar 2026 17:09:42 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/besinventory
+BES Asset Discovery
+113
+14
+Wed, 15 Oct 2025 08:01:00 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/assetdiscovery
+Updates for Windows Applications
+2516
+12
+Mon, 29 Jun 2026 06:04:40 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/updateswindowsapps
+SCM Reporting
+170
+14
+Thu, 04 Dec 2025 15:37:03 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/scmreporting
+Power Management
+85
+0
+Fri, 11 May 2018 14:49:35 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/powermanagement
+Patching Support
+1324
+14
+Wed, 10 Jun 2026 03:35:39 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/patchingsupport
+OS Deployment and Bare Metal Imaging
+117
+14
+Mon, 13 Apr 2026 15:00:00 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/osimaging
+AVP Federal User Group
+67
+14
+Wed, 16 Dec 2020 15:09:24 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/avpfederalusergroup
+Software Distribution
+126
+14
+Mon, 30 Mar 2026 19:10:13 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/softwaredistribution
+DISA STIG Checklist for Windows Server 2019
+27
+0
+Tue, 12 May 2026 08:28:07 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/disawin2019
+Insights
+8
+0
+Mon, 25 Oct 2021 18:27:15 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/insights
+BigFix Modern Client Management
+60
+12
+Tue, 19 Sep 2023 20:26:57 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/besuem
+BigFix ServiceNow Data Flow
+10
+14
+Wed, 31 Aug 2022 14:00:00 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/bfsndataflow
+CIS Checklist for MS SQL Server 2019
+25
+3
+Fri, 18 Jul 2014 03:12:55 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/cismssql2019
+BigFix Mobile Client Management
+28
+1
+Tue, 24 Aug 2021 18:15:25 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/besuemmobile
+BigFix Insights for Vulnerability Remediation
+223
+14
+Fri, 17 Apr 2026 18:47:29 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/bfivr
+Updates for Windows Applications Extended
+372
+12
+Mon, 29 Jun 2026 06:44:47 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/updateforwinappextend
+Vulnerability Reporting
+77
+0
+Wed, 02 Nov 2022 10:26:28 -0400
+http://sync.bigfix.com/cgi-bin/bfgather/vulnreport
+ 
+//===== CUSTOM SITES INFORMATION  ==================================
+Column Headers: Site Name, Number of Subscribed Computers, Number of Fixlets Within the Site, Number of Writers to Site, Number of Readers to Site, Number of Owners to Site
+ 
+Austin
+0
+7
+3
+4
+3
+Bethesda
+14
+5
+5
+5
+3
+Development
+14
+15
+3
+3
+3
+Diem
+12
+22
+3
+4
+3
+Finance
+14
+11
+3
+3
+3
+Health Check 4 Dev
+14
+41
+3
+3
+3
+Health Check 4 Test
+0
+0
+3
+3
+3
+Health Check 5 Dev
+9
+37
+3
+3
+3
+Health Check 5 QA
+9
+0
+3
+3
+3
+Marsh
+0
+1
+3
+3
+3
+Master Class
+14
+9
+3
+3
+3
+Production
+14
+26
+3
+3
+3
+QA
+14
+31
+3
+3
+3
+Resolve
+14
+56
+3
+3
+3
+Server Automation Plan Log Files
+0
+0
+3
+10
+3
+ServiceNow CMDB Attributes
+14
+1
+3
+3
+3
+Software Distribution
+14
+2
+3
+5
+3
+Staples
+14
+16
+3
+3
+3
+Stuff
+0
+0
+3
+3
+3
+Superman
+14
+4
+3
+3
+3
+swd app group
+14
+3
+3
+5
+3
+Test
+14
+63
+3
+3
+3
+Wellness Check
+14
+11
+3
+3
+3

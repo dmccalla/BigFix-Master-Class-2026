@@ -392,3 +392,44 @@ def test_standalone_udp_discovery_stops_at_results_root(tmp_path: Path) -> None:
     )
 
     assert get_loop_health.discover_udp_notifications_file(loop_xml) is None
+
+
+def test_loop_manual_deployment_info_folder_outside_scope_is_kept(
+    tmp_path: Path,
+) -> None:
+    """A hand-picked Deployment_Information folder is never replaced.
+
+    The loop capture lives in one folder and the deployment information in
+    another, and neither sits under the data root. Without the manual marker
+    the stale-path guard replaces the folder with whatever discovery finds
+    (nothing here) and Contributing Factors goes missing.
+    """
+    loop_dir = tmp_path / "A" / "Client_Loop"
+    loop_dir.mkdir(parents=True)
+    loop_csv = loop_dir / "Client_Loop_08-10-2026_1502.csv"
+    loop_csv.write_text(
+        "Computer Name,Maximum Cycle Minutes,Average Cycle Minutes\nclient-1,16,4.3\n",
+        encoding="utf-8",
+    )
+    deployment_dir = tmp_path / "B" / "Deployment_Information"
+    deployment_dir.mkdir(parents=True)
+    data_root = tmp_path / "C"
+    data_root.mkdir()
+    mod = next(m for m in builder.MODULES if m.key == "loop")
+    raw = {
+        "loop": {
+            "input_xlsx": str(loop_csv),
+            "deployment_info_folder": str(deployment_dir),
+        }
+    }
+
+    unmarked = builder._parse_module_inputs_from_config([mod], raw, data_root)
+    assert unmarked["loop"]["deployment_info_folder"] is None
+
+    marked = builder._parse_module_inputs_from_config(
+        [mod],
+        raw,
+        data_root,
+        {"loop": {"deployment_info_folder": str(deployment_dir)}},
+    )
+    assert marked["loop"]["deployment_info_folder"] == deployment_dir.resolve()

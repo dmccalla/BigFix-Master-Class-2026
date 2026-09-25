@@ -27,6 +27,8 @@ Config keys:
     data_root       Optional folder searched for module inputs.
     modules         List of module keys to run, in order.
     inputs          {module key: {field key: value}}.
+    manual_inputs   {module key: {field key: path}} for inputs the user chose
+                    by hand. These are never replaced by discovery.
 """
 
 from __future__ import annotations
@@ -1709,14 +1711,26 @@ def load_config(path: str) -> dict:
 
 
 def _parse_module_inputs_from_config(
-    selected: list[Module], raw_inputs: dict, data_root: Path | None
+    selected: list[Module],
+    raw_inputs: dict,
+    data_root: Path | None,
+    manual_inputs: dict | None = None,
 ) -> dict[str, dict]:
+    """Resolve every selected module's inputs from the config.
+
+    manual_inputs maps a module key to the input keys the user chose by hand
+    (the UI writes it as {module: {field: path}}). A loop optional path that
+    is not under the data root or the loop input's folder is normally treated
+    as stale and replaced by discovery. A path the user chose is never
+    replaced, wherever it lives.
+    """
     discovered: dict[str, Path | None] = {}
     if data_root is not None and data_root.is_dir():
         discovered = scan_input_folder(data_root)
 
     module_inputs: dict[str, dict] = {}
     for mod in selected:
+        manual_keys = set((manual_inputs or {}).get(mod.key) or ())
         mod_raw_inputs = dict(raw_inputs.get(mod.key, {}) or {})
         if mod.key == "loop":
             raw_loop_input = mod_raw_inputs.get(mod.file_key)
@@ -1734,6 +1748,8 @@ def _parse_module_inputs_from_config(
             ):
                 raw_value = str(mod_raw_inputs.get(key) or "").strip()
                 if not raw_value:
+                    continue
+                if key in manual_keys:
                     continue
                 if _loop_optional_path_in_scope(data_root, loop_input, Path(raw_value)):
                     continue
@@ -1767,8 +1783,13 @@ def build_run_context(config_path: str) -> RunContext:
     )
     data_root_raw = clean_user_path(config.get("data_root", ""))
     data_root = Path(data_root_raw).expanduser() if data_root_raw else None
+    manual_inputs = {
+        key: value
+        for key, value in (config.get("manual_inputs") or {}).items()
+        if key in MODULE_BY_KEY
+    }
     module_inputs = _parse_module_inputs_from_config(
-        selected, dict(config.get("inputs") or {}), data_root
+        selected, dict(config.get("inputs") or {}), data_root, manual_inputs
     )
     return RunContext(
         selected=selected,

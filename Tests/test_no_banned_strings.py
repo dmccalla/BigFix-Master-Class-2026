@@ -104,6 +104,19 @@ def _hits(path: Path) -> list[str]:
     return hits
 
 
+def test_tree_has_no_banned_names() -> None:
+    """File and folder names are pointers too."""
+    hits = [
+        str(path.relative_to(ROOT))
+        for path in ROOT.rglob("*")
+        if not any(part in _EXCL_DIRS for part in path.relative_to(ROOT).parts)
+        and any(needle in path.name for needle in BANNED)
+    ]
+    assert not hits, "Banned strings in names:
+  " + "
+  ".join(hits)
+
+
 def test_tree_has_no_banned_strings() -> None:
     hits: list[str] = []
     for path in _iter_text_files():

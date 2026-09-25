@@ -24,6 +24,7 @@ App/run_diagnostics.py as a child process, streaming its output into the log.
 
 from __future__ import annotations
 
+import contextlib
 import ctypes
 import json
 import os
@@ -196,9 +197,9 @@ MISSING_INPUT_CLUES = {
 STEP_TITLES = {
     1: "Folders and Run Details",
     2: "Choose the Modules to Run",
-    3: "Run the Analysis",
+    3: "Build the Outputs",
 }
-RAIL_LABELS = ["Folders", "Modules", "Run"]
+RAIL_LABELS = ["Folders", "Modules", "Build"]
 # The engine prints "Step: <label>" when a module starts. The labels here are
 # the ones App/run_diagnostics.py prints, so progress can follow the log.
 STEP_HEADERS = {
@@ -668,8 +669,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._scan_thread: threading.Thread | None = None
         self._scan_token = 0
         self._last_scan_root = ""
-        self._opened_module_keys: set[str] = set()
-        self._reviewed_module_keys: set[str] = set()
         self._expanded_module_key: str | None = None
         self._module_card_controls: dict[str, dict[str, object]] = {}
         self._group_count_label: ctk.CTkLabel | None = None
@@ -714,7 +713,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         for (key, field_key), var in self.date_field_vars.items():
             var.trace_add(
                 "write",
-                lambda *_a, f=_field_id(key, field_key): self._clear_field_highlight(f),
+                lambda *_a, k=key, f=_field_id(key, field_key): (
+                    self._on_date_value_changed(k, f)
+                ),
             )
 
         self._build_shell()
@@ -794,8 +795,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 ctypes.windll.gdi32.AddFontResourceExW(str(CONDENSED_FONT_FILE), 0x10, 0)
             if "Roboto Condensed" in tkfont.families(self):
                 return "Roboto Condensed"
-        except Exception:
-            pass
+        except (OSError, AttributeError, TclError, ValueError):
+            return UI_FONT
         return UI_FONT
 
     def _build_brand_bar(self) -> None:
@@ -893,10 +894,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             indicator.grid(row=1, column=0, sticky="ew")
             for widget in (item, inner, label):
                 widget.bind("<Button-1>", lambda _e, n=idx: self._on_nav_click(n))
-                try:
+                with contextlib.suppress(TclError):
                     widget.configure(cursor="hand2")
-                except Exception:
-                    pass
             self.step_badges.append(badge)
             self.step_labels.append(label)
             self._step_indicators.append(indicator)
@@ -1154,8 +1153,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.perfmon2_vm_var.set(False)
         self._discovered = {}
         self._optional_input_cache = {}
-        self._opened_module_keys.clear()
-        self._reviewed_module_keys.clear()
         self._expanded_module_key = None
         self._run_folder = None
         self._run_log_path = None
@@ -1431,7 +1428,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         name_row = self._add_form_row(
             run_details,
             "Run Name",
-            "Optional. Names the run folder and the output files.",
+            "Required. Names the run folder and the output files.",
             first=True,
         )
         name_entry = self._form_entry(name_row, self.run_name_var, "run_name")
@@ -1717,23 +1714,29 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         return self._module_available(key)
 
     def _module_review_inputs_complete(self, key: str) -> bool:
+        """Whether the values the module needs beyond its input are present.
+
+        There is no review button. A row reads Needs Review while something
+        is missing and Found the moment it is filled in.
+        """
         if self._module_row_status(key)[0] in {"Missing", "Not scanned", "Scanning"}:
             return False
         if key == "perfmon":
-            return all(
-                self._positive_int_or_blank(var.get())
-                for var in (
-                    self.perfmon_processors_var,
-                    self.perfmon_disks_var,
-                    self.perfmon_memory_var,
-                )
-            )
+            return not self._perfmon_missing_field_ids()
+        if key == "loop":
+            return not self._loop_missing_date_ids()
         return True
 
+    def _loop_missing_date_ids(self) -> set[str]:
+        """The loop report needs both dates. Ids of the ones still blank."""
+        return {
+            _field_id("loop", field_key)
+            for field_key in ("start_date", "end_date")
+            if not self.date_field_vars[("loop", field_key)].get().strip()
+        }
+
     def _module_reviewed(self, key: str) -> bool:
-        return key in self._reviewed_module_keys and self._module_review_inputs_complete(
-            key
-        )
+        return self._module_review_inputs_complete(key)
 
     def _module_pill(self, key: str, status: str) -> tuple[str, str, str]:
         label = STATUS_PILL_TEXT.get(status, status)
@@ -1744,7 +1747,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return label, fg, bg
         if status == "Found" and self._module_has_reviewable_inputs(key):
             if self._module_reviewed(key):
-                return "Reviewed", "#1a7f4e", "#e7f4ec"
+                return label, fg, bg
             return NEEDS_REVIEW_PILL, *S2_PILL_STYLES[NEEDS_REVIEW_PILL]
         return label, fg, bg
 
@@ -1758,25 +1761,25 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _module_review_gate_message(self, key: str) -> str:
         name = self._module_display_name(key)
-        if key not in self._opened_module_keys:
-            return f"{name}: open Details on step 2 and review the module inputs."
         if key == "perfmon":
             return f"{name}: complete the required hardware values in the step 2 details."
+        if key == "loop":
+            return (
+                f"{name}: enter the Report Start Date and Report End Date in the "
+                "step 2 details."
+            )
         return f"{name}: complete the step 2 details."
 
-    def _mark_module_reviewed(self, key: str) -> None:
-        self._opened_module_keys.add(key)
-        self._reviewed_module_keys.add(key)
+    def _module_review_field_ids(self, key: str) -> set[str]:
+        """Registry ids of the fields behind a module's Needs Review pill."""
+        if key == "perfmon":
+            return self._perfmon_missing_field_ids()
+        if key == "loop":
+            return self._loop_missing_date_ids()
+        return set()
 
     def _on_module_review_value_changed(self, key: str) -> None:
-        if key not in self._opened_module_keys and key not in self._reviewed_module_keys:
-            return
-        complete = self._module_review_inputs_complete(key)
-        if complete and key not in self._reviewed_module_keys:
-            self._reviewed_module_keys.add(key)
-            self._refresh_module_card_views([key])
-        elif not complete and key in self._reviewed_module_keys:
-            self._reviewed_module_keys.discard(key)
+        if self.step == 2:
             self._refresh_module_card_views([key])
 
     def _positive_int_or_blank(self, value: str) -> str:
@@ -2222,9 +2225,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         except TclError:
             return
         self._expanded_module_key = key
-        self._opened_module_keys.add(key)
-        if self._module_review_inputs_complete(key):
-            self._reviewed_module_keys.add(key)
         self._refresh_module_card_state(key)
 
     def _rebuild_expansion(self, key: str) -> None:
@@ -2310,7 +2310,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         else:
             self._add_module_input_rows(frame, key)
             self._add_date_tools(frame, key)
-        self._add_module_review_confirmation(frame, key)
 
     def _add_expansion_details(self, frame, key: str) -> None:
         detail = MODULE_DETAILS.get(key, {})
@@ -2536,9 +2535,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if key == "loop":
             title = "Client Loop report date range"
             help_text = (
-                "The export does not record collection start and end. If you know when "
-                "the counters were started and stopped, enter the range here. Leave "
-                "blank to use the full data range."
+                "Required. The export does not record collection start and end. Enter "
+                "when the counters were started and stopped. The report shows this "
+                "range."
             )
         else:
             title = "Collection date metadata"
@@ -2615,7 +2614,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             ).grid(row=1, column=1, sticky="e", padx=(0, 10), pady=(6, 2))
             ctk.CTkLabel(
                 field_card,
-                text="Optional",
+                text="Required" if key == "loop" else "Optional",
                 text_color=MUTED,
                 font=(UI_FONT, 12),
                 anchor="w",
@@ -2666,31 +2665,6 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             except ValueError:
                 continue
         return None
-
-    def _add_module_review_confirmation(self, frame, key: str) -> None:
-        row = ctk.CTkFrame(frame, fg_color="transparent")
-        row.pack(fill="x", pady=(4, 0))
-        self._step2_pill_button(
-            row, "Mark Reviewed", lambda k=key: self._confirm_module_review(k), fg=PLUM
-        ).pack(side="left")
-        ctk.CTkLabel(
-            row,
-            text="Use after verifying the inputs in this panel.",
-            text_color=MUTED,
-            font=(UI_FONT, 14),
-            anchor="w",
-        ).pack(side="left", padx=(10, 0))
-
-    def _confirm_module_review(self, key: str) -> None:
-        if not self._module_review_inputs_complete(key):
-            if key == "perfmon":
-                self._apply_field_highlights(self._perfmon_missing_field_ids())
-            self._show_errors(
-                "Review Incomplete", [self._module_review_gate_message(key)]
-            )
-            return
-        self._mark_module_reviewed(key)
-        self._refresh_module_card_views([key])
 
     # ------------------------------------------------------------------
     # PerfMon panels
@@ -2965,6 +2939,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.perfmon2_vm_var.set(False)
         self._rebuild_expansion("perfmon")
 
+    def _on_date_value_changed(self, key: str, field_id: str) -> None:
+        self._clear_field_highlight(field_id)
+        self._on_module_review_value_changed(key)
+
     def _on_perfmon_value_changed(self, field_id: str) -> None:
         self._clear_field_highlight(field_id)
         self._on_module_review_value_changed("perfmon")
@@ -3075,6 +3053,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if data_root_text and not Path(data_root_text).is_dir():
             errors.append("Data folder must be a valid directory if provided.")
             bad.add("data_root")
+        if not self.run_name_var.get().strip():
+            errors.append("Run name is required.")
+            bad.add("run_name")
         output_text = self.output_folder_var.get().strip()
         if not output_text:
             errors.append("Output folder is required.")
@@ -3094,8 +3075,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             errors.append("Select at least one module.")
         for key in self._modules_awaiting_review(selected):
             errors.append(self._module_review_gate_message(key))
-            if bad_fields is not None and key == "perfmon":
-                bad_fields |= self._perfmon_missing_field_ids()
+            if bad_fields is not None:
+                bad_fields |= self._module_review_field_ids(key)
         for key in selected:
             status, detail = self._module_row_status(key)
             if status in {"Missing", "Not scanned", "Scanning"}:
@@ -3319,14 +3300,19 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         row = ctk.CTkFrame(card, fg_color="transparent")
         row.pack(fill="x", padx=18, pady=14)
         folder = _display_path(self.output_folder_var.get()) or "-"
-        selected_count = len(self._selected_keys())
-        total = len(MODULES)
+        selected = self._selected_keys()
+        selected_names = [self._module_display_name(key) for key in selected]
+        not_selected = [
+            self._module_display_name(mod.key)
+            for mod in MODULES
+            if mod.key not in selected
+        ]
+        modules_text = ", ".join(selected_names) or "-"
+        if not_selected:
+            modules_text += "\nNot selected: " + ", ".join(not_selected)
         values = [
             ("Run Name", self.run_name_var.get().strip() or "-"),
-            (
-                "Modules",
-                f"{selected_count} of {total} will run. {max(total - selected_count, 0)} not selected.",
-            ),
+            ("Modules", modules_text),
             ("Output Folder", folder),
         ]
         for col, (label_text, value) in enumerate(values):
@@ -3354,6 +3340,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 text_color=INK,
                 font=(UI_FONT, 14),
                 anchor="w",
+                justify="left",
                 **({"width": 1} if is_last else {}),
             )
             if is_last:
@@ -3594,10 +3581,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             value=f"{len(selected)} module{'s' if len(selected) != 1 else ''}"
         )
         self.progress_guidance_var = ctk.StringVar(value="")
-        build_btn = self._pill_button(card, "Run", self._run_engine, fg=PLUM)
+        build_btn = self._pill_button(card, "Build", self._run_engine, fg=PLUM)
         build_btn.configure(
             height=48,
-            width=self._action_button_width("Run", 40),
+            width=self._action_button_width("Build", 40),
             font=(UI_FONT, 15, "bold"),
         )
         build_btn.grid(row=0, column=0, rowspan=2, sticky="w", padx=(16, 14), pady=16)
@@ -3682,7 +3669,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if self._progress_current:
             self._set_status_cell(self._progress_current, "running", "Running")
         self._update_progress_bar()
-        self.build_button.configure(state="disabled", text="Running")
+        self.build_button.configure(state="disabled", text="Building")
 
     def _set_status_cell(self, key: str, state: str, text: str | None = None) -> None:
         bg, border, text_color = S3_STATUS_PILL_STYLES.get(
@@ -3804,7 +3791,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._build_running = True
         self._cancel_requested = False
         self._build_started_at = time.monotonic()
-        self.build_button.configure(state="disabled", text="Running")
+        self.build_button.configure(state="disabled", text="Building")
         self.cancel_button.configure(state="normal")
         self.view_logs_button.configure(state="normal")
         self.open_output_button.configure(state="disabled")
@@ -3901,31 +3888,31 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _set_done(self, success: bool) -> None:
         self._build_running = False
         self._update_progress_meta()
-        self.build_button.configure(state="normal", text="Run")
+        self.build_button.configure(state="normal", text="Build")
         self.cancel_button.configure(state="disabled")
         self.view_logs_button.configure(state="normal")
         if self._output_folder_to_open() is not None:
             self.open_output_button.configure(state="normal")
         self._sync_nav()
         if self._cancel_requested:
-            self.progress_status_var.set("Run canceled.")
+            self.progress_status_var.set("Build canceled.")
             if self._progress_current:
                 self._set_status_cell(self._progress_current, "failed", "Canceled")
             return
         if success:
             for key in self._progress_order:
                 self._mark_progress_done(key)
-            self.progress_status_var.set("Run complete.")
+            self.progress_status_var.set("Build complete.")
             folder = self._output_folder_to_open()
             self.progress_guidance_var.set(
-                f"Run complete. Output folder: {folder if folder else 'the selected output folder'}. "
+                f"Build complete. Output folder: {folder if folder else 'the selected output folder'}. "
                 "Use Open Output to review the generated files."
             )
             self.progress_guidance_label.grid()
         else:
             if self._progress_current:
                 self._set_status_cell(self._progress_current, "failed", "Failed")
-            self.progress_status_var.set("Run finished with errors. See View Logs.")
+            self.progress_status_var.set("Build finished with errors. See View Logs.")
 
     def _cancel_run(self) -> None:
         process = self._process
@@ -3940,7 +3927,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _view_logs(self) -> None:
         window = ctk.CTkToplevel(self)
-        window.title("Run Logs")
+        window.title("Build Logs")
         self.update_idletasks()
         win_w, win_h = 920, 640
         x = self.winfo_rootx() + max(0, (self.winfo_width() - win_w) // 2)
@@ -3962,7 +3949,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         header.grid(row=0, column=0, sticky="ew", padx=18, pady=(18, 10))
         header.grid_columnconfigure(0, weight=1)
         ctk.CTkLabel(
-            header, text="Run Logs", text_color=INK, font=(UI_FONT, 24, "bold")
+            header, text="Build Logs", text_color=INK, font=(UI_FONT, 24, "bold")
         ).grid(row=0, column=0, sticky="w", padx=20, pady=(16, 0))
         if self._run_log_path and self._run_log_path.exists():
             source = f"Run log file: {self._run_log_path}"
@@ -3985,7 +3972,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         )
         log_box.grid(row=1, column=0, sticky="nsew", padx=18, pady=10)
         log_box.insert(
-            "1.0", "".join(self._log_chunks) or "No run log has been captured yet."
+            "1.0", "".join(self._log_chunks) or "No build log has been captured yet."
         )
         log_box.see("end")
         log_box.configure(state="disabled")
@@ -4007,8 +3994,15 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 fg=PAPER,
                 text_color=INK,
             ).grid(row=0, column=0, sticky="w", padx=14, pady=12)
+        open_output = self._pill_button(
+            actions, "Open Output", self._open_output_folder, fg=PAPER, text_color=INK
+        )
+        open_output.configure(
+            state="normal" if self._output_folder_to_open() is not None else "disabled"
+        )
+        open_output.grid(row=0, column=1, padx=(8, 0), pady=12)
         self._pill_button(actions, "Close", window.destroy, fg=FOG, text_color=INK).grid(
-            row=0, column=1, padx=(8, 14), pady=12
+            row=0, column=2, padx=(8, 14), pady=12
         )
 
     def _on_close(self) -> None:

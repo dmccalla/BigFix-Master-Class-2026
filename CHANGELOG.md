@@ -16,7 +16,7 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 - Client Performance Loop Analysis, Perfmon Infrastructure Analysis and
   FillDB Performance Analysis modules, each producing its Mini Report,
   Infographic and Excel outputs under one run folder.
-- Desktop app with three steps: Folders, Modules and Run. A data folder scan
+- Desktop app with three steps: Folders, Modules and Build. A data folder scan
   fills the module inputs, every input can be chosen by hand, and the run
   streams the engine log with per-module progress.
 - Sample data set "BigFix Master Class 2026" so the Workbench runs without a

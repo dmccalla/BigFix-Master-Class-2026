@@ -24,6 +24,6 @@ The full gate, which also runs the suite:
 ## Checking The App By Hand
 
 Launch the app, point the Data Folder at `SampleData\BigFix Master Class
-2026`, press Next, open each module's Details, press Next again and Run. All
+2026`, press Next, open each module's Details, press Next again and Build. All
 three modules should finish with a green Done pill and Open Output should
 show three module folders.

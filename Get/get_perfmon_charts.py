@@ -176,9 +176,7 @@ def perfmon_host_label(hosts: list[str] | tuple[str, ...] | None) -> str:
         return host_list[0]
     if len(host_list) <= 3:
         return "Multiple hosts: " + ", ".join(host_list)
-    return (
-        "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
-    )
+    return "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
 
 
 def perfmon_chart_title(
@@ -786,9 +784,7 @@ def render_zero_counter_strip(
         message = "No errors recorded"
     else:
         message = "No activity recorded"
-    standard = (
-        f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
-    )
+    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
 
     fig.text(
         0.025,

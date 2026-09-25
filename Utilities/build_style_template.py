@@ -145,7 +145,9 @@ def build(output: Path = OUTPUT) -> Path:
 
     # Replace any earlier copy of the table style, then add ours.
     existing = [
-        style for style in styles if style.type == WD_STYLE_TYPE.TABLE and style.style_id == TABLE_STYLE_ID
+        style
+        for style in styles
+        if style.type == WD_STYLE_TYPE.TABLE and style.style_id == TABLE_STYLE_ID
     ]
     for style in existing:
         style.element.getparent().remove(style.element)

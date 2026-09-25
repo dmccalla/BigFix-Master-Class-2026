@@ -10,9 +10,7 @@ from __future__ import annotations
 
 import re
 
-_BOOKMARK_MARKER_RE = re.compile(
-    r'<w:bookmark(Start|End)\b[^>]*\bw:id="([^"]+)"[^>]*/?>'
-)
+_BOOKMARK_MARKER_RE = re.compile(r'<w:bookmark(Start|End)\b[^>]*\bw:id="([^"]+)"[^>]*/?>')
 _DOC_PR_RE = re.compile(r'(<wp:docPr\b[^>]*\bid=")(\d+)(")')
 
 

@@ -23,7 +23,9 @@ _HEADER = (
 
 def _doc(answers: list[str]) -> str:
     body = "".join(f'\t\t\t<Answer type="string">{a}</Answer>\n' for a in answers)
-    return f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    return (
+        f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    )
 
 
 def _sample_polling_rows() -> list[loop.ProcessedRow]:

@@ -268,9 +268,7 @@ def test_stub_front_matter_strip_handles_title_stamp_notice_order():
         + _para_xml(STUB_NOTICE_TEXT)
         + _para_xml("Body paragraph.")
     )
-    stripped = strip_stub_front_matter_xml(
-        body, titles=("FillDB Performance Analysis",)
-    )
+    stripped = strip_stub_front_matter_xml(body, titles=("FillDB Performance Analysis",))
     assert "Assessment dates:" not in stripped
     assert "Standalone module excerpt" not in stripped
     assert "FillDB Performance Analysis" not in stripped

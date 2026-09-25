@@ -267,9 +267,7 @@ def test_discover_log_set_from_folder_excludes_readme_and_csv(tmp_path):
     (tmp_path / "HEALTHCHECK_FILLDB_PERF_README.txt").write_text(
         "readme", encoding="utf-8"
     )
-    (tmp_path / "old_analysis.csv").write_text(
-        "FillDB Object,Count\n", encoding="utf-8"
-    )
+    (tmp_path / "old_analysis.csv").write_text("FillDB Object,Count\n", encoding="utf-8")
 
     found = fpl.discover_log_set(tmp_path)
     assert [p.name for p in found] == ["FillDBperf.log"]

@@ -42,9 +42,7 @@ def test_resolve_existing_file_rejects_wrong_extension(tmp_path: Path) -> None:
 def test_resolve_existing_folder_can_require_matching_files(tmp_path: Path) -> None:
     (tmp_path / "chart.png").write_bytes(b"png")
 
-    resolved = input_utils.resolve_existing_folder(
-        str(tmp_path), "chart folder", "*.png"
-    )
+    resolved = input_utils.resolve_existing_folder(str(tmp_path), "chart folder", "*.png")
 
     assert resolved == tmp_path.resolve()
 
@@ -91,9 +89,7 @@ def test_docx_contains_text_or_style_returns_false_for_bad_docx(tmp_path: Path) 
     bad_docx = tmp_path / "bad.docx"
     bad_docx.write_text("not a zip", encoding="utf-8")
 
-    assert not input_utils.docx_contains_text_or_style(
-        bad_docx, required_text="anything"
-    )
+    assert not input_utils.docx_contains_text_or_style(bad_docx, required_text="anything")
 
 
 def test_add_keep_next_leaves_malformed_paragraph_xml_unchanged() -> None:

@@ -45,9 +45,7 @@ class SpineLevel:
 
 
 HEALTHY = SpineLevel("Healthy", "#187A43", "#187A43", "#D5F5E3", 85, 100, "Pass")
-ADVISORY = SpineLevel(
-    "Advisory", "#2A6FDB", "#2A6FDB", "#E6EFFD", None, None, "Advisory"
-)
+ADVISORY = SpineLevel("Advisory", "#2A6FDB", "#2A6FDB", "#E6EFFD", None, None, "Advisory")
 NEEDS_ATTENTION = SpineLevel(
     "Needs Attention", "#B45309", "#B45309", "#FFF8E7", 60, 84, "Fail (rolled up)"
 )
@@ -77,9 +75,7 @@ def _score_low(level: SpineLevel) -> int:
 
 # Score-driven bands only (Advisory is informational, never a score band; Not
 # Assessed is excluded), worst-to-best for rating_for_score.
-_SCORE_LEVELS = sorted(
-    (HEALTHY, NEEDS_ATTENTION, CRITICAL), key=_score_low, reverse=True
-)
+_SCORE_LEVELS = sorted((HEALTHY, NEEDS_ATTENTION, CRITICAL), key=_score_low, reverse=True)
 RATING_SCALE: list[tuple[int, str]] = [
     (_score_low(level), level.word) for level in _SCORE_LEVELS
 ]

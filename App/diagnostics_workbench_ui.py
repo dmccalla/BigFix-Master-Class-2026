@@ -64,6 +64,7 @@ from run_diagnostics import (  # noqa: E402
     validate_loop_workbook,
 )
 
+from Lib.Core import app_version  # noqa: E402
 from Lib.Core.input_utils import (  # noqa: E402
     DEFAULT_WORK_DIR,
     clean_user_path,
@@ -80,7 +81,6 @@ except Exception:  # pragma: no cover - optional dependency
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
-APP_VERSION = "1.0"
 IS_WINDOWS = sys.platform == "win32"
 
 # ---------------------------------------------------------------------------
@@ -469,7 +469,9 @@ class HoverTip:
 class DatePopup(ctk.CTkToplevel):
     """Floating calendar. Calls on_pick(date) on a pick, on_clear() on Clear."""
 
-    def __init__(self, master, anchor_widget, initial: date | None, on_pick, on_clear) -> None:
+    def __init__(
+        self, master, anchor_widget, initial: date | None, on_pick, on_clear
+    ) -> None:
         super().__init__(master)
         self._on_pick = on_pick
         self._on_clear = on_clear
@@ -803,7 +805,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.logo_image = _make_logo(38)
         if self.logo_image is not None:
             ctk.CTkLabel(
-                bar, text="", image=self.logo_image, width=38, height=38, fg_color="transparent"
+                bar,
+                text="",
+                image=self.logo_image,
+                width=38,
+                height=38,
+                fg_color="transparent",
             ).grid(row=0, column=0, padx=(30, 18), pady=16)
         self._condensed_family = self._condensed_font_family()
         stack = ctk.CTkFrame(bar, fg_color="transparent")
@@ -837,7 +844,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         right = ctk.CTkFrame(bar, fg_color="transparent")
         right.grid(row=0, column=3, sticky="e", padx=(0, 30))
         ctk.CTkLabel(
-            right, text=f"v{APP_VERSION}", text_color="#FFFFFF", font=(UI_FONT, 13)
+            right,
+            text=app_version.display_version(),
+            text_color="#FFFFFF",
+            font=(UI_FONT, 13),
         ).grid(row=0, column=0)
 
     def _build_step_rail(self) -> None:
@@ -877,7 +887,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 inner, text=label_text, text_color=INK, font=(UI_FONT, 15), anchor="w"
             )
             label.grid(row=0, column=1, padx=(12, 0))
-            indicator = ctk.CTkFrame(item, fg_color="transparent", height=4, corner_radius=0)
+            indicator = ctk.CTkFrame(
+                item, fg_color="transparent", height=4, corner_radius=0
+            )
             indicator.grid(row=1, column=0, sticky="ew")
             for widget in (item, inner, label):
                 widget.bind("<Button-1>", lambda _e, n=idx: self._on_nav_click(n))
@@ -1085,7 +1097,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 step1_errors, step1_bad = self._validate_step1()
                 errors.extend(step1_errors)
                 bad_fields |= step1_bad
-                if not errors and not self._discovered and self.data_root_var.get().strip():
+                if (
+                    not errors
+                    and not self._discovered
+                    and self.data_root_var.get().strip()
+                ):
                     self._scan_inputs()
             if step == 3 and self.step <= 2:
                 errors.extend(self._validate_step2(bad_fields))
@@ -1173,7 +1189,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         except TclError:
             self._field_widgets.pop(field_id, None)
 
-    def _register_field(self, field_id: str, entry, rest_border: str = FIELD_BORDER) -> None:
+    def _register_field(
+        self, field_id: str, entry, rest_border: str = FIELD_BORDER
+    ) -> None:
         self._field_widgets[field_id] = entry
         self._field_rest_borders[field_id] = rest_border
 
@@ -1213,7 +1231,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _add_form_section(self, parent, title: str):
         card = ctk.CTkFrame(
-            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+            parent,
+            fg_color=PAPER,
+            corner_radius=12,
+            border_width=1,
+            border_color=HAIRLINE,
         )
         card.pack(fill="x", padx=(0, 4), pady=(0, 14))
         header = ctk.CTkFrame(card, fg_color=CARD_HEADER, corner_radius=10)
@@ -1396,7 +1418,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         output_row = self._add_form_row(
             folders, "Output Folder", "A timestamped run folder is created here."
         )
-        output_entry = self._form_entry(output_row, self.output_folder_var, "output_folder")
+        output_entry = self._form_entry(
+            output_row, self.output_folder_var, "output_folder"
+        )
         output_entry.grid(row=0, column=1, sticky="ew", padx=(0, 8), pady=14)
         self._keep_tail_view(output_entry, self.output_folder_var)
         self._form_browse_button(output_row, "Browse", self._browse_output_folder).grid(
@@ -1486,7 +1510,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             try:
                 found = scan_input_folder(root)
                 ancillary = discover_loop_ancillary_inputs(root, found.get("loop"))
-                self._post(lambda: self._scan_inputs_complete(root, found, ancillary, token))
+                self._post(
+                    lambda: self._scan_inputs_complete(root, found, ancillary, token)
+                )
             except Exception as exc:
                 self._post(lambda e=exc: self._scan_inputs_failed(e, token))
 
@@ -1495,12 +1521,16 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if self.step == 2:
             self._refresh_module_card_views(tuple(self.module_vars))
 
-    def _scan_inputs_complete(self, root: Path, found: dict, ancillary: dict, token: int) -> None:
+    def _scan_inputs_complete(
+        self, root: Path, found: dict, ancillary: dict, token: int
+    ) -> None:
         if token != self._scan_token:
             return
         self._scan_thread = None
         self._discovered = dict(found)
-        self._optional_input_cache = {("loop", key): path for key, path in ancillary.items()}
+        self._optional_input_cache = {
+            ("loop", key): path for key, path in ancillary.items()
+        }
         self._last_scan_root = _display_path(root)
         self._update_scan_confirmation()
         if not any(var.get() for var in self.module_vars.values()):
@@ -1524,7 +1554,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             (self._module_display_name(k) for k, s in statuses.items() if s == "Missing"),
             key=str.casefold,
         )
-        self.scan_confirmation_var.set(f"Data found for {found} of {len(MODULES)} modules.")
+        self.scan_confirmation_var.set(
+            f"Data found for {found} of {len(MODULES)} modules."
+        )
         self.scan_missing_var.set(
             f"{', '.join(missing)}. Choose files for these on step 2." if missing else ""
         )
@@ -1656,7 +1688,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return "Scanning", "Input scan is running; status will update shortly."
         raw = self.data_root_var.get().strip()
         if not raw or not Path(raw).is_dir():
-            return "Not scanned", "Select a data folder or choose this module's input manually."
+            return (
+                "Not scanned",
+                "Select a data folder or choose this module's input manually.",
+            )
         path = self._discovered.get(mod.key)
         if path is not None:
             return "Found", f"Found: {_display_path(path)}"
@@ -1696,7 +1731,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         return True
 
     def _module_reviewed(self, key: str) -> bool:
-        return key in self._reviewed_module_keys and self._module_review_inputs_complete(key)
+        return key in self._reviewed_module_keys and self._module_review_inputs_complete(
+            key
+        )
 
     def _module_pill(self, key: str, status: str) -> tuple[str, str, str]:
         label = STATUS_PILL_TEXT.get(status, status)
@@ -1772,14 +1809,22 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         presets = ctk.CTkFrame(frame, fg_color="transparent")
         presets.grid(row=0, column=0, sticky="ew", pady=(0, 16))
         presets.grid_columnconfigure(3, weight=1)
-        ctk.CTkLabel(presets, text="Presets", text_color=INK, font=(UI_FONT, 13, "bold")).grid(
-            row=0, column=0, sticky="w", padx=(4, 14)
-        )
+        ctk.CTkLabel(
+            presets, text="Presets", text_color=INK, font=(UI_FONT, 13, "bold")
+        ).grid(row=0, column=0, sticky="w", padx=(4, 14))
         self._step2_pill_button(
-            presets, "All Available", self._select_all_available, fg=PLUM, text_color=PAPER
+            presets,
+            "All Available",
+            self._select_all_available,
+            fg=PLUM,
+            text_color=PAPER,
         ).grid(row=0, column=1, sticky="w", padx=(0, 8))
         clear_link = ctk.CTkLabel(
-            presets, text="Clear", text_color=INK, font=(UI_FONT, 15, "bold"), cursor="hand2"
+            presets,
+            text="Clear",
+            text_color=INK,
+            font=(UI_FONT, 15, "bold"),
+            cursor="hand2",
         )
         clear_link.grid(row=0, column=2, sticky="w", padx=(6, 0))
         clear_link.bind("<Button-1>", lambda _e: self._clear_modules())
@@ -1799,7 +1844,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _select_all_available(self) -> None:
         for key in self.module_vars:
             self.module_vars[key].set(
-                self._module_available(key) and self._module_selection_status(key)[0] == "Found"
+                self._module_available(key)
+                and self._module_selection_status(key)[0] == "Found"
             )
         if self.step == 2:
             self._refresh_module_card_views(tuple(self.module_vars))
@@ -1824,7 +1870,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _add_module_section(self, parent, title: str, keys: list[str]):
         card = ctk.CTkFrame(
-            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+            parent,
+            fg_color=PAPER,
+            corner_radius=12,
+            border_width=1,
+            border_color=HAIRLINE,
         )
         card.pack(fill="x", padx=(0, 4), pady=(0, 14))
         header = ctk.CTkFrame(card, fg_color=CARD_HEADER, corner_radius=10)
@@ -1851,7 +1901,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         ]:
             ctk.CTkLabel(
                 head, text=text, text_color=INK, font=(UI_FONT, 13, "bold"), anchor=anchor
-            ).grid(row=0, column=col, columnspan=columnspan, sticky="ew", padx=padx, pady=9)
+            ).grid(
+                row=0, column=col, columnspan=columnspan, sticky="ew", padx=padx, pady=9
+            )
         for key in keys:
             self._add_module_row(card, key)
         ctk.CTkFrame(card, fg_color="transparent", height=4).pack(fill="x")
@@ -1924,7 +1976,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         check_x = self._S2_ACCENT_MIN + 15
         check_y = mid - 9
         controls["checkbox_box"] = canvas.create_rectangle(
-            check_x, check_y, check_x + 18, check_y + 18, width=1.5, tags=("checkbox_hit",)
+            check_x,
+            check_y,
+            check_x + 18,
+            check_y + 18,
+            width=1.5,
+            tags=("checkbox_hit",),
         )
         controls["checkbox_check"] = canvas.create_line(
             check_x + 4,
@@ -1962,13 +2019,29 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         controls["pill_w"] = pill_w
         tags = ("review_pill_hit",) if pill_label == NEEDS_REVIEW_PILL else ()
         controls["pill_bg"] = canvas.create_image(
-            0, mid, image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24), anchor="e", tags=tags
+            0,
+            mid,
+            image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24),
+            anchor="e",
+            tags=tags,
         )
         controls["pill_text"] = canvas.create_text(
-            0, mid, text=pill_label, font=fonts["pill"], fill=pill_fg, anchor="center", tags=tags
+            0,
+            mid,
+            text=pill_label,
+            font=fonts["pill"],
+            fill=pill_fg,
+            anchor="center",
+            tags=tags,
         )
         controls["link"] = canvas.create_text(
-            0, mid, text="Details", font=fonts["link"], fill=PLUM, anchor="e", tags=("link",)
+            0,
+            mid,
+            text="Details",
+            font=fonts["link"],
+            fill=PLUM,
+            anchor="e",
+            tags=("link",),
         )
         controls["missing_item"] = canvas.create_text(
             desc_x,
@@ -2023,7 +2096,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
         canvas.bind("<Button-1>", _click)
         for tag in ("checkbox_hit", "link", "review_pill_hit"):
-            canvas.tag_bind(tag, "<Enter>", lambda _e, c=canvas: c.configure(cursor="hand2"))
+            canvas.tag_bind(
+                tag, "<Enter>", lambda _e, c=canvas: c.configure(cursor="hand2")
+            )
             canvas.tag_bind(tag, "<Leave>", lambda _e, c=canvas: c.configure(cursor=""))
         self._module_card_controls[key] = controls
 
@@ -2042,7 +2117,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         try:
             if canvas.winfo_exists():
                 canvas.itemconfigure(box, fill=fill, outline=outline)
-                canvas.itemconfigure(check, fill=PAPER, state="normal" if selected else "hidden")
+                canvas.itemconfigure(
+                    check, fill=PAPER, state="normal" if selected else "hidden"
+                )
         except TclError:
             pass
 
@@ -2059,7 +2136,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if not self._module_selected_for_step2(key):
             return False
         status, _detail = self._module_row_status(key)
-        return status == "Missing" or self._module_pill(key, status)[0] == NEEDS_REVIEW_PILL
+        return (
+            status == "Missing" or self._module_pill(key, status)[0] == NEEDS_REVIEW_PILL
+        )
 
     def _on_module_row_click(self, key: str) -> None:
         if self._expanded_module_key == key:
@@ -2112,10 +2191,16 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 return
             wrapper = controls.get("expansion_wrapper")
             if wrapper is None or not wrapper.winfo_exists():
-                wrapper = ctk.CTkFrame(canvas.master, fg_color=EXPANSION_TINT, corner_radius=0)
+                wrapper = ctk.CTkFrame(
+                    canvas.master, fg_color=EXPANSION_TINT, corner_radius=0
+                )
                 wrapper.grid_columnconfigure(1, weight=1)
                 ctk.CTkFrame(
-                    wrapper, fg_color=PLUM, width=self._S2_ACCENT_MIN, height=1, corner_radius=0
+                    wrapper,
+                    fg_color=PLUM,
+                    width=self._S2_ACCENT_MIN,
+                    height=1,
+                    corner_radius=0,
                 ).grid(row=0, column=0, sticky="ns")
                 expansion = ctk.CTkFrame(wrapper, fg_color="transparent", height=1)
                 expansion.grid(
@@ -2178,9 +2263,13 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             controls["pill_w"] = pill_w
             tags = ("review_pill_hit",) if pill_label == NEEDS_REVIEW_PILL else ()
             canvas.itemconfigure(
-                controls["pill_bg"], image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24), tags=tags
+                controls["pill_bg"],
+                image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24),
+                tags=tags,
             )
-            canvas.itemconfigure(controls["pill_text"], text=pill_label, fill=pill_fg, tags=tags)
+            canvas.itemconfigure(
+                controls["pill_text"], text=pill_label, fill=pill_fg, tags=tags
+            )
             missing = status == "Missing" and self._module_available(key)
             canvas.itemconfigure(
                 controls["missing_item"],
@@ -2326,7 +2415,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     width=1,
                 )
                 label.grid(
-                    row=row_index, column=col, sticky="ew", padx=(14 if col == 0 else 8, 8), pady=5
+                    row=row_index,
+                    column=col,
+                    sticky="ew",
+                    padx=(14 if col == 0 else 8, 8),
+                    pady=5,
                 )
                 if col == 2:
                     self._left_ellipsize_label(label, text)
@@ -2365,7 +2458,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return sorted(field.extensions)
         return []
 
-    def _left_ellipsize_label(self, label, full_text: str, *, font_size: int = 13) -> None:
+    def _left_ellipsize_label(
+        self, label, full_text: str, *, font_size: int = 13
+    ) -> None:
         font = tkfont.Font(family=UI_FONT, size=-font_size)
 
         def fitted(width: int) -> str:
@@ -2428,7 +2523,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._rebuild_expansion(key)
 
     def _add_date_tools(self, card, key: str) -> None:
-        fields = [f for f in MODULE_BY_KEY[key].inputs_schema if f.kind == "datetime_optional"]
+        fields = [
+            f for f in MODULE_BY_KEY[key].inputs_schema if f.kind == "datetime_optional"
+        ]
         if not fields:
             return
         panel = ctk.CTkFrame(
@@ -2471,7 +2568,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         )
         for col, field in enumerate(fields):
             field_card = ctk.CTkFrame(
-                panel, fg_color=PAPER, corner_radius=8, border_width=1, border_color=HAIRLINE
+                panel,
+                fg_color=PAPER,
+                corner_radius=8,
+                border_width=1,
+                border_color=HAIRLINE,
             )
             field_card.grid(row=2, column=col, sticky="ew", padx=8, pady=(0, 12))
             field_card.grid_columnconfigure(0, weight=1)
@@ -2508,10 +2609,16 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 corner_radius=8,
                 fg_color=PLUM,
                 hover_color="#0B4FC0",
-                command=lambda k=key, fk=field.key, e=entry: self._open_date_picker(k, fk, e),
+                command=lambda k=key, fk=field.key, e=entry: self._open_date_picker(
+                    k, fk, e
+                ),
             ).grid(row=1, column=1, sticky="e", padx=(0, 10), pady=(6, 2))
             ctk.CTkLabel(
-                field_card, text="Optional", text_color=MUTED, font=(UI_FONT, 12), anchor="w"
+                field_card,
+                text="Optional",
+                text_color=MUTED,
+                font=(UI_FONT, 12),
+                anchor="w",
             ).grid(row=2, column=0, columnspan=2, sticky="w", padx=12, pady=(0, 10))
 
     def _open_date_picker(self, module_key: str, field_key: str, anchor_widget) -> None:
@@ -2528,9 +2635,18 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 var.set(picked.strftime("%m-%d-%Y"))
                 return
             combined = datetime(
-                picked.year, picked.month, picked.day, current.hour, current.minute, current.second
+                picked.year,
+                picked.month,
+                picked.day,
+                current.hour,
+                current.minute,
+                current.second,
             )
-            var.set(combined.strftime("%m-%d-%Y %H:%M:%S" if combined.second else "%m-%d-%Y %H:%M"))
+            var.set(
+                combined.strftime(
+                    "%m-%d-%Y %H:%M:%S" if combined.second else "%m-%d-%Y %H:%M"
+                )
+            )
 
         DatePopup(
             self,
@@ -2569,7 +2685,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if not self._module_review_inputs_complete(key):
             if key == "perfmon":
                 self._apply_field_highlights(self._perfmon_missing_field_ids())
-            self._show_errors("Review Incomplete", [self._module_review_gate_message(key)])
+            self._show_errors(
+                "Review Incomplete", [self._module_review_gate_message(key)]
+            )
             return
         self._mark_module_reviewed(key)
         self._refresh_module_card_views([key])
@@ -2612,9 +2730,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             font=(UI_FONT, 13, "bold"),
         ).grid(row=0, column=1, sticky="e")
         blg = self._perfmon_input_path()
-        self._path_entry(primary, str(blg) if blg else "", placeholder="No BLG selected yet.").pack(
-            fill="x", padx=14, pady=(8, 0)
-        )
+        self._path_entry(
+            primary, str(blg) if blg else "", placeholder="No BLG selected yet."
+        ).pack(fill="x", padx=14, pady=(8, 0))
         self._add_perfmon_hardware_controls(
             primary,
             "perfmon",
@@ -2636,7 +2754,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             primary,
             [
                 ("Re-detect", lambda: self._start_perfmon_detection()),
-                ("Browse", lambda: self._browse_module_input_field("perfmon", "blg_path")),
+                (
+                    "Browse",
+                    lambda: self._browse_module_input_field("perfmon", "blg_path"),
+                ),
             ],
         )
 
@@ -2667,7 +2788,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         ).grid(row=0, column=1, sticky="e")
         entry = ctk.CTkEntry(
             secondary,
-            textvariable=self.module_input_override_vars[("perfmon", "capture2_blg_path")],
+            textvariable=self.module_input_override_vars[
+                ("perfmon", "capture2_blg_path")
+            ],
             placeholder_text="Add the SQL host's BLG file.",
             height=34,
             corner_radius=8,
@@ -2698,7 +2821,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         ).pack(fill="x", padx=14, pady=(8, 0))
         links: list[tuple[str, object]] = [
             ("Re-detect", lambda: self._start_perfmon_detection(capture="perfmon2")),
-            ("Browse", lambda: self._browse_module_input_field("perfmon", "capture2_blg_path")),
+            (
+                "Browse",
+                lambda: self._browse_module_input_field("perfmon", "capture2_blg_path"),
+            ),
         ]
         if capture2:
             links.append(("Remove", self._remove_capture2))
@@ -2730,7 +2856,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 font=(UI_FONT, 15),
             )
             entry.pack(side="left", padx=(0, 14))
-            self._register_field(_field_id("perfmon", prefix + field_key), entry, HAIRLINE)
+            self._register_field(
+                _field_id("perfmon", prefix + field_key), entry, HAIRLINE
+            )
         hw2 = ctk.CTkFrame(parent, fg_color="transparent")
         hw2.pack(fill="x", padx=14, pady=(8, 0))
         ctk.CTkLabel(hw2, text="RAM", text_color=INK, font=(UI_FONT, 15)).pack(
@@ -2749,7 +2877,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             font=(UI_FONT, 15),
         )
         entry.pack(side="left")
-        self._register_field(_field_id("perfmon", prefix + "physical_memory_gb"), entry, HAIRLINE)
+        self._register_field(
+            _field_id("perfmon", prefix + "physical_memory_gb"), entry, HAIRLINE
+        )
         ctk.CTkLabel(hw2, text="GB", text_color=INK, font=(UI_FONT, 15)).pack(
             side="left", padx=(6, 14)
         )
@@ -2788,7 +2918,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _add_perfmon_compact_dates(self, parent) -> None:
         row = ctk.CTkFrame(parent, fg_color="transparent")
         row.pack(fill="x", pady=(8, 12))
-        for label_text, field_key in (("Start", "collection_start"), ("End", "collection_end")):
+        for label_text, field_key in (
+            ("Start", "collection_start"),
+            ("End", "collection_end"),
+        ):
             var = self.date_field_vars[("perfmon", field_key)]
             ctk.CTkLabel(row, text=label_text, text_color=INK, font=(UI_FONT, 15)).pack(
                 side="left", padx=(0, 6)
@@ -2816,12 +2949,18 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 corner_radius=8,
                 fg_color=PLUM,
                 hover_color="#0B4FC0",
-                command=lambda fk=field_key, e=entry: self._open_date_picker("perfmon", fk, e),
+                command=lambda fk=field_key, e=entry: self._open_date_picker(
+                    "perfmon", fk, e
+                ),
             ).pack(side="left", padx=(4, 18))
 
     def _remove_capture2(self) -> None:
         self.module_input_override_vars[("perfmon", "capture2_blg_path")].set("")
-        for var in (self.perfmon2_processors_var, self.perfmon2_disks_var, self.perfmon2_memory_var):
+        for var in (
+            self.perfmon2_processors_var,
+            self.perfmon2_disks_var,
+            self.perfmon2_memory_var,
+        ):
             var.set("")
         self.perfmon2_vm_var.set(False)
         self._rebuild_expansion("perfmon")
@@ -2851,16 +2990,28 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     ids.add(fid)
         return ids
 
-    def _start_perfmon_detection(self, *, capture: str = "perfmon", auto: bool = False) -> None:
+    def _start_perfmon_detection(
+        self, *, capture: str = "perfmon", auto: bool = False
+    ) -> None:
         if not IS_WINDOWS:
             return
-        blg = self._perfmon_input_path() if capture == "perfmon" else self._perfmon_capture2_path()
+        blg = (
+            self._perfmon_input_path()
+            if capture == "perfmon"
+            else self._perfmon_capture2_path()
+        )
         if blg is None or not blg.is_file():
             return
         if capture == "perfmon":
-            processors_var, disks_var = self.perfmon_processors_var, self.perfmon_disks_var
+            processors_var, disks_var = (
+                self.perfmon_processors_var,
+                self.perfmon_disks_var,
+            )
         else:
-            processors_var, disks_var = self.perfmon2_processors_var, self.perfmon2_disks_var
+            processors_var, disks_var = (
+                self.perfmon2_processors_var,
+                self.perfmon2_disks_var,
+            )
         if auto and (processors_var.get().strip() or disks_var.get().strip()):
             return
         self._perfmon_detect_tokens[capture] += 1
@@ -2876,7 +3027,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             except Exception:
                 procs, disks, begin, end = 0, 0, "", ""
             self._post(
-                lambda: self._apply_perfmon_detection(capture, token, procs, disks, begin, end)
+                lambda: self._apply_perfmon_detection(
+                    capture, token, procs, disks, begin, end
+                )
             )
 
         threading.Thread(target=worker, daemon=True).start()
@@ -2887,13 +3040,22 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if token != self._perfmon_detect_tokens[capture]:
             return
         if capture == "perfmon":
-            processors_var, disks_var = self.perfmon_processors_var, self.perfmon_disks_var
+            processors_var, disks_var = (
+                self.perfmon_processors_var,
+                self.perfmon_disks_var,
+            )
         else:
-            processors_var, disks_var = self.perfmon2_processors_var, self.perfmon2_disks_var
+            processors_var, disks_var = (
+                self.perfmon2_processors_var,
+                self.perfmon2_disks_var,
+            )
         processors_var.set(str(procs) if procs > 0 else "")
         disks_var.set(str(disks) if disks > 0 else "")
         if capture == "perfmon":
-            for field_key, value in (("collection_start", begin), ("collection_end", end)):
+            for field_key, value in (
+                ("collection_start", begin),
+                ("collection_end", end),
+            ):
                 var = self.date_field_vars[("perfmon", field_key)]
                 if value and not var.get().strip():
                     try:
@@ -2952,19 +3114,31 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             capture2_id = _field_id("perfmon", "capture2_blg_path")
             if capture2 is not None:
                 if not capture2.is_file() or capture2.suffix.lower() != ".blg":
-                    errors.append("Capture 2 PerfMon input must be an existing .blg file.")
+                    errors.append(
+                        "Capture 2 PerfMon input must be an existing .blg file."
+                    )
                     if bad_fields is not None:
                         bad_fields.add(capture2_id)
-                elif primary is not None and os.path.normcase(str(capture2.resolve())) == (
-                    os.path.normcase(str(primary.resolve()))
-                ):
-                    errors.append("Capture 2 PerfMon BLG must be different from Capture 1.")
+                elif primary is not None and os.path.normcase(
+                    str(capture2.resolve())
+                ) == (os.path.normcase(str(primary.resolve()))):
+                    errors.append(
+                        "Capture 2 PerfMon BLG must be different from Capture 1."
+                    )
                     if bad_fields is not None:
                         bad_fields.add(capture2_id)
             hardware = (
-                (self.perfmon_processors_var, "Logical processors", "perfmon:logical_processors"),
+                (
+                    self.perfmon_processors_var,
+                    "Logical processors",
+                    "perfmon:logical_processors",
+                ),
                 (self.perfmon_disks_var, "Physical disks", "perfmon:physical_disks"),
-                (self.perfmon_memory_var, "Physical Memory (GB)", "perfmon:physical_memory_gb"),
+                (
+                    self.perfmon_memory_var,
+                    "Physical Memory (GB)",
+                    "perfmon:physical_memory_gb",
+                ),
             )
             for var, label, fid in hardware:
                 value = var.get().strip()
@@ -3006,12 +3180,19 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             "capture2_physical_disks": self.perfmon2_disks_var,
             "capture2_physical_memory_gb": self.perfmon2_memory_var,
         }
-        perfmon_bools = {"is_vm": self.perfmon_vm_var, "capture2_is_vm": self.perfmon2_vm_var}
+        perfmon_bools = {
+            "is_vm": self.perfmon_vm_var,
+            "capture2_is_vm": self.perfmon2_vm_var,
+        }
         for field in mod.inputs_schema:
             if field.kind == "datetime_optional":
-                values[field.key] = self.date_field_vars[(mod.key, field.key)].get().strip()
+                values[field.key] = (
+                    self.date_field_vars[(mod.key, field.key)].get().strip()
+                )
             elif mod.key == "perfmon" and field.key in perfmon_ints:
-                values[field.key] = self._positive_int_or_blank(perfmon_ints[field.key].get())
+                values[field.key] = self._positive_int_or_blank(
+                    perfmon_ints[field.key].get()
+                )
             elif mod.key == "perfmon" and field.key in perfmon_bools:
                 values[field.key] = bool(perfmon_bools[field.key].get())
             elif field.kind in BROWSABLE_INPUT_KINDS:
@@ -3039,10 +3220,13 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         selected = self._selected_keys()
         return {
             "run_name": self.run_name_var.get().strip(),
-            "output_folder": _display_path(self.output_folder_var.get()) or DEFAULT_WORK_DIR,
+            "output_folder": _display_path(self.output_folder_var.get())
+            or DEFAULT_WORK_DIR,
             "data_root": _display_path(self.data_root_var.get()),
             "modules": selected,
-            "inputs": {key: self._build_raw_inputs(MODULE_BY_KEY[key]) for key in selected},
+            "inputs": {
+                key: self._build_raw_inputs(MODULE_BY_KEY[key]) for key in selected
+            },
             # Inputs chosen by hand. The engine never replaces these with a
             # discovered path, wherever they live.
             "manual_inputs": self._manual_inputs_by_module(selected),
@@ -3066,9 +3250,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
         legend_row = ctk.CTkFrame(frame, fg_color="transparent")
         legend_row.grid(row=0, column=0, sticky="ew", pady=(0, 14))
-        ctk.CTkLabel(legend_row, text="Outputs", text_color=INK, font=(UI_FONT, 13, "bold")).pack(
-            side="left", padx=(0, 16)
-        )
+        ctk.CTkLabel(
+            legend_row, text="Outputs", text_color=INK, font=(UI_FONT, 13, "bold")
+        ).pack(side="left", padx=(0, 16))
         for index, term in enumerate(OUTPUT_TERM_ORDER):
             entry = ctk.CTkFrame(legend_row, fg_color="transparent")
             entry.pack(side="left", padx=(0 if index == 0 else 16, 0))
@@ -3107,7 +3291,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         strip_holder = ctk.CTkFrame(frame, fg_color="transparent")
         strip_holder.grid(row=3, column=0, sticky="ew", pady=(8, 0))
         card = ctk.CTkFrame(
-            strip_holder, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+            strip_holder,
+            fg_color=PAPER,
+            corner_radius=12,
+            border_width=1,
+            border_color=HAIRLINE,
         )
         card.pack(fill="x", padx=(0, 4), pady=(0, 14))
         self._populate_run_action_strip(card, selected)
@@ -3154,7 +3342,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             if is_last:
                 cell.grid_columnconfigure(0, weight=1)
             ctk.CTkLabel(
-                cell, text=label_text, text_color=INK, font=(UI_FONT, 15, "bold"), anchor="w"
+                cell,
+                text=label_text,
+                text_color=INK,
+                font=(UI_FONT, 15, "bold"),
+                anchor="w",
             ).pack(anchor="w")
             value_label = ctk.CTkLabel(
                 cell,
@@ -3191,11 +3383,22 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             font=(UI_FONT, 14),
         ).pack(side="right", padx=(0, 14))
         head = self._step3_row_grid(card)
-        headers = [("Module", "w"), ("Description", "w"), ("Outputs", "e"), ("Build Status", "e")]
+        headers = [
+            ("Module", "w"),
+            ("Description", "w"),
+            ("Outputs", "e"),
+            ("Build Status", "e"),
+        ]
         for col, (text, anchor) in enumerate(headers):
             ctk.CTkLabel(
                 head, text=text, text_color=INK, font=(UI_FONT, 14, "bold"), anchor=anchor
-            ).grid(row=0, column=col, sticky="ew", padx=(0, 0 if col == 3 else self._S3_GAP), pady=10)
+            ).grid(
+                row=0,
+                column=col,
+                sticky="ew",
+                padx=(0, 0 if col == 3 else self._S3_GAP),
+                pady=10,
+            )
         return card
 
     def _step3_fonts(self) -> dict[str, tkfont.Font]:
@@ -3228,14 +3431,21 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         canvas.create_text(
             inset + 23,
             mid,
-            text=_truncate_for_width(self._module_display_name(key), fonts["name"], name_max),
+            text=_truncate_for_width(
+                self._module_display_name(key), fonts["name"], name_max
+            ),
             font=fonts["name"],
             fill=INK,
             anchor="w",
         )
         desc_text = MODULE_DETAILS.get(key, {}).get("summary", "")
         desc_item = canvas.create_text(
-            inset + self._S3_MODULE_MIN, mid, text=desc_text, font=fonts["desc"], fill=INK, anchor="w"
+            inset + self._S3_MODULE_MIN,
+            mid,
+            text=desc_text,
+            font=fonts["desc"],
+            fill=INK,
+            anchor="w",
         )
         badge_items = [
             canvas.create_image(0, mid, image=_canvas_icon(term, 24), anchor="e")
@@ -3271,10 +3481,14 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 for item in reversed(badge_items):
                     c.coords(item, x, mid)
                     x -= 30
-                desc_max = badge_right - self._S3_OUTPUTS_MIN - (inset + self._S3_MODULE_MIN)
+                desc_max = (
+                    badge_right - self._S3_OUTPUTS_MIN - (inset + self._S3_MODULE_MIN)
+                )
                 c.itemconfigure(
                     desc_item,
-                    text=_truncate_for_width(desc_text, fonts["desc"], max(40, desc_max + 90)),
+                    text=_truncate_for_width(
+                        desc_text, fonts["desc"], max(40, desc_max + 90)
+                    ),
                 )
             except TclError:
                 pass
@@ -3286,7 +3500,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if not unselected:
             return
         card = ctk.CTkFrame(
-            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+            parent,
+            fg_color=PAPER,
+            corner_radius=12,
+            border_width=1,
+            border_color=HAIRLINE,
         )
         card.pack(fill="x", padx=(0, 4), pady=(0, 14))
         head = ctk.CTkFrame(card, fg_color="transparent")
@@ -3296,7 +3514,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         title_holder = ctk.CTkFrame(head, fg_color="transparent")
         title_holder.grid(row=0, column=0, sticky="w")
         caret = ctk.CTkLabel(
-            title_holder, text="", image=_caret_icon(False), width=12, height=12, fg_color="transparent"
+            title_holder,
+            text="",
+            image=_caret_icon(False),
+            width=12,
+            height=12,
+            fg_color="transparent",
         )
         caret.grid(row=0, column=0, padx=(0, 8))
         title = ctk.CTkLabel(
@@ -3339,7 +3562,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                         anchor="w",
                     ).grid(row=0, column=0, sticky="w")
                     ctk.CTkLabel(
-                        line, text=reason_for(key), text_color=INK, font=(UI_FONT, 15), anchor="w"
+                        line,
+                        text=reason_for(key),
+                        text_color=INK,
+                        font=(UI_FONT, 15),
+                        anchor="w",
                     ).grid(row=0, column=1, sticky="w", padx=(10, 0))
             body.pack(fill="x", padx=14, pady=(0, 10))
             caret.configure(image=_caret_icon(True))
@@ -3369,24 +3596,42 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.progress_guidance_var = ctk.StringVar(value="")
         build_btn = self._pill_button(card, "Run", self._run_engine, fg=PLUM)
         build_btn.configure(
-            height=48, width=self._action_button_width("Run", 40), font=(UI_FONT, 15, "bold")
+            height=48,
+            width=self._action_button_width("Run", 40),
+            font=(UI_FONT, 15, "bold"),
         )
         build_btn.grid(row=0, column=0, rowspan=2, sticky="w", padx=(16, 14), pady=16)
         self.build_button = build_btn
         ctk.CTkLabel(
-            card, textvariable=self.progress_status_var, text_color=INK, font=(UI_FONT, 13), anchor="w"
+            card,
+            textvariable=self.progress_status_var,
+            text_color=INK,
+            font=(UI_FONT, 13),
+            anchor="w",
         ).grid(row=0, column=1, sticky="sew", pady=(16, 2))
         ctk.CTkLabel(
-            card, textvariable=self.progress_meta_var, text_color=INK, font=(UI_FONT, 13), anchor="e"
+            card,
+            textvariable=self.progress_meta_var,
+            text_color=INK,
+            font=(UI_FONT, 13),
+            anchor="e",
         ).grid(row=0, column=2, sticky="se", padx=(10, 14), pady=(16, 2))
         self.progress_bar = ctk.CTkProgressBar(
-            card, height=10, corner_radius=5, fg_color=RUN_DETAIL_RULE, progress_color=PLUM
+            card,
+            height=10,
+            corner_radius=5,
+            fg_color=RUN_DETAIL_RULE,
+            progress_color=PLUM,
         )
-        self.progress_bar.grid(row=1, column=1, columnspan=2, sticky="ew", padx=(0, 14), pady=(0, 16))
+        self.progress_bar.grid(
+            row=1, column=1, columnspan=2, sticky="ew", padx=(0, 14), pady=(0, 16)
+        )
         self.progress_bar.set(0)
         buttons = ctk.CTkFrame(card, fg_color="transparent")
         buttons.grid(row=0, column=3, rowspan=2, sticky="e", padx=(0, 16), pady=16)
-        self.view_logs_button = self._secondary_toolbar_button(buttons, "View Logs", self._view_logs)
+        self.view_logs_button = self._secondary_toolbar_button(
+            buttons, "View Logs", self._view_logs
+        )
         self.view_logs_button.configure(
             height=40,
             width=100,
@@ -3404,7 +3649,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             state="normal" if self._output_folder_to_open() is not None else "disabled",
         )
         self.open_output_button.pack(side="left", padx=(0, 8))
-        self.cancel_button = self._secondary_toolbar_button(buttons, "Cancel", self._cancel_run)
+        self.cancel_button = self._secondary_toolbar_button(
+            buttons, "Cancel", self._cancel_run
+        )
         self.cancel_button.configure(
             height=40,
             width=80,
@@ -3424,7 +3671,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             justify="left",
             anchor="w",
         )
-        self.progress_guidance_label.grid(row=2, column=0, columnspan=4, sticky="ew", padx=16, pady=(0, 12))
+        self.progress_guidance_label.grid(
+            row=2, column=0, columnspan=4, sticky="ew", padx=16, pady=(0, 12)
+        )
         self.progress_guidance_label.grid_remove()
 
     def _restore_progress_view(self) -> None:
@@ -3436,7 +3685,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.build_button.configure(state="disabled", text="Running")
 
     def _set_status_cell(self, key: str, state: str, text: str | None = None) -> None:
-        bg, border, text_color = S3_STATUS_PILL_STYLES.get(state, S3_STATUS_PILL_STYLES["not_started"])
+        bg, border, text_color = S3_STATUS_PILL_STYLES.get(
+            state, S3_STATUS_PILL_STYLES["not_started"]
+        )
         if text is None:
             text = state.replace("_", " ").capitalize()
         pill = self._canvas_status_pills.get(key)
@@ -3446,7 +3697,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             canvas = pill["canvas"]
             if canvas.winfo_exists():
                 canvas.itemconfigure(
-                    pill["bg"], image=_pill_bg_photo(bg, border, pill["width"], pill["height"])
+                    pill["bg"],
+                    image=_pill_bg_photo(bg, border, pill["width"], pill["height"]),
                 )
                 canvas.itemconfigure(pill["text"], text=text, fill=text_color)
         except TclError:
@@ -3460,8 +3712,14 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._set_status_cell(key, "running", "Running")
         if hasattr(self, "progress_status_var"):
             total = len(self._progress_order)
-            position = self._progress_order.index(key) + 1 if key in self._progress_order else total
-            self.progress_status_var.set(f"{position} of {total} · {self._module_display_name(key)}")
+            position = (
+                self._progress_order.index(key) + 1
+                if key in self._progress_order
+                else total
+            )
+            self.progress_status_var.set(
+                f"{position} of {total} · {self._module_display_name(key)}"
+            )
         self._update_progress_bar()
 
     def _mark_progress_done(self, key: str) -> None:
@@ -3493,7 +3751,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         if not hasattr(self, "progress_meta_var"):
             return
         total = len(self._progress_order)
-        if self._build_started_at is not None and (self._build_running or self._progress_completed):
+        if self._build_started_at is not None and (
+            self._build_running or self._progress_completed
+        ):
             elapsed = int(time.monotonic() - self._build_started_at)
             minutes, secs = divmod(max(0, elapsed), 60)
             self.progress_meta_var.set(f"Elapsed {minutes:02d}:{secs:02d}")
@@ -3553,7 +3813,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.progress_guidance_label.grid_remove()
         self._sync_nav()
         self._append_log(f"Config saved: {CONFIG_PATH}\n")
-        threading.Thread(target=self._run_worker, args=(CONFIG_PATH,), daemon=True).start()
+        threading.Thread(
+            target=self._run_worker, args=(CONFIG_PATH,), daemon=True
+        ).start()
         self.after(100, self._drain_log)
         self._tick_elapsed_timer()
 
@@ -3563,7 +3825,13 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             pythonw = Path(sys.executable).parent / "pythonw.exe"
             if pythonw.exists():
                 python_exe = str(pythonw)
-        cmd = [python_exe, str(APP_DIR / "run_diagnostics.py"), "--config", str(config_path), "--yes"]
+        cmd = [
+            python_exe,
+            str(APP_DIR / "run_diagnostics.py"),
+            "--config",
+            str(config_path),
+            "--yes",
+        ]
         code = 1
         try:
             process = subprocess.Popen(
@@ -3684,31 +3952,60 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         window.grid_rowconfigure(1, weight=1)
         window.transient(self)
         window.after(50, lambda: (window.lift(), window.focus_force()))
-        header = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=14, border_width=1, border_color=HAIRLINE)
+        header = ctk.CTkFrame(
+            window,
+            fg_color=PAPER,
+            corner_radius=14,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
         header.grid(row=0, column=0, sticky="ew", padx=18, pady=(18, 10))
         header.grid_columnconfigure(0, weight=1)
-        ctk.CTkLabel(header, text="Run Logs", text_color=INK, font=(UI_FONT, 24, "bold")).grid(
-            row=0, column=0, sticky="w", padx=20, pady=(16, 0)
-        )
+        ctk.CTkLabel(
+            header, text="Run Logs", text_color=INK, font=(UI_FONT, 24, "bold")
+        ).grid(row=0, column=0, sticky="w", padx=20, pady=(16, 0))
         if self._run_log_path and self._run_log_path.exists():
             source = f"Run log file: {self._run_log_path}"
         else:
             source = "Captured engine output from this session."
-        ctk.CTkLabel(header, text=source, text_color=MUTED, font=(UI_FONT, 12), wraplength=820, justify="left").grid(
-            row=1, column=0, sticky="w", padx=20, pady=(2, 16)
+        ctk.CTkLabel(
+            header,
+            text=source,
+            text_color=MUTED,
+            font=(UI_FONT, 12),
+            wraplength=820,
+            justify="left",
+        ).grid(row=1, column=0, sticky="w", padx=20, pady=(2, 16))
+        log_box = ctk.CTkTextbox(
+            window,
+            corner_radius=24,
+            fg_color=LOG_BG,
+            text_color=LOG_TEXT,
+            font=("Consolas", 12),
         )
-        log_box = ctk.CTkTextbox(window, corner_radius=24, fg_color=LOG_BG, text_color=LOG_TEXT, font=("Consolas", 12))
         log_box.grid(row=1, column=0, sticky="nsew", padx=18, pady=10)
-        log_box.insert("1.0", "".join(self._log_chunks) or "No run log has been captured yet.")
+        log_box.insert(
+            "1.0", "".join(self._log_chunks) or "No run log has been captured yet."
+        )
         log_box.see("end")
         log_box.configure(state="disabled")
         self._log_viewers.append(log_box)
-        actions = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=14, border_width=1, border_color=HAIRLINE)
+        actions = ctk.CTkFrame(
+            window,
+            fg_color=PAPER,
+            corner_radius=14,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
         actions.grid(row=2, column=0, sticky="ew", padx=18, pady=(6, 18))
         actions.grid_columnconfigure(0, weight=1)
         if self._run_log_path is not None:
             self._pill_button(
-                actions, "Open Log File", lambda: open_path(self._run_log_path), fg=PAPER, text_color=INK
+                actions,
+                "Open Log File",
+                lambda: open_path(self._run_log_path),
+                fg=PAPER,
+                text_color=INK,
             ).grid(row=0, column=0, sticky="w", padx=14, pady=12)
         self._pill_button(actions, "Close", window.destroy, fg=FOG, text_color=INK).grid(
             row=0, column=1, padx=(8, 14), pady=12

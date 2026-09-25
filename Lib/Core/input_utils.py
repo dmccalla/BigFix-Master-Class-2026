@@ -99,9 +99,7 @@ def resolve_existing_file(
         ]
         if not candidate.is_absolute():
             message.append(f"Current folder: {Path.cwd()}")
-            message.append(
-                "Tip: If the file is in this folder, enter only the filename."
-            )
+            message.append("Tip: If the file is in this folder, enter only the filename.")
             message.append("     Otherwise, enter the full path to the file.")
         raise ValueError("\n".join(message))
 
@@ -195,8 +193,7 @@ def resolve_output_file(
 
     if candidate.exists() and candidate.is_dir():
         raise ValueError(
-            f"{label} path points to a folder, not a file.\n"
-            f"Checked path: {display_path}"
+            f"{label} path points to a folder, not a file.\nChecked path: {display_path}"
         )
 
     return display_path
@@ -318,9 +315,7 @@ def skip_section_rule(doc_xml: str, pos: int) -> int:
     return pos
 
 
-def keep_section_rule(
-    doc_xml: str, zone_start: int, zone_end: int, body_xml: str
-) -> str:
+def keep_section_rule(doc_xml: str, zone_start: int, zone_end: int, body_xml: str) -> str:
     """Re-insert a section heading's decorative rule into replacement body XML.
 
     For injectors that replace a whole section (the heading is rebuilt inside

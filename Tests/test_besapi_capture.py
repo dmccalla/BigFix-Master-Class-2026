@@ -35,7 +35,9 @@ def _doc(answers: list[str], tuples: list[tuple[str, str]] | None = None) -> str
         "\t\t\t</Tuple>\n"
         for v, c in (tuples or [])
     )
-    return f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    return (
+        f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    )
 
 
 def test_capture_to_log_text_matches_task_conversion() -> None:
@@ -181,5 +183,3 @@ def test_newest_capture_source_log_pattern_override(tmp_path: Path) -> None:
         log_patterns=("Deployment_Overview_Dashboard_Data.log",),
     )
     assert found == xml
-
-

@@ -73,8 +73,7 @@ def test_analysis_score_headers_use_shared_non_wrapping_lockup() -> None:
     assert "const scoreText = numeric ? d.score" in html
     assert "${scoreText}" in html
     assert (
-        "flex-direction:column;align-items:flex-end;white-space:nowrap;flex:none"
-        in html
+        "flex-direction:column;align-items:flex-end;white-space:nowrap;flex:none" in html
     )
     assert "white-space:normal" in html
     assert "analysisHeader(payload,{scoreSize:60,bar:true,statusWord:true})" in html
@@ -111,9 +110,7 @@ def test_chart_template_uses_one_neutral_title_case_pill_grammar() -> None:
 def test_overview_uses_plain_status_header_without_pills() -> None:
     html = html_charts._build_html("overview", {}, card_width=960)
     active_start = html.rindex("function buildOverview")
-    section = html[
-        active_start : html.index("function srcCapacityHeader", active_start)
-    ]
+    section = html[active_start : html.index("function srcCapacityHeader", active_start)]
 
     assert "const right = ''" in section
     assert "srcHeader(d.title, srcOverviewMeta(d.meta), right)" in section
@@ -223,9 +220,7 @@ def test_rollup_findings_footers_use_traceable_summaries() -> None:
     ]
 
     assert 'data-single-line="findings-split"' in summary_helper
-    assert (
-        "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" in summary_helper
-    )
+    assert "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" in summary_helper
     assert "function srcFindingIdList" in summary_helper
     assert "function srcFindingIdPreview" in summary_helper
     assert "+${fmtCount(clean.length - max)} more below" in summary_helper
@@ -235,8 +230,7 @@ def test_rollup_findings_footers_use_traceable_summaries() -> None:
     assert "srcFooter('Findings raised', srcDashboardFindingLine(d))" in dashboard
     assert "srcFooter('Findings raised', srcPerfmonFindingLine(d))" in perfmon
     assert (
-        "srcFindingSummaryLine(summaryLine) + srcFindingSummaryLine(ids)"
-        in source_region
+        "srcFindingSummaryLine(summaryLine) + srcFindingSummaryLine(ids)" in source_region
     )
     assert "const footerLine = srcFindingSummaryLine(" in breakdown
     assert "const footerLine = srcBalanceFindingFooter(d, count, split);" in balance
@@ -338,9 +332,7 @@ def test_not_assessed_rows_do_not_report_clean_findings() -> None:
 def test_snapshot_findings_card_omits_focus_area_label() -> None:
     html = html_charts._build_html("snapshot", {}, card_width=960)
     section = html[
-        html.index("function snapshotFindingsCard") : html.index(
-            "function buildSnapshot"
-        )
+        html.index("function snapshotFindingsCard") : html.index("function buildSnapshot")
     ]
 
     assert "focus areas" not in section

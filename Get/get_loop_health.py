@@ -274,9 +274,7 @@ def _column_unit_hint(column_name: str | None) -> str:
     return ""
 
 
-def _numeric_loop_value_to_seconds(
-    value: float, column_name: str | None = None
-) -> float:
+def _numeric_loop_value_to_seconds(value: float, column_name: str | None = None) -> float:
     """Convert numeric loop values using column units when available.
 
     BigFix exports are not perfectly consistent. Some workbooks contain true
@@ -1480,8 +1478,7 @@ def aggregate_loop_offenders(
                 )
             )
     elif (
-        "ClientProcessingSeconds" in df.columns
-        or "ClientEvaluationSeconds" in df.columns
+        "ClientProcessingSeconds" in df.columns or "ClientEvaluationSeconds" in df.columns
     ):
         rows = []
         for result, group in df.groupby("Result", dropna=True):
@@ -1489,9 +1486,7 @@ def aggregate_loop_offenders(
             if not result_text:
                 continue
             seconds = [
-                _float_from_row(
-                    row, "ClientProcessingSeconds", "ClientEvaluationSeconds"
-                )
+                _float_from_row(row, "ClientProcessingSeconds", "ClientEvaluationSeconds")
                 for _, row in group.iterrows()
             ]
             total = sum(seconds)
@@ -2234,9 +2229,7 @@ def process_rows(
             )
         else:
             avg_raw = row.get(avg_column)
-            avg_text = (
-                "" if avg_raw is None or pd.isna(avg_raw) else str(avg_raw).strip()
-            )
+            avg_text = "" if avg_raw is None or pd.isna(avg_raw) else str(avg_raw).strip()
             if re.search(r"error", avg_text, re.IGNORECASE):
                 error_count += 1
             else:
@@ -2255,9 +2248,7 @@ def _command_polling_group_rows(
 
     output: list[list[str]] = []
     for key, group in groups.items():
-        status_counts = Counter(
-            row.command_polling_enabled or "Unknown" for row in group
-        )
+        status_counts = Counter(row.command_polling_enabled or "Unknown" for row in group)
         no_udp_polling_gap = sum(
             1
             for row in group
@@ -2308,9 +2299,7 @@ def analyze_command_polling(
     rows: list[ProcessedRow],
 ) -> CommandPollingSummary | None:
     polling_rows = [
-        row
-        for row in rows
-        if row.command_polling_enabled or row.command_polling_interval
+        row for row in rows if row.command_polling_enabled or row.command_polling_interval
     ]
     if not polling_rows:
         return None
@@ -2650,9 +2639,7 @@ def generate_png(
     data = {
         "title": "Client Loop Performance",
         "meta": meta,
-        "findingsLine": (
-            f"Raises 1 {finding_impact} finding" if finding_impact else ""
-        ),
+        "findingsLine": (f"Raises 1 {finding_impact} finding" if finding_impact else ""),
         "findings": (
             [
                 {
@@ -2878,9 +2865,7 @@ def generate_excel(
         )
 
     with pd.ExcelWriter(excel_output, engine="openpyxl") as writer:
-        metrics_df.to_excel(
-            writer, sheet_name="Health Summary", index=False, startrow=0
-        )
+        metrics_df.to_excel(writer, sheet_name="Health Summary", index=False, startrow=0)
         bands_df.to_excel(
             writer, sheet_name="Health Summary", index=False, startrow=bands_start_row
         )
@@ -2900,9 +2885,7 @@ def generate_excel(
                     for item in loop_offenders
                 ]
             )
-            offenders_df.to_excel(
-                writer, sheet_name="Evaluation Offenders", index=False
-            )
+            offenders_df.to_excel(writer, sheet_name="Evaluation Offenders", index=False)
         if actionsite_pressure:
             pressure_df = pd.DataFrame(
                 actionsite_pressure_rows(actionsite_pressure),
@@ -3534,9 +3517,7 @@ def main() -> int:
         default="01:00:00",
         help="Critical threshold. Default: 01:00:00",
     )
-    parser.add_argument(
-        "--report-start-date", help="Report start date, e.g. 04-22-2026"
-    )
+    parser.add_argument("--report-start-date", help="Report start date, e.g. 04-22-2026")
     parser.add_argument("--report-end-date", help="Report end date, e.g. 04-29-2026")
     parser.add_argument(
         "--deployment-info-folder",
@@ -3611,9 +3592,7 @@ def main() -> int:
         else:
             udp_notifications_file = discover_udp_notifications_file(input_file)
 
-        report_start = prompt_for_report_date(
-            "Report start date", args.report_start_date
-        )
+        report_start = prompt_for_report_date("Report start date", args.report_start_date)
         report_end = prompt_for_report_date("Report end date", args.report_end_date)
         # Both dates are now optional: only validate ordering when both
         # were supplied. Missing dates render downstream as "Not provided".
@@ -3622,9 +3601,7 @@ def main() -> int:
             and report_end is not None
             and report_end < report_start
         ):
-            raise ValueError(
-                "Report end date cannot be earlier than report start date."
-            )
+            raise ValueError("Report end date cannot be earlier than report start date.")
 
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         generated_at = datetime.now()

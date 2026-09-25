@@ -33,7 +33,9 @@ _HEADER = (
 
 def _doc(answers: list[str]) -> str:
     body = "".join(f'\t\t\t<Answer type="string">{a}</Answer>\n' for a in answers)
-    return f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    return (
+        f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    )
 
 
 _LOOP_ROWS = [
@@ -221,8 +223,7 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
     )
     assert loop_rows[1]["Platform Health Check - Command Polling Enabled"] == "0"
     assert (
-        loop_rows[1]["Platform Health Check - Command Polling Interval"]
-        == "Not Enabled"
+        loop_rows[1]["Platform Health Check - Command Polling Interval"] == "Not Enabled"
     )
 
     with udp_csv.open(encoding="utf-8-sig", newline="") as handle:

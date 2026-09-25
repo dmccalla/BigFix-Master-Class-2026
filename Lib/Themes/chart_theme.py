@@ -88,9 +88,7 @@ class Theme:
     bg_card: str = DS.white.hex_value
     title: str = DS.midnight.hex_value
     text: str = DS.midnight.hex_value
-    muted: str = (
-        "#3E4856"  # darker than DS.text_muted so small chart labels stay legible
-    )
+    muted: str = "#3E4856"  # darker than DS.text_muted so small chart labels stay legible
     border: str = DS.border_light.hex_value
     track: str = DS.tech_grey.hex_value
 

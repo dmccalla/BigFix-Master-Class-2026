@@ -161,9 +161,7 @@ def resolve_optional_template(arg_value) -> Path | None:
     if template_path:
         return template_path
 
-    log.warn(
-        "No style template was found. Using a blank Word document."
-    )
+    log.warn("No style template was found. Using a blank Word document.")
     return None
 
 
@@ -404,9 +402,7 @@ def generate_filldb_chart(
             "label": clean_object_name(r.get("FillDB Object", "")),
             "width": f"{m / max_min * 100:.1f}%",
             "mins": f"{m:.1f}",
-            "color": status_color.get(
-                health_status(r.get("Health Check", "")), C_NODATA
-            ),
+            "color": status_color.get(health_status(r.get("Health Check", "")), C_NODATA),
         }
         for r, m in zip(ranked, times_min)
     ]
@@ -577,9 +573,7 @@ def set_row_cant_split(row) -> None:
         tr_pr.append(OxmlElement("w:cantSplit"))
 
 
-def set_cell_text(
-    cell, text: str, bold: bool = False, color: str | None = None
-) -> None:
+def set_cell_text(cell, text: str, bold: bool = False, color: str | None = None) -> None:
     cell.text = ""
     cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
@@ -746,18 +740,14 @@ def write_word_output(
     stamp: str = "",
 ) -> None:
     document = (
-        create_stub_document_from_template(template_path)
-        if template_path
-        else Document()
+        create_stub_document_from_template(template_path) if template_path else Document()
     )
     apply_standalone_narrow_margins(document)
     add_stub_front_matter(document, "FillDB Performance Analysis")
     if stamp:
         stamp_docx_document(document, stamp)
     if chart_path:
-        picture = document.add_picture(
-            str(chart_path), width=usable_page_width(document)
-        )
+        picture = document.add_picture(str(chart_path), width=usable_page_width(document))
         set_picture_alt_text(
             picture,
             "FillDB performance chart showing health score, status distribution, "
@@ -808,9 +798,7 @@ def main() -> int:
         input_stem = input_path.name if input_path.is_dir() else input_path.stem
         default_docx = f"{input_stem}.filldb.performance.docx"
         output_path = resolve_output_docx(args.word_output, default_docx)
-        chart_path = resolve_output_png(
-            args.png_output, output_path.with_suffix(".png")
-        )
+        chart_path = resolve_output_png(args.png_output, output_path.with_suffix(".png"))
         template_path = resolve_optional_template(args.template)
         collection_start = clean_user_path(args.collection_start)
         collection_end = clean_user_path(args.collection_end)

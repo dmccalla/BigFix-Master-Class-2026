@@ -38,3 +38,4 @@ Thumbs.db
 # Scratch space and generated output
 Temp/
 Output/
+Dist/

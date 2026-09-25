@@ -1,6 +1,6 @@
 [project]
 name = "master-class-diagnostics-workbench"
-version = "1.0.0"
+version = "1.0.0-dev"
 description = "Master Class Diagnostics Workbench: automated performance and configuration analysis for BigFix."
 license = "MIT"
 license-files = ["LICENSE"]
@@ -27,8 +27,14 @@ dependencies = [
 
 [dependency-groups]
 dev = [
+    "bandit>=1.7.9",
+    "cyclonedx-bom>=4.0.0",
+    "mypy>=1.10",
+    "pip-audit>=2.7.0",
+    "pip-licenses>=5.0.0",
     "pytest>=8.0.0",
     "ruff>=0.5.0",
+    "vulture>=2.11",
 ]
 
 [tool.ruff]
@@ -40,3 +46,6 @@ extend-exclude = ["SampleData", "Fonts", "Templates"]
 # E402: the scripts extend sys.path before importing shared modules.
 select = ["E", "F", "W", "I", "UP"]
 ignore = ["E402", "E501"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "Temp", "Dist", "Tests", "SampleData"]

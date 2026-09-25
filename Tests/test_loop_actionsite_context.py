@@ -105,17 +105,16 @@ def test_loop_word_places_score_method_after_summary_without_context_table(
     )
     assert score_heading.style.name == "Heading 3"
     assert "Client Loop Context" not in paragraphs
-    assert paragraphs.index(
-        "BigFix Client Loop Performance Summary"
-    ) < paragraphs.index("How This Score Is Calculated")
+    assert paragraphs.index("BigFix Client Loop Performance Summary") < paragraphs.index(
+        "How This Score Is Calculated"
+    )
     assert "Score Method: test driver" not in paragraphs
     assert "Score Breakdown: test breakdown" not in paragraphs
     assert (
         "Formula: Healthy% x 100 + Needs Attention% x 67 + Critical% x 34" in paragraphs
     )
     assert (
-        "- Critical, over 60 minutes, or no usable data reported: 34 points"
-        in paragraphs
+        "- Critical, over 60 minutes, or no usable data reported: 34 points" in paragraphs
     )
     assert not any(
         table.cell(0, 0).text.startswith("SLOWEST EVALUATION, AVG")
@@ -657,9 +656,7 @@ def test_udp_notification_notes_explain_missing_rollup_data(
         udp_summary=summary,
     )
 
-    paragraphs = [
-        p.text for p in Document(str(word_output)).paragraphs if p.text.strip()
-    ]
+    paragraphs = [p.text for p in Document(str(word_output)).paragraphs if p.text.strip()]
     assert any(
         p.startswith("NOTE: ") and "did not report a relay and/or IPv4 address" in p
         for p in paragraphs

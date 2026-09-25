@@ -527,9 +527,7 @@ def validate_docx_package(docx_path: Path) -> None:
         rels_xml = zf.read("word/_rels/document.xml.rels").decode("utf-8")
         package_names = set(names)
         missing_targets: list[str] = []
-        for rel in re.findall(
-            r"<Relationship\b[^>]*/?>", rels_xml, flags=re.IGNORECASE
-        ):
+        for rel in re.findall(r"<Relationship\b[^>]*/?>", rels_xml, flags=re.IGNORECASE):
             if IMAGE_REL_TYPE not in rel and "image" not in rel.lower():
                 continue
             target_match = re.search(r'\bTarget="([^"]+)"', rel)
@@ -912,8 +910,7 @@ def perfmon_section_score(counts: dict[str, int]) -> int | None:
     if total <= 0:
         return None
     weighted = sum(
-        counts.get(status, 0) * weight
-        for status, weight in PERFMON_SCORE_WEIGHTS.items()
+        counts.get(status, 0) * weight for status, weight in PERFMON_SCORE_WEIGHTS.items()
     )
     return round(weighted / total * 100)
 
@@ -1529,9 +1526,7 @@ def add_image_relationship(rels_xml: str, rid: str, target: str) -> str:
             "Template relationship file is missing closing </Relationships> tag."
         )
 
-    return rels_xml.replace(
-        "</Relationships>", relationship_xml + "</Relationships>", 1
-    )
+    return rels_xml.replace("</Relationships>", relationship_xml + "</Relationships>", 1)
 
 
 def png_dimensions(path: Path) -> tuple[int, int]:
@@ -1966,9 +1961,7 @@ def inject_perfmon_charts(
 
     log.step("Discovering placeholder images in template")
 
-    section_rids, section_insert_points, _ = discover_perfmon_sections(
-        doc_xml, rels_xml
-    )
+    section_rids, section_insert_points, _ = discover_perfmon_sections(doc_xml, rels_xml)
 
     log.step("Building chart-to-placeholder map")
 
@@ -2062,16 +2055,12 @@ def inject_perfmon_charts(
                     rf'(?:r:embed|r:id)="{re.escape(rid_to_remove)}"',
                     candidate_xml,
                 ):
-                    new_rels_xml = remove_relationship_by_id(
-                        new_rels_xml, rid_to_remove
-                    )
+                    new_rels_xml = remove_relationship_by_id(new_rels_xml, rid_to_remove)
                 new_doc_xml = candidate_xml
                 log.ok("OK")
             else:
                 position = injection["Position"]
-                new_doc_xml = (
-                    new_doc_xml[:position] + insert_xml + new_doc_xml[position:]
-                )
+                new_doc_xml = new_doc_xml[:position] + insert_xml + new_doc_xml[position:]
                 log.ok("OK")
 
         if scorecard_path and scorecard_path.exists():

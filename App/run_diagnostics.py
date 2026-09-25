@@ -834,9 +834,7 @@ def _is_child_output_rule(line: str) -> bool:
     """Return True when a child script prints a decorative separator line."""
     stripped = line.strip()
     return (
-        len(stripped) >= 8
-        and len(set(stripped)) == 1
-        and stripped[0] in {"=", "-", "_"}
+        len(stripped) >= 8 and len(set(stripped)) == 1 and stripped[0] in {"=", "-", "_"}
     )
 
 
@@ -1322,7 +1320,9 @@ def perfmon_summary(inputs: dict) -> list[tuple[str, str]]:
         ),
         (
             "Capture 1 Memory",
-            f"{p['physical_memory_gb']} GB" if p["physical_memory_gb"] else "not specified",
+            f"{p['physical_memory_gb']} GB"
+            if p["physical_memory_gb"]
+            else "not specified",
         ),
         ("Capture 1 VM", "Yes" if p["is_vm"] else "No"),
     ]
@@ -1700,7 +1700,9 @@ def attach_run_context(
 def load_config(path: str) -> dict:
     config_path = Path(clean_user_path(path)).expanduser()
     if not config_path.exists():
-        raise ValueError(f"Config file was not found: {config_path.resolve(strict=False)}")
+        raise ValueError(
+            f"Config file was not found: {config_path.resolve(strict=False)}"
+        )
     try:
         with config_path.open("r", encoding="utf-8-sig") as handle:
             return json.load(handle)
@@ -1773,7 +1775,9 @@ class RunContext:
 
 def build_run_context(config_path: str) -> RunContext:
     config = load_config(config_path)
-    requested_keys = [key for key in (config.get("modules") or []) if key in MODULE_BY_KEY]
+    requested_keys = [
+        key for key in (config.get("modules") or []) if key in MODULE_BY_KEY
+    ]
     if not requested_keys:
         raise ValueError("Config does not select any known modules.")
     selected = [MODULE_BY_KEY[key] for key in requested_keys]

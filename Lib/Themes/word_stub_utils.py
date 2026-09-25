@@ -28,10 +28,8 @@ TABLE_STYLE_ID = "BigFixContent"
 _TEMPLATE_CONTENT_TYPE = "wordprocessingml.template.main+xml"
 _DOCUMENT_CONTENT_TYPE = "wordprocessingml.document.main+xml"
 STUB_NOTICE_PREFIX = "Standalone module excerpt."
-STUB_NOTICE_TEXT = (
-    "Standalone module excerpt. This file can be used as a Mini-Report vs. "
-    "delivering the entire Health Check report."
-)
+# No notice paragraph: every module document here is a standalone Mini Report.
+STUB_NOTICE_TEXT = ""
 STANDALONE_NARROW_MARGIN_INCHES = 0.5
 
 

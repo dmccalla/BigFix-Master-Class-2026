@@ -515,7 +515,7 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
             f"{threshold_display} -- inside the critical limit but in the warning range -- "
             f"with a peak of {maximum} and {warnings} of {samples} readings "
             f"({warning_pct}%) in the warning range. This should be watched for "
-            f"sustained recurrence before the next health check."
+            f"sustained recurrence before the next capture."
         )
     elif threshold == "No threshold defined":
         result = (

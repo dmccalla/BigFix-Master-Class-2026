@@ -8,30 +8,40 @@
 """
 diagnostics_workbench_ui.py -- the Master Class Diagnostics Workbench desktop app.
 
-Two panes:
+Three steps, laid out like the full Workbench:
 
-  1. Inputs. Pick the run folder, choose the modules, point each one at its
-     data. A data folder can be scanned to fill the inputs automatically, and
-     any input can be browsed or typed by hand.
-  2. Run. Watch the engine (App/run_diagnostics.py) work through the selected
-     modules, then open the run folder and the files it produced.
+  1. Folders.  Pick the data folder (scanned for module inputs) and the
+     output folder, and name the run.
+  2. Modules.  One row per analysis module: checkbox, description, status
+     pill, and a Details expansion with what the module does, the inputs it
+     found or needs, and the values to confirm.
+  3. Run.      The run details, one status row per module, and the action
+     strip that runs the engine and shows progress.
 
-The app never analyses anything itself. It writes a JSON config and runs the
-engine as a child process, streaming its output into the log.
+The app never analyses anything itself. It writes a JSON config and runs
+App/run_diagnostics.py as a child process, streaming its output into the log.
 """
 
 from __future__ import annotations
 
+import ctypes
 import json
+import os
 import queue
 import re
 import subprocess
 import sys
 import threading
+import time
+import tkinter as tk
+from datetime import date, datetime
+from functools import lru_cache
 from pathlib import Path
 from tkinter import TclError, filedialog, messagebox
+from tkinter import font as tkfont
 
 import customtkinter as ctk
+from PIL import Image, ImageDraw, ImageTk
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 APP_DIR = Path(__file__).resolve().parent
@@ -39,7 +49,7 @@ for folder in (PROJECT_ROOT, APP_DIR):
     if str(folder) not in sys.path:
         sys.path.insert(0, str(folder))
 
-from run_diagnostics import (
+from run_diagnostics import (  # noqa: E402
     APP_TITLE,
     MODULE_BY_KEY,
     MODULES,
@@ -51,62 +61,535 @@ from run_diagnostics import (
     discover_loop_ancillary_inputs,
     relog_query_lines,
     scan_input_folder,
+    validate_loop_workbook,
 )
 
-from Lib.Core.input_utils import DEFAULT_WORK_DIR, clean_user_path, open_path
-from Lib.Core.subprocess_window import hidden_subprocess_kwargs
-from Lib.Design.design_system import DESIGN_SYSTEM as DS
+from Lib.Core.input_utils import (  # noqa: E402
+    DEFAULT_WORK_DIR,
+    clean_user_path,
+    open_path,
+)
+from Lib.Core.subprocess_window import hidden_subprocess_kwargs  # noqa: E402
+from Lib.Design.design_system import DESIGN_SYSTEM as DS  # noqa: E402
+
+try:  # The calendar popup needs tkcalendar. Without it the date fields are typed.
+    from tkcalendar import Calendar
+except Exception:  # pragma: no cover - optional dependency
+    Calendar = None
 
 ctk.set_appearance_mode("light")
 ctk.set_default_color_theme("blue")
 
+APP_VERSION = "1.0"
+IS_WINDOWS = sys.platform == "win32"
+
 # ---------------------------------------------------------------------------
-# Design tokens (light mode). Colors come from the shared design system.
+# Design tokens. The same values the full Workbench draws with, light mode.
 # ---------------------------------------------------------------------------
 
 CANVAS = DS.tech_grey.hex_value
 PAPER = DS.white.hex_value
 INK = DS.midnight.hex_value
 MUTED = DS.text_muted.hex_value
+MOSS = "#1a7f4e"
 PLUM = DS.accent_blue.hex_value
 CLAY = DS.critical.hex_value
-SUCCESS = DS.success.hex_value
+OCHRE = "#946200"
+FOG = "#DCE6F0"
+RAIL = "#FFFFFF"
+BRAND_NAVY = "#000032"
+BRAND_EYEBROW = "#6FA3F0"
+LINK_BLUE = "#0F5FDC"
+FOOTER_RAIL = "#EEF1F8"
+CARD_HEADER = "#EEF1F8"
+PLUM_SOFT = "#E6EFFD"
+PANEL = "#F4F7FB"
 HAIRLINE = "#E3E9F1"
 FIELD_BORDER = "#CFD9E5"
-PANEL = "#F4F7FB"
 LOG_BG = DS.midnight.hex_value
 LOG_TEXT = "#EAF1F8"
+ROW_RULE = "#F0F3F8"
+RUN_DETAIL_RULE = "#EDF1F7"
+EXPANSION_TINT = "#F7FAFD"
 UI_FONT = "Segoe UI"
-MONO_FONT = "Consolas"
 
-PILL_STYLES = {
-    "Found": (SUCCESS, "#E7F4EC"),
-    "Chosen": (SUCCESS, "#E7F4EC"),
-    "Missing": (CLAY, "#FDECEA"),
-    "Not selected": (MUTED, "#F0F3F8"),
-    "Windows only": (MUTED, "#F0F3F8"),
+NEEDS_REVIEW_PILL = "Needs Review"
+S2_PILL_STYLES = {
+    "Found": ("#1a7f4e", "#e7f4ec"),
+    NEEDS_REVIEW_PILL: ("#946200", "#FDF6E7"),
+    "Missing": ("#b3372c", "#fdecea"),
+}
+S2_PILL_NEUTRAL = ("#000032", "#F0F3F8")
+STATUS_PILL_TEXT = {
+    "Found": "Found",
+    "Missing": "Needs A File",
+    "Scanning": "Scanning",
+    "Not scanned": "Not Scanned",
+}
+S3_STATUS_PILL_STYLES = {
+    "not_started": ("#F0F3F8", "#E3E9F1", "#000032"),
+    "running": ("#E6EFFD", "#c9dcf8", "#0a48a8"),
+    "done": ("#e7f4ec", "#cfe6da", "#14663f"),
+    "failed": ("#fdecea", "#f2c9c4", "#b3372c"),
 }
 
+OUTPUT_TERM_ORDER = ["Infographic", "Excel", "Mini Report"]
+OUTPUT_TERM_COLORS = {
+    "Infographic": "#6B2FA0",
+    "Excel": "#16704A",
+    "Mini Report": "#8A4A0F",
+}
+OUTPUT_TILE_FILLS = {
+    "Infographic": "#F1E9F7",
+    "Excel": "#E4F1EA",
+    "Mini Report": "#F7EDE2",
+}
+
+# What each module does, for the row description and the Details expansion.
+MODULE_DETAILS = {
+    "loop": {
+        "summary": "Reviews client evaluation loop performance.",
+        "does": (
+            "Creates an Infographic, Excel file, and Mini Report. Optional data adds "
+            "expensive evaluations, UDP notification coverage, Command Polling Review, "
+            "relay details, and subnet details."
+        ),
+        "use": (
+            "Use this with a Client Loop XML or CSV capture. The Agent Performance "
+            "Counters Basic export is also supported."
+        ),
+        "consultant": (
+            "Confirm the collection period, slow client counts, UDP results, command "
+            "polling settings, and expensive evaluations."
+        ),
+    },
+    "perfmon": {
+        "summary": "Reviews Windows performance counters against BigFix requirements.",
+        "does": (
+            "Creates an Infographic, Excel file, and Mini Report from one or two "
+            "PerfMon captures. Each counter is scored against its threshold."
+        ),
+        "use": "Use this when a BigFix platform server has a PerfMon BLG capture.",
+        "consultant": (
+            "Confirm the capture host and hardware values. Review every counter "
+            "outside its limit."
+        ),
+    },
+    "filldb": {
+        "summary": "Reviews FillDB processing performance.",
+        "does": (
+            "Reads raw FillDB performance logs or an existing analyzer CSV. It "
+            "creates an Infographic and Mini Report."
+        ),
+        "use": (
+            "Use this when FillDB performance logging was enabled and the logs "
+            "were collected."
+        ),
+        "consultant": "Confirm the collection period. Review any processing delays.",
+    },
+}
+MISSING_INPUT_CLUES = {
+    "loop": "Client Loop XML or CSV export",
+    "perfmon": "PerfMon BLG from a platform server",
+    "filldb": "FillDB performance log (FillDBperf.log) or CSV",
+}
+STEP_TITLES = {
+    1: "Folders and Run Details",
+    2: "Choose the Modules to Run",
+    3: "Run the Analysis",
+}
+RAIL_LABELS = ["Folders", "Modules", "Run"]
+# The engine prints "Step: <label>" when a module starts. The labels here are
+# the ones App/run_diagnostics.py prints, so progress can follow the log.
+STEP_HEADERS = {
+    "loop": "Client Performance Loop Analysis",
+    "perfmon": "Perfmon Infrastructure Analysis",
+    "filldb": "FillDB Performance Analysis",
+}
+BROWSABLE_INPUT_KINDS = {"file", "file_optional", "folder", "folder_optional"}
+LOGO_ASSET_PATH = PROJECT_ROOT / "Assets" / "bigfix_logo_official_icon.png"
+CONDENSED_FONT_FILE = PROJECT_ROOT / "Fonts" / "Roboto" / "RobotoCondensed-Bold.ttf"
 CONFIG_PATH = PROJECT_ROOT / "diagnostics_workbench.ui.config.json"
 DETECTING = "Detecting..."
+_LAYOUT_DEBOUNCE_MS = 40
 
 _RUN_FOLDER_RE = re.compile(r"^RUN_FOLDER:\s*(.+?)\s*$")
-_MODULE_RE = re.compile(r"^\s*MODULE (\d+) OF (\d+)\s*$")
-_STEP_RE = re.compile(r"^\s*Step:\s*(.+?)\s*$")
 _RUN_LOG_RE = re.compile(r"^\s*Run log\s*:\s*(.+?)\s*$")
-
-BROWSABLE_KINDS = {"file", "file_optional", "folder_optional"}
-TEXT_KINDS = {"file", "file_optional", "folder_optional", "int", "int_detected", "datetime_optional"}
-OUTPUT_SUFFIXES = {".docx", ".xlsx", ".png"}
 
 
 def _display_path(value: object) -> str:
     text = clean_user_path(value)
-    return str(Path(text)) if text else ""
+    return os.path.normpath(text) if text else ""
 
 
 def _field_id(key: str, field_key: str) -> str:
     return f"{key}:{field_key}"
+
+
+# ---------------------------------------------------------------------------
+# Drawn icons and pills. Supersampled with PIL, scaled down for crisp strokes.
+# ---------------------------------------------------------------------------
+
+_ICON_CACHE: dict[tuple[str, int], ctk.CTkImage] = {}
+_CANVAS_ICON_CACHE: dict[tuple[str, int], ImageTk.PhotoImage] = {}
+_PILL_BG_CACHE: dict[tuple[str, str, int, int], ImageTk.PhotoImage] = {}
+
+
+def _table_icon(kind: str, display: int) -> ctk.CTkImage:
+    cached = _ICON_CACHE.get((kind, display))
+    if cached is not None:
+        return cached
+    S = 4
+    size = 24 * S
+    img = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+    d = ImageDraw.Draw(img)
+    w = int(1.6 * S)
+
+    def doc(x0, y0, x1, y1, color, lines):
+        fold = 4 * S
+        d.line(
+            [(x1 - fold, y0), (x0, y0), (x0, y1), (x1, y1), (x1, y0 + fold)],
+            fill=color,
+            width=w,
+            joint="curve",
+        )
+        d.line(
+            [(x1 - fold, y0), (x1 - fold, y0 + fold), (x1, y0 + fold)],
+            fill=color,
+            width=max(S, w - S),
+            joint="curve",
+        )
+        for line_y in lines:
+            d.line([(x0 + 3 * S, line_y), (x1 - 3 * S, line_y)], fill=color, width=w)
+
+    if kind in OUTPUT_TERM_COLORS:
+        stroke = OUTPUT_TERM_COLORS[kind]
+        d.rounded_rectangle(
+            [0, 0, size - 1, size - 1], radius=7 * S, fill=OUTPUT_TILE_FILLS[kind]
+        )
+        if kind == "Mini Report":
+            doc(int(7.5 * S), 8 * S, int(16.5 * S), 19 * S, stroke, [int(14.5 * S)])
+        elif kind == "Infographic":
+            d.line(
+                [(6 * S, int(18.5 * S)), (18 * S, int(18.5 * S))], fill=stroke, width=w
+            )
+            for bar_x, top in ((8 * S, 13 * S), (12 * S, 9 * S), (16 * S, 11 * S)):
+                d.line(
+                    [(bar_x, top), (bar_x, int(17.5 * S))],
+                    fill=stroke,
+                    width=int(2.2 * S),
+                )
+        elif kind == "Excel":
+            d.rounded_rectangle(
+                [6 * S, 6 * S, 18 * S, 18 * S],
+                radius=int(1.5 * S),
+                outline=stroke,
+                width=w,
+            )
+            for rule_x in (10 * S, 14 * S):
+                d.line([(rule_x, 6 * S), (rule_x, 18 * S)], fill=stroke, width=w)
+            for rule_y in (10 * S, 14 * S):
+                d.line([(6 * S, rule_y), (18 * S, rule_y)], fill=stroke, width=w)
+    elif kind == "check_tile":
+        d.ellipse([0, 0, size - 1, size - 1], fill="#e7f4ec")
+        d.line(
+            [(int(6.5 * S), int(12.5 * S)), (11 * S, 17 * S), (18 * S, 7 * S)],
+            fill="#1a7f4e",
+            width=int(2.4 * S),
+            joint="curve",
+        )
+    image = ctk.CTkImage(light_image=img, dark_image=img, size=(display, display))
+    _ICON_CACHE[(kind, display)] = image
+    return image
+
+
+def _canvas_icon(kind: str, display: int) -> ImageTk.PhotoImage:
+    key = (kind, display)
+    cached = _CANVAS_ICON_CACHE.get(key)
+    if cached is None:
+        source = _table_icon(kind, display)._light_image
+        cached = ImageTk.PhotoImage(source.resize((display, display), Image.LANCZOS))
+        _CANVAS_ICON_CACHE[key] = cached
+    return cached
+
+
+def _pill_bg_photo(bg: str, border: str, width: int, height: int) -> ImageTk.PhotoImage:
+    key = (bg, border, width, height)
+    cached = _PILL_BG_CACHE.get(key)
+    if cached is None:
+        S = 4
+        img = Image.new("RGBA", (width * S, height * S), (0, 0, 0, 0))
+        draw = ImageDraw.Draw(img)
+        draw.rounded_rectangle(
+            [0, 0, width * S - 1, height * S - 1],
+            radius=(height // 2) * S,
+            fill=bg,
+            outline=border,
+            width=S,
+        )
+        cached = ImageTk.PhotoImage(img.resize((width, height), Image.LANCZOS))
+        _PILL_BG_CACHE[key] = cached
+    return cached
+
+
+@lru_cache(maxsize=4)
+def _caret_icon(expanded: bool, size: int = 12) -> ctk.CTkImage:
+    scale = 4
+    canvas = size * scale
+    image = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    if expanded:
+        points = [
+            (0.2 * canvas, 0.32 * canvas),
+            (0.8 * canvas, 0.32 * canvas),
+            (0.5 * canvas, 0.75 * canvas),
+        ]
+    else:
+        points = [
+            (0.32 * canvas, 0.2 * canvas),
+            (0.32 * canvas, 0.8 * canvas),
+            (0.75 * canvas, 0.5 * canvas),
+        ]
+    draw.polygon(points, fill="#000032")
+    image = image.resize((size, size), Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=image, dark_image=image, size=(size, size))
+
+
+@lru_cache(maxsize=2)
+def _calendar_icon(size: int = 14) -> ctk.CTkImage:
+    scale = 4
+    c = size * scale
+    image = Image.new("RGBA", (c, c), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(image)
+    width = int(1.2 * scale)
+    draw.rounded_rectangle(
+        [0.08 * c, 0.18 * c, 0.92 * c, 0.92 * c],
+        radius=int(0.08 * c),
+        outline="#FFFFFF",
+        width=width,
+    )
+    draw.line([0.08 * c, 0.4 * c, 0.92 * c, 0.4 * c], fill="#FFFFFF", width=width)
+    draw.line([0.32 * c, 0.06 * c, 0.32 * c, 0.24 * c], fill="#FFFFFF", width=width)
+    draw.line([0.68 * c, 0.06 * c, 0.68 * c, 0.24 * c], fill="#FFFFFF", width=width)
+    image = image.resize((size, size), Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=image, dark_image=image, size=(size, size))
+
+
+def _make_logo(size: int = 38) -> ctk.CTkImage | None:
+    if not LOGO_ASSET_PATH.exists():
+        return None
+    image = Image.open(LOGO_ASSET_PATH).convert("RGBA")
+    image = image.resize((size, size), Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=image, dark_image=image, size=(size, size))
+
+
+def _truncate_for_width(text: str, font: tkfont.Font, max_width: int) -> str:
+    if max_width <= 0 or font.measure(text) <= max_width:
+        return text
+    ellipsis = "..."
+    while text and font.measure(text + ellipsis) > max_width:
+        text = text[:-1]
+    return text + ellipsis if text else ellipsis
+
+
+class HoverTip:
+    """Small tooltip used on the step rail."""
+
+    _active_window: ctk.CTkToplevel | None = None
+    _active_after_id: str | None = None
+    _active_widget = None
+
+    def __init__(
+        self, widget, text: str, *, wraplength: int = 340, delay_ms: int = 350
+    ) -> None:
+        self.widget = widget
+        self.text = text
+        self.wraplength = wraplength
+        self.delay_ms = delay_ms
+        widget.bind("<Enter>", self.show, add="+")
+        widget.bind("<Leave>", self.hide, add="+")
+        widget.bind("<Destroy>", self.hide, add="+")
+
+    def show(self, _event=None) -> None:
+        self.hide()
+        if not self.text:
+            return
+        try:
+            HoverTip._active_after_id = self.widget.after(self.delay_ms, self._show_now)
+            HoverTip._active_widget = self.widget
+        except TclError:
+            HoverTip._active_after_id = None
+
+    def _show_now(self) -> None:
+        HoverTip._active_after_id = None
+        try:
+            if not self.widget.winfo_exists():
+                return
+        except TclError:
+            return
+        x = self.widget.winfo_rootx() + 24
+        y = self.widget.winfo_rooty() + 24
+        window = ctk.CTkToplevel(self.widget)
+        window.wm_overrideredirect(True)
+        window.wm_geometry(f"+{x}+{y}")
+        HoverTip._active_window = window
+        frame = ctk.CTkFrame(window, fg_color=INK, corner_radius=10)
+        frame.pack()
+        ctk.CTkLabel(
+            frame,
+            text=self.text,
+            text_color=PAPER,
+            font=(UI_FONT, 12),
+            wraplength=self.wraplength,
+            justify="left",
+        ).pack(padx=14, pady=10)
+
+    def hide(self, _event=None) -> None:
+        HoverTip.dismiss_active()
+
+    @classmethod
+    def dismiss_active(cls) -> None:
+        if cls._active_after_id is not None and cls._active_widget is not None:
+            try:
+                cls._active_widget.after_cancel(cls._active_after_id)
+            except TclError:
+                pass
+        cls._active_after_id = None
+        cls._active_widget = None
+        window = cls._active_window
+        cls._active_window = None
+        if window is not None:
+            try:
+                if window.winfo_exists():
+                    window.destroy()
+            except TclError:
+                pass
+
+
+class DatePopup(ctk.CTkToplevel):
+    """Floating calendar. Calls on_pick(date) on a pick, on_clear() on Clear."""
+
+    def __init__(self, master, anchor_widget, initial: date | None, on_pick, on_clear) -> None:
+        super().__init__(master)
+        self._on_pick = on_pick
+        self._on_clear = on_clear
+        self._selected = initial or date.today()
+        self._calendar = None
+        self.title("Pick a date")
+        self.configure(fg_color=CANVAS)
+        self.resizable(False, False)
+        self.transient(master.winfo_toplevel())
+        self._build_widgets()
+        self.update_idletasks()
+        self._place_near(anchor_widget)
+        self.after(50, self._lift_and_grab)
+        self.bind("<Escape>", lambda _e: self._close())
+        self.protocol("WM_DELETE_WINDOW", self._close)
+
+    def _build_widgets(self) -> None:
+        outer = ctk.CTkFrame(self, fg_color=PAPER, corner_radius=14)
+        outer.pack(padx=12, pady=12, fill="both", expand=True)
+        self._calendar = Calendar(
+            outer,
+            year=self._selected.year,
+            month=self._selected.month,
+            day=self._selected.day,
+            firstweekday="monday",
+            showweeknumbers=False,
+            showothermonthdays=False,
+            date_pattern="mm-dd-yyyy",
+            selectmode="day",
+            font=(UI_FONT, 11),
+            background=PLUM,
+            foreground=PAPER,
+            bordercolor=PLUM_SOFT,
+            headersbackground=PAPER,
+            headersforeground=MUTED,
+            normalbackground=PAPER,
+            normalforeground=INK,
+            weekendbackground=PAPER,
+            weekendforeground=INK,
+            othermonthbackground=PAPER,
+            othermonthforeground=MUTED,
+            othermonthwebackground=PAPER,
+            othermonthweforeground=MUTED,
+            selectbackground=PLUM,
+            selectforeground=PAPER,
+        )
+        self._calendar.pack(padx=12, pady=(12, 8), fill="both", expand=True)
+        self._calendar.bind(
+            "<<CalendarSelected>>",
+            lambda _e: self._do_pick(self._calendar.selection_get() or self._selected),
+        )
+        footer = ctk.CTkFrame(outer, fg_color="transparent")
+        footer.pack(fill="x", padx=12, pady=(4, 12))
+        footer.grid_columnconfigure(1, weight=1)
+        ctk.CTkButton(
+            footer,
+            text="Today",
+            width=82,
+            height=30,
+            corner_radius=15,
+            fg_color=MOSS,
+            text_color=PAPER,
+            hover_color=PLUM,
+            command=lambda: self._do_pick(date.today()),
+        ).grid(row=0, column=0, sticky="w")
+        ctk.CTkButton(
+            footer,
+            text="Clear",
+            width=82,
+            height=30,
+            corner_radius=15,
+            fg_color=PLUM_SOFT,
+            text_color=PLUM,
+            hover_color=PLUM,
+            command=self._do_clear,
+        ).grid(row=0, column=2, sticky="e", padx=(8, 0))
+
+    def _do_pick(self, picked: date) -> None:
+        try:
+            self._on_pick(picked)
+        finally:
+            self._close()
+
+    def _do_clear(self) -> None:
+        try:
+            self._on_clear()
+        finally:
+            self._close()
+
+    def _close(self) -> None:
+        try:
+            self.grab_release()
+        except TclError:
+            pass
+        self.destroy()
+
+    def _place_near(self, anchor_widget) -> None:
+        try:
+            ax = anchor_widget.winfo_rootx()
+            ay = anchor_widget.winfo_rooty()
+            ah = anchor_widget.winfo_height()
+        except TclError:
+            return
+        self.update_idletasks()
+        win_w, win_h = self.winfo_reqwidth(), self.winfo_reqheight()
+        screen_w, screen_h = self.winfo_screenwidth(), self.winfo_screenheight()
+        x, y = ax, ay + ah + 4
+        if x + win_w > screen_w - 8:
+            x = max(8, screen_w - win_w - 8)
+        if y + win_h > screen_h - 8:
+            y = max(8, ay - win_h - 4)
+        self.geometry(f"+{x}+{y}")
+
+    def _lift_and_grab(self) -> None:
+        try:
+            self.lift()
+            self.focus_force()
+            self.grab_set()
+        except TclError:
+            pass
 
 
 # ---------------------------------------------------------------------------
@@ -115,88 +598,133 @@ def _field_id(key: str, field_key: str) -> str:
 
 
 class DiagnosticsWorkbenchUI(ctk.CTk):
+    _S2_ACCENT_MIN = 3
+    _S2_CHECK_MIN = 26
+    _S2_NAME_MIN = 330
+    _S2_STATUS_MIN = 140
+    _S2_LINK_MIN = 58
+    _S2_GAP = 14
+    _S2_ROW_HEIGHT = 52
+    _S2_MISSING_EXTRA = 36
+    _S3_MODULE_MIN = 350
+    _S3_OUTPUTS_MIN = 116
+    _S3_STATUS_MIN = 118
+    _S3_GAP = 14
+    _S3_ROW_HEIGHT = 54
+    _DATE_PARSE_FORMATS = (
+        "%m-%d-%Y %H:%M:%S",
+        "%m-%d-%Y %H:%M",
+        "%m-%d-%Y",
+        "%m/%d/%Y %H:%M:%S",
+        "%m/%d/%Y %H:%M",
+        "%m/%d/%Y",
+        "%Y-%m-%d %H:%M:%S",
+        "%Y-%m-%d %H:%M",
+        "%Y-%m-%d",
+    )
+
     def __init__(self) -> None:
         super().__init__()
         self.title(APP_TITLE)
-        self.geometry("1200x840")
-        self.minsize(980, 700)
+        default_height = min(1080, max(900, self.winfo_screenheight() - 40))
+        self.geometry(f"1400x{default_height}")
+        self.minsize(1180, 780)
         self.configure(fg_color=CANVAS)
 
-        # ---- state ------------------------------------------------------
-        self.run_name_var = ctk.StringVar(value="")
-        self.output_folder_var = ctk.StringVar(value=_display_path(DEFAULT_WORK_DIR))
+        self.step = 1
         self.data_root_var = ctk.StringVar(value="")
-        self.scan_status_var = ctk.StringVar(value="")
-        self.module_vars: dict[str, ctk.BooleanVar] = {
-            mod.key: ctk.BooleanVar(value=self._module_available(mod)) for mod in MODULES
+        self.output_folder_var = ctk.StringVar(value=_display_path(DEFAULT_WORK_DIR))
+        self.run_name_var = ctk.StringVar(value="")
+        self.scan_confirmation_var = ctk.StringVar(value="")
+        self.scan_missing_var = ctk.StringVar(value="")
+
+        self.module_vars = {mod.key: ctk.BooleanVar(value=False) for mod in MODULES}
+        # A browsed or typed path per browsable field. Present means manual.
+        self.module_input_override_vars = {
+            (mod.key, field.key): ctk.StringVar()
+            for mod in MODULES
+            for field in mod.inputs_schema
+            if field.kind in BROWSABLE_INPUT_KINDS
         }
-        self.field_vars: dict[tuple[str, str], ctk.StringVar] = {}
-        self.bool_vars: dict[tuple[str, str], ctk.BooleanVar] = {}
-        for mod in MODULES:
-            for field in mod.inputs_schema:
-                if field.kind == "bool":
-                    self.bool_vars[(mod.key, field.key)] = ctk.BooleanVar(value=False)
-                else:
-                    default = "" if field.default in (None, 0) else str(field.default)
-                    self.field_vars[(mod.key, field.key)] = ctk.StringVar(value=default)
-        # Inputs the user browsed or typed. The engine never replaces these.
-        self._manual_fields: set[tuple[str, str]] = set()
-        self._programmatic = 0
+        self.date_field_vars = {
+            (mod.key, field.key): ctk.StringVar()
+            for mod in MODULES
+            for field in mod.inputs_schema
+            if field.kind == "datetime_optional"
+        }
+        self.perfmon_processors_var = ctk.StringVar(value="")
+        self.perfmon_disks_var = ctk.StringVar(value="")
+        self.perfmon_memory_var = ctk.StringVar(value="")
+        self.perfmon_vm_var = ctk.BooleanVar(value=False)
+        self.perfmon2_processors_var = ctk.StringVar(value="")
+        self.perfmon2_disks_var = ctk.StringVar(value="")
+        self.perfmon2_memory_var = ctk.StringVar(value="")
+        self.perfmon2_vm_var = ctk.BooleanVar(value=False)
+
         self._discovered: dict[str, Path | None] = {}
-        self._pill_labels: dict[str, ctk.CTkLabel] = {}
-        # Validation highlighting: one registry for every pane, each entry
-        # remembers the border it returns to when the highlight clears.
+        self._optional_input_cache: dict[tuple[str, str], Path | None] = {}
+        self._scan_thread: threading.Thread | None = None
+        self._scan_token = 0
+        self._last_scan_root = ""
+        self._opened_module_keys: set[str] = set()
+        self._reviewed_module_keys: set[str] = set()
+        self._expanded_module_key: str | None = None
+        self._module_card_controls: dict[str, dict[str, object]] = {}
+        self._group_count_label: ctk.CTkLabel | None = None
+        self._perfmon_detect_tokens = {"perfmon": 0, "perfmon2": 0}
         self._field_widgets: dict[str, ctk.CTkEntry] = {}
         self._field_rest_borders: dict[str, str] = {}
+        self._ui_queue: queue.Queue = queue.Queue()
 
         self._process: subprocess.Popen | None = None
-        self._log_queue: queue.Queue[str | None] = queue.Queue()
-        # Worker threads never touch Tk. They post callables here and the main
-        # thread runs them from _drain_ui_queue.
-        self._ui_queue: queue.Queue = queue.Queue()
-        self._running = False
+        self._log_queue: queue.Queue[str] = queue.Queue()
+        self._log_chunks: list[str] = []
+        self._log_viewers: list[ctk.CTkTextbox] = []
+        self._build_running = False
         self._cancel_requested = False
         self._run_folder: Path | None = None
         self._run_log_path: Path | None = None
-        self._module_total = 0
-        self._perfmon_detect_token = 0
+        self._progress_order: list[str] = []
+        self._progress_completed: set[str] = set()
+        self._progress_current: str | None = None
+        self._module_run_started: dict[str, float] = {}
+        self._canvas_status_pills: dict[str, dict] = {}
+        self._build_started_at: float | None = None
+        self._elapsed_timer_id: str | None = None
+        self._nav_row_states: dict[int, str] = {}
 
-        for (key, field_key), var in self.field_vars.items():
-            var.trace_add(
-                "write",
-                lambda *_a, k=key, f=field_key: self._on_field_edited(k, f),
-            )
+        for (key, _field_key), var in self.module_input_override_vars.items():
+            var.trace_add("write", lambda *_a, k=key: self._on_manual_input_changed(k))
         self.output_folder_var.trace_add(
             "write", lambda *_a: self._clear_field_highlight("output_folder")
         )
-        self.data_root_var.trace_add(
-            "write", lambda *_a: self._clear_field_highlight("data_root")
-        )
+        self.data_root_var.trace_add("write", lambda *_a: self._on_data_root_changed())
+        self.run_name_var.trace_add("write", lambda *_a: self._update_rail_context())
+        for var, fid in (
+            (self.perfmon_processors_var, "perfmon:logical_processors"),
+            (self.perfmon_disks_var, "perfmon:physical_disks"),
+            (self.perfmon_memory_var, "perfmon:physical_memory_gb"),
+            (self.perfmon2_processors_var, "perfmon:capture2_logical_processors"),
+            (self.perfmon2_disks_var, "perfmon:capture2_physical_disks"),
+            (self.perfmon2_memory_var, "perfmon:capture2_physical_memory_gb"),
+        ):
+            var.trace_add("write", lambda *_a, f=fid: self._on_perfmon_value_changed(f))
+        for (key, field_key), var in self.date_field_vars.items():
+            var.trace_add(
+                "write",
+                lambda *_a, f=_field_id(key, field_key): self._clear_field_highlight(f),
+            )
 
-        # ---- layout -----------------------------------------------------
-        self.grid_columnconfigure(0, weight=1)
-        self.grid_rowconfigure(1, weight=1)
-        self._build_header()
-        self.content = ctk.CTkFrame(self, fg_color="transparent")
-        self.content.grid(row=1, column=0, sticky="nsew", padx=24, pady=(0, 20))
-        self.content.grid_columnconfigure(0, weight=1)
-        self.content.grid_rowconfigure(0, weight=1)
-        self.pane_inputs = self._build_inputs_pane(self.content)
-        self.pane_run = self._build_run_pane(self.content)
-        self._show_pane("inputs")
+        self._build_shell()
+        self._show_step(1)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.after(100, self._drain_ui_queue)
 
     # ------------------------------------------------------------------
-    # Static helpers
+    # Threads hand work back through a queue the main thread drains.
     # ------------------------------------------------------------------
 
-    @staticmethod
-    def _module_available(mod: Module) -> bool:
-        return not (mod.windows_only and sys.platform != "win32")
-
     def _post(self, callback) -> None:
-        """Hand a callable from a worker thread to the main thread."""
         self._ui_queue.put(callback)
 
     def _drain_ui_queue(self) -> None:
@@ -214,421 +742,413 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         except TclError:
             pass
 
-    def _set_var(self, var, value) -> None:
-        """Programmatic write that does not count as a manual edit."""
-        self._programmatic += 1
+    # ------------------------------------------------------------------
+    # Shell: brand bar, step rail, hero, content, action bar, footer
+    # ------------------------------------------------------------------
+
+    def _build_shell(self) -> None:
+        self.grid_columnconfigure(0, weight=1)
+        self.grid_rowconfigure(2, weight=1)
+        self._build_brand_bar()
+        self._build_step_rail()
+
+        self.main = ctk.CTkFrame(self, fg_color="transparent")
+        self.main.grid(row=2, column=0, sticky="nsew", padx=30, pady=(28, 0))
+        self.main.grid_columnconfigure(0, weight=1)
+        self.main.grid_rowconfigure(1, weight=1)
+        self.hero = ctk.CTkFrame(self.main, fg_color="transparent")
+        self.hero.grid(row=0, column=0, sticky="ew", pady=(0, 6))
+        self.hero.grid_columnconfigure(0, weight=1)
+        self.title_label = ctk.CTkLabel(
+            self.hero, text="", text_color=INK, font=(UI_FONT, 32, "bold")
+        )
+        self.title_label.grid(row=0, column=0, sticky="w")
+        self.content = ctk.CTkFrame(self.main, fg_color="transparent")
+        self.content.grid(row=1, column=0, sticky="nsew")
+        self.content.grid_columnconfigure(0, weight=1)
+        self.content.grid_rowconfigure(0, weight=1)
+
+        self.nav = ctk.CTkFrame(self, fg_color=PAPER, corner_radius=0)
+        self.nav.grid(row=3, column=0, sticky="ew")
+        ctk.CTkFrame(self.nav, height=1, fg_color=HAIRLINE, corner_radius=0).place(
+            relx=0.0, rely=0.0, relwidth=1.0, anchor="nw"
+        )
+        self.nav.grid_columnconfigure(2, weight=1)
+        self.reset_button = self._action_secondary_button(
+            self.nav, "Start over", self._confirm_start_over
+        )
+        self.reset_button.grid(row=0, column=0, padx=(30, 0), pady=16)
+        self.back_button = self._action_secondary_button(self.nav, "Back", self._back)
+        self.back_button.grid(row=0, column=1, padx=(16, 0), pady=16)
+        self.next_button = self._action_primary_button(self.nav, "Next", self._next)
+        self.next_button.grid(row=0, column=3, padx=(16, 30), pady=16)
+        self.close_button = self._action_primary_button(self.nav, "Close", self._on_close)
+        self.close_button.grid(row=0, column=4, padx=(0, 30), pady=16)
+        self._build_footer_rail()
+
+    def _condensed_font_family(self) -> str:
         try:
-            var.set(value)
-        finally:
-            self._programmatic -= 1
+            if CONDENSED_FONT_FILE.is_file() and IS_WINDOWS:
+                ctypes.windll.gdi32.AddFontResourceExW(str(CONDENSED_FONT_FILE), 0x10, 0)
+            if "Roboto Condensed" in tkfont.families(self):
+                return "Roboto Condensed"
+        except Exception:
+            pass
+        return UI_FONT
 
-    def _on_field_edited(self, key: str, field_key: str) -> None:
-        self._clear_field_highlight(_field_id(key, field_key))
-        if self._programmatic:
-            return
-        value = self.field_vars[(key, field_key)].get().strip()
-        if value:
-            self._manual_fields.add((key, field_key))
-        else:
-            self._manual_fields.discard((key, field_key))
-        mod = MODULE_BY_KEY[key]
-        if field_key == mod.file_key:
-            self._refresh_pill(key)
-
-    # ------------------------------------------------------------------
-    # Header
-    # ------------------------------------------------------------------
-
-    def _build_header(self) -> None:
-        bar = ctk.CTkFrame(self, fg_color=INK, corner_radius=0, height=76)
+    def _build_brand_bar(self) -> None:
+        bar = ctk.CTkFrame(self, fg_color=BRAND_NAVY, corner_radius=0)
         bar.grid(row=0, column=0, sticky="ew")
-        bar.grid_columnconfigure(0, weight=1)
+        bar.grid_columnconfigure(2, weight=1)
+        self.logo_image = _make_logo(38)
+        if self.logo_image is not None:
+            ctk.CTkLabel(
+                bar, text="", image=self.logo_image, width=38, height=38, fg_color="transparent"
+            ).grid(row=0, column=0, padx=(30, 18), pady=16)
+        self._condensed_family = self._condensed_font_family()
+        stack = ctk.CTkFrame(bar, fg_color="transparent")
+        stack.grid(
+            row=0, column=1, sticky="w", pady=16, padx=(0 if self.logo_image else 30, 0)
+        )
         ctk.CTkLabel(
-            bar,
-            text=APP_TITLE,
-            text_color=PAPER,
-            font=(UI_FONT, 22, "bold"),
+            stack,
+            text="BIGFIX PLATFORM",
+            text_color=BRAND_EYEBROW,
+            font=(UI_FONT, 11, "bold"),
             anchor="w",
-        ).grid(row=0, column=0, sticky="w", padx=24, pady=(16, 0))
+            height=13,
+        ).grid(row=0, column=0, sticky="w")
         ctk.CTkLabel(
-            bar,
-            text="Automated performance and configuration analysis for BigFix",
-            text_color="#B8C4D6",
+            stack,
+            text="MASTER CLASS DIAGNOSTICS WORKBENCH",
+            text_color="#FFFFFF",
+            font=(self._condensed_family, 24, "bold"),
+            anchor="w",
+            height=27,
+        ).grid(row=1, column=0, sticky="w", pady=(4, 0))
+        ctk.CTkLabel(
+            stack,
+            text="Automated performance and configuration analysis.",
+            text_color=BRAND_EYEBROW,
             font=(UI_FONT, 13),
             anchor="w",
-        ).grid(row=1, column=0, sticky="w", padx=24, pady=(0, 14))
-        self.pane_label = ctk.CTkLabel(
-            bar, text="1  Inputs", text_color="#B8C4D6", font=(UI_FONT, 14, "bold")
-        )
-        self.pane_label.grid(row=0, column=1, rowspan=2, sticky="e", padx=24)
-
-    def _show_pane(self, name: str) -> None:
-        if name == "inputs":
-            self.pane_run.grid_remove()
-            self.pane_inputs.grid(row=0, column=0, sticky="nsew")
-            self.pane_label.configure(text="1  Inputs")
-        else:
-            self.pane_inputs.grid_remove()
-            self.pane_run.grid(row=0, column=0, sticky="nsew")
-            self.pane_label.configure(text="2  Run")
-
-    # ------------------------------------------------------------------
-    # Pane 1: inputs
-    # ------------------------------------------------------------------
-
-    def _card(self, parent, title: str, subtitle: str = "") -> ctk.CTkFrame:
-        card = ctk.CTkFrame(
-            parent, fg_color=PAPER, corner_radius=10, border_width=1, border_color=HAIRLINE
-        )
-        card.grid_columnconfigure(0, weight=1)
+            height=15,
+        ).grid(row=2, column=0, sticky="w", pady=(8, 0))
+        right = ctk.CTkFrame(bar, fg_color="transparent")
+        right.grid(row=0, column=3, sticky="e", padx=(0, 30))
         ctk.CTkLabel(
-            card, text=title, text_color=INK, font=(UI_FONT, 16, "bold"), anchor="w"
-        ).grid(row=0, column=0, sticky="w", padx=18, pady=(14, 0))
-        if subtitle:
-            ctk.CTkLabel(
-                card,
-                text=subtitle,
-                text_color=MUTED,
-                font=(UI_FONT, 12),
-                anchor="w",
-                justify="left",
-                wraplength=980,
-            ).grid(row=1, column=0, sticky="w", padx=18, pady=(2, 0))
-        return card
+            right, text=f"v{APP_VERSION}", text_color="#FFFFFF", font=(UI_FONT, 13)
+        ).grid(row=0, column=0)
 
-    def _entry(self, parent, var, field_id: str, placeholder: str = "") -> ctk.CTkEntry:
-        entry = ctk.CTkEntry(
+    def _build_step_rail(self) -> None:
+        holder = ctk.CTkFrame(self, fg_color=RAIL, corner_radius=0)
+        holder.grid(row=1, column=0, sticky="ew")
+        holder.grid_columnconfigure(0, weight=1)
+        rail = ctk.CTkFrame(holder, fg_color="transparent")
+        rail.grid(row=0, column=0, sticky="ew", padx=30)
+        rail.grid_columnconfigure(1, weight=1)
+        items = ctk.CTkFrame(rail, fg_color="transparent")
+        items.grid(row=0, column=0, sticky="w")
+        self.step_badges: list[ctk.CTkButton] = []
+        self.step_labels: list[ctk.CTkLabel] = []
+        self._step_indicators: list[ctk.CTkFrame] = []
+        for idx, label_text in enumerate(RAIL_LABELS, start=1):
+            item = ctk.CTkFrame(items, fg_color="transparent")
+            item.grid(row=0, column=idx - 1, sticky="ns")
+            item.grid_columnconfigure(0, weight=1)
+            inner = ctk.CTkFrame(item, fg_color="transparent")
+            inner.grid(row=0, column=0, padx=(0 if idx == 1 else 28, 28), pady=(18, 14))
+            badge = ctk.CTkButton(
+                inner,
+                text=str(idx),
+                width=30,
+                height=30,
+                corner_radius=15,
+                border_width=2,
+                border_color=FIELD_BORDER,
+                fg_color="transparent",
+                hover=False,
+                text_color=INK,
+                font=(UI_FONT, 13, "bold"),
+                command=lambda n=idx: self._on_nav_click(n),
+            )
+            badge.grid(row=0, column=0)
+            label = ctk.CTkLabel(
+                inner, text=label_text, text_color=INK, font=(UI_FONT, 15), anchor="w"
+            )
+            label.grid(row=0, column=1, padx=(12, 0))
+            indicator = ctk.CTkFrame(item, fg_color="transparent", height=4, corner_radius=0)
+            indicator.grid(row=1, column=0, sticky="ew")
+            for widget in (item, inner, label):
+                widget.bind("<Button-1>", lambda _e, n=idx: self._on_nav_click(n))
+                try:
+                    widget.configure(cursor="hand2")
+                except Exception:
+                    pass
+            self.step_badges.append(badge)
+            self.step_labels.append(label)
+            self._step_indicators.append(indicator)
+        # width/height 1: an empty CTkFrame otherwise requests its default
+        # 200 px and inflates the rail on step 1, where the run label is hidden.
+        right = ctk.CTkFrame(rail, fg_color="transparent", width=1, height=1)
+        right.grid(row=0, column=2, sticky="e")
+        self._rail_run_divider = ctk.CTkFrame(
+            right, width=1, height=18, fg_color=FIELD_BORDER, corner_radius=0
+        )
+        self._rail_run_divider.grid(row=0, column=0, padx=10)
+        self._rail_run_label = ctk.CTkLabel(
+            right, text="", text_color=INK, font=(UI_FONT, 14, "bold")
+        )
+        self._rail_run_label.grid(row=0, column=1)
+        ctk.CTkFrame(holder, height=1, fg_color=FIELD_BORDER, corner_radius=0).grid(
+            row=1, column=0, sticky="ew"
+        )
+        self._update_rail_context()
+
+    def _update_rail_context(self) -> None:
+        run_name = self.run_name_var.get().strip()
+        if run_name and self.step != 1:
+            self._rail_run_divider.grid()
+            self._rail_run_label.configure(text=run_name)
+            self._rail_run_label.grid()
+        else:
+            self._rail_run_divider.grid_remove()
+            self._rail_run_label.grid_remove()
+
+    def _build_footer_rail(self) -> None:
+        rail = ctk.CTkFrame(self, fg_color=FOOTER_RAIL, corner_radius=0)
+        rail.grid(row=4, column=0, sticky="ew")
+        ctk.CTkFrame(rail, height=1, fg_color=HAIRLINE, corner_radius=0).place(
+            relx=0.0, rely=0.0, relwidth=1.0, anchor="nw"
+        )
+        rail.grid_columnconfigure(1, weight=1)
+        ctk.CTkLabel(
+            rail,
+            text=f"{APP_TITLE}. Provided as-is for BigFix Master Class attendees.",
+            text_color=INK,
+            font=(UI_FONT, 12),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w", padx=(30, 0), pady=8)
+        self._footer_run_label = ctk.CTkLabel(
+            rail, text="", text_color=LINK_BLUE, font=(UI_FONT, 12), cursor="hand2"
+        )
+        self._footer_run_label.grid(row=0, column=2, sticky="e", padx=(16, 30), pady=8)
+        self._footer_run_label.bind("<Button-1>", lambda _e: self._open_output_folder())
+
+    def _action_secondary_button(self, parent, text: str, command):
+        button = ctk.CTkButton(
             parent,
-            textvariable=var,
-            placeholder_text=placeholder,
-            height=36,
+            text=text,
+            command=command,
+            height=44,
             corner_radius=8,
+            fg_color=PAPER,
+            hover_color="#F4F7FB",
             border_width=1,
             border_color=FIELD_BORDER,
-            fg_color=PAPER,
             text_color=INK,
-            font=(UI_FONT, 13),
+            font=(UI_FONT, 15, "bold"),
         )
-        self._field_widgets[field_id] = entry
-        self._field_rest_borders[field_id] = FIELD_BORDER
-        return entry
+        button.configure(width=self._action_button_width(text, 24))
+        return button
 
-    def _button(self, parent, text: str, command, primary: bool = False, **kw):
+    def _action_primary_button(self, parent, text: str, command):
+        button = ctk.CTkButton(
+            parent,
+            text=text,
+            command=command,
+            height=44,
+            corner_radius=8,
+            fg_color=PLUM,
+            hover_color="#0a48a8",
+            text_color="#FFFFFF",
+            font=(UI_FONT, 15, "bold"),
+        )
+        button.configure(width=self._action_button_width(text, 36))
+        return button
+
+    @staticmethod
+    def _action_button_width(text: str, side_padding: int) -> int:
+        font = tkfont.Font(family=UI_FONT, size=15, weight="bold")
+        return font.measure(text) + 2 * side_padding
+
+    def _pill_button(self, parent, text: str, command, fg: str, text_color: str = PAPER):
+        hover = {PLUM: "#0B4FC0", PAPER: "#EEF3F8", FOG: "#CAD8E8", CLAY: "#9A330A"}.get(
+            fg, fg
+        )
         return ctk.CTkButton(
             parent,
             text=text,
             command=command,
-            height=36,
+            height=42,
             corner_radius=8,
-            fg_color=PLUM if primary else PAPER,
-            hover_color="#0B4FB8" if primary else PANEL,
-            text_color=PAPER if primary else INK,
-            border_width=0 if primary else 1,
-            border_color=FIELD_BORDER,
-            font=(UI_FONT, 13, "bold" if primary else "normal"),
-            **kw,
+            fg_color=fg,
+            hover_color=hover,
+            text_color=text_color,
+            font=(UI_FONT, 13, "bold"),
         )
 
-    def _build_inputs_pane(self, parent) -> ctk.CTkFrame:
-        pane = ctk.CTkScrollableFrame(parent, fg_color="transparent")
-        pane.grid_columnconfigure(0, weight=1)
+    def _step2_pill_button(
+        self, parent, text: str, command, fg: str, text_color: str = PAPER
+    ):
+        button = self._pill_button(parent, text, command, fg, text_color)
+        button.configure(height=44, corner_radius=8, font=(UI_FONT, 15, "bold"))
+        return button
 
-        # Run card
-        run = self._card(
-            pane,
-            "Run",
-            "Name the run, choose where the outputs go, and optionally point at a "
-            "data folder to fill the module inputs automatically.",
+    def _secondary_toolbar_button(self, parent, text: str, command):
+        button = self._pill_button(parent, text, command, fg=PAPER, text_color=INK)
+        button.configure(
+            height=34,
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+            hover_color="#F4F7FB",
+            font=(UI_FONT, 13, "bold"),
         )
-        run.grid(row=0, column=0, sticky="ew", pady=(0, 14))
-        grid = ctk.CTkFrame(run, fg_color="transparent")
-        grid.grid(row=2, column=0, sticky="ew", padx=18, pady=(10, 16))
-        grid.grid_columnconfigure(1, weight=1)
-        rows = [
-            ("Run name (optional)", self.run_name_var, "run_name", None, "Lab 1"),
-            ("Output folder", self.output_folder_var, "output_folder", "folder", ""),
-            ("Data folder (optional)", self.data_root_var, "data_root", "folder", ""),
-        ]
-        for row, (label, var, fid, browse, placeholder) in enumerate(rows):
-            ctk.CTkLabel(grid, text=label, text_color=INK, font=(UI_FONT, 13), anchor="w").grid(
-                row=row, column=0, sticky="w", padx=(0, 12), pady=4
-            )
-            self._entry(grid, var, fid, placeholder).grid(
-                row=row, column=1, sticky="ew", pady=4
-            )
-            if browse:
-                self._button(
-                    grid, "Browse", lambda v=var: self._browse_folder(v), width=90
-                ).grid(row=row, column=2, sticky="e", padx=(8, 0), pady=4)
-        self._button(grid, "Scan data folder", self._scan_data_root, width=150).grid(
-            row=2, column=3, sticky="e", padx=(8, 0), pady=4
-        )
-        ctk.CTkLabel(
-            grid, textvariable=self.scan_status_var, text_color=MUTED, font=(UI_FONT, 12), anchor="w"
-        ).grid(row=3, column=1, columnspan=3, sticky="w", pady=(2, 0))
+        return button
 
-        # Module cards
-        for index, mod in enumerate(MODULES, start=1):
-            self._build_module_card(pane, mod).grid(row=index, column=0, sticky="ew", pady=(0, 14))
+    # ------------------------------------------------------------------
+    # Navigation
+    # ------------------------------------------------------------------
 
-        # Actions
-        actions = ctk.CTkFrame(pane, fg_color="transparent")
-        actions.grid(row=len(MODULES) + 1, column=0, sticky="ew", pady=(4, 12))
-        actions.grid_columnconfigure(0, weight=1)
-        self._button(actions, "Reset", self._reset, width=110).grid(row=0, column=0, sticky="w")
-        self._button(actions, "Run analysis", self._start_run, primary=True, width=180).grid(
-            row=0, column=1, sticky="e"
-        )
-        return pane
-
-    def _build_module_card(self, parent, mod: Module) -> ctk.CTkFrame:
-        card = ctk.CTkFrame(
-            parent, fg_color=PAPER, corner_radius=10, border_width=1, border_color=HAIRLINE
-        )
-        card.grid_columnconfigure(1, weight=1)
-        available = self._module_available(mod)
-        check = ctk.CTkCheckBox(
-            card,
-            text=mod.label,
-            variable=self.module_vars[mod.key],
-            command=lambda k=mod.key: self._refresh_pill(k),
-            text_color=INK,
-            font=(UI_FONT, 16, "bold"),
-            fg_color=PLUM,
-            hover_color="#0B4FB8",
-            state="normal" if available else "disabled",
-        )
-        check.grid(row=0, column=0, sticky="w", padx=18, pady=(14, 0))
-        ctk.CTkLabel(
-            card, text=f"Outputs: {mod.outputs}", text_color=MUTED, font=(UI_FONT, 12), anchor="w"
-        ).grid(row=0, column=1, sticky="w", padx=(6, 0), pady=(14, 0))
-        pill = ctk.CTkLabel(
-            card,
-            text="",
-            font=(UI_FONT, 12, "bold"),
-            corner_radius=12,
-            width=110,
-            height=26,
-        )
-        pill.grid(row=0, column=2, sticky="e", padx=18, pady=(14, 0))
-        self._pill_labels[mod.key] = pill
-
-        body = ctk.CTkFrame(card, fg_color="transparent")
-        body.grid(row=1, column=0, columnspan=3, sticky="ew", padx=18, pady=(8, 6))
-        body.grid_columnconfigure(1, weight=1)
-        for row, field in enumerate(mod.inputs_schema):
-            self._build_field_row(body, mod, field, row)
-
-        if mod.note:
-            ctk.CTkLabel(
-                card,
-                text=mod.note,
-                text_color=MUTED,
-                font=(UI_FONT, 12),
-                anchor="w",
-                justify="left",
-                wraplength=1040,
-            ).grid(row=2, column=0, columnspan=3, sticky="w", padx=18, pady=(0, 14))
+    def _show_step(self, step: int) -> None:
+        HoverTip.dismiss_active()
+        self.step = step
+        self.title_label.configure(text=STEP_TITLES[step])
+        self._update_rail_context()
+        self._clear_content()
+        if step == 1:
+            self._build_step1()
+        elif step == 2:
+            self._build_step2()
         else:
-            ctk.CTkFrame(card, fg_color="transparent", height=8).grid(row=2, column=0)
-        self._refresh_pill(mod.key)
-        return card
+            self._build_step3()
+        self._set_nav_state(step)
+        self._sync_nav()
 
-    def _build_field_row(self, body, mod: Module, field: InputField, row: int) -> None:
-        required = field.kind in {"file", "int_detected"} or (
-            mod.key == "perfmon" and field.key == "physical_memory_gb"
+    def _clear_content(self) -> None:
+        self._field_widgets.clear()
+        self._field_rest_borders.clear()
+        self._module_card_controls.clear()
+        self._canvas_status_pills.clear()
+        self._group_count_label = None
+        HoverTip.dismiss_active()
+        for child in self.content.winfo_children():
+            child.destroy()
+
+    def _set_nav_state(self, step: int) -> None:
+        rows = zip(self.step_badges, self.step_labels, self._step_indicators)
+        for idx, (badge, label, indicator) in enumerate(rows, start=1):
+            state = "active" if idx == step else "idle"
+            if self._nav_row_states.get(idx) == state:
+                continue
+            self._nav_row_states[idx] = state
+            if state == "active":
+                badge.configure(fg_color=PLUM, border_width=0, text_color="#FFFFFF")
+                label.configure(text_color=INK, font=(UI_FONT, 15, "bold"))
+                indicator.configure(fg_color=PLUM)
+            else:
+                badge.configure(fg_color="transparent", border_width=2, text_color=INK)
+                label.configure(text_color=INK, font=(UI_FONT, 15))
+                indicator.configure(fg_color="transparent")
+
+    def _sync_nav(self) -> None:
+        locked = self._build_running
+        self.reset_button.configure(state="disabled" if locked else "normal")
+        self.back_button.configure(
+            state="disabled" if locked or self.step == 1 else "normal"
         )
-        label = field.label + (" *" if required else "")
-        ctk.CTkLabel(body, text=label, text_color=INK, font=(UI_FONT, 13), anchor="w").grid(
-            row=row, column=0, sticky="w", padx=(0, 12), pady=3
-        )
-        if field.kind == "bool":
-            ctk.CTkCheckBox(
-                body,
-                text="",
-                variable=self.bool_vars[(mod.key, field.key)],
-                fg_color=PLUM,
-                hover_color="#0B4FB8",
-                width=24,
-            ).grid(row=row, column=1, sticky="w", pady=3)
-            return
-        placeholder = ""
-        if field.kind == "datetime_optional":
-            placeholder = "MM-DD-YYYY HH:MM (optional)"
-        elif field.kind in {"int", "int_detected"}:
-            placeholder = "whole number"
-        elif field.kind in {"file_optional", "folder_optional"}:
-            placeholder = "optional"
-        entry = self._entry(
-            body, self.field_vars[(mod.key, field.key)], _field_id(mod.key, field.key), placeholder
-        )
-        entry.grid(row=row, column=1, sticky="ew", pady=3)
-        if field.kind in BROWSABLE_KINDS:
-            self._button(
-                body,
-                "Browse",
-                lambda m=mod, f=field: self._browse_field(m, f),
-                width=90,
-            ).grid(row=row, column=2, sticky="e", padx=(8, 0), pady=3)
-
-    # ------------------------------------------------------------------
-    # Pills and discovery
-    # ------------------------------------------------------------------
-
-    def _primary_path(self, key: str) -> Path | None:
-        mod = MODULE_BY_KEY[key]
-        if mod.file_key is None:
-            return None
-        text = self.field_vars[(key, mod.file_key)].get().strip()
-        return Path(text) if text else None
-
-    def _module_status(self, key: str) -> str:
-        mod = MODULE_BY_KEY[key]
-        if not self._module_available(mod):
-            return "Windows only"
-        if not self.module_vars[key].get():
-            return "Not selected"
-        path = self._primary_path(key)
-        if path is None or not path.is_file():
-            return "Missing"
-        return "Chosen" if (key, mod.file_key) in self._manual_fields else "Found"
-
-    def _refresh_pill(self, key: str) -> None:
-        pill = self._pill_labels.get(key)
-        if pill is None:
-            return
-        status = self._module_status(key)
-        fg, bg = PILL_STYLES[status]
-        try:
-            pill.configure(text=status, text_color=fg, fg_color=bg)
-        except TclError:
-            pass
-
-    def _browse_folder(self, var) -> None:
-        current = var.get().strip()
-        path = filedialog.askdirectory(
-            title="Choose a folder", initialdir=current if Path(current).is_dir() else None
-        )
-        if path:
-            var.set(_display_path(path))
-
-    def _browse_field(self, mod: Module, field: InputField) -> None:
-        var = self.field_vars[(mod.key, field.key)]
-        current = var.get().strip()
-        initial = str(Path(current).parent) if current else self.data_root_var.get().strip() or None
-        if field.kind == "folder_optional":
-            path = filedialog.askdirectory(title=f"Choose the {field.label}", initialdir=initial)
+        if self.step == 1:
+            self.back_button.grid_remove()
         else:
-            patterns = " ".join(f"*{ext}" for ext in sorted(field.extensions or {"*"}))
-            path = filedialog.askopenfilename(
-                title=f"Choose the {field.label}",
-                filetypes=[(field.label, patterns), ("All files", "*.*")],
-                initialdir=initial,
-            )
-        if not path:
+            self.back_button.grid()
+        if self.step == 3:
+            self.next_button.grid_remove()
+            self.close_button.grid()
+            self.close_button.configure(state="disabled" if locked else "normal")
+        else:
+            self.close_button.grid_remove()
+            self.next_button.grid()
+            self.next_button.configure(state="normal")
+
+    def _on_nav_click(self, n: int) -> None:
+        if not self._build_running:
+            self._go_step(n)
+
+    def _go_step(self, step: int) -> None:
+        if step == self.step:
             return
-        var.set(_display_path(path))  # counts as a manual edit through the trace
-        self.module_vars[mod.key].set(True)
-        self._after_primary_input_set(mod, field)
+        if step > self.step:
+            errors: list[str] = []
+            bad_fields: set[str] = set()
+            if step >= 2 and self.step <= 1:
+                step1_errors, step1_bad = self._validate_step1()
+                errors.extend(step1_errors)
+                bad_fields |= step1_bad
+                if not errors and not self._discovered and self.data_root_var.get().strip():
+                    self._scan_inputs()
+            if step == 3 and self.step <= 2:
+                errors.extend(self._validate_step2(bad_fields))
+            if errors:
+                self._reveal_step2_fields(bad_fields)
+                self._apply_field_highlights(bad_fields)
+                self._show_errors("Check Inputs", errors)
+                return
+        self._show_step(step)
 
-    def _after_primary_input_set(self, mod: Module, field: InputField) -> None:
-        if field.key != mod.file_key:
-            return
-        self._refresh_pill(mod.key)
-        if mod.key == "loop":
-            self._fill_loop_ancillaries()
-        if mod.key == "perfmon" and field.key == "blg_path":
-            self._start_perfmon_detection(self._primary_path("perfmon"))
-        if mod.key == "perfmon" and field.key == "capture2_blg_path":
-            self._start_perfmon_detection(self._primary_path("perfmon"))
+    def _next(self) -> None:
+        self._go_step(self.step + 1)
 
-    def _scan_data_root(self) -> None:
-        root_text = self.data_root_var.get().strip()
-        root = Path(root_text) if root_text else None
-        if root is None or not root.is_dir():
-            self._apply_field_highlights({"data_root"})
-            messagebox.showerror("Check folders", "- Data folder must be an existing folder.")
-            return
-        self.scan_status_var.set("Scanning...")
+    def _back(self) -> None:
+        if self.step > 1:
+            self._show_step(self.step - 1)
 
-        def worker() -> None:
-            found = scan_input_folder(root)
-            self._post(lambda: self._apply_scan(root, found))
+    def _show_errors(self, title: str, errors: list[str]) -> None:
+        messagebox.showerror(title, "\n".join(f"- {err}" for err in errors))
 
-        threading.Thread(target=worker, daemon=True).start()
+    def _confirm_start_over(self) -> None:
+        if messagebox.askyesno(
+            "Start over?", "Clear every step and begin a new run? This cannot be undone."
+        ):
+            self._reset_form()
 
-    def _apply_scan(self, root: Path, found: dict[str, Path | None]) -> None:
-        self._discovered = found
-        filled = []
-        for mod in MODULES:
-            path = found.get(mod.key)
-            if path is None or mod.file_key is None:
-                continue
-            if (mod.key, mod.file_key) in self._manual_fields:
-                continue
-            self._set_var(self.field_vars[(mod.key, mod.file_key)], _display_path(path))
-            filled.append(mod.label)
-            self._refresh_pill(mod.key)
-        self._fill_loop_ancillaries(root)
-        if self._primary_path("perfmon") is not None:
-            self._start_perfmon_detection(self._primary_path("perfmon"))
-        self.scan_status_var.set(
-            "Scan found: " + ", ".join(filled) if filled else "Scan found no module inputs."
-        )
-
-    def _fill_loop_ancillaries(self, root: Path | None = None) -> None:
-        if root is None:
-            root_text = self.data_root_var.get().strip()
-            root = Path(root_text) if root_text and Path(root_text).is_dir() else None
-        loop_input = self._primary_path("loop")
-        try:
-            ancillary = discover_loop_ancillary_inputs(root, loop_input)
-        except Exception:
-            return
-        for field_key, path in ancillary.items():
-            if ("loop", field_key) in self._manual_fields:
-                continue
-            self._set_var(self.field_vars[("loop", field_key)], _display_path(path) if path else "")
-
-    def _start_perfmon_detection(self, blg: Path | None) -> None:
-        if blg is None or not blg.is_file() or sys.platform != "win32":
-            return
-        self._perfmon_detect_token += 1
-        token = self._perfmon_detect_token
-        for field_key in ("logical_processors", "physical_disks"):
-            if ("perfmon", field_key) not in self._manual_fields:
-                self._set_var(self.field_vars[("perfmon", field_key)], DETECTING)
-
-        def worker() -> None:
-            try:
-                lines = relog_query_lines(blg)
-                procs, disks, _volumes = detect_hardware_from_blg(blg, lines)
-                begin, end = detect_perfmon_window(lines)
-            except Exception:
-                procs, disks, begin, end = 0, 0, "", ""
-            self._post(lambda: self._apply_perfmon_detection(token, procs, disks, begin, end))
-
-        threading.Thread(target=worker, daemon=True).start()
-
-    def _apply_perfmon_detection(self, token: int, procs: int, disks: int, begin: str, end: str) -> None:
-        if token != self._perfmon_detect_token:
-            return
-        values = {
-            "logical_processors": str(procs) if procs > 0 else "",
-            "physical_disks": str(disks) if disks > 0 else "",
-            "collection_start": begin,
-            "collection_end": end,
-        }
-        for field_key, value in values.items():
-            if ("perfmon", field_key) in self._manual_fields:
-                continue
-            var = self.field_vars[("perfmon", field_key)]
-            if field_key.startswith("collection") and var.get().strip():
-                continue
-            self._set_var(var, value)
+    def _reset_form(self) -> None:
+        self._scan_token += 1
+        self.data_root_var.set("")
+        self.output_folder_var.set(_display_path(DEFAULT_WORK_DIR))
+        self.run_name_var.set("")
+        self.scan_confirmation_var.set("")
+        self.scan_missing_var.set("")
+        for var in self.module_vars.values():
+            var.set(False)
+        for var in self.module_input_override_vars.values():
+            var.set("")
+        for var in self.date_field_vars.values():
+            var.set("")
+        for var in (
+            self.perfmon_processors_var,
+            self.perfmon_disks_var,
+            self.perfmon_memory_var,
+            self.perfmon2_processors_var,
+            self.perfmon2_disks_var,
+            self.perfmon2_memory_var,
+        ):
+            var.set("")
+        self.perfmon_vm_var.set(False)
+        self.perfmon2_vm_var.set(False)
+        self._discovered = {}
+        self._optional_input_cache = {}
+        self._opened_module_keys.clear()
+        self._reviewed_module_keys.clear()
+        self._expanded_module_key = None
+        self._run_folder = None
+        self._run_log_path = None
+        self._log_chunks.clear()
+        self._footer_run_label.configure(text="")
+        self._show_step(1)
 
     # ------------------------------------------------------------------
-    # Validation and highlighting
+    # Field highlighting (one registry for every step)
     # ------------------------------------------------------------------
 
     def _apply_field_highlights(self, field_ids) -> None:
@@ -647,21 +1167,1752 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return
         try:
             widget.configure(
-                border_width=1, border_color=self._field_rest_borders.get(field_id, FIELD_BORDER)
+                border_width=1,
+                border_color=self._field_rest_borders.get(field_id, FIELD_BORDER),
             )
         except TclError:
             self._field_widgets.pop(field_id, None)
+
+    def _register_field(self, field_id: str, entry, rest_border: str = FIELD_BORDER) -> None:
+        self._field_widgets[field_id] = entry
+        self._field_rest_borders[field_id] = rest_border
+
+    def _reveal_step2_fields(self, field_ids) -> None:
+        if self.step != 2:
+            return
+        for field_id in sorted(field_ids):
+            key = field_id.split(":", 1)[0]
+            if key not in MODULE_BY_KEY:
+                continue
+            if self._expanded_module_key != key:
+                self._expand_module_row(key)
+            self._scroll_to_module_row(key)
+            return
+
+    def _scroll_to_module_row(self, key: str) -> None:
+        """Bring a module row (and its open expansion) to the top of the list."""
+        controls = self._module_card_controls.get(key)
+        scroll = getattr(self, "module_scroll", None)
+        if not controls or scroll is None:
+            return
+        canvas = controls.get("canvas")
+        outer = getattr(scroll, "_parent_canvas", None)
+        try:
+            if canvas is None or outer is None or not canvas.winfo_exists():
+                return
+            self.update_idletasks()
+            inner_height = max(1, scroll.winfo_height())
+            row_top = canvas.winfo_rooty() - scroll.winfo_rooty() + outer.canvasy(0)
+            outer.yview_moveto(max(0.0, (row_top - 8) / inner_height))
+        except TclError:
+            pass
+
+    # ------------------------------------------------------------------
+    # Shared form pieces
+    # ------------------------------------------------------------------
+
+    def _add_form_section(self, parent, title: str):
+        card = ctk.CTkFrame(
+            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+        )
+        card.pack(fill="x", padx=(0, 4), pady=(0, 14))
+        header = ctk.CTkFrame(card, fg_color=CARD_HEADER, corner_radius=10)
+        header.pack(fill="x", padx=2, pady=(2, 0))
+        ctk.CTkLabel(
+            header, text=title, text_color=INK, font=(self._condensed_family, 14, "bold")
+        ).pack(side="left", padx=18, pady=11)
+        ctk.CTkFrame(card, fg_color=HAIRLINE, height=1).pack(fill="x", padx=2)
+        return card
+
+    def _add_form_row(self, card, label: str, hint: str, *, first: bool = False):
+        if not first:
+            ctk.CTkFrame(card, fg_color=HAIRLINE, height=1).pack(fill="x", padx=14)
+        row = ctk.CTkFrame(card, fg_color="transparent")
+        row.pack(fill="x")
+        row.grid_columnconfigure(0, minsize=210)
+        row.grid_columnconfigure(1, weight=1)
+        left = ctk.CTkFrame(row, fg_color="transparent")
+        left.grid(row=0, column=0, rowspan=2, sticky="nw", padx=(14, 4), pady=12)
+        ctk.CTkLabel(
+            left, text=label, text_color=INK, font=(UI_FONT, 15, "bold"), anchor="w"
+        ).pack(anchor="w")
+        if hint:
+            ctk.CTkLabel(
+                left,
+                text=hint,
+                text_color=INK,
+                font=(UI_FONT, 14),
+                wraplength=192,
+                justify="left",
+                anchor="w",
+            ).pack(anchor="w", pady=(2, 0))
+        return row
+
+    def _form_entry(self, parent, var, field_id: str | None = None):
+        entry = ctk.CTkEntry(
+            parent,
+            textvariable=var,
+            height=40,
+            corner_radius=8,
+            border_width=1,
+            border_color=FIELD_BORDER,
+            fg_color=PAPER,
+            text_color=INK,
+            font=(UI_FONT, 14),
+        )
+        if field_id is not None:
+            self._register_field(field_id, entry)
+        return entry
+
+    def _form_browse_button(self, parent, text: str, command):
+        button = self._pill_button(parent, text, command, fg=PAPER, text_color=INK)
+        button.configure(
+            height=40,
+            width=96,
+            corner_radius=8,
+            border_width=1,
+            border_color=FIELD_BORDER,
+            hover_color="#F4F7FB",
+            font=(UI_FONT, 15, "bold"),
+        )
+        return button
+
+    def _keep_tail_view(self, entry, var) -> None:
+        def move_tail(*_a) -> None:
+            try:
+                if entry.winfo_exists() and entry.focus_get() is not entry:
+                    entry.after(_LAYOUT_DEBOUNCE_MS, lambda: entry.xview_moveto(1.0))
+            except TclError:
+                pass
+
+        var.trace_add("write", move_tail)
+        move_tail()
+
+    def _path_entry(self, parent, text: str, placeholder: str = "No input selected yet."):
+        entry = ctk.CTkEntry(
+            parent,
+            height=34,
+            corner_radius=8,
+            border_width=1,
+            border_color=FIELD_BORDER,
+            fg_color=PAPER,
+            text_color=INK,
+            placeholder_text=placeholder,
+            font=(UI_FONT, 14),
+        )
+        if text:
+            entry.insert(0, _display_path(text))
+            entry.after(
+                _LAYOUT_DEBOUNCE_MS,
+                lambda: entry.xview_moveto(1.0) if entry.winfo_exists() else None,
+            )
+        entry.configure(state="readonly")
+        return entry
+
+    def _wire_scrollable_inner_width(self, scrollable) -> None:
+        canvas = getattr(scrollable, "_parent_canvas", None)
+        frame_id = getattr(scrollable, "_create_window_id", None) or getattr(
+            scrollable, "_scrollable_frame_id", None
+        )
+        if canvas is None or frame_id is None:
+            return
+
+        def _sync(event):
+            try:
+                canvas.itemconfigure(frame_id, anchor="nw", width=event.width)
+                canvas.coords(frame_id, 0, 0)
+            except TclError:
+                pass
+
+        canvas.bind("<Configure>", _sync, add="+")
+
+    def _scrollable(self, parent):
+        scroll = ctk.CTkScrollableFrame(
+            parent,
+            fg_color="transparent",
+            corner_radius=0,
+            scrollbar_button_color=PLUM,
+            scrollbar_button_hover_color="#0B4FC0",
+        )
+        scroll.grid_columnconfigure(0, weight=1)
+        self._wire_scrollable_inner_width(scroll)
+        return scroll
+
+    # ------------------------------------------------------------------
+    # Step 1: folders and run details
+    # ------------------------------------------------------------------
+
+    def _build_step1(self) -> None:
+        frame = ctk.CTkFrame(self.content, fg_color="transparent")
+        frame.grid(row=0, column=0, sticky="nsew")
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_rowconfigure(0, weight=1)
+        form = self._scrollable(frame)
+        form.grid(row=0, column=0, sticky="nsew")
+
+        folders = self._add_form_section(form, "Folders")
+        data_row = self._add_form_row(
+            folders,
+            "Data Folder",
+            "The folder with the collected data. Optional: leave it blank to pick "
+            "each module's input on step 2.",
+            first=True,
+        )
+        data_entry = self._form_entry(data_row, self.data_root_var, "data_root")
+        data_entry.grid(row=0, column=1, sticky="ew", padx=(0, 8), pady=(14, 6))
+        self._keep_tail_view(data_entry, self.data_root_var)
+        self._form_browse_button(data_row, "Browse", self._browse_data_root).grid(
+            row=0, column=2, sticky="e", padx=(0, 14), pady=(14, 6)
+        )
+        self._scan_confirmation_label = ctk.CTkLabel(
+            data_row,
+            textvariable=self.scan_confirmation_var,
+            text_color=MOSS,
+            font=(UI_FONT, 14, "bold"),
+            anchor="w",
+        )
+        self._scan_confirmation_label.grid(row=1, column=1, sticky="w", pady=0)
+        missing_holder = ctk.CTkFrame(data_row, fg_color="transparent")
+        missing_holder.grid(row=2, column=1, sticky="ew", pady=(2, 14))
+        ctk.CTkLabel(
+            missing_holder,
+            text="Not Found:",
+            text_color=OCHRE,
+            font=(UI_FONT, 14, "bold"),
+            height=20,
+        ).pack(side="left", anchor="n")
+        ctk.CTkLabel(
+            missing_holder,
+            textvariable=self.scan_missing_var,
+            text_color=INK,
+            font=(UI_FONT, 14),
+            wraplength=640,
+            justify="left",
+            height=20,
+        ).pack(side="left", anchor="n", padx=(5, 0))
+        self._scan_missing_label = missing_holder
+        self._sync_scan_confirmation_visibility()
+
+        output_row = self._add_form_row(
+            folders, "Output Folder", "A timestamped run folder is created here."
+        )
+        output_entry = self._form_entry(output_row, self.output_folder_var, "output_folder")
+        output_entry.grid(row=0, column=1, sticky="ew", padx=(0, 8), pady=14)
+        self._keep_tail_view(output_entry, self.output_folder_var)
+        self._form_browse_button(output_row, "Browse", self._browse_output_folder).grid(
+            row=0, column=2, sticky="e", padx=(0, 14), pady=14
+        )
+
+        run_details = self._add_form_section(form, "Run Details")
+        name_row = self._add_form_row(
+            run_details,
+            "Run Name",
+            "Optional. Names the run folder and the output files.",
+            first=True,
+        )
+        name_entry = self._form_entry(name_row, self.run_name_var, "run_name")
+        name_entry.configure(width=320)
+        name_entry.grid(row=0, column=1, sticky="w", pady=14)
+
+        self._auto_scan_if_ready()
+
+    def _sync_scan_confirmation_visibility(self) -> None:
+        pairs = (
+            (getattr(self, "_scan_confirmation_label", None), self.scan_confirmation_var),
+            (getattr(self, "_scan_missing_label", None), self.scan_missing_var),
+        )
+        for label, var in pairs:
+            if label is None:
+                continue
+            try:
+                if not label.winfo_exists():
+                    continue
+                if var.get():
+                    label.grid()
+                else:
+                    label.grid_remove()
+            except TclError:
+                pass
+
+    def _browse_data_root(self) -> None:
+        current = self.data_root_var.get().strip()
+        path = filedialog.askdirectory(
+            title="Choose the data folder",
+            initialdir=current if current and Path(current).is_dir() else None,
+        )
+        if path:
+            self.data_root_var.set(_display_path(path))
+            self._scan_inputs()
+
+    def _browse_output_folder(self) -> None:
+        current = self.output_folder_var.get().strip()
+        path = filedialog.askdirectory(
+            title="Choose the output folder",
+            initialdir=current if current and Path(current).is_dir() else None,
+        )
+        if path:
+            self.output_folder_var.set(_display_path(path))
+
+    def _on_data_root_changed(self) -> None:
+        self._clear_field_highlight("data_root")
+        if _display_path(self.data_root_var.get()) != self._last_scan_root:
+            self._discovered = {}
+            self._optional_input_cache = {}
+            self.scan_confirmation_var.set("")
+            self.scan_missing_var.set("")
+            self._sync_scan_confirmation_visibility()
+
+    def _auto_scan_if_ready(self) -> None:
+        raw = self.data_root_var.get().strip()
+        if raw and Path(raw).is_dir() and _display_path(raw) != self._last_scan_root:
+            self._scan_inputs()
+
+    # ------------------------------------------------------------------
+    # Scanning and status
+    # ------------------------------------------------------------------
+
+    def _scan_inputs(self) -> None:
+        raw = self.data_root_var.get().strip()
+        root = Path(raw) if raw else None
+        if root is None or not root.is_dir():
+            return
+        self._scan_token += 1
+        token = self._scan_token
+        self.scan_confirmation_var.set("Scanning...")
+        self.scan_missing_var.set("")
+        self._sync_scan_confirmation_visibility()
+
+        def worker() -> None:
+            try:
+                found = scan_input_folder(root)
+                ancillary = discover_loop_ancillary_inputs(root, found.get("loop"))
+                self._post(lambda: self._scan_inputs_complete(root, found, ancillary, token))
+            except Exception as exc:
+                self._post(lambda e=exc: self._scan_inputs_failed(e, token))
+
+        self._scan_thread = threading.Thread(target=worker, daemon=True)
+        self._scan_thread.start()
+        if self.step == 2:
+            self._refresh_module_card_views(tuple(self.module_vars))
+
+    def _scan_inputs_complete(self, root: Path, found: dict, ancillary: dict, token: int) -> None:
+        if token != self._scan_token:
+            return
+        self._scan_thread = None
+        self._discovered = dict(found)
+        self._optional_input_cache = {("loop", key): path for key, path in ancillary.items()}
+        self._last_scan_root = _display_path(root)
+        self._update_scan_confirmation()
+        if not any(var.get() for var in self.module_vars.values()):
+            self._select_all_available()
+        if self.step == 2:
+            self._refresh_module_card_views(tuple(self.module_vars))
+        self._start_perfmon_detection(auto=True)
+
+    def _scan_inputs_failed(self, exc: Exception, token: int) -> None:
+        if token != self._scan_token:
+            return
+        self._scan_thread = None
+        self.scan_confirmation_var.set("")
+        self.scan_missing_var.set(f"Scan failed: {exc}")
+        self._sync_scan_confirmation_visibility()
+
+    def _update_scan_confirmation(self) -> None:
+        statuses = {mod.key: self._data_folder_scan_status(mod)[0] for mod in MODULES}
+        found = sum(1 for status in statuses.values() if status == "Found")
+        missing = sorted(
+            (self._module_display_name(k) for k, s in statuses.items() if s == "Missing"),
+            key=str.casefold,
+        )
+        self.scan_confirmation_var.set(f"Data found for {found} of {len(MODULES)} modules.")
+        self.scan_missing_var.set(
+            f"{', '.join(missing)}. Choose files for these on step 2." if missing else ""
+        )
+        self._sync_scan_confirmation_visibility()
+
+    def _data_folder_scan_status(self, mod: Module) -> tuple[str, str]:
+        raw = self.data_root_var.get().strip()
+        if not raw or not Path(raw).is_dir():
+            return "Not scanned", "Select a data folder."
+        path = self._discovered.get(mod.key)
+        if path is not None:
+            return "Found", f"Found: {_display_path(path)}"
+        clue = MISSING_INPUT_CLUES.get(mod.key, "input")
+        return "Missing", f"No {clue} found under {_display_path(raw)}."
+
+    def _module_display_name(self, key: str) -> str:
+        return MODULE_BY_KEY[key].label
+
+    def _module_available(self, key: str) -> bool:
+        mod = MODULE_BY_KEY.get(key)
+        return mod is not None and not (mod.windows_only and not IS_WINDOWS)
+
+    def _primary_field(self, mod: Module) -> InputField | None:
+        return next((f for f in mod.inputs_schema if f.key == mod.file_key), None)
+
+    def _browsable_input_fields(self, mod: Module) -> list[InputField]:
+        if mod.key == "perfmon":
+            return []
+        return [f for f in mod.inputs_schema if f.kind in BROWSABLE_INPUT_KINDS]
+
+    def _manual_field_input_path(self, key: str, field_key: str | None) -> Path | None:
+        if field_key is None:
+            return None
+        var = self.module_input_override_vars.get((key, field_key))
+        raw = var.get().strip() if var is not None else ""
+        return Path(raw) if raw else None
+
+    def _manual_input_path(self, key: str) -> Path | None:
+        return self._manual_field_input_path(key, MODULE_BY_KEY[key].file_key)
+
+    def _resolved_input_for_field(self, mod: Module, field: InputField) -> Path | None:
+        manual = self._manual_field_input_path(mod.key, field.key)
+        if manual is not None:
+            return manual
+        if field.key == mod.file_key:
+            discovered = self._discovered.get(mod.key)
+            return Path(discovered) if discovered else None
+        if mod.key == "loop":
+            root_text = self.data_root_var.get().strip()
+            root = Path(root_text) if root_text and Path(root_text).is_dir() else None
+            primary = self._resolved_input_for_field(mod, self._primary_field(mod))
+            try:
+                detected = discover_loop_ancillary_inputs(root, primary).get(field.key)
+            except Exception:
+                detected = None
+            return Path(detected) if detected else None
+        return None
+
+    def _validate_field_input(
+        self, mod: Module, field: InputField, path: Path
+    ) -> tuple[bool, str]:
+        if field.kind in {"folder", "folder_optional"}:
+            if not path.exists():
+                return False, "folder does not exist"
+            if not path.is_dir():
+                return False, "path is not a folder"
+            return True, ""
+        if not path.exists():
+            return False, "file does not exist"
+        if not path.is_file():
+            return False, "path is not a file"
+        if field.extensions and path.suffix.lower() not in {
+            ext.lower() for ext in field.extensions
+        }:
+            return False, f"expected one of: {', '.join(sorted(field.extensions))}"
+        if mod.key == "loop" and field.key == mod.file_key:
+            validation = validate_loop_workbook(path)
+            if not validation.ok:
+                return False, validation.reason
+        return True, ""
+
+    def _input_field_state(self, mod: Module, field: InputField) -> tuple[str, str]:
+        path = self._resolved_input_for_field(mod, field)
+        required = field.kind in {"file", "folder"}
+        if path is None:
+            return ("Needed" if required else "Optional", "Not selected")
+        valid, reason = self._validate_field_input(mod, field, path)
+        if not valid:
+            return "Needed", f"Invalid: {reason}"
+        return "Found", _display_path(path)
+
+    def _input_state_color(self, state: str) -> str:
+        return {"Found": MOSS, "Optional": MUTED}.get(state, CLAY)
+
+    def _missing_required_input_labels(self, key: str) -> list[str]:
+        mod = MODULE_BY_KEY[key]
+        primary = self._primary_field(mod)
+        missing: list[str] = []
+        for field in [primary] if primary is not None else []:
+            path = self._resolved_input_for_field(mod, field)
+            if path is None:
+                missing.append(field.label)
+                continue
+            valid, reason = self._validate_field_input(mod, field, path)
+            if not valid:
+                missing.append(f"{field.label} ({reason})")
+        return missing
+
+    def _missing_input_message(self, key: str) -> str:
+        labels = self._missing_required_input_labels(key)
+        if not labels:
+            return f"Needs the {MISSING_INPUT_CLUES.get(key, 'module input')}."
+        if len(labels) == 1:
+            return f"Needs the {labels[0]}."
+        return f"Needs the {', '.join(labels[:-1])}, and {labels[-1]}."
+
+    def _scan_status(self, mod: Module) -> tuple[str, str]:
+        manual = self._manual_input_path(mod.key)
+        if manual is not None:
+            primary = self._primary_field(mod)
+            if primary is None:
+                return "Missing", "This module has no primary input."
+            valid, reason = self._validate_field_input(mod, primary, manual)
+            if valid:
+                return "Found", f"Found: {_display_path(manual)}"
+            return "Missing", f"Manual selection problem: {reason}"
+        thread = self._scan_thread
+        if thread is not None and thread.is_alive():
+            return "Scanning", "Input scan is running; status will update shortly."
+        raw = self.data_root_var.get().strip()
+        if not raw or not Path(raw).is_dir():
+            return "Not scanned", "Select a data folder or choose this module's input manually."
+        path = self._discovered.get(mod.key)
+        if path is not None:
+            return "Found", f"Found: {_display_path(path)}"
+        return "Missing", self._missing_input_message(mod.key)
+
+    def _module_selection_status(self, key: str) -> tuple[str, str]:
+        return self._scan_status(MODULE_BY_KEY[key])
+
+    def _module_selected_for_step2(self, key: str) -> bool:
+        return bool(self.module_vars[key].get() and self._module_available(key))
+
+    def _module_row_status(self, key: str) -> tuple[str, str]:
+        status, detail = self._module_selection_status(key)
+        if not self._module_selected_for_step2(key):
+            return status, detail
+        if status != "Not scanned":
+            return status, detail
+        if self._missing_required_input_labels(key):
+            return "Missing", self._missing_input_message(key)
+        return "Found", "Needs review."
+
+    def _module_has_reviewable_inputs(self, key: str) -> bool:
+        return self._module_available(key)
+
+    def _module_review_inputs_complete(self, key: str) -> bool:
+        if self._module_row_status(key)[0] in {"Missing", "Not scanned", "Scanning"}:
+            return False
+        if key == "perfmon":
+            return all(
+                self._positive_int_or_blank(var.get())
+                for var in (
+                    self.perfmon_processors_var,
+                    self.perfmon_disks_var,
+                    self.perfmon_memory_var,
+                )
+            )
+        return True
+
+    def _module_reviewed(self, key: str) -> bool:
+        return key in self._reviewed_module_keys and self._module_review_inputs_complete(key)
+
+    def _module_pill(self, key: str, status: str) -> tuple[str, str, str]:
+        label = STATUS_PILL_TEXT.get(status, status)
+        fg, bg = S2_PILL_STYLES.get(status, S2_PILL_NEUTRAL)
+        if status in {"Missing", "Scanning", "Not scanned"}:
+            return label, fg, bg
+        if not self._module_selected_for_step2(key):
+            return label, fg, bg
+        if status == "Found" and self._module_has_reviewable_inputs(key):
+            if self._module_reviewed(key):
+                return "Reviewed", "#1a7f4e", "#e7f4ec"
+            return NEEDS_REVIEW_PILL, *S2_PILL_STYLES[NEEDS_REVIEW_PILL]
+        return label, fg, bg
+
+    def _modules_awaiting_review(self, keys) -> list[str]:
+        pending = []
+        for key in keys:
+            status = self._module_row_status(key)[0]
+            if self._module_pill(key, status)[0] == NEEDS_REVIEW_PILL:
+                pending.append(key)
+        return pending
+
+    def _module_review_gate_message(self, key: str) -> str:
+        name = self._module_display_name(key)
+        if key not in self._opened_module_keys:
+            return f"{name}: open Details on step 2 and review the module inputs."
+        if key == "perfmon":
+            return f"{name}: complete the required hardware values in the step 2 details."
+        return f"{name}: complete the step 2 details."
+
+    def _mark_module_reviewed(self, key: str) -> None:
+        self._opened_module_keys.add(key)
+        self._reviewed_module_keys.add(key)
+
+    def _on_module_review_value_changed(self, key: str) -> None:
+        if key not in self._opened_module_keys and key not in self._reviewed_module_keys:
+            return
+        complete = self._module_review_inputs_complete(key)
+        if complete and key not in self._reviewed_module_keys:
+            self._reviewed_module_keys.add(key)
+            self._refresh_module_card_views([key])
+        elif not complete and key in self._reviewed_module_keys:
+            self._reviewed_module_keys.discard(key)
+            self._refresh_module_card_views([key])
+
+    def _positive_int_or_blank(self, value: str) -> str:
+        clean = str(value or "").strip()
+        return clean if clean.isdigit() and int(clean) > 0 else ""
 
     def _selected_keys(self) -> list[str]:
         return [
             mod.key
             for mod in MODULES
-            if self.module_vars[mod.key].get() and self._module_available(mod)
+            if self.module_vars[mod.key].get() and self._module_available(mod.key)
         ]
 
-    def _validate(self) -> tuple[list[str], set[str]]:
+    def _on_manual_input_changed(self, key: str) -> None:
+        for field in MODULE_BY_KEY[key].inputs_schema:
+            self._clear_field_highlight(_field_id(key, field.key))
+        if self.step == 2:
+            self._refresh_module_card_views([key])
+
+    # ------------------------------------------------------------------
+    # Step 2: modules
+    # ------------------------------------------------------------------
+
+    def _build_step2(self) -> None:
+        frame = ctk.CTkFrame(self.content, fg_color="transparent")
+        frame.grid(row=0, column=0, sticky="nsew")
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_rowconfigure(1, weight=1)
+
+        presets = ctk.CTkFrame(frame, fg_color="transparent")
+        presets.grid(row=0, column=0, sticky="ew", pady=(0, 16))
+        presets.grid_columnconfigure(3, weight=1)
+        ctk.CTkLabel(presets, text="Presets", text_color=INK, font=(UI_FONT, 13, "bold")).grid(
+            row=0, column=0, sticky="w", padx=(4, 14)
+        )
+        self._step2_pill_button(
+            presets, "All Available", self._select_all_available, fg=PLUM, text_color=PAPER
+        ).grid(row=0, column=1, sticky="w", padx=(0, 8))
+        clear_link = ctk.CTkLabel(
+            presets, text="Clear", text_color=INK, font=(UI_FONT, 15, "bold"), cursor="hand2"
+        )
+        clear_link.grid(row=0, column=2, sticky="w", padx=(6, 0))
+        clear_link.bind("<Button-1>", lambda _e: self._clear_modules())
+        ctk.CTkLabel(
+            presets,
+            text="Tip: Click Details for more information about a module.",
+            text_color=MUTED,
+            font=(UI_FONT, 13),
+            anchor="e",
+        ).grid(row=0, column=3, sticky="e", padx=(18, 4))
+
+        self.module_scroll = self._scrollable(frame)
+        self.module_scroll.grid(row=1, column=0, sticky="nsew")
+        self._render_module_cards()
+        self._start_perfmon_detection(auto=True)
+
+    def _select_all_available(self) -> None:
+        for key in self.module_vars:
+            self.module_vars[key].set(
+                self._module_available(key) and self._module_selection_status(key)[0] == "Found"
+            )
+        if self.step == 2:
+            self._refresh_module_card_views(tuple(self.module_vars))
+
+    def _clear_modules(self) -> None:
+        for var in self.module_vars.values():
+            var.set(False)
+        if self.step == 2:
+            self._refresh_module_card_views(tuple(self.module_vars))
+
+    def _render_module_cards(self) -> None:
+        target = self.module_scroll
+        self._module_card_controls.clear()
+        for child in target.winfo_children():
+            child.destroy()
+        self._add_module_section(target, "Analysis Modules", [mod.key for mod in MODULES])
+        expanded = self._expanded_module_key
+        if expanded is not None:
+            self._expanded_module_key = None
+            self._expand_module_row(expanded)
+        self._update_group_count()
+
+    def _add_module_section(self, parent, title: str, keys: list[str]):
+        card = ctk.CTkFrame(
+            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+        )
+        card.pack(fill="x", padx=(0, 4), pady=(0, 14))
+        header = ctk.CTkFrame(card, fg_color=CARD_HEADER, corner_radius=10)
+        header.pack(fill="x", padx=2, pady=(2, 0))
+        header.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            header,
+            text=title.upper(),
+            text_color=INK,
+            font=(self._condensed_family, 14, "bold"),
+        ).grid(row=0, column=0, sticky="w", padx=18, pady=11)
+        self._group_count_label = ctk.CTkLabel(
+            header, text="", text_color=INK, font=(UI_FONT, 14)
+        )
+        self._group_count_label.grid(row=0, column=1, sticky="e", padx=(0, 18))
+        ctk.CTkFrame(card, fg_color=HAIRLINE, height=1).pack(fill="x", padx=2)
+        gap = self._S2_GAP
+        head = self._step2_row_grid(card)
+        for col, columnspan, text, anchor, padx in [
+            (1, 1, "", "w", (15, 0)),
+            (2, 1, "MODULE", "w", (0, 0)),
+            (3, 1, "DESCRIPTION", "w", (0, gap)),
+            (4, 2, "STATUS", "center", (0, gap)),
+        ]:
+            ctk.CTkLabel(
+                head, text=text, text_color=INK, font=(UI_FONT, 13, "bold"), anchor=anchor
+            ).grid(row=0, column=col, columnspan=columnspan, sticky="ew", padx=padx, pady=9)
+        for key in keys:
+            self._add_module_row(card, key)
+        ctk.CTkFrame(card, fg_color="transparent", height=4).pack(fill="x")
+        return card
+
+    def _update_group_count(self) -> None:
+        label = self._group_count_label
+        if label is None:
+            return
+        selected = sum(1 for key in self.module_vars if self.module_vars[key].get())
+        total = len(MODULES)
+        text = (
+            f"All {total} modules selected"
+            if selected == total
+            else f"{selected} of {total} modules selected"
+        )
+        try:
+            if label.winfo_exists():
+                label.configure(text=text)
+        except TclError:
+            pass
+
+    def _step2_row_grid(self, parent):
+        gap = self._S2_GAP
+        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row.pack(fill="x", padx=(0, 18))
+        row.grid_columnconfigure(0, minsize=self._S2_ACCENT_MIN)
+        row.grid_columnconfigure(1, minsize=self._S2_CHECK_MIN + gap)
+        row.grid_columnconfigure(2, minsize=self._S2_NAME_MIN + gap)
+        row.grid_columnconfigure(3, weight=1)
+        row.grid_columnconfigure(4, minsize=self._S2_STATUS_MIN + gap)
+        row.grid_columnconfigure(5, minsize=self._S2_LINK_MIN + gap)
+        return row
+
+    def _step2_fonts(self) -> dict[str, tkfont.Font]:
+        fonts = self.__dict__.get("_s2_row_fonts")
+        if fonts is None:
+            fonts = {
+                "name": tkfont.Font(family=UI_FONT, size=-15, weight="bold"),
+                "desc": tkfont.Font(family=UI_FONT, size=-14),
+                "pill": tkfont.Font(family=UI_FONT, size=-13, weight="bold"),
+                "link": tkfont.Font(family=UI_FONT, size=-14, weight="bold"),
+            }
+            self.__dict__["_s2_row_fonts"] = fonts
+        return fonts
+
+    def _add_module_row(self, parent, key: str) -> None:
+        status, _detail = self._module_row_status(key)
+        available = self._module_available(key)
+        if not available:
+            self.module_vars[key].set(False)
+        fonts = self._step2_fonts()
+        gap = self._S2_GAP
+        row_h = self._S2_ROW_HEIGHT
+        mid = row_h // 2
+        missing = status == "Missing" and available
+        canvas = tk.Canvas(
+            parent,
+            height=row_h + (self._S2_MISSING_EXTRA if missing else 0),
+            bd=0,
+            highlightthickness=0,
+            bg=PAPER,
+        )
+        canvas.pack(fill="x")
+        controls: dict[str, object] = {"canvas": canvas, "status": status}
+        controls["rule"] = canvas.create_line(2, 0, 2000, 0, fill=ROW_RULE)
+        controls["accent"] = canvas.create_rectangle(
+            0, 0, self._S2_ACCENT_MIN, row_h, fill="", outline=""
+        )
+        check_x = self._S2_ACCENT_MIN + 15
+        check_y = mid - 9
+        controls["checkbox_box"] = canvas.create_rectangle(
+            check_x, check_y, check_x + 18, check_y + 18, width=1.5, tags=("checkbox_hit",)
+        )
+        controls["checkbox_check"] = canvas.create_line(
+            check_x + 4,
+            mid,
+            check_x + 8,
+            mid + 5,
+            check_x + 15,
+            mid - 6,
+            width=2.2,
+            capstyle="round",
+            joinstyle="round",
+            state="hidden",
+            tags=("checkbox_hit",),
+        )
+        self._paint_module_checkbox(controls, key)
+        name_x = self._S2_ACCENT_MIN + self._S2_CHECK_MIN + gap
+        display_name = self._module_display_name(key)
+        name_text = display_name if available else f"{display_name}  (Windows only)"
+        canvas.create_text(
+            name_x,
+            mid,
+            text=_truncate_for_width(name_text, fonts["name"], self._S2_NAME_MIN - 14),
+            font=fonts["name"],
+            fill=INK,
+            anchor="w",
+        )
+        desc_x = name_x + self._S2_NAME_MIN + gap
+        summary = MODULE_DETAILS.get(key, {}).get("summary", "")
+        controls["desc"] = canvas.create_text(
+            desc_x, mid, text=summary, font=fonts["desc"], fill=INK, anchor="w"
+        )
+        controls["desc_text"] = summary
+        pill_label, pill_fg, pill_bg = self._module_pill(key, status)
+        pill_w = fonts["pill"].measure(f"  {pill_label}  ")
+        controls["pill_w"] = pill_w
+        tags = ("review_pill_hit",) if pill_label == NEEDS_REVIEW_PILL else ()
+        controls["pill_bg"] = canvas.create_image(
+            0, mid, image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24), anchor="e", tags=tags
+        )
+        controls["pill_text"] = canvas.create_text(
+            0, mid, text=pill_label, font=fonts["pill"], fill=pill_fg, anchor="center", tags=tags
+        )
+        controls["link"] = canvas.create_text(
+            0, mid, text="Details", font=fonts["link"], fill=PLUM, anchor="e", tags=("link",)
+        )
+        controls["missing_item"] = canvas.create_text(
+            desc_x,
+            row_h + 14,
+            text=self._missing_input_message(key),
+            font=fonts["desc"],
+            fill=CLAY,
+            anchor="w",
+            state="normal" if missing else "hidden",
+        )
+        controls["expansion_wrapper"] = None
+        controls["expansion"] = None
+        controls["expansion_built"] = False
+
+        def _relayout(_event=None, c=canvas, controls=controls) -> None:
+            try:
+                width = c.winfo_width()
+                if width <= 1:
+                    return
+                right = width - 18
+                c.coords(controls["rule"], 2, 0, width - 2, 0)
+                c.coords(controls["accent"], 0, 0, self._S2_ACCENT_MIN, c.winfo_height())
+                c.coords(controls["link"], right, mid)
+                pill_right = right - self._S2_LINK_MIN - gap
+                c.coords(controls["pill_bg"], pill_right, mid)
+                c.coords(controls["pill_text"], pill_right - controls["pill_w"] / 2, mid)
+                status_start = pill_right - max(self._S2_STATUS_MIN, controls["pill_w"])
+                desc_max = status_start - gap - desc_x
+                c.itemconfigure(
+                    controls["desc"],
+                    text=_truncate_for_width(
+                        controls["desc_text"], fonts["desc"], max(40, desc_max)
+                    ),
+                )
+            except TclError:
+                pass
+
+        controls["relayout"] = _relayout
+        canvas.bind("<Configure>", lambda _e: _relayout(), add="+")
+
+        def _click(_event, k=key, c=canvas) -> None:
+            hit = c.find_withtag("current")
+            tags = c.gettags(hit[0]) if hit else ()
+            if "checkbox_hit" in tags:
+                if self._module_available(k):
+                    self.module_vars[k].set(not self.module_vars[k].get())
+                    self._on_module_selection_toggle(k)
+            elif "link" in tags or "review_pill_hit" in tags:
+                self._module_row_link_action(k)
+            else:
+                self._on_module_row_click(k)
+
+        canvas.bind("<Button-1>", _click)
+        for tag in ("checkbox_hit", "link", "review_pill_hit"):
+            canvas.tag_bind(tag, "<Enter>", lambda _e, c=canvas: c.configure(cursor="hand2"))
+            canvas.tag_bind(tag, "<Leave>", lambda _e, c=canvas: c.configure(cursor=""))
+        self._module_card_controls[key] = controls
+
+    def _paint_module_checkbox(self, controls: dict[str, object], key: str) -> None:
+        canvas = controls.get("canvas")
+        box = controls.get("checkbox_box")
+        check = controls.get("checkbox_check")
+        if canvas is None or box is None or check is None:
+            return
+        available = self._module_available(key)
+        selected = bool(self.module_vars[key].get()) and available
+        fill = PLUM if selected else PAPER
+        outline = PLUM if selected else FIELD_BORDER
+        if not available:
+            fill, outline = FOG, FIELD_BORDER
+        try:
+            if canvas.winfo_exists():
+                canvas.itemconfigure(box, fill=fill, outline=outline)
+                canvas.itemconfigure(check, fill=PAPER, state="normal" if selected else "hidden")
+        except TclError:
+            pass
+
+    def _on_module_selection_toggle(self, key: str) -> None:
+        self._refresh_module_card_views([key])
+        if (
+            self.module_vars[key].get()
+            and self._module_needs_step2_attention(key)
+            and self._expanded_module_key != key
+        ):
+            self._expand_module_row(key)
+
+    def _module_needs_step2_attention(self, key: str) -> bool:
+        if not self._module_selected_for_step2(key):
+            return False
+        status, _detail = self._module_row_status(key)
+        return status == "Missing" or self._module_pill(key, status)[0] == NEEDS_REVIEW_PILL
+
+    def _on_module_row_click(self, key: str) -> None:
+        if self._expanded_module_key == key:
+            self._collapse_module_row()
+        else:
+            self._expand_module_row(key)
+
+    def _module_row_link_action(self, key: str) -> None:
+        self._on_module_row_click(key)
+
+    def _set_module_row_link_text(self, key: str) -> None:
+        controls = self._module_card_controls.get(key)
+        if not controls:
+            return
+        try:
+            text = "Close" if self._expanded_module_key == key else "Details"
+            controls["canvas"].itemconfigure(controls["link"], text=text)
+        except TclError:
+            pass
+
+    def _collapse_module_row(self) -> None:
+        key = self._expanded_module_key
+        self._expanded_module_key = None
+        if key is None:
+            return
+        controls = self._module_card_controls.get(key)
+        if controls:
+            try:
+                wrapper = controls.get("expansion_wrapper")
+                if wrapper is not None and wrapper.winfo_exists():
+                    wrapper.pack_forget()
+                canvas = controls.get("canvas")
+                if canvas is not None and canvas.winfo_exists():
+                    canvas.configure(bg=PAPER)
+                    canvas.itemconfigure(controls["accent"], fill="", outline="")
+            except TclError:
+                pass
+        self._set_module_row_link_text(key)
+
+    def _expand_module_row(self, key: str) -> None:
+        previous = self._expanded_module_key
+        if previous is not None and previous != key:
+            self._collapse_module_row()
+        controls = self._module_card_controls.get(key)
+        if not controls:
+            return
+        canvas = controls.get("canvas")
+        try:
+            if canvas is None or not canvas.winfo_exists():
+                return
+            wrapper = controls.get("expansion_wrapper")
+            if wrapper is None or not wrapper.winfo_exists():
+                wrapper = ctk.CTkFrame(canvas.master, fg_color=EXPANSION_TINT, corner_radius=0)
+                wrapper.grid_columnconfigure(1, weight=1)
+                ctk.CTkFrame(
+                    wrapper, fg_color=PLUM, width=self._S2_ACCENT_MIN, height=1, corner_radius=0
+                ).grid(row=0, column=0, sticky="ns")
+                expansion = ctk.CTkFrame(wrapper, fg_color="transparent", height=1)
+                expansion.grid(
+                    row=0,
+                    column=1,
+                    sticky="ew",
+                    padx=(40 - self._S2_ACCENT_MIN, 18),
+                    pady=(0, 14),
+                )
+                controls["expansion_wrapper"] = wrapper
+                controls["expansion"] = expansion
+                controls["expansion_built"] = False
+            if not controls.get("expansion_built"):
+                self._build_module_expansion(controls["expansion"], key)
+                controls["expansion_built"] = True
+            wrapper.pack(fill="x", after=canvas)
+            canvas.configure(bg=EXPANSION_TINT)
+            canvas.itemconfigure(controls["accent"], fill=PLUM, outline=PLUM)
+        except TclError:
+            return
+        self._expanded_module_key = key
+        self._opened_module_keys.add(key)
+        if self._module_review_inputs_complete(key):
+            self._reviewed_module_keys.add(key)
+        self._refresh_module_card_state(key)
+
+    def _rebuild_expansion(self, key: str) -> None:
+        controls = self._module_card_controls.get(key)
+        if not controls:
+            return
+        expansion = controls.get("expansion")
+        try:
+            if expansion is not None and expansion.winfo_exists():
+                for child in expansion.winfo_children():
+                    child.destroy()
+                controls["expansion_built"] = False
+                if self._expanded_module_key == key:
+                    self._build_module_expansion(expansion, key)
+                    controls["expansion_built"] = True
+        except TclError:
+            pass
+
+    def _refresh_module_card_views(self, keys) -> None:
+        for key in keys:
+            self._refresh_module_card_state(key)
+        self._update_group_count()
+
+    def _refresh_module_card_state(self, key: str) -> None:
+        controls = self._module_card_controls.get(key)
+        if not controls:
+            return
+        status, _detail = self._module_row_status(key)
+        controls["status"] = status
+        canvas = controls.get("canvas")
+        try:
+            if canvas is None or not canvas.winfo_exists():
+                return
+            pill_label, pill_fg, pill_bg = self._module_pill(key, status)
+            pill_w = self._step2_fonts()["pill"].measure(f"  {pill_label}  ")
+            controls["pill_w"] = pill_w
+            tags = ("review_pill_hit",) if pill_label == NEEDS_REVIEW_PILL else ()
+            canvas.itemconfigure(
+                controls["pill_bg"], image=_pill_bg_photo(pill_bg, pill_bg, pill_w, 24), tags=tags
+            )
+            canvas.itemconfigure(controls["pill_text"], text=pill_label, fill=pill_fg, tags=tags)
+            missing = status == "Missing" and self._module_available(key)
+            canvas.itemconfigure(
+                controls["missing_item"],
+                text=self._missing_input_message(key),
+                state="normal" if missing else "hidden",
+            )
+            wanted_h = self._S2_ROW_HEIGHT + (self._S2_MISSING_EXTRA if missing else 0)
+            if int(canvas.cget("height")) != wanted_h:
+                canvas.configure(height=wanted_h)
+            relayout = controls.get("relayout")
+            if relayout is not None:
+                relayout()
+        except TclError:
+            return
+        self._paint_module_checkbox(controls, key)
+        self._set_module_row_link_text(key)
+
+    # ------------------------------------------------------------------
+    # Step 2 expansion content
+    # ------------------------------------------------------------------
+
+    def _build_module_expansion(self, frame, key: str) -> None:
+        if not self._module_available(key):
+            ctk.CTkLabel(
+                frame,
+                text="Not available on this OS. Needs a Windows-only tool (relog.exe).",
+                text_color=INK,
+                font=(UI_FONT, 15),
+                wraplength=640,
+                justify="left",
+                anchor="w",
+            ).pack(fill="x", pady=(2, 0))
+            return
+        self._add_expansion_details(frame, key)
+        if key == "perfmon":
+            self._add_perfmon_capture_panels(frame)
+            self._add_perfmon_compact_dates(frame)
+        else:
+            self._add_module_input_rows(frame, key)
+            self._add_date_tools(frame, key)
+        self._add_module_review_confirmation(frame, key)
+
+    def _add_expansion_details(self, frame, key: str) -> None:
+        detail = MODULE_DETAILS.get(key, {})
+        block = ctk.CTkFrame(
+            frame, fg_color=PAPER, corner_radius=10, border_width=1, border_color=HAIRLINE
+        )
+        block.pack(fill="x", pady=(0, 12))
+        inner = ctk.CTkFrame(block, fg_color="transparent")
+        inner.pack(fill="x", padx=16, pady=14)
+        inner.grid_columnconfigure((0, 2, 4), weight=1, uniform="exp_details")
+        columns = [
+            ("What it does", detail.get("does", "")),
+            ("When to use it", detail.get("use", "")),
+            ("Consultant action", detail.get("consultant", "")),
+        ]
+        body_labels = []
+        for col, (title, body) in enumerate(columns):
+            grid_col = col * 2
+            cell = ctk.CTkFrame(inner, fg_color="transparent")
+            cell.grid(row=0, column=grid_col, sticky="nsew")
+            ctk.CTkLabel(
+                cell, text=title, text_color=INK, font=(UI_FONT, 15, "bold"), anchor="w"
+            ).pack(anchor="w")
+            body_label = ctk.CTkLabel(
+                cell,
+                text=body,
+                text_color=INK,
+                font=(UI_FONT, 14),
+                wraplength=250,
+                justify="left",
+                anchor="w",
+            )
+            body_label.pack(anchor="w", fill="x", pady=(2, 0))
+            body_labels.append(body_label)
+            if col < 2:
+                tk.Frame(inner, bg=RUN_DETAIL_RULE, width=1).grid(
+                    row=0, column=grid_col + 1, sticky="ns", padx=20
+                )
+
+        def fit_columns(_event=None) -> None:
+            try:
+                for label in body_labels:
+                    if not label.winfo_exists():
+                        return
+                    width = label.master.winfo_width()
+                    if width > 40 and int(label.cget("wraplength")) != width - 4:
+                        label.configure(wraplength=width - 4)
+            except TclError:
+                pass
+
+        inner.bind("<Configure>", fit_columns, add="+")
+
+    def _add_module_input_rows(self, frame, key: str) -> None:
+        mod = MODULE_BY_KEY[key]
+        fields = self._browsable_input_fields(mod)
+        if not fields:
+            return
+        block = ctk.CTkFrame(
+            frame, fg_color=PAPER, corner_radius=10, border_width=1, border_color=HAIRLINE
+        )
+        block.pack(fill="x", pady=(0, 12))
+        block.grid_columnconfigure(0, minsize=190)
+        block.grid_columnconfigure(1, minsize=330)
+        block.grid_columnconfigure(2, weight=1)
+        block.grid_columnconfigure(3, minsize=84)
+        block.grid_columnconfigure(4, minsize=100)
+        for col, text in enumerate(("INPUT", "LOOKS FOR", "SELECTED", "STATE", "")):
+            ctk.CTkLabel(
+                block,
+                text=text,
+                text_color=INK,
+                font=(UI_FONT, 12, "bold"),
+                anchor="w" if col < 3 else "e",
+            ).grid(
+                row=0,
+                column=col,
+                sticky="ew",
+                padx=(14 if col == 0 else 8, 14 if col == 4 else 8),
+                pady=(12, 4),
+            )
+        for row_index, field in enumerate(fields, start=1):
+            state, value = self._input_field_state(mod, field)
+            pattern_items = self._field_pattern_items(mod, field)
+            pattern = ", ".join(pattern_items) or "-"
+            if len(pattern_items) > 4:
+                pattern = f"{pattern_items[0]} and {len(pattern_items) - 1} more"
+            cells = (
+                (field.label, "bold", INK),
+                (pattern, "normal", INK),
+                (value, "normal", INK),
+                (state, "bold", self._input_state_color(state)),
+            )
+            for col, (text, weight, color) in enumerate(cells):
+                label = ctk.CTkLabel(
+                    block,
+                    text=text,
+                    text_color=color,
+                    font=(UI_FONT, 13, weight),
+                    anchor="w" if col < 3 else "e",
+                    justify="left",
+                    wraplength=0,
+                    width=1,
+                )
+                label.grid(
+                    row=row_index, column=col, sticky="ew", padx=(14 if col == 0 else 8, 8), pady=5
+                )
+                if col == 2:
+                    self._left_ellipsize_label(label, text)
+            button_text = "Change" if state == "Found" else "Choose"
+            if field.kind in {"folder", "folder_optional"}:
+                button_text = "Change folder" if state == "Found" else "Choose folder"
+            button = self._step2_pill_button(
+                block,
+                button_text,
+                lambda k=key, fk=field.key: self._browse_module_input_field(k, fk),
+                fg=PAPER,
+                text_color=PLUM,
+            )
+            button.configure(
+                height=30,
+                border_width=1,
+                border_color=HAIRLINE,
+                hover_color="#F4F7FB",
+                font=(UI_FONT, 12, "bold"),
+            )
+            if not self.module_vars[key].get():
+                button.configure(state="disabled")
+            button.grid(row=row_index, column=4, sticky="e", padx=(8, 14), pady=5)
+
+    def _field_pattern_items(self, mod: Module, field: InputField) -> list[str]:
+        if field.key == mod.file_key:
+            source = mod.file_patterns or ([mod.file_pattern] if mod.file_pattern else [])
+            patterns = [str(p) for p in source]
+        elif field.patterns:
+            patterns = [str(p) for p in field.patterns]
+        else:
+            patterns = []
+        if patterns:
+            return patterns
+        if field.extensions:
+            return sorted(field.extensions)
+        return []
+
+    def _left_ellipsize_label(self, label, full_text: str, *, font_size: int = 13) -> None:
+        font = tkfont.Font(family=UI_FONT, size=-font_size)
+
+        def fitted(width: int) -> str:
+            if font.measure(full_text) <= width:
+                return full_text
+            low, high = 0, len(full_text)
+            while low < high:
+                mid = (low + high + 1) // 2
+                if font.measure("..." + full_text[-mid:]) <= width:
+                    low = mid
+                else:
+                    high = mid - 1
+            return "..." + full_text[-low:] if low else "..."
+
+        def apply(_event=None) -> None:
+            try:
+                if not label.winfo_exists():
+                    return
+                width = label.winfo_width()
+                if width > 1:
+                    text = fitted(width)
+                    if label.cget("text") != text:
+                        label.configure(text=text)
+            except TclError:
+                pass
+
+        label.bind("<Configure>", apply, add="+")
+
+    def _browse_module_input_field(self, key: str, field_key: str) -> None:
+        mod = MODULE_BY_KEY[key]
+        field = next((f for f in mod.inputs_schema if f.key == field_key), None)
+        if field is None:
+            return
+        current = self._resolved_input_for_field(mod, field)
+        initial = ""
+        if current is not None:
+            initial = str(current if current.is_dir() else current.parent)
+        elif self.data_root_var.get().strip():
+            initial = self.data_root_var.get().strip()
+        if field.kind in {"folder", "folder_optional"}:
+            path = filedialog.askdirectory(
+                title=f"Choose the {field.label}", initialdir=initial or None
+            )
+        else:
+            patterns = " ".join(f"*{ext}" for ext in sorted(field.extensions or {".*"}))
+            path = filedialog.askopenfilename(
+                title=f"Choose the {field.label}",
+                filetypes=[(field.label, patterns), ("All Files", "*.*")],
+                initialdir=initial or None,
+            )
+        if not path:
+            return
+        self.module_input_override_vars[(key, field_key)].set(_display_path(path))
+        self.module_vars[key].set(True)
+        if key == "perfmon" and field_key == mod.file_key:
+            self._start_perfmon_detection()
+        elif key == "perfmon" and field_key == "capture2_blg_path":
+            self._start_perfmon_detection(capture="perfmon2")
+        self._refresh_module_card_views([key])
+        self._rebuild_expansion(key)
+
+    def _add_date_tools(self, card, key: str) -> None:
+        fields = [f for f in MODULE_BY_KEY[key].inputs_schema if f.kind == "datetime_optional"]
+        if not fields:
+            return
+        panel = ctk.CTkFrame(
+            card, fg_color=PANEL, corner_radius=12, border_width=1, border_color=HAIRLINE
+        )
+        panel.pack(fill="x", pady=(0, 12))
+        panel.grid_columnconfigure(tuple(range(len(fields))), weight=1)
+        if key == "loop":
+            title = "Client Loop report date range"
+            help_text = (
+                "The export does not record collection start and end. If you know when "
+                "the counters were started and stopped, enter the range here. Leave "
+                "blank to use the full data range."
+            )
+        else:
+            title = "Collection date metadata"
+            help_text = (
+                "Optional. Use MM-DD-YYYY HH:MM for date and time values, or "
+                "MM-DD-YYYY when only the date is known."
+            )
+        ctk.CTkLabel(panel, text=title, text_color=INK, font=(UI_FONT, 16, "bold")).grid(
+            row=0, column=0, columnspan=len(fields), sticky="w", padx=14, pady=(12, 0)
+        )
+        help_label = ctk.CTkLabel(
+            panel,
+            text=help_text,
+            text_color=INK,
+            font=(UI_FONT, 14),
+            wraplength=960,
+            justify="left",
+            anchor="w",
+        )
+        help_label.grid(
+            row=1, column=0, columnspan=len(fields), sticky="ew", padx=14, pady=(2, 8)
+        )
+        panel.bind(
+            "<Configure>",
+            lambda e: help_label.configure(wraplength=max(280, e.width - 28)),
+            add="+",
+        )
+        for col, field in enumerate(fields):
+            field_card = ctk.CTkFrame(
+                panel, fg_color=PAPER, corner_radius=8, border_width=1, border_color=HAIRLINE
+            )
+            field_card.grid(row=2, column=col, sticky="ew", padx=8, pady=(0, 12))
+            field_card.grid_columnconfigure(0, weight=1)
+            ctk.CTkLabel(
+                field_card,
+                text=field.label,
+                text_color=INK,
+                font=(UI_FONT, 14, "bold"),
+                wraplength=240,
+                justify="left",
+                anchor="w",
+            ).grid(row=0, column=0, columnspan=2, sticky="ew", padx=12, pady=(10, 0))
+            var = self.date_field_vars[(key, field.key)]
+            entry = ctk.CTkEntry(
+                field_card,
+                textvariable=var,
+                placeholder_text="MM-DD-YYYY",
+                height=36,
+                corner_radius=8,
+                border_width=1,
+                border_color=HAIRLINE,
+                fg_color=PAPER,
+                text_color=INK,
+                font=(UI_FONT, 14),
+            )
+            entry.grid(row=1, column=0, sticky="ew", padx=(10, 4), pady=(6, 2))
+            self._register_field(_field_id(key, field.key), entry, HAIRLINE)
+            ctk.CTkButton(
+                field_card,
+                text="",
+                image=_calendar_icon(),
+                width=42,
+                height=36,
+                corner_radius=8,
+                fg_color=PLUM,
+                hover_color="#0B4FC0",
+                command=lambda k=key, fk=field.key, e=entry: self._open_date_picker(k, fk, e),
+            ).grid(row=1, column=1, sticky="e", padx=(0, 10), pady=(6, 2))
+            ctk.CTkLabel(
+                field_card, text="Optional", text_color=MUTED, font=(UI_FONT, 12), anchor="w"
+            ).grid(row=2, column=0, columnspan=2, sticky="w", padx=12, pady=(0, 10))
+
+    def _open_date_picker(self, module_key: str, field_key: str, anchor_widget) -> None:
+        var = self.date_field_vars.get((module_key, field_key))
+        if var is None:
+            return
+        if Calendar is None:
+            anchor_widget.focus_set()
+            return
+        current = self._parse_date_field_value(var.get())
+
+        def commit(picked: date) -> None:
+            if current is None or not (current.hour or current.minute or current.second):
+                var.set(picked.strftime("%m-%d-%Y"))
+                return
+            combined = datetime(
+                picked.year, picked.month, picked.day, current.hour, current.minute, current.second
+            )
+            var.set(combined.strftime("%m-%d-%Y %H:%M:%S" if combined.second else "%m-%d-%Y %H:%M"))
+
+        DatePopup(
+            self,
+            anchor_widget,
+            current.date() if current else None,
+            on_pick=commit,
+            on_clear=lambda: var.set(""),
+        )
+
+    def _parse_date_field_value(self, raw: str) -> datetime | None:
+        raw = (raw or "").strip()
+        if not raw:
+            return None
+        for fmt in self._DATE_PARSE_FORMATS:
+            try:
+                return datetime.strptime(raw, fmt)
+            except ValueError:
+                continue
+        return None
+
+    def _add_module_review_confirmation(self, frame, key: str) -> None:
+        row = ctk.CTkFrame(frame, fg_color="transparent")
+        row.pack(fill="x", pady=(4, 0))
+        self._step2_pill_button(
+            row, "Mark Reviewed", lambda k=key: self._confirm_module_review(k), fg=PLUM
+        ).pack(side="left")
+        ctk.CTkLabel(
+            row,
+            text="Use after verifying the inputs in this panel.",
+            text_color=MUTED,
+            font=(UI_FONT, 14),
+            anchor="w",
+        ).pack(side="left", padx=(10, 0))
+
+    def _confirm_module_review(self, key: str) -> None:
+        if not self._module_review_inputs_complete(key):
+            if key == "perfmon":
+                self._apply_field_highlights(self._perfmon_missing_field_ids())
+            self._show_errors("Review Incomplete", [self._module_review_gate_message(key)])
+            return
+        self._mark_module_reviewed(key)
+        self._refresh_module_card_views([key])
+
+    # ------------------------------------------------------------------
+    # PerfMon panels
+    # ------------------------------------------------------------------
+
+    def _perfmon_input_path(self) -> Path | None:
+        mod = MODULE_BY_KEY["perfmon"]
+        return self._resolved_input_for_field(mod, self._primary_field(mod))
+
+    def _perfmon_capture2_path(self) -> Path | None:
+        return self._manual_field_input_path("perfmon", "capture2_blg_path")
+
+    def _add_perfmon_capture_panels(self, parent) -> None:
+        wrap = ctk.CTkFrame(parent, fg_color="transparent")
+        wrap.pack(fill="x", pady=(0, 12))
+        wrap.grid_columnconfigure((0, 1), weight=1, uniform="perfmon_capture")
+
+        primary = ctk.CTkFrame(
+            wrap, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+        )
+        primary.grid(row=0, column=0, sticky="nsew", padx=(0, 8))
+        head = ctk.CTkFrame(primary, fg_color="transparent")
+        head.pack(fill="x", padx=14, pady=(12, 0))
+        head.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            head,
+            text="Capture 1 - BigFix Root Server",
+            text_color=INK,
+            font=(UI_FONT, 15, "bold"),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w")
+        status, _detail = self._module_selection_status("perfmon")
+        ctk.CTkLabel(
+            head,
+            text=STATUS_PILL_TEXT.get(status, status),
+            text_color={"Found": MOSS, "Scanning": PLUM}.get(status, CLAY),
+            font=(UI_FONT, 13, "bold"),
+        ).grid(row=0, column=1, sticky="e")
+        blg = self._perfmon_input_path()
+        self._path_entry(primary, str(blg) if blg else "", placeholder="No BLG selected yet.").pack(
+            fill="x", padx=14, pady=(8, 0)
+        )
+        self._add_perfmon_hardware_controls(
+            primary,
+            "perfmon",
+            self.perfmon_processors_var,
+            self.perfmon_disks_var,
+            self.perfmon_memory_var,
+            self.perfmon_vm_var,
+        )
+        ctk.CTkLabel(
+            primary,
+            text="CPUs and disks are detected from the BLG. RAM is entered manually.",
+            text_color=INK,
+            font=(UI_FONT, 15),
+            wraplength=320,
+            justify="left",
+            anchor="w",
+        ).pack(fill="x", padx=14, pady=(8, 0))
+        self._add_perfmon_links(
+            primary,
+            [
+                ("Re-detect", lambda: self._start_perfmon_detection()),
+                ("Browse", lambda: self._browse_module_input_field("perfmon", "blg_path")),
+            ],
+        )
+
+        capture2 = self._perfmon_capture2_path()
+        secondary = ctk.CTkFrame(
+            wrap,
+            fg_color=PAPER,
+            corner_radius=12,
+            border_width=1,
+            border_color=HAIRLINE if capture2 else FIELD_BORDER,
+        )
+        secondary.grid(row=0, column=1, sticky="nsew", padx=(8, 0))
+        head2 = ctk.CTkFrame(secondary, fg_color="transparent")
+        head2.pack(fill="x", padx=14, pady=(12, 0))
+        head2.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            head2,
+            text="Capture 2 - SQL Server host",
+            text_color=INK,
+            font=(UI_FONT, 15, "bold"),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="w")
+        ctk.CTkLabel(
+            head2,
+            text="selected" if capture2 else "optional",
+            text_color=INK,
+            font=(UI_FONT, 13),
+        ).grid(row=0, column=1, sticky="e")
+        entry = ctk.CTkEntry(
+            secondary,
+            textvariable=self.module_input_override_vars[("perfmon", "capture2_blg_path")],
+            placeholder_text="Add the SQL host's BLG file.",
+            height=34,
+            corner_radius=8,
+            border_width=1,
+            border_color=FIELD_BORDER,
+            fg_color=PAPER,
+            text_color=INK,
+            font=(UI_FONT, 14),
+        )
+        entry.pack(fill="x", padx=14, pady=(8, 0))
+        self._register_field(_field_id("perfmon", "capture2_blg_path"), entry)
+        self._add_perfmon_hardware_controls(
+            secondary,
+            "perfmon2",
+            self.perfmon2_processors_var,
+            self.perfmon2_disks_var,
+            self.perfmon2_memory_var,
+            self.perfmon2_vm_var,
+        )
+        ctk.CTkLabel(
+            secondary,
+            text="CPUs and disks are detected once a file is chosen. RAM is entered manually.",
+            text_color=INK,
+            font=(UI_FONT, 15),
+            wraplength=320,
+            justify="left",
+            anchor="w",
+        ).pack(fill="x", padx=14, pady=(8, 0))
+        links: list[tuple[str, object]] = [
+            ("Re-detect", lambda: self._start_perfmon_detection(capture="perfmon2")),
+            ("Browse", lambda: self._browse_module_input_field("perfmon", "capture2_blg_path")),
+        ]
+        if capture2:
+            links.append(("Remove", self._remove_capture2))
+        self._add_perfmon_links(secondary, links)
+
+    def _add_perfmon_hardware_controls(
+        self, parent, capture: str, processors_var, disks_var, memory_var, vm_var
+    ) -> None:
+        prefix = "" if capture == "perfmon" else "capture2_"
+        hw1 = ctk.CTkFrame(parent, fg_color="transparent")
+        hw1.pack(fill="x", padx=14, pady=(10, 0))
+        for label_text, var, field_key in (
+            ("CPUs", processors_var, "logical_processors"),
+            ("Disks", disks_var, "physical_disks"),
+        ):
+            ctk.CTkLabel(hw1, text=label_text, text_color=INK, font=(UI_FONT, 15)).pack(
+                side="left", padx=(0, 6)
+            )
+            entry = ctk.CTkEntry(
+                hw1,
+                textvariable=var,
+                width=56,
+                height=32,
+                corner_radius=8,
+                border_width=1,
+                border_color=HAIRLINE,
+                fg_color=PAPER,
+                text_color=INK,
+                font=(UI_FONT, 15),
+            )
+            entry.pack(side="left", padx=(0, 14))
+            self._register_field(_field_id("perfmon", prefix + field_key), entry, HAIRLINE)
+        hw2 = ctk.CTkFrame(parent, fg_color="transparent")
+        hw2.pack(fill="x", padx=14, pady=(8, 0))
+        ctk.CTkLabel(hw2, text="RAM", text_color=INK, font=(UI_FONT, 15)).pack(
+            side="left", padx=(0, 6)
+        )
+        entry = ctk.CTkEntry(
+            hw2,
+            textvariable=memory_var,
+            width=56,
+            height=32,
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+            fg_color=PAPER,
+            text_color=INK,
+            font=(UI_FONT, 15),
+        )
+        entry.pack(side="left")
+        self._register_field(_field_id("perfmon", prefix + "physical_memory_gb"), entry, HAIRLINE)
+        ctk.CTkLabel(hw2, text="GB", text_color=INK, font=(UI_FONT, 15)).pack(
+            side="left", padx=(6, 14)
+        )
+        ctk.CTkCheckBox(
+            hw2,
+            text="Virtual machine",
+            variable=vm_var,
+            font=(UI_FONT, 15),
+            text_color=INK,
+            fg_color=PLUM,
+            hover_color="#0B4FC0",
+            checkbox_width=18,
+            checkbox_height=18,
+            corner_radius=4,
+            border_width=1.5,
+            border_color=FIELD_BORDER,
+        ).pack(side="left")
+
+    def _add_perfmon_links(self, parent, specs: list[tuple[str, object]]) -> None:
+        links = ctk.CTkFrame(parent, fg_color="transparent")
+        links.pack(fill="x", padx=8, pady=(4, 10))
+        for link_text, link_cmd in specs:
+            ctk.CTkButton(
+                links,
+                text=link_text,
+                command=link_cmd,
+                fg_color="transparent",
+                hover_color=PANEL,
+                text_color=LINK_BLUE,
+                width=80,
+                height=28,
+                corner_radius=8,
+                font=(UI_FONT, 15, "bold"),
+            ).pack(side="left", padx=(0, 6))
+
+    def _add_perfmon_compact_dates(self, parent) -> None:
+        row = ctk.CTkFrame(parent, fg_color="transparent")
+        row.pack(fill="x", pady=(8, 12))
+        for label_text, field_key in (("Start", "collection_start"), ("End", "collection_end")):
+            var = self.date_field_vars[("perfmon", field_key)]
+            ctk.CTkLabel(row, text=label_text, text_color=INK, font=(UI_FONT, 15)).pack(
+                side="left", padx=(0, 6)
+            )
+            entry = ctk.CTkEntry(
+                row,
+                textvariable=var,
+                width=150,
+                height=32,
+                corner_radius=8,
+                border_width=1,
+                border_color=FIELD_BORDER,
+                fg_color=PAPER,
+                text_color=INK,
+                font=(UI_FONT, 14),
+            )
+            entry.pack(side="left")
+            self._register_field(_field_id("perfmon", field_key), entry)
+            ctk.CTkButton(
+                row,
+                text="",
+                image=_calendar_icon(),
+                width=36,
+                height=32,
+                corner_radius=8,
+                fg_color=PLUM,
+                hover_color="#0B4FC0",
+                command=lambda fk=field_key, e=entry: self._open_date_picker("perfmon", fk, e),
+            ).pack(side="left", padx=(4, 18))
+
+    def _remove_capture2(self) -> None:
+        self.module_input_override_vars[("perfmon", "capture2_blg_path")].set("")
+        for var in (self.perfmon2_processors_var, self.perfmon2_disks_var, self.perfmon2_memory_var):
+            var.set("")
+        self.perfmon2_vm_var.set(False)
+        self._rebuild_expansion("perfmon")
+
+    def _on_perfmon_value_changed(self, field_id: str) -> None:
+        self._clear_field_highlight(field_id)
+        self._on_module_review_value_changed("perfmon")
+
+    def _perfmon_missing_field_ids(self) -> set[str]:
+        ids: set[str] = set()
+        primary = (
+            (self.perfmon_processors_var, "perfmon:logical_processors"),
+            (self.perfmon_disks_var, "perfmon:physical_disks"),
+            (self.perfmon_memory_var, "perfmon:physical_memory_gb"),
+        )
+        for var, fid in primary:
+            if not self._positive_int_or_blank(var.get()):
+                ids.add(fid)
+        if self._perfmon_capture2_path() is not None:
+            secondary = (
+                (self.perfmon2_processors_var, "perfmon:capture2_logical_processors"),
+                (self.perfmon2_disks_var, "perfmon:capture2_physical_disks"),
+                (self.perfmon2_memory_var, "perfmon:capture2_physical_memory_gb"),
+            )
+            for var, fid in secondary:
+                if not self._positive_int_or_blank(var.get()):
+                    ids.add(fid)
+        return ids
+
+    def _start_perfmon_detection(self, *, capture: str = "perfmon", auto: bool = False) -> None:
+        if not IS_WINDOWS:
+            return
+        blg = self._perfmon_input_path() if capture == "perfmon" else self._perfmon_capture2_path()
+        if blg is None or not blg.is_file():
+            return
+        if capture == "perfmon":
+            processors_var, disks_var = self.perfmon_processors_var, self.perfmon_disks_var
+        else:
+            processors_var, disks_var = self.perfmon2_processors_var, self.perfmon2_disks_var
+        if auto and (processors_var.get().strip() or disks_var.get().strip()):
+            return
+        self._perfmon_detect_tokens[capture] += 1
+        token = self._perfmon_detect_tokens[capture]
+        processors_var.set(DETECTING)
+        disks_var.set(DETECTING)
+
+        def worker() -> None:
+            try:
+                lines = relog_query_lines(blg)
+                procs, disks, _volumes = detect_hardware_from_blg(blg, lines)
+                begin, end = detect_perfmon_window(lines)
+            except Exception:
+                procs, disks, begin, end = 0, 0, "", ""
+            self._post(
+                lambda: self._apply_perfmon_detection(capture, token, procs, disks, begin, end)
+            )
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def _apply_perfmon_detection(
+        self, capture: str, token: int, procs: int, disks: int, begin: str, end: str
+    ) -> None:
+        if token != self._perfmon_detect_tokens[capture]:
+            return
+        if capture == "perfmon":
+            processors_var, disks_var = self.perfmon_processors_var, self.perfmon_disks_var
+        else:
+            processors_var, disks_var = self.perfmon2_processors_var, self.perfmon2_disks_var
+        processors_var.set(str(procs) if procs > 0 else "")
+        disks_var.set(str(disks) if disks > 0 else "")
+        if capture == "perfmon":
+            for field_key, value in (("collection_start", begin), ("collection_end", end)):
+                var = self.date_field_vars[("perfmon", field_key)]
+                if value and not var.get().strip():
+                    try:
+                        var.set(_parse_optional_datetime(value, field_key))
+                    except ValueError:
+                        var.set(value)
+        self._on_module_review_value_changed("perfmon")
+
+    # ------------------------------------------------------------------
+    # Validation and config
+    # ------------------------------------------------------------------
+
+    def _validate_step1(self) -> tuple[list[str], set[str]]:
         errors: list[str] = []
         bad: set[str] = set()
+        data_root_text = self.data_root_var.get().strip()
+        if data_root_text and not Path(data_root_text).is_dir():
+            errors.append("Data folder must be a valid directory if provided.")
+            bad.add("data_root")
         output_text = self.output_folder_var.get().strip()
         if not output_text:
             errors.append("Output folder is required.")
@@ -672,202 +2923,643 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             except OSError as exc:
                 errors.append(f"Output folder could not be created: {exc}")
                 bad.add("output_folder")
-        data_root = self.data_root_var.get().strip()
-        if data_root and not Path(data_root).is_dir():
-            errors.append("Data folder must be an existing folder when provided.")
-            bad.add("data_root")
+        return errors, bad
+
+    def _validate_step2(self, bad_fields: set[str] | None = None) -> list[str]:
+        errors: list[str] = []
         selected = self._selected_keys()
         if not selected:
             errors.append("Select at least one module.")
+        for key in self._modules_awaiting_review(selected):
+            errors.append(self._module_review_gate_message(key))
+            if bad_fields is not None and key == "perfmon":
+                bad_fields |= self._perfmon_missing_field_ids()
         for key in selected:
+            status, detail = self._module_row_status(key)
+            if status in {"Missing", "Not scanned", "Scanning"}:
+                errors.append(f"{self._module_display_name(key)}: {detail}")
             mod = MODULE_BY_KEY[key]
-            for field in mod.inputs_schema:
-                fid = _field_id(key, field.key)
-                if field.kind == "bool":
+            for field in self._browsable_input_fields(mod):
+                manual = self._manual_field_input_path(key, field.key)
+                if manual is None:
                     continue
-                value = self.field_vars[(key, field.key)].get().strip()
-                if field.kind == "file":
-                    if not value:
-                        errors.append(f"{mod.label}: choose the {field.label}.")
-                        bad.add(fid)
-                    elif not Path(value).is_file():
-                        errors.append(f"{mod.label}: {field.label} was not found.")
-                        bad.add(fid)
-                    elif field.extensions and Path(value).suffix.lower() not in field.extensions:
-                        errors.append(f"{mod.label}: {field.label} has an unsupported extension.")
-                        bad.add(fid)
-                elif field.kind == "file_optional" and value and not Path(value).is_file():
-                    errors.append(f"{mod.label}: {field.label} was not found.")
-                    bad.add(fid)
-                elif field.kind == "folder_optional" and value and not Path(value).is_dir():
-                    errors.append(f"{mod.label}: {field.label} was not found.")
-                    bad.add(fid)
-                elif field.kind in {"int", "int_detected"}:
-                    required = field.kind == "int_detected" or (
-                        key == "perfmon" and field.key == "physical_memory_gb"
-                    )
-                    if value == DETECTING:
-                        errors.append(
-                            f"{mod.label}: wait for {field.label} detection to finish, or type the value."
-                        )
-                        bad.add(fid)
-                    elif not value and required and self._int_field_applies(key, field):
-                        errors.append(f"{mod.label}: enter {field.label}.")
-                        bad.add(fid)
-                    elif value and (not value.isdigit() or int(value) <= 0):
-                        errors.append(f"{mod.label}: {field.label} must be a positive whole number.")
-                        bad.add(fid)
-                elif field.kind == "datetime_optional" and value:
-                    try:
-                        self._set_var(
-                            self.field_vars[(key, field.key)],
-                            _parse_optional_datetime(value, field.label),
-                        )
-                    except ValueError:
-                        errors.append(
-                            f"{mod.label}: {field.label} must use MM-DD-YYYY HH:MM or MM-DD-YYYY."
-                        )
-                        bad.add(fid)
+                valid, reason = self._validate_field_input(mod, field, manual)
+                if not valid:
+                    errors.append(f"{mod.label}: {field.label}: {reason}")
         if "perfmon" in selected:
-            capture1 = self.field_vars[("perfmon", "blg_path")].get().strip()
-            capture2 = self.field_vars[("perfmon", "capture2_blg_path")].get().strip()
-            if capture1 and capture2 and Path(capture1).resolve() == Path(capture2).resolve():
-                errors.append("Perfmon Infrastructure Analysis: Capture 2 must differ from Capture 1.")
-                bad.add(_field_id("perfmon", "capture2_blg_path"))
-        return errors, bad
+            capture2 = self._perfmon_capture2_path()
+            primary = self._perfmon_input_path()
+            capture2_id = _field_id("perfmon", "capture2_blg_path")
+            if capture2 is not None:
+                if not capture2.is_file() or capture2.suffix.lower() != ".blg":
+                    errors.append("Capture 2 PerfMon input must be an existing .blg file.")
+                    if bad_fields is not None:
+                        bad_fields.add(capture2_id)
+                elif primary is not None and os.path.normcase(str(capture2.resolve())) == (
+                    os.path.normcase(str(primary.resolve()))
+                ):
+                    errors.append("Capture 2 PerfMon BLG must be different from Capture 1.")
+                    if bad_fields is not None:
+                        bad_fields.add(capture2_id)
+            hardware = (
+                (self.perfmon_processors_var, "Logical processors", "perfmon:logical_processors"),
+                (self.perfmon_disks_var, "Physical disks", "perfmon:physical_disks"),
+                (self.perfmon_memory_var, "Physical Memory (GB)", "perfmon:physical_memory_gb"),
+            )
+            for var, label, fid in hardware:
+                value = var.get().strip()
+                if value == DETECTING:
+                    errors.append(
+                        f"Perfmon Infrastructure Analysis: wait for {label} detection to "
+                        "finish, or type the value."
+                    )
+                elif value and not self._positive_int_or_blank(value):
+                    errors.append(f"PerfMon {label} must be a positive whole number.")
+                    if bad_fields is not None:
+                        bad_fields.add(fid)
+        for key in selected:
+            for field in MODULE_BY_KEY[key].inputs_schema:
+                if field.kind != "datetime_optional":
+                    continue
+                var = self.date_field_vars[(key, field.key)]
+                value = var.get().strip()
+                if not value:
+                    continue
+                try:
+                    var.set(_parse_optional_datetime(value, field.label))
+                except ValueError:
+                    errors.append(
+                        f"{MODULE_BY_KEY[key].label}: {field.label} must use "
+                        "MM-DD-YYYY HH:MM or MM-DD-YYYY."
+                    )
+                    if bad_fields is not None:
+                        bad_fields.add(_field_id(key, field.key))
+        return errors
 
-    def _int_field_applies(self, key: str, field: InputField) -> bool:
-        """Capture 2 hardware values are only required once a Capture 2 file is set."""
-        if key == "perfmon" and field.key.startswith("capture2_"):
-            return bool(self.field_vars[("perfmon", "capture2_blg_path")].get().strip())
-        return True
+    def _build_raw_inputs(self, mod: Module) -> dict:
+        values: dict[str, object] = {}
+        perfmon_ints = {
+            "logical_processors": self.perfmon_processors_var,
+            "physical_disks": self.perfmon_disks_var,
+            "physical_memory_gb": self.perfmon_memory_var,
+            "capture2_logical_processors": self.perfmon2_processors_var,
+            "capture2_physical_disks": self.perfmon2_disks_var,
+            "capture2_physical_memory_gb": self.perfmon2_memory_var,
+        }
+        perfmon_bools = {"is_vm": self.perfmon_vm_var, "capture2_is_vm": self.perfmon2_vm_var}
+        for field in mod.inputs_schema:
+            if field.kind == "datetime_optional":
+                values[field.key] = self.date_field_vars[(mod.key, field.key)].get().strip()
+            elif mod.key == "perfmon" and field.key in perfmon_ints:
+                values[field.key] = self._positive_int_or_blank(perfmon_ints[field.key].get())
+            elif mod.key == "perfmon" and field.key in perfmon_bools:
+                values[field.key] = bool(perfmon_bools[field.key].get())
+            elif field.kind in BROWSABLE_INPUT_KINDS:
+                path = self._resolved_input_for_field(mod, field)
+                values[field.key] = _display_path(path) if path else ""
+            else:
+                values[field.key] = ""
+        return values
 
-    # ------------------------------------------------------------------
-    # Config
-    # ------------------------------------------------------------------
+    def _manual_inputs_by_module(self, keys: list[str]) -> dict[str, dict[str, str]]:
+        manual: dict[str, dict[str, str]] = {}
+        for key in keys:
+            fields: dict[str, str] = {}
+            for field in MODULE_BY_KEY[key].inputs_schema:
+                if field.kind not in BROWSABLE_INPUT_KINDS:
+                    continue
+                path = self._manual_field_input_path(key, field.key)
+                if path is not None:
+                    fields[field.key] = _display_path(path)
+            if fields:
+                manual[key] = fields
+        return manual
 
     def _build_config(self) -> dict:
         selected = self._selected_keys()
-        inputs: dict[str, dict] = {}
-        manual: dict[str, dict[str, str]] = {}
-        for key in selected:
-            mod = MODULE_BY_KEY[key]
-            values: dict[str, object] = {}
-            for field in mod.inputs_schema:
-                if field.kind == "bool":
-                    values[field.key] = bool(self.bool_vars[(key, field.key)].get())
-                    continue
-                value = self.field_vars[(key, field.key)].get().strip()
-                if value == DETECTING:
-                    value = ""
-                values[field.key] = value
-                if (key, field.key) in self._manual_fields and value:
-                    manual.setdefault(key, {})[field.key] = value
-            inputs[key] = values
         return {
             "run_name": self.run_name_var.get().strip(),
             "output_folder": _display_path(self.output_folder_var.get()) or DEFAULT_WORK_DIR,
             "data_root": _display_path(self.data_root_var.get()),
             "modules": selected,
-            "inputs": inputs,
-            # Inputs the user chose by hand. The engine never replaces these
-            # with a discovered path, wherever they live.
-            "manual_inputs": manual,
+            "inputs": {key: self._build_raw_inputs(MODULE_BY_KEY[key]) for key in selected},
+            # Inputs chosen by hand. The engine never replaces these with a
+            # discovered path, wherever they live.
+            "manual_inputs": self._manual_inputs_by_module(selected),
         }
 
     # ------------------------------------------------------------------
-    # Pane 2: run
+    # Step 3: run
     # ------------------------------------------------------------------
 
-    def _build_run_pane(self, parent) -> ctk.CTkFrame:
-        pane = ctk.CTkFrame(parent, fg_color="transparent")
-        pane.grid_columnconfigure(0, weight=1)
-        pane.grid_rowconfigure(2, weight=1)
+    def _build_step3(self) -> None:
+        frame = ctk.CTkFrame(self.content, fg_color="transparent")
+        frame.grid(row=0, column=0, sticky="nsew")
+        frame.grid_columnconfigure(0, weight=1)
+        frame.grid_rowconfigure(2, weight=1)
+        selected = self._selected_keys()
+        self._progress_order = list(selected)
+        self._progress_completed = set()
+        self._progress_current = None
+        self._module_run_started = {}
+        self._canvas_status_pills = {}
 
-        head = self._card(pane, "Run progress")
-        head.grid(row=0, column=0, sticky="ew", pady=(0, 12))
-        self.progress_label = ctk.CTkLabel(
-            head, text="Ready.", text_color=INK, font=(UI_FONT, 13), anchor="w"
+        legend_row = ctk.CTkFrame(frame, fg_color="transparent")
+        legend_row.grid(row=0, column=0, sticky="ew", pady=(0, 14))
+        ctk.CTkLabel(legend_row, text="Outputs", text_color=INK, font=(UI_FONT, 13, "bold")).pack(
+            side="left", padx=(0, 16)
         )
-        self.progress_label.grid(row=1, column=0, sticky="w", padx=18, pady=(6, 4))
-        self.progress = ctk.CTkProgressBar(head, height=10, progress_color=PLUM, fg_color=HAIRLINE)
-        self.progress.grid(row=2, column=0, sticky="ew", padx=18, pady=(0, 14))
-        self.progress.set(0)
+        for index, term in enumerate(OUTPUT_TERM_ORDER):
+            entry = ctk.CTkFrame(legend_row, fg_color="transparent")
+            entry.pack(side="left", padx=(0 if index == 0 else 16, 0))
+            ctk.CTkLabel(entry, text="", image=_table_icon(term, 24)).pack(side="left")
+            ctk.CTkLabel(entry, text=term, text_color=INK, font=(UI_FONT, 14)).pack(
+                side="left", padx=(6, 0)
+            )
 
-        self.log = ctk.CTkTextbox(
-            pane,
-            fg_color=LOG_BG,
-            text_color=LOG_TEXT,
-            font=(MONO_FONT, 12),
-            corner_radius=10,
-            wrap="none",
+        details_holder = ctk.CTkFrame(frame, fg_color="transparent")
+        details_holder.grid(row=1, column=0, sticky="ew")
+        self._add_run_details_strip(details_holder)
+
+        tables_holder = ctk.CTkFrame(frame, fg_color="transparent", height=1)
+        tables_holder.grid(row=2, column=0, sticky="nsew")
+        tables_holder.grid_columnconfigure(0, weight=1)
+        tables = self._scrollable(tables_holder)
+        tables.grid(row=0, column=0, sticky="new")
+
+        def cap_tables_height(_event=None) -> None:
+            try:
+                available = tables_holder.winfo_height()
+                wanted = min(520, available)
+                if available > 1 and int(tables.cget("height")) != wanted:
+                    tables.configure(height=wanted)
+            except (TclError, ValueError):
+                pass
+
+        tables_holder.bind("<Configure>", cap_tables_height, add="+")
+        if selected:
+            card = self._add_module_status_table(tables, "Analysis Modules", selected)
+            for key in selected:
+                self._add_step3_canvas_row(card, key)
+            ctk.CTkFrame(card, fg_color="transparent", height=4).pack(fill="x")
+        self._add_unselected_row(tables, selected)
+
+        strip_holder = ctk.CTkFrame(frame, fg_color="transparent")
+        strip_holder.grid(row=3, column=0, sticky="ew", pady=(8, 0))
+        card = ctk.CTkFrame(
+            strip_holder, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
         )
-        self.log.grid(row=2, column=0, sticky="nsew", pady=(0, 12))
-        self.log.configure(state="disabled")
+        card.pack(fill="x", padx=(0, 4), pady=(0, 14))
+        self._populate_run_action_strip(card, selected)
+        if self._build_running:
+            self._restore_progress_view()
 
-        self.outputs_card = self._card(pane, "Outputs")
-        self.outputs_card.grid(row=3, column=0, sticky="ew", pady=(0, 12))
-        self.outputs_frame = ctk.CTkFrame(self.outputs_card, fg_color="transparent")
-        self.outputs_frame.grid(row=1, column=0, sticky="ew", padx=18, pady=(6, 12))
-        self.outputs_frame.grid_columnconfigure(0, weight=1)
-        self.outputs_card.grid_remove()
+    def _add_run_details_strip(self, parent) -> None:
+        card = self._add_form_section(parent, "Run Details")
+        header = card.winfo_children()[0]
+        ctk.CTkButton(
+            header,
+            text="Change on earlier steps",
+            command=lambda: self._show_step(1),
+            fg_color="transparent",
+            hover_color=PANEL,
+            text_color=PLUM,
+            height=26,
+            corner_radius=8,
+            font=(UI_FONT, 14, "bold"),
+        ).pack(side="right", padx=(0, 10))
+        row = ctk.CTkFrame(card, fg_color="transparent")
+        row.pack(fill="x", padx=18, pady=14)
+        folder = _display_path(self.output_folder_var.get()) or "-"
+        selected_count = len(self._selected_keys())
+        total = len(MODULES)
+        values = [
+            ("Run Name", self.run_name_var.get().strip() or "-"),
+            (
+                "Modules",
+                f"{selected_count} of {total} will run. {max(total - selected_count, 0)} not selected.",
+            ),
+            ("Output Folder", folder),
+        ]
+        for col, (label_text, value) in enumerate(values):
+            grid_col = col * 2
+            is_last = col == len(values) - 1
+            row.grid_columnconfigure(grid_col, weight=1 if is_last else 0)
+            if col:
+                tk.Frame(row, bg=RUN_DETAIL_RULE, width=1).grid(
+                    row=0, column=grid_col - 1, sticky="ns", padx=24
+                )
+            cell = ctk.CTkFrame(row, fg_color="transparent")
+            cell.grid(row=0, column=grid_col, sticky="nsew" if is_last else "nw")
+            if is_last:
+                cell.grid_columnconfigure(0, weight=1)
+            ctk.CTkLabel(
+                cell, text=label_text, text_color=INK, font=(UI_FONT, 15, "bold"), anchor="w"
+            ).pack(anchor="w")
+            value_label = ctk.CTkLabel(
+                cell,
+                text=value,
+                text_color=INK,
+                font=(UI_FONT, 14),
+                anchor="w",
+                **({"width": 1} if is_last else {}),
+            )
+            if is_last:
+                value_label.pack(anchor="w", fill="x", pady=(4, 0))
+                if folder != "-":
+                    self._left_ellipsize_label(value_label, folder, font_size=14)
+            else:
+                value_label.pack(anchor="w", pady=(4, 0))
 
-        actions = ctk.CTkFrame(pane, fg_color="transparent")
-        actions.grid(row=4, column=0, sticky="ew")
-        actions.grid_columnconfigure(1, weight=1)
-        self.back_button = self._button(actions, "Back to inputs", lambda: self._show_pane("inputs"), width=140)
-        self.back_button.grid(row=0, column=0, sticky="w")
-        self.cancel_button = self._button(actions, "Cancel", self._cancel_run, width=110)
-        self.cancel_button.grid(row=0, column=2, sticky="e", padx=(8, 0))
-        self.open_folder_button = self._button(actions, "Open run folder", self._open_run_folder, width=150)
-        self.open_folder_button.grid(row=0, column=3, sticky="e", padx=(8, 0))
-        self.open_log_button = self._button(actions, "Open run log", self._open_run_log, width=130)
-        self.open_log_button.grid(row=0, column=4, sticky="e", padx=(8, 0))
-        return pane
+    def _step3_row_grid(self, parent):
+        row = ctk.CTkFrame(parent, fg_color="transparent", height=1)
+        row.pack(fill="x", padx=18)
+        row.grid_columnconfigure(0, minsize=self._S3_MODULE_MIN)
+        row.grid_columnconfigure(1, weight=1)
+        row.grid_columnconfigure(2, minsize=self._S3_OUTPUTS_MIN)
+        row.grid_columnconfigure(3, minsize=self._S3_STATUS_MIN)
+        return row
 
-    def _append_log(self, text: str) -> None:
-        self.log.configure(state="normal")
-        self.log.insert("end", text)
-        self.log.see("end")
-        self.log.configure(state="disabled")
+    def _add_module_status_table(self, parent, title: str, keys: list[str]):
+        card = self._add_form_section(parent, title)
+        header = card.winfo_children()[0]
+        count = len(keys)
+        ctk.CTkLabel(
+            header,
+            text=f"{count} module{'s' if count != 1 else ''} selected",
+            text_color=INK,
+            font=(UI_FONT, 14),
+        ).pack(side="right", padx=(0, 14))
+        head = self._step3_row_grid(card)
+        headers = [("Module", "w"), ("Description", "w"), ("Outputs", "e"), ("Build Status", "e")]
+        for col, (text, anchor) in enumerate(headers):
+            ctk.CTkLabel(
+                head, text=text, text_color=INK, font=(UI_FONT, 14, "bold"), anchor=anchor
+            ).grid(row=0, column=col, sticky="ew", padx=(0, 0 if col == 3 else self._S3_GAP), pady=10)
+        return card
 
-    def _reset_run_pane(self) -> None:
-        self.log.configure(state="normal")
-        self.log.delete("1.0", "end")
-        self.log.configure(state="disabled")
-        self.progress.set(0)
-        self.progress_label.configure(text="Starting...")
-        for child in self.outputs_frame.winfo_children():
-            child.destroy()
-        self.outputs_card.grid_remove()
-        self._run_folder = None
-        self._run_log_path = None
-        self._module_total = 0
+    def _step3_fonts(self) -> dict[str, tkfont.Font]:
+        fonts = self.__dict__.get("_s3_row_fonts")
+        if fonts is None:
+            fonts = {
+                "name": tkfont.Font(family=UI_FONT, size=-15, weight="bold"),
+                "desc": tkfont.Font(family=UI_FONT, size=-15),
+                "pill": tkfont.Font(family=UI_FONT, size=-13, weight="bold"),
+            }
+            self.__dict__["_s3_row_fonts"] = fonts
+        return fonts
 
-    def _start_run(self) -> None:
-        if self._running:
+    def _module_output_terms(self, key: str) -> list[str]:
+        raw = (MODULE_BY_KEY[key].outputs or "").split(",")
+        terms = [part.strip() for part in raw if part.strip() in OUTPUT_TERM_ORDER]
+        return sorted(set(terms), key=OUTPUT_TERM_ORDER.index)
+
+    def _add_step3_canvas_row(self, card, key: str) -> None:
+        fonts = self._step3_fonts()
+        row_h = self._S3_ROW_HEIGHT
+        gap = self._S3_GAP
+        canvas = tk.Canvas(card, height=row_h, bd=0, highlightthickness=0, bg=PAPER)
+        canvas.pack(fill="x", padx=2)
+        rule = canvas.create_line(0, 0, 2000, 0, fill=ROW_RULE)
+        inset = 16
+        mid = row_h // 2
+        canvas.create_image(inset, mid, image=_canvas_icon("check_tile", 16), anchor="w")
+        name_max = self._S3_MODULE_MIN - gap - 13
+        canvas.create_text(
+            inset + 23,
+            mid,
+            text=_truncate_for_width(self._module_display_name(key), fonts["name"], name_max),
+            font=fonts["name"],
+            fill=INK,
+            anchor="w",
+        )
+        desc_text = MODULE_DETAILS.get(key, {}).get("summary", "")
+        desc_item = canvas.create_text(
+            inset + self._S3_MODULE_MIN, mid, text=desc_text, font=fonts["desc"], fill=INK, anchor="w"
+        )
+        badge_items = [
+            canvas.create_image(0, mid, image=_canvas_icon(term, 24), anchor="e")
+            for term in self._module_output_terms(key)
+        ]
+        pill_w, pill_h = 118, 24
+        style = S3_STATUS_PILL_STYLES["not_started"]
+        pill_bg_item = canvas.create_image(
+            0, mid, image=_pill_bg_photo(style[0], style[1], pill_w, pill_h), anchor="e"
+        )
+        pill_text_item = canvas.create_text(
+            0, mid, text="Not started", font=fonts["pill"], fill=style[2], anchor="center"
+        )
+        self._canvas_status_pills[key] = {
+            "canvas": canvas,
+            "bg": pill_bg_item,
+            "text": pill_text_item,
+            "width": pill_w,
+            "height": pill_h,
+        }
+
+        def _relayout(_event=None, c=canvas) -> None:
+            try:
+                width = c.winfo_width()
+                if width <= 1:
+                    return
+                right = width - inset
+                c.coords(rule, 0, 0, width, 0)
+                c.coords(pill_bg_item, right, mid)
+                c.coords(pill_text_item, right - pill_w / 2, mid)
+                badge_right = right - pill_w - gap
+                x = badge_right
+                for item in reversed(badge_items):
+                    c.coords(item, x, mid)
+                    x -= 30
+                desc_max = badge_right - self._S3_OUTPUTS_MIN - (inset + self._S3_MODULE_MIN)
+                c.itemconfigure(
+                    desc_item,
+                    text=_truncate_for_width(desc_text, fonts["desc"], max(40, desc_max + 90)),
+                )
+            except TclError:
+                pass
+
+        canvas.bind("<Configure>", _relayout, add="+")
+
+    def _add_unselected_row(self, parent, selected: list[str]) -> None:
+        unselected = [mod.key for mod in MODULES if mod.key not in set(selected)]
+        if not unselected:
             return
-        errors, bad = self._validate()
+        card = ctk.CTkFrame(
+            parent, fg_color=PAPER, corner_radius=12, border_width=1, border_color=HAIRLINE
+        )
+        card.pack(fill="x", padx=(0, 4), pady=(0, 14))
+        head = ctk.CTkFrame(card, fg_color="transparent")
+        head.pack(fill="x", padx=14, pady=10)
+        head.grid_columnconfigure(0, weight=1)
+        count = len(unselected)
+        title_holder = ctk.CTkFrame(head, fg_color="transparent")
+        title_holder.grid(row=0, column=0, sticky="w")
+        caret = ctk.CTkLabel(
+            title_holder, text="", image=_caret_icon(False), width=12, height=12, fg_color="transparent"
+        )
+        caret.grid(row=0, column=0, padx=(0, 8))
+        title = ctk.CTkLabel(
+            title_holder,
+            text=f"{count} module{'s' if count != 1 else ''} {'were' if count != 1 else 'was'} not selected",
+            text_color=INK,
+            font=(UI_FONT, 15, "bold"),
+            anchor="w",
+        )
+        title.grid(row=0, column=1, sticky="w")
+        body = ctk.CTkFrame(card, fg_color="transparent")
+
+        def reason_for(key: str) -> str:
+            if not self._module_available(key):
+                return "Not available on this OS. Needs a Windows-only tool (relog.exe)."
+            if self._module_selection_status(key)[0] == "Missing":
+                return "Needs a file. Fix it on step 2."
+            return "Not selected on step 2."
+
+        built = {"done": False}
+
+        def toggle() -> None:
+            if body.winfo_manager():
+                body.pack_forget()
+                caret.configure(image=_caret_icon(False))
+                link.configure(text="Show")
+                return
+            if not built["done"]:
+                built["done"] = True
+                for key in unselected:
+                    line = ctk.CTkFrame(body, fg_color="transparent", height=1)
+                    line.pack(fill="x", pady=2)
+                    line.grid_columnconfigure(0, minsize=self._S3_MODULE_MIN)
+                    line.grid_columnconfigure(1, weight=1)
+                    ctk.CTkLabel(
+                        line,
+                        text=self._module_display_name(key),
+                        text_color=INK,
+                        font=(UI_FONT, 15, "bold"),
+                        anchor="w",
+                    ).grid(row=0, column=0, sticky="w")
+                    ctk.CTkLabel(
+                        line, text=reason_for(key), text_color=INK, font=(UI_FONT, 15), anchor="w"
+                    ).grid(row=0, column=1, sticky="w", padx=(10, 0))
+            body.pack(fill="x", padx=14, pady=(0, 10))
+            caret.configure(image=_caret_icon(True))
+            link.configure(text="Hide")
+
+        link = ctk.CTkButton(
+            head,
+            text="Show",
+            command=toggle,
+            fg_color="transparent",
+            hover_color=PANEL,
+            text_color=PLUM,
+            width=60,
+            height=26,
+            corner_radius=8,
+            font=(UI_FONT, 15, "bold"),
+        )
+        link.grid(row=0, column=1, sticky="e")
+        title.bind("<Button-1>", lambda _e: toggle())
+
+    def _populate_run_action_strip(self, card, selected: list[str]) -> None:
+        card.grid_columnconfigure(1, weight=1)
+        self.progress_status_var = ctk.StringVar(value="Not started")
+        self.progress_meta_var = ctk.StringVar(
+            value=f"{len(selected)} module{'s' if len(selected) != 1 else ''}"
+        )
+        self.progress_guidance_var = ctk.StringVar(value="")
+        build_btn = self._pill_button(card, "Run", self._run_engine, fg=PLUM)
+        build_btn.configure(
+            height=48, width=self._action_button_width("Run", 40), font=(UI_FONT, 15, "bold")
+        )
+        build_btn.grid(row=0, column=0, rowspan=2, sticky="w", padx=(16, 14), pady=16)
+        self.build_button = build_btn
+        ctk.CTkLabel(
+            card, textvariable=self.progress_status_var, text_color=INK, font=(UI_FONT, 13), anchor="w"
+        ).grid(row=0, column=1, sticky="sew", pady=(16, 2))
+        ctk.CTkLabel(
+            card, textvariable=self.progress_meta_var, text_color=INK, font=(UI_FONT, 13), anchor="e"
+        ).grid(row=0, column=2, sticky="se", padx=(10, 14), pady=(16, 2))
+        self.progress_bar = ctk.CTkProgressBar(
+            card, height=10, corner_radius=5, fg_color=RUN_DETAIL_RULE, progress_color=PLUM
+        )
+        self.progress_bar.grid(row=1, column=1, columnspan=2, sticky="ew", padx=(0, 14), pady=(0, 16))
+        self.progress_bar.set(0)
+        buttons = ctk.CTkFrame(card, fg_color="transparent")
+        buttons.grid(row=0, column=3, rowspan=2, sticky="e", padx=(0, 16), pady=16)
+        self.view_logs_button = self._secondary_toolbar_button(buttons, "View Logs", self._view_logs)
+        self.view_logs_button.configure(
+            height=40,
+            width=100,
+            font=(UI_FONT, 14, "bold"),
+            state="normal" if self._log_chunks or self._build_running else "disabled",
+        )
+        self.view_logs_button.pack(side="left", padx=(0, 8))
+        self.open_output_button = self._secondary_toolbar_button(
+            buttons, "Open Output", self._open_output_folder
+        )
+        self.open_output_button.configure(
+            height=40,
+            width=112,
+            font=(UI_FONT, 14, "bold"),
+            state="normal" if self._output_folder_to_open() is not None else "disabled",
+        )
+        self.open_output_button.pack(side="left", padx=(0, 8))
+        self.cancel_button = self._secondary_toolbar_button(buttons, "Cancel", self._cancel_run)
+        self.cancel_button.configure(
+            height=40,
+            width=80,
+            font=(UI_FONT, 14, "bold"),
+            text_color=CLAY,
+            state="normal" if self._build_running else "disabled",
+        )
+        self.cancel_button.pack(side="left")
+        self.progress_guidance_label = ctk.CTkLabel(
+            card,
+            textvariable=self.progress_guidance_var,
+            text_color=INK,
+            fg_color=PANEL,
+            corner_radius=8,
+            font=(UI_FONT, 14),
+            wraplength=980,
+            justify="left",
+            anchor="w",
+        )
+        self.progress_guidance_label.grid(row=2, column=0, columnspan=4, sticky="ew", padx=16, pady=(0, 12))
+        self.progress_guidance_label.grid_remove()
+
+    def _restore_progress_view(self) -> None:
+        for key in self._progress_completed:
+            self._set_status_cell(key, "done", "Done")
+        if self._progress_current:
+            self._set_status_cell(self._progress_current, "running", "Running")
+        self._update_progress_bar()
+        self.build_button.configure(state="disabled", text="Running")
+
+    def _set_status_cell(self, key: str, state: str, text: str | None = None) -> None:
+        bg, border, text_color = S3_STATUS_PILL_STYLES.get(state, S3_STATUS_PILL_STYLES["not_started"])
+        if text is None:
+            text = state.replace("_", " ").capitalize()
+        pill = self._canvas_status_pills.get(key)
+        if pill is None:
+            return
+        try:
+            canvas = pill["canvas"]
+            if canvas.winfo_exists():
+                canvas.itemconfigure(
+                    pill["bg"], image=_pill_bg_photo(bg, border, pill["width"], pill["height"])
+                )
+                canvas.itemconfigure(pill["text"], text=text, fill=text_color)
+        except TclError:
+            pass
+
+    def _mark_progress_current(self, key: str) -> None:
+        if self._progress_current and self._progress_current != key:
+            self._mark_progress_done(self._progress_current)
+        self._progress_current = key
+        self._module_run_started[key] = time.monotonic()
+        self._set_status_cell(key, "running", "Running")
+        if hasattr(self, "progress_status_var"):
+            total = len(self._progress_order)
+            position = self._progress_order.index(key) + 1 if key in self._progress_order else total
+            self.progress_status_var.set(f"{position} of {total} · {self._module_display_name(key)}")
+        self._update_progress_bar()
+
+    def _mark_progress_done(self, key: str) -> None:
+        if key in self._progress_completed:
+            return
+        self._progress_completed.add(key)
+        started = self._module_run_started.get(key)
+        if started is not None:
+            secs = int(time.monotonic() - started)
+            minutes, remainder = divmod(secs, 60)
+            timing = f"{minutes}m {remainder}s" if minutes else f"{remainder}s"
+            self._set_status_cell(key, "done", f"Done · {timing}")
+        else:
+            self._set_status_cell(key, "done", "Done")
+        self._update_progress_bar()
+
+    def _update_progress_bar(self) -> None:
+        total = len(self._progress_order)
+        if not total or not hasattr(self, "progress_bar"):
+            return
+        try:
+            if self.progress_bar.winfo_exists():
+                self.progress_bar.set(len(self._progress_completed) / total)
+        except TclError:
+            pass
+        self._update_progress_meta()
+
+    def _update_progress_meta(self) -> None:
+        if not hasattr(self, "progress_meta_var"):
+            return
+        total = len(self._progress_order)
+        if self._build_started_at is not None and (self._build_running or self._progress_completed):
+            elapsed = int(time.monotonic() - self._build_started_at)
+            minutes, secs = divmod(max(0, elapsed), 60)
+            self.progress_meta_var.set(f"Elapsed {minutes:02d}:{secs:02d}")
+        else:
+            self.progress_meta_var.set(f"{total} module{'s' if total != 1 else ''}")
+
+    def _tick_elapsed_timer(self) -> None:
+        self._elapsed_timer_id = None
+        self._update_progress_meta()
+        if self._build_running:
+            self._elapsed_timer_id = self.after(1000, self._tick_elapsed_timer)
+
+    def _output_folder_to_open(self) -> Path | None:
+        if self._run_folder is not None and self._run_folder.is_dir():
+            return self._run_folder
+        return None
+
+    def _open_output_folder(self) -> None:
+        folder = self._output_folder_to_open()
+        if folder is None:
+            return
+        try:
+            open_path(folder)
+        except OSError as exc:
+            messagebox.showerror("Could not open", f"{folder}\n\n{exc}")
+
+    # ------------------------------------------------------------------
+    # Running the engine
+    # ------------------------------------------------------------------
+
+    def _run_engine(self) -> None:
+        if self._build_running:
+            return
+        errors, bad = self._validate_step1()
+        errors += self._validate_step2(bad)
         if errors:
-            self._apply_field_highlights(bad)
-            messagebox.showerror("Check inputs", "\n".join(f"- {err}" for err in errors))
+            self._show_errors("Not ready", errors)
             return
         config = self._build_config()
         CONFIG_PATH.write_text(json.dumps(config, indent=2), encoding="utf-8")
-        self._reset_run_pane()
-        self._show_pane("run")
-        self._running = True
+        self._log_chunks.clear()
+        self._run_folder = None
+        self._run_log_path = None
+        self._progress_completed = set()
+        self._progress_current = None
+        for key in self._progress_order:
+            self._set_status_cell(key, "not_started", "Queued")
+        self._build_running = True
         self._cancel_requested = False
-        self.back_button.configure(state="disabled")
+        self._build_started_at = time.monotonic()
+        self.build_button.configure(state="disabled", text="Running")
         self.cancel_button.configure(state="normal")
-        self.open_folder_button.configure(state="disabled")
-        self.open_log_button.configure(state="disabled")
+        self.view_logs_button.configure(state="normal")
+        self.open_output_button.configure(state="disabled")
+        self.progress_status_var.set("Starting...")
+        self.progress_guidance_var.set("")
+        self.progress_guidance_label.grid_remove()
+        self._sync_nav()
+        self._append_log(f"Config saved: {CONFIG_PATH}\n")
         threading.Thread(target=self._run_worker, args=(CONFIG_PATH,), daemon=True).start()
         self.after(100, self._drain_log)
+        self._tick_elapsed_timer()
 
     def _run_worker(self, config_path: Path) -> None:
         python_exe = sys.executable
-        if sys.platform == "win32":
+        if IS_WINDOWS:
             pythonw = Path(sys.executable).parent / "pythonw.exe"
             if pythonw.exists():
                 python_exe = str(pythonw)
@@ -903,95 +3595,69 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 item = self._log_queue.get_nowait()
             except queue.Empty:
                 break
-            if item is None:
-                continue
             if item.startswith("__EXIT__"):
                 finished = int(item[len("__EXIT__") :] or 1)
                 continue
             self._append_log(item)
-            self._track_progress(item.rstrip("\r\n"))
         if finished is not None:
-            self._finish_run(finished)
+            self._set_done(finished == 0)
             return
-        if self._running:
+        if self._build_running:
             self.after(100, self._drain_log)
 
-    def _track_progress(self, line: str) -> None:
-        match = _RUN_FOLDER_RE.match(line)
-        if match:
-            self._run_folder = Path(match.group(1))
-            return
-        match = _MODULE_RE.match(line)
-        if match:
-            index, total = int(match.group(1)), int(match.group(2))
-            self._module_total = total
-            self.progress.set((index - 1) / total if total else 0)
-            return
-        match = _STEP_RE.match(line)
-        if match and self._module_total:
-            self.progress_label.configure(text=f"Running: {match.group(1)}")
-            return
-        match = _RUN_LOG_RE.match(line)
-        if match:
-            self._run_log_path = Path(match.group(1))
-
-    def _finish_run(self, code: int) -> None:
-        self._running = False
-        self.back_button.configure(state="normal")
-        self.cancel_button.configure(state="disabled")
-        self.open_folder_button.configure(state="normal" if self._run_folder else "disabled")
-        self.open_log_button.configure(state="normal" if self._run_log_path else "disabled")
-        if self._cancel_requested:
-            self.progress_label.configure(text="Run canceled.")
-            return
-        if code == 0:
-            self.progress.set(1)
-            self.progress_label.configure(text="Run complete.")
-            self._list_outputs()
-        else:
-            self.progress_label.configure(text=f"Run finished with errors (exit code {code}). See the log.")
-
-    def _list_outputs(self) -> None:
-        if self._run_folder is None:
-            return
-        manifests = sorted(self._run_folder.glob("*_Run_Manifest.json"))
-        files: list[str] = []
-        if manifests:
+    def _append_log(self, text: str) -> None:
+        self._log_chunks.append(text)
+        for viewer in list(self._log_viewers):
             try:
-                data = json.loads(manifests[-1].read_text(encoding="utf-8"))
-                files = list(data.get("files") or [])
-            except (OSError, ValueError):
-                files = []
-        shown = [
-            rel
-            for rel in files
-            if Path(rel).suffix.lower() in OUTPUT_SUFFIXES and len(Path(rel).parts) <= 2
-        ]
-        if not shown:
+                if not viewer.winfo_exists():
+                    self._log_viewers.remove(viewer)
+                    continue
+                viewer.configure(state="normal")
+                viewer.insert("end", text)
+                viewer.see("end")
+                viewer.configure(state="disabled")
+            except TclError:
+                self._log_viewers.remove(viewer)
+        for line in text.splitlines():
+            for key, header in STEP_HEADERS.items():
+                if key in self._progress_order and f"Step: {header}" in line:
+                    self._mark_progress_current(key)
+            match = _RUN_FOLDER_RE.match(line)
+            if match:
+                self._run_folder = Path(match.group(1))
+                self._footer_run_label.configure(text=str(self._run_folder))
+            match = _RUN_LOG_RE.match(line)
+            if match:
+                self._run_log_path = Path(match.group(1))
+
+    def _set_done(self, success: bool) -> None:
+        self._build_running = False
+        self._update_progress_meta()
+        self.build_button.configure(state="normal", text="Run")
+        self.cancel_button.configure(state="disabled")
+        self.view_logs_button.configure(state="normal")
+        if self._output_folder_to_open() is not None:
+            self.open_output_button.configure(state="normal")
+        self._sync_nav()
+        if self._cancel_requested:
+            self.progress_status_var.set("Run canceled.")
+            if self._progress_current:
+                self._set_status_cell(self._progress_current, "failed", "Canceled")
             return
-        for row, rel in enumerate(sorted(shown)):
-            path = self._run_folder / rel
-            ctk.CTkLabel(
-                self.outputs_frame, text=rel, text_color=INK, font=(UI_FONT, 13), anchor="w"
-            ).grid(row=row, column=0, sticky="w", pady=2)
-            self._button(
-                self.outputs_frame, "Open", lambda p=path: self._open(p), width=80
-            ).grid(row=row, column=1, sticky="e", padx=(8, 0), pady=2)
-        self.outputs_card.grid()
-
-    def _open(self, path: Path) -> None:
-        try:
-            open_path(path)
-        except OSError as exc:
-            messagebox.showerror("Could not open", f"{path}\n\n{exc}")
-
-    def _open_run_folder(self) -> None:
-        if self._run_folder is not None:
-            self._open(self._run_folder)
-
-    def _open_run_log(self) -> None:
-        if self._run_log_path is not None:
-            self._open(self._run_log_path)
+        if success:
+            for key in self._progress_order:
+                self._mark_progress_done(key)
+            self.progress_status_var.set("Run complete.")
+            folder = self._output_folder_to_open()
+            self.progress_guidance_var.set(
+                f"Run complete. Output folder: {folder if folder else 'the selected output folder'}. "
+                "Use Open Output to review the generated files."
+            )
+            self.progress_guidance_label.grid()
+        else:
+            if self._progress_current:
+                self._set_status_cell(self._progress_current, "failed", "Failed")
+            self.progress_status_var.set("Run finished with errors. See View Logs.")
 
     def _cancel_run(self) -> None:
         process = self._process
@@ -1004,33 +3670,52 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             pass
         self._append_log("\nCancel requested.\n")
 
-    # ------------------------------------------------------------------
-    # Reset and close
-    # ------------------------------------------------------------------
-
-    def _reset(self) -> None:
-        if not messagebox.askyesno("Reset?", "Clear every input and start again?"):
-            return
-        self._manual_fields.clear()
-        self._discovered = {}
-        self._set_var(self.run_name_var, "")
-        self._set_var(self.output_folder_var, _display_path(DEFAULT_WORK_DIR))
-        self._set_var(self.data_root_var, "")
-        self.scan_status_var.set("")
-        for (key, field_key), var in self.field_vars.items():
-            field = next(f for f in MODULE_BY_KEY[key].inputs_schema if f.key == field_key)
-            default = "" if field.default in (None, 0) else str(field.default)
-            self._set_var(var, default)
-        for var in self.bool_vars.values():
-            var.set(False)
-        for mod in MODULES:
-            self.module_vars[mod.key].set(self._module_available(mod))
-            self._refresh_pill(mod.key)
-        for fid in list(self._field_widgets):
-            self._clear_field_highlight(fid)
+    def _view_logs(self) -> None:
+        window = ctk.CTkToplevel(self)
+        window.title("Run Logs")
+        self.update_idletasks()
+        win_w, win_h = 920, 640
+        x = self.winfo_rootx() + max(0, (self.winfo_width() - win_w) // 2)
+        y = self.winfo_rooty() + max(0, (self.winfo_height() - win_h) // 2)
+        window.geometry(f"{win_w}x{win_h}+{x}+{y}")
+        window.minsize(760, 480)
+        window.configure(fg_color=CANVAS)
+        window.grid_columnconfigure(0, weight=1)
+        window.grid_rowconfigure(1, weight=1)
+        window.transient(self)
+        window.after(50, lambda: (window.lift(), window.focus_force()))
+        header = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=14, border_width=1, border_color=HAIRLINE)
+        header.grid(row=0, column=0, sticky="ew", padx=18, pady=(18, 10))
+        header.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(header, text="Run Logs", text_color=INK, font=(UI_FONT, 24, "bold")).grid(
+            row=0, column=0, sticky="w", padx=20, pady=(16, 0)
+        )
+        if self._run_log_path and self._run_log_path.exists():
+            source = f"Run log file: {self._run_log_path}"
+        else:
+            source = "Captured engine output from this session."
+        ctk.CTkLabel(header, text=source, text_color=MUTED, font=(UI_FONT, 12), wraplength=820, justify="left").grid(
+            row=1, column=0, sticky="w", padx=20, pady=(2, 16)
+        )
+        log_box = ctk.CTkTextbox(window, corner_radius=24, fg_color=LOG_BG, text_color=LOG_TEXT, font=("Consolas", 12))
+        log_box.grid(row=1, column=0, sticky="nsew", padx=18, pady=10)
+        log_box.insert("1.0", "".join(self._log_chunks) or "No run log has been captured yet.")
+        log_box.see("end")
+        log_box.configure(state="disabled")
+        self._log_viewers.append(log_box)
+        actions = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=14, border_width=1, border_color=HAIRLINE)
+        actions.grid(row=2, column=0, sticky="ew", padx=18, pady=(6, 18))
+        actions.grid_columnconfigure(0, weight=1)
+        if self._run_log_path is not None:
+            self._pill_button(
+                actions, "Open Log File", lambda: open_path(self._run_log_path), fg=PAPER, text_color=INK
+            ).grid(row=0, column=0, sticky="w", padx=14, pady=12)
+        self._pill_button(actions, "Close", window.destroy, fg=FOG, text_color=INK).grid(
+            row=0, column=1, padx=(8, 14), pady=12
+        )
 
     def _on_close(self) -> None:
-        if self._running and not messagebox.askyesno(
+        if self._build_running and not messagebox.askyesno(
             "Quit?", "A run is in progress. Cancel it and quit?"
         ):
             return

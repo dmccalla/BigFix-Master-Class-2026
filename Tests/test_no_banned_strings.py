@@ -29,6 +29,7 @@ BANNED = (
     "BigFix Health Check",
     "BigFix Platform Health Check",
     "Health Check Report",
+    "Health Check report",
     "health check report",
     "health check template",
     "Health_Check",

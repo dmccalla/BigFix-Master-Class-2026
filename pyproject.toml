@@ -21,6 +21,8 @@ dependencies = [
     "xlsxwriter>=3.0.0",
     # customtkinter powers the desktop UI.
     "customtkinter>=5.2.0,<6.0.0",
+    # tkcalendar powers the date picker popup.
+    "tkcalendar>=1.6.1",
 ]
 
 [dependency-groups]

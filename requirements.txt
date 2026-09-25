@@ -10,3 +10,4 @@ openpyxl==3.1.5
 xlsxwriter==3.2.9
 playwright==1.63.0
 customtkinter==5.2.2
+tkcalendar==1.6.1

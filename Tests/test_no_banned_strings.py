@@ -112,9 +112,7 @@ def test_tree_has_no_banned_names() -> None:
         if not any(part in _EXCL_DIRS for part in path.relative_to(ROOT).parts)
         and any(needle in path.name for needle in BANNED)
     ]
-    assert not hits, "Banned strings in names:
-  " + "
-  ".join(hits)
+    assert not hits, "Banned strings in names:\n  " + "\n  ".join(hits)
 
 
 def test_tree_has_no_banned_strings() -> None:

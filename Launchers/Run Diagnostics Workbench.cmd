@@ -9,7 +9,7 @@ REM ===================================================================
 REM  Master Class Diagnostics Workbench - one-click launcher (Windows)
 REM
 REM  Double-click this file. It will:
-REM    1. Find Python (3.11 or newer is required)
+REM    1. Find Python (3.12 or newer is required)
 REM    2. Create a PRIVATE environment (.venv) for this tool and install
 REM       its packages there. Your own Python install is left untouched.
 REM    3. Open the Workbench
@@ -67,7 +67,7 @@ if defined BROKEN_VENV (
     rmdir /s /q "%VENV%"
     if exist "%VENV%" goto :venv_failed
 )
-%PY% -c "import sys; sys.exit(0 if sys.version_info >= (3, 11) else 1)" 2>nul
+%PY% -c "import sys; sys.exit(0 if sys.version_info >= (3, 12) else 1)" 2>nul
 if errorlevel 1 goto :old_python
 echo Creating the private environment ^(.venv^)...
 %PY% -m venv "%VENV%"
@@ -102,12 +102,12 @@ echo Keep this launcher in the Launchers folder.
 goto :fail
 :no_python
 echo [ERROR] Python was not found on this PC.
-echo Install Python 3.11 or newer from https://www.python.org/downloads/
+echo Install Python 3.12 or newer from https://www.python.org/downloads/
 echo and tick "Add Python to PATH" during setup, then try again.
 goto :fail
 :old_python
-echo [ERROR] Python 3.11 or newer is required, but an older version was found.
-echo Install Python 3.11 or newer from https://www.python.org/downloads/
+echo [ERROR] Python 3.12 or newer is required, but an older version was found.
+echo Install Python 3.12 or newer from https://www.python.org/downloads/
 goto :fail
 :venv_failed
 echo [ERROR] Could not create the private environment (.venv).

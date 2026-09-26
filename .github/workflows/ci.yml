@@ -8,6 +8,9 @@ on:
 permissions:
   contents: read
 
+# One command per step. The Windows runner's shell only reports the last
+# command's exit code, so a failed install inside a multi-line step would
+# pass silently and surface later as missing modules.
 jobs:
   test:
     name: Lint and test (Python ${{ matrix.python-version }})
@@ -15,7 +18,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.11", "3.13"]
+        python-version: ["3.12", "3.13", "3.14"]
     steps:
       - uses: actions/checkout@v4
 
@@ -24,16 +27,20 @@ jobs:
           python-version: ${{ matrix.python-version }}
           cache: pip
 
-      - name: Install the runtime packages and the test tools
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements.txt
-          python -m pip install pytest ruff
+      - name: Upgrade pip
+        run: python -m pip install --upgrade pip
 
-      - name: Lint
-        run: |
-          python -m ruff check .
-          python -m ruff format --check .
+      - name: Install the runtime packages
+        run: python -m pip install -r requirements.txt
+
+      - name: Install the test tools
+        run: python -m pip install pytest ruff
+
+      - name: Ruff check
+        run: python -m ruff check .
+
+      - name: Ruff format
+        run: python -m ruff format --check .
 
       - name: Test
         run: python -m pytest -q

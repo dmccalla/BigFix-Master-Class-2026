@@ -21,7 +21,7 @@ end to end before any data is collected.
 
 - Windows 10 or 11. PerfMon analysis uses `relog.exe`, which ships with
   Windows.
-- Python 3.11 or newer, installed with "Add Python to PATH".
+- Python 3.12 or newer, installed with "Add Python to PATH".
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
 

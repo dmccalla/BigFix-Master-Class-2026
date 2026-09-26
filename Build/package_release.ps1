@@ -132,6 +132,13 @@ foreach ($relativePath in $includedFiles) {
     $destination = Join-Path $stagingPath $relativePath
     New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
     Copy-Item -LiteralPath $source -Destination $destination
+    if ($destination -like "*.cmd") {
+        # cmd.exe needs CRLF for goto labels. Enforce it whatever line endings
+        # the working copy happens to have, and never write a BOM.
+        $text = [IO.File]::ReadAllText($destination)
+        $text = $text -replace "`r?`n", "`r`n"
+        [IO.File]::WriteAllText($destination, $text, (New-Object Text.UTF8Encoding($false)))
+    }
 }
 
 # SBOM and third-party notices describe exactly what the launcher installs:
@@ -165,7 +172,7 @@ $startHere = @"
 $productName $version
 
 1. Double-click Launchers\Run Diagnostics Workbench.cmd. The first run creates
-   a private Python environment for the tool. Python 3.11 or newer is required.
+   a private Python environment for the tool. Python 3.12 or newer is required.
 2. On the Folders step, choose the sample data at SampleData\BigFix Master Class 2026
    to try the Workbench without a deployment, or your own collected data.
 3. Read Docs\Getting_Started.md before class. Docs\Data_Collection.md describes

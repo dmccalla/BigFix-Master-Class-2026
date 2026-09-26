@@ -7,7 +7,7 @@ deployment is needed to follow it.
 ## Before You Start
 
 - Windows 10 or 11.
-- Python 3.11 or newer. Install it from python.org and tick **Add Python to
+- Python 3.12 or newer. Install it from python.org and tick **Add Python to
   PATH** during setup.
 - Microsoft Edge or Google Chrome. Edge is already on Windows.
 
@@ -22,7 +22,7 @@ deployment is needed to follow it.
    about a minute. Later runs skip this and open the app straight away.
 
 If the launcher reports that Python was not found or is too old, install
-Python 3.11 or newer and run the launcher again. If an install fails part
+Python 3.12 or newer and run the launcher again. If an install fails part
 way through, delete the `.venv` folder and run the launcher again.
 
 ## Step 1: Folders

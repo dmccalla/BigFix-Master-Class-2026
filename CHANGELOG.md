@@ -23,6 +23,8 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
   deployment.
 - Windows launcher that creates a private Python environment on first run.
 - Code sweep, packaging script, SBOM and checksum for releases.
+- Getting Started and Data Collection guides.
+- Continuous integration that lints and runs the suite on every push.
 
 ### Changed
 

@@ -24,7 +24,7 @@ fails the suite when a release version has no changelog section.
    Recommended** result needs a recorded decision before it is accepted.
 
    ```powershell
-   .\Tools\run-code-sweep.ps1
+   .\Build\run-code-sweep.ps1
    ```
 
    The sweep writes its reports and executive summary under

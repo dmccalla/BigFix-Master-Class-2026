@@ -27,7 +27,7 @@ them.
 Run before every release, from the repository root:
 
 ```powershell
-.\Tools\run-code-sweep.ps1
+.\Build\run-code-sweep.ps1
 ```
 
 | Check | Tool | Blocks a release when |

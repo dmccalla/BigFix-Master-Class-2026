@@ -13,7 +13,7 @@ Lib/Themes/word_stub_utils.py). It carries no content: only the body font,
 the heading styles, and the BigFixContent table style the modules use.
 Run this script to regenerate the template; never edit the .docx by hand.
 
-    python Utilities/build_style_template.py
+    python Build/build_style_template.py
 """
 
 from __future__ import annotations

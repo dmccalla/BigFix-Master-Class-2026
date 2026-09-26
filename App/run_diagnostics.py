@@ -19,7 +19,7 @@ Each module writes its own Mini Report, Infographic, and Excel outputs. There
 is no combined report.
 
 Usage:
-    python run_diagnostics.py --config diagnostics_workbench.ui.config.json --yes
+    python run_diagnostics.py --config <config.json> --yes
 
 Config keys:
     run_name        Optional label used for the run folder and file prefix.

@@ -204,9 +204,23 @@ STEP_HEADERS = {
     "filldb": "FillDB Performance Analysis",
 }
 BROWSABLE_INPUT_KINDS = {"file", "file_optional", "folder", "folder_optional"}
-LOGO_ASSET_PATH = PROJECT_ROOT / "Assets" / "bigfix_logo_official_icon.png"
+LOGO_ASSET_PATH = PROJECT_ROOT / "Assets" / "workbench_icon.png"
 CONDENSED_FONT_FILE = PROJECT_ROOT / "Fonts" / "Roboto" / "RobotoCondensed-Bold.ttf"
-CONFIG_PATH = PROJECT_ROOT / "diagnostics_workbench.ui.config.json"
+
+
+def _app_data_dir() -> Path:
+    """Per-user folder for files the app writes for itself.
+
+    The build config goes here rather than next to the code, so an extracted
+    copy of the Workbench stays exactly what it was shipped as.
+    """
+    base = os.environ.get("LOCALAPPDATA")
+    if base:
+        return Path(base) / "Master Class Diagnostics Workbench"
+    return PROJECT_ROOT
+
+
+CONFIG_PATH = _app_data_dir() / "last_build.config.json"
 DETECTING = "Detecting..."
 _LAYOUT_DEBOUNCE_MS = 40
 
@@ -3833,6 +3847,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             self._show_errors("Not ready", errors)
             return
         config = self._build_config()
+        CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         CONFIG_PATH.write_text(json.dumps(config, indent=2), encoding="utf-8")
         self._log_chunks.clear()
         self._run_folder = None

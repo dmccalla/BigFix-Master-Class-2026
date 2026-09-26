@@ -15,7 +15,7 @@
     example --apply-ruff-fixes or --fail-fast.
 
 .EXAMPLE
-    .\Tools\run-code-sweep.ps1
+    .\Build\run-code-sweep.ps1
 #>
 
 [CmdletBinding(PositionalBinding = $false)]

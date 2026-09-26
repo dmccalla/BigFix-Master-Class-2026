@@ -18,12 +18,12 @@ references to any other project.
 The full gate, which also runs the suite:
 
 ```powershell
-.\Tools\run-code-sweep.ps1
+.\Build\run-code-sweep.ps1
 ```
 
 ## Checking The App By Hand
 
 Launch the app, point the Data Folder at `SampleData\BigFix Master Class
-2026`, press Next, open each module's Details, press Next again and Build. All
-three modules should finish with a green Done pill and Open Output should
-show three module folders.
+2026`, enter a run name, press Next, open each module's Details, press Next
+again and Build. All three modules should finish with a green Done pill and
+Open Output should show three module folders.

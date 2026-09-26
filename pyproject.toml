@@ -35,6 +35,16 @@ dev = [
     "vulture>=2.11",
 ]
 
+[tool.pytest.ini_options]
+testpaths = ["Tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-ra"
+markers = [
+    "integration: tests that execute full module pipelines or require realistic evidence files",
+    "slow: tests that can take several seconds or more",
+]
+
 [tool.ruff]
 line-length = 90
 target-version = "py311"

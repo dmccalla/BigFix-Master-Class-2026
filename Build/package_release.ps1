@@ -68,7 +68,7 @@ function Test-IncludedTrackedFile {
     param([string]$RelativePath)
 
     $path = $RelativePath.Replace("\", "/")
-    $rootFiles = @("README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "AUTHORS.md", "pyproject.toml", "requirements.txt")
+    $rootFiles = @("README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "AUTHORS.md", "SECURITY.md", "pyproject.toml", "requirements.txt")
     if ($rootFiles -contains $path) { return $true }
 
     $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/", "Docs/")
@@ -168,7 +168,8 @@ $productName $version
    a private Python environment for the tool. Python 3.11 or newer is required.
 2. On the Folders step, choose the sample data at SampleData\BigFix Master Class 2026
    to try the Workbench without a deployment, or your own collected data.
-3. Read the guide in Docs before class.
+3. Read Docs\Getting_Started.md before class. Docs\Data_Collection.md describes
+   the files each module needs.
 
 Release notes are in CHANGELOG.md. The software bill of materials is
 sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.

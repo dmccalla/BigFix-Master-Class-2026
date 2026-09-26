@@ -4,7 +4,7 @@ python-docx==1.2.0
 defusedxml==0.7.1
 Pillow==12.3.0
 matplotlib==3.11.2
-numpy>=2.0
+numpy==2.5.3
 pandas==3.0.6
 openpyxl==3.1.5
 xlsxwriter==3.2.9

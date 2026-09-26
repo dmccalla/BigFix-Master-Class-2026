@@ -1,3 +1,9 @@
+# Copyright (c) 2026 Duncan McCalla
+# SPDX-License-Identifier: MIT
+#
+# Master Class Diagnostics Workbench
+# See the LICENSE and NOTICE files in the project root for license text and attribution.
+
 """The release notices come from the environment that runs the script."""
 
 from __future__ import annotations

@@ -5,20 +5,10 @@
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 """
-app_version.py -- single source of truth for the Workbench version.
+app_version.py -- source of the Workbench version shown in the UI.
 
-The version is declared in exactly one place: the ``version`` field in
-pyproject.toml. Anything that shows or records a version reads it from here,
-so bumping a release is a one-line edit in one file.
-
-Release bookkeeping lives in two other places, both maintained by hand:
-
-  * CHANGELOG.md at the repo root records what changed in each version.
-  * A git tag (vMAJOR.MINOR.PATCH) marks the exact commit the version shipped
-    from. The tag, not the file, is the permanent record.
-
-Tests/test_version.py keeps the three in agreement: it fails the suite if
-pyproject declares a release version that CHANGELOG.md has no section for.
+The version is declared in the ``version`` field in pyproject.toml. Anything
+that shows the Workbench version reads it from here.
 
 Usage:
 
@@ -34,9 +24,8 @@ import tomllib
 from functools import lru_cache
 from pathlib import Path
 
-# Returned when pyproject.toml cannot be read or declares no version. Shaped
-# like a real version so callers never have to special-case the failure, but
-# obviously not a release.
+# Returned when pyproject.toml cannot be read or declares no version. It keeps
+# callers from having to special-case a missing version.
 FALLBACK = "0.0.0+unknown"
 
 

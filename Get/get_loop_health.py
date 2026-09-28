@@ -115,6 +115,9 @@ class ProcessedRow:
     command_polling_interval: str = ""
     command_polling_interval_seconds: int | None = None
     command_polling_review: str = ""
+    fast_hash_verify_enabled: str = ""
+    fast_hash_verify_work: str = ""
+    fast_hash_verify_sleep: str = ""
 
 
 @dataclass
@@ -218,6 +221,16 @@ class CommandPollingSummary:
     subnet_rows: list[list[str]]
 
 
+@dataclass
+class FastHashVerifySummary:
+    total_devices: int
+    enabled_count: int
+    disabled_count: int
+    not_set_count: int
+    unknown_count: int
+    settings_rows: list[list[str]]
+
+
 # Accessible, colorblind-safer palette from the PowerShell version.
 TABLE_STYLE_ID = "BigFixContent"
 
@@ -241,6 +254,22 @@ COMMAND_POLLING_INTERVAL_COLUMN_NAMES = (
     "_BESClient_Comm_CommandPollIntervalSeconds",
 )
 COMMAND_POLLING_HEADROOM_SECONDS = 600
+
+FAST_HASH_VERIFY_ENABLED_COLUMN_NAMES = (
+    "Platform Health Check - FastHashVerify Enabled",
+    "FastHashVerify Enabled",
+    "_BESClient_Download_FastHashVerify",
+)
+FAST_HASH_VERIFY_WORK_COLUMN_NAMES = (
+    "Platform Health Check - FastHashVerify Work ms",
+    "FastHashVerify Work ms",
+    "_BESClient_Resource_WorkFastHashVerify",
+)
+FAST_HASH_VERIFY_SLEEP_COLUMN_NAMES = (
+    "Platform Health Check - FastHashVerify Sleep ms",
+    "FastHashVerify Sleep ms",
+    "_BESClient_Resource_SleepFastHashVerify",
+)
 
 
 def parse_timespan_to_seconds(value: str) -> float:
@@ -502,6 +531,14 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
                 "Platform Health Check - Command Polling Interval",
             ]
         )
+    if column_count >= 10:
+        names.extend(
+            [
+                "Platform Health Check - FastHashVerify Enabled",
+                "Platform Health Check - FastHashVerify Work ms",
+                "Platform Health Check - FastHashVerify Sleep ms",
+            ]
+        )
     if column_count > len(names):
         names.extend(
             f"Extra Column {idx}" for idx in range(len(names) + 1, column_count + 1)
@@ -526,7 +563,10 @@ def _looks_like_loop_csv_metric(value: str) -> bool:
 
 
 def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[str]:
-    if expected == 7:
+    if expected == 10:
+        tail = [value.strip() for value in row[-6:]]
+        middle = row[:-6]
+    elif expected == 7:
         tail = [value.strip() for value in row[-3:]]
         middle = row[:-3]
     elif expected == 5:
@@ -545,6 +585,8 @@ def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[
             last_udp = ",".join(middle[idx + 2 :]).strip()
             if expected == 7:
                 return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
+            if expected == 10:
+                return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
             return [computer_name, max_cycle, avg_cycle, last_udp, tail[0]]
 
     return []
@@ -553,7 +595,7 @@ def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[
 def _merge_extra_leading_csv_fields(row: list[str], expected: int) -> list[str]:
     if len(row) <= expected:
         return row + [""] * max(0, expected - len(row))
-    if expected in {5, 7}:
+    if expected in {5, 7, 10}:
         repaired = _repair_loop_capture_row_with_commas(row, expected)
         if repaired:
             return repaired
@@ -581,6 +623,20 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
         if first_len <= 2:
             columns = ["Maximum Cycle Minutes", "Average Cycle Minutes"]
             expected = 2
+        elif first_len >= 10:
+            columns = [
+                "Computer Name",
+                "Maximum Cycle Minutes",
+                "Average Cycle Minutes",
+                "Last UDP Ping",
+                "Receiving UDP Pings",
+                "Platform Health Check - Command Polling Enabled",
+                "Platform Health Check - Command Polling Interval",
+                "Platform Health Check - FastHashVerify Enabled",
+                "Platform Health Check - FastHashVerify Work ms",
+                "Platform Health Check - FastHashVerify Sleep ms",
+            ]
+            expected = 10
         elif first_len >= 7:
             columns = [
                 "Computer Name",
@@ -1686,6 +1742,17 @@ def auto_detect_command_polling_columns(
     )
 
 
+def auto_detect_fast_hash_verify_columns(
+    df: pd.DataFrame,
+) -> tuple[str | None, str | None, str | None]:
+    """Find FastHashVerify columns from the 2.0 agent counter analysis."""
+    return (
+        _column_lookup_normalized(df, FAST_HASH_VERIFY_ENABLED_COLUMN_NAMES),
+        _column_lookup_normalized(df, FAST_HASH_VERIFY_WORK_COLUMN_NAMES),
+        _column_lookup_normalized(df, FAST_HASH_VERIFY_SLEEP_COLUMN_NAMES),
+    )
+
+
 def auto_detect_udp_receiving_column(df: pd.DataFrame) -> str | None:
     return _column_lookup_normalized(
         df,
@@ -1717,6 +1784,50 @@ def parse_command_polling_enabled(value: Any) -> str:
     if "does not exist" in folded or "duplicate" in folded or "error" in folded:
         return "Unknown"
     return "Unknown"
+
+
+def parse_fast_hash_verify_enabled(value: Any) -> str:
+    """Normalize the FastHashVerify boolean while preserving an unset state."""
+    if value is None:
+        return "Not Set"
+    try:
+        if pd.isna(value):
+            return "Not Set"
+    except (TypeError, ValueError):
+        pass
+
+    text = str(value).strip()
+    folded = text.casefold()
+    if not folded or folded in {"nan", "none", "not set", "not reported"}:
+        return "Not Set"
+    if folded in {"1", "true", "yes", "enabled", "enable"}:
+        return "Enabled"
+    if folded in {"0", "false", "no", "disabled", "disable"}:
+        return "Disabled"
+    if "does not exist" in folded or "duplicate" in folded or "error" in folded:
+        return "Unknown"
+    return "Unknown"
+
+
+def display_fast_hash_verify_ms(value: Any) -> str:
+    """Display a FastHashVerify work/sleep value with its documented unit."""
+    if value is None:
+        return "Not Set"
+    try:
+        if pd.isna(value):
+            return "Not Set"
+    except (TypeError, ValueError):
+        pass
+
+    text = str(value).strip()
+    folded = text.casefold()
+    if not folded or folded in {"nan", "none", "not set", "not reported"}:
+        return "Not Set"
+    if "does not exist" in folded or "duplicate" in folded or "error" in folded:
+        return "Unknown"
+    if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
+        return f"{float(text):g} ms"
+    return text
 
 
 def parse_command_polling_interval_seconds(value: Any) -> int | None:
@@ -2153,6 +2264,9 @@ def process_rows(
     udp_data: dict[str, dict[str, str]] | None = None,
     command_polling_enabled_column: str | None = None,
     command_polling_interval_column: str | None = None,
+    fast_hash_verify_enabled_column: str | None = None,
+    fast_hash_verify_work_column: str | None = None,
+    fast_hash_verify_sleep_column: str | None = None,
 ) -> tuple[list[ProcessedRow], int, int]:
     processed: list[ProcessedRow] = []
     not_reported_count = 0
@@ -2162,6 +2276,18 @@ def process_rows(
         command_polling_enabled_column, command_polling_interval_column = (
             auto_detect_command_polling_columns(df)
         )
+    if not any(
+        (
+            fast_hash_verify_enabled_column,
+            fast_hash_verify_work_column,
+            fast_hash_verify_sleep_column,
+        )
+    ):
+        (
+            fast_hash_verify_enabled_column,
+            fast_hash_verify_work_column,
+            fast_hash_verify_sleep_column,
+        ) = auto_detect_fast_hash_verify_columns(df)
 
     for _, row in df.iterrows():
         max_sec = convert_to_seconds(row.get(max_column), max_column)
@@ -2212,6 +2338,22 @@ def process_rows(
                     raw_interval, polling_interval_seconds, polling_status
                 )
 
+            fast_hash_enabled = ""
+            fast_hash_work = ""
+            fast_hash_sleep = ""
+            if fast_hash_verify_enabled_column:
+                fast_hash_enabled = parse_fast_hash_verify_enabled(
+                    row.get(fast_hash_verify_enabled_column)
+                )
+            if fast_hash_verify_work_column:
+                fast_hash_work = display_fast_hash_verify_ms(
+                    row.get(fast_hash_verify_work_column)
+                )
+            if fast_hash_verify_sleep_column:
+                fast_hash_sleep = display_fast_hash_verify_ms(
+                    row.get(fast_hash_verify_sleep_column)
+                )
+
             processed.append(
                 ProcessedRow(
                     computer_name=computer_name,
@@ -2225,6 +2367,9 @@ def process_rows(
                     command_polling_enabled=polling_status,
                     command_polling_interval=polling_interval,
                     command_polling_interval_seconds=polling_interval_seconds,
+                    fast_hash_verify_enabled=fast_hash_enabled,
+                    fast_hash_verify_work=fast_hash_work,
+                    fast_hash_verify_sleep=fast_hash_sleep,
                 )
             )
         else:
@@ -2368,6 +2513,60 @@ def analyze_command_polling(
     )
 
 
+def analyze_fast_hash_verify(
+    rows: list[ProcessedRow],
+) -> FastHashVerifySummary | None:
+    fast_hash_rows = [
+        row
+        for row in rows
+        if row.fast_hash_verify_enabled
+        or row.fast_hash_verify_work
+        or row.fast_hash_verify_sleep
+    ]
+    if not fast_hash_rows:
+        return None
+
+    counts = Counter(row.fast_hash_verify_enabled or "Not Set" for row in fast_hash_rows)
+    settings = Counter(
+        (
+            row.fast_hash_verify_work or "Not Set",
+            row.fast_hash_verify_sleep or "Not Set",
+        )
+        for row in fast_hash_rows
+    )
+    settings_rows = [
+        [work, sleep, f"{count:,}"]
+        for (work, sleep), count in sorted(
+            settings.items(), key=lambda item: (-item[1], item[0])
+        )
+    ]
+    return FastHashVerifySummary(
+        total_devices=len(fast_hash_rows),
+        enabled_count=counts["Enabled"],
+        disabled_count=counts["Disabled"],
+        not_set_count=counts["Not Set"],
+        unknown_count=counts["Unknown"],
+        settings_rows=settings_rows,
+    )
+
+
+def fast_hash_verify_coverage_rows(
+    summary: FastHashVerifySummary,
+) -> list[list[str]]:
+    total = summary.total_devices
+    denominator = max(total, 1)
+
+    def percent(count: int) -> str:
+        return f"{count / denominator * 100:.1f}%"
+
+    return [
+        ["Enabled", f"{summary.enabled_count:,}", percent(summary.enabled_count)],
+        ["Disabled", f"{summary.disabled_count:,}", percent(summary.disabled_count)],
+        ["Not Set", f"{summary.not_set_count:,}", percent(summary.not_set_count)],
+        ["Unknown", f"{summary.unknown_count:,}", percent(summary.unknown_count)],
+    ]
+
+
 def calculate_metrics(
     processed: list[ProcessedRow],
     total_source_rows: int,
@@ -2488,6 +2687,12 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
     has_command_polling_data = any(
         r.command_polling_enabled or r.command_polling_interval for r in rows
     )
+    has_fast_hash_verify_data = any(
+        r.fast_hash_verify_enabled
+        or r.fast_hash_verify_work
+        or r.fast_hash_verify_sleep
+        for r in rows
+    )
 
     data = []
     for r in rows:
@@ -2510,6 +2715,10 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
                 suggested_command_polling_seconds(r.avg_seconds)
             )
             row_dict["Command Polling Review"] = r.command_polling_review
+        if has_fast_hash_verify_data:
+            row_dict["FastHashVerify"] = r.fast_hash_verify_enabled
+            row_dict["FastHashVerify Work"] = r.fast_hash_verify_work
+            row_dict["FastHashVerify Sleep"] = r.fast_hash_verify_sleep
         data.append(row_dict)
     return pd.DataFrame(data)
 
@@ -2750,6 +2959,7 @@ def generate_excel(
     loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
     command_polling_summary: CommandPollingSummary | None = None,
+    fast_hash_verify_summary: FastHashVerifySummary | None = None,
     stamp: str = "",
 ) -> None:
     metrics_rows = [
@@ -2816,6 +3026,15 @@ def generate_excel(
                     "Command Polling Interval Below Average Loop",
                     command_polling_summary.interval_below_loop_count,
                 ),
+            ]
+        )
+    if fast_hash_verify_summary:
+        metrics_rows.extend(
+            [
+                ("FastHashVerify Enabled", fast_hash_verify_summary.enabled_count),
+                ("FastHashVerify Disabled", fast_hash_verify_summary.disabled_count),
+                ("FastHashVerify Not Set", fast_hash_verify_summary.not_set_count),
+                ("FastHashVerify Unknown", fast_hash_verify_summary.unknown_count),
             ]
         )
     metrics_df = pd.DataFrame(metrics_rows, columns=["Metric", "Value"])
@@ -2955,6 +3174,15 @@ def generate_excel(
                         "NoUdpAndPollingOff",
                     ],
                 ).to_excel(writer, sheet_name="Polling by Subnet", index=False)
+        if fast_hash_verify_summary:
+            pd.DataFrame(
+                fast_hash_verify_coverage_rows(fast_hash_verify_summary),
+                columns=["Status", "Devices / Source", "Percent"],
+            ).to_excel(writer, sheet_name="FastHashVerify Summary", index=False)
+            pd.DataFrame(
+                fast_hash_verify_summary.settings_rows,
+                columns=["Work (ms)", "Sleep (ms)", "Devices"],
+            ).to_excel(writer, sheet_name="FastHashVerify Settings", index=False)
 
     autosize_excel_columns(excel_output)
     if actionsite_pressure:
@@ -3207,6 +3435,7 @@ def generate_word(
     loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
     command_polling_summary: CommandPollingSummary | None = None,
+    fast_hash_verify_summary: FastHashVerifySummary | None = None,
     stamp: str = "",
 ) -> None:
     if Document is None:
@@ -3234,6 +3463,8 @@ def generate_word(
         finding_scope = (
             "loop time, expensive evaluations, UDP notification, and command polling"
         )
+    if fast_hash_verify_summary:
+        finding_scope += ", and FastHashVerify client settings"
     add_note_paragraph(
         document,
         f"The raw data used to generate these {finding_scope} findings is available "
@@ -3446,12 +3677,10 @@ def generate_word(
             {1, 2},
         )
         document.add_paragraph(
-            "For deeper command polling review, use the Client Loop Workbook "
-            "generated with this module. The Source Data sheet includes the "
-            "client loop data, relay, subnet, UDP notification status, command "
-            "polling enabled state, and reported polling interval. Filter that "
-            "workbook with the customer's network knowledge to identify where "
-            "command polling changes may be appropriate."
+            "Command polling data includes client loop timing, relay and subnet "
+            "context, UDP notification status, the command polling enabled state, "
+            "and the reported polling interval. These fields describe command "
+            "polling coverage and its relationship to client evaluation timing."
         )
 
         if command_polling_summary.relay_rows:
@@ -3491,6 +3720,39 @@ def generate_word(
                 command_polling_summary.subnet_rows[:10],
                 {1, 2, 3, 4, 5, 6, 7, 8},
             )
+
+    if fast_hash_verify_summary:
+        document.add_heading("FastHashVerify Review", level=3)
+        document.add_paragraph(
+            "FastHashVerify temporarily allows the BigFix Client to use more "
+            "CPU while calculating downloaded file hashes. This can shorten "
+            "verification time for large patch files and large software updates, "
+            "especially when the client would otherwise throttle hashing. It is "
+            "disabled by default. When enabled, the documented default work and "
+            "sleep settings are 20 ms and 60 ms, which allows hashing to use about "
+            "25% of one CPU core while it is active. A missing value in the source "
+            "data means the client default is in effect. The effective impact "
+            "depends on endpoint workload and available CPU."
+        )
+        document.add_heading("FastHashVerify Status", level=4)
+        build_word_table(
+            document,
+            ["Status", "Devices / Source", "% of Source"],
+            fast_hash_verify_coverage_rows(fast_hash_verify_summary),
+            {1, 2},
+        )
+        document.add_heading("Reported Work and Sleep Settings", level=4)
+        build_word_table(
+            document,
+            ["Work (ms)", "Sleep (ms)", "Devices"],
+            fast_hash_verify_summary.settings_rows,
+            {2},
+        )
+        document.add_paragraph(
+            "Individual client FastHashVerify values include the enabled state and "
+            "the reported work and sleep intervals. These intervals show the "
+            "configured balance between active hash calculation and sleep time."
+        )
 
     document.save(str(word_output))
 
@@ -3631,6 +3893,17 @@ def main() -> int:
             log.detail("Command Polling Enabled", command_polling_enabled_column)
         if command_polling_interval_column:
             log.detail("Command Polling Interval", command_polling_interval_column)
+        (
+            fast_hash_verify_enabled_column,
+            fast_hash_verify_work_column,
+            fast_hash_verify_sleep_column,
+        ) = auto_detect_fast_hash_verify_columns(df)
+        if fast_hash_verify_enabled_column:
+            log.detail("FastHashVerify Enabled", fast_hash_verify_enabled_column)
+        if fast_hash_verify_work_column:
+            log.detail("FastHashVerify Work", fast_hash_verify_work_column)
+        if fast_hash_verify_sleep_column:
+            log.detail("FastHashVerify Sleep", fast_hash_verify_sleep_column)
 
         # Load UDP data early so it can be merged into the loop data
         udp_summary = load_udp_notification_summary(udp_notifications_file)
@@ -3656,6 +3929,9 @@ def main() -> int:
             udp_data=udp_data_dict,
             command_polling_enabled_column=command_polling_enabled_column,
             command_polling_interval_column=command_polling_interval_column,
+            fast_hash_verify_enabled_column=fast_hash_verify_enabled_column,
+            fast_hash_verify_work_column=fast_hash_verify_work_column,
+            fast_hash_verify_sleep_column=fast_hash_verify_sleep_column,
         )
         if not processed:
             log.warn("No valid rows were parsed.")
@@ -3687,6 +3963,7 @@ def main() -> int:
             top_offenders_file, top_count=args.top_offenders_count
         )
         command_polling_summary = analyze_command_polling(processed)
+        fast_hash_verify_summary = analyze_fast_hash_verify(processed)
 
         log.step("Summary")
         log.detail("Devices", metrics.total_devices)
@@ -3747,6 +4024,10 @@ def main() -> int:
                 "No UDP and polling disabled/not set",
                 command_polling_summary.no_udp_polling_gap_count,
             )
+        if fast_hash_verify_summary:
+            log.detail("FastHashVerify enabled", fast_hash_verify_summary.enabled_count)
+            log.detail("FastHashVerify disabled", fast_hash_verify_summary.disabled_count)
+            log.detail("FastHashVerify not set", fast_hash_verify_summary.not_set_count)
 
         log.step("Generating Word-friendly accessible PNG health summary")
         generate_png(
@@ -3767,6 +4048,7 @@ def main() -> int:
             loop_offenders=loop_offenders,
             udp_summary=udp_summary,
             command_polling_summary=command_polling_summary,
+            fast_hash_verify_summary=fast_hash_verify_summary,
             stamp=stamp,
         )
 
@@ -3780,6 +4062,7 @@ def main() -> int:
                 loop_offenders=loop_offenders,
                 udp_summary=udp_summary,
                 command_polling_summary=command_polling_summary,
+                fast_hash_verify_summary=fast_hash_verify_summary,
                 stamp=stamp,
             )
 

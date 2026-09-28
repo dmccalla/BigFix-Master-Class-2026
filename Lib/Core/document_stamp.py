@@ -102,8 +102,8 @@ def strip_stamp_paragraphs_xml(body_xml: str) -> str:
     """Remove stamp paragraphs from raw body XML before report injection.
 
     The stamp belongs to the standalone document. When an injector lifts a
-    module document's body into the full report, the report keeps its own
-    front matter and the stamp must not ride along.
+    module document's body into a larger assembled document, that document
+    keeps its own front matter and the stamp must not ride along.
     """
     import re
 

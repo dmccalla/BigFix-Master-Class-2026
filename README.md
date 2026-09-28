@@ -2,11 +2,9 @@
 
 Automated performance and configuration analysis for BigFix.
 
-The Workbench takes data collected from a BigFix deployment, runs three
-analysis modules against it, and writes each module's Mini Report,
-Infographic and Excel workbook into one run folder. It was built for the
-2026 BigFix Master Class so that attendees can run the same analysis on
-their own deployments after the session.
+The Workbench takes data collected from a BigFix deployment, runs the three
+Master Class analysis modules against it, and writes each module's Mini Report,
+Infographic and Excel workbook into one run folder.
 
 | Module | What it needs | What it writes |
 |---|---|---|
@@ -24,27 +22,19 @@ end to end before any data is collected.
 - Python 3.12 or newer, installed with "Add Python to PATH".
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
+- Microsoft Word and Excel are the preferred and tested applications for
+  opening the Mini Reports and Excel workbooks. LibreOffice and other
+  compatible applications may work, but they have not been fully vetted.
 
 The Workbench installs its own packages into a private `.venv` folder next
 to the code. Your Python installation is not changed.
 
-## Quick Start
+## Using The Workbench
 
-1. Extract the release zip to a folder you can write to.
-2. Double-click `Launchers\Run Diagnostics Workbench.cmd`. The first run
-   creates the private environment and installs the packages, which takes
-   about a minute.
-3. On **Folders**, set the Data Folder to `SampleData\BigFix Master Class
-   2026`, choose an Output Folder and enter a Run Name.
-4. On **Modules**, keep all three modules selected. Open **Details** on the
-   Client Performance Loop Analysis row and enter the Report Start and End
-   dates.
-5. On **Build**, press **Build**. When the three modules read Done, press
-   **Open Output**.
-
-[Getting Started](Docs/Getting_Started.md) walks through each step and
-explains the outputs. [Data Collection](Docs/Data_Collection.md) describes
-the files each module needs and where they come from.
+See [Getting Started](Docs/Getting_Started.md) for the application workflow
+and outputs. [Data Collection](Docs/Data_Collection.md) describes the files
+each module needs, where they come from, and how the live labs run the
+corresponding BigFix collection tasks first.
 
 ## Layout
 
@@ -60,24 +50,15 @@ the files each module needs and where they come from.
 | `SampleData/` | The fictional sample capture |
 | `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1` |
 | `Launchers/` | The Windows launcher |
-| `Docs/` | Guides for attendees and for maintaining the project |
-| `Tests/` | The test suite |
-| `Build/` | Developer tooling: code sweep, packaging, release notices. Not shipped. |
+| `Docs/` | Guides for attendees and the live lab collection workflow |
 
-## Development
+## Class Materials
 
-```powershell
-.venv\Scripts\python -m pytest -q      # the suite
-.\Build\run-code-sweep.ps1             # lint, tests, security, licenses, SBOM
-.\Build\package_release.ps1            # the release zip, checksum and SBOM
-```
-
-See [Testing](Docs/Testing.md), [Security](Docs/Security.md) and the
-[Release Process](Docs/Release_Process.md). Changes are recorded in
-[CHANGELOG.md](CHANGELOG.md).
+- [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
+- [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
+  and the files each module reads.
 
 ## License
 
 MIT. See [LICENSE](LICENSE) and [NOTICE](NOTICE). The bundled fonts keep
-their own licenses, listed in NOTICE. Third-party package licenses ship with
-each release as `THIRD_PARTY_NOTICES.md`.
+their own licenses, listed in NOTICE.

@@ -78,3 +78,31 @@ The captures above come from three places:
 
 Keep the captures for one deployment together. The Workbench never modifies
 an input file.
+
+## Master Class Lab Workflow
+
+The live labs begin in the BigFix console. Run the collection task first, then
+retrieve the resulting capture and use it as the input for the matching module.
+The sample data is for practicing the Workbench workflow; it does not replace
+the collection task in a live lab.
+
+| Lab | BigFix collection task | Capture to retrieve | Workbench module |
+|---|---|---|---|
+| Agent Performance | `BigFix Platform Health Check -- Collect Agent Performance Counter Analysis Data (2.0)` | `Client_Loop_*.xml` or `Client_Loop_*.csv`; the task also produces the optional Top 10 and UDP captures | Client Performance Loop Analysis |
+| PerfMon | `BigFix Platform Health Check -- Setup and Run Perfmon Counters (2.0)` | The `.blg` file from each targeted server | Perfmon Infrastructure Analysis |
+| FillDB (time permitting) | `BigFix Platform Health Check -- Enable FillDB Performance Logging (2.0)` | `FillDBPerf.log` and its rollover files after logging is disabled | FillDB Performance Analysis |
+
+For the Agent Performance lab, confirm that the `BigFix Platform Health Check
+-- Agent Performance Counters - Basic (2.0)` analysis is active before running
+the collection task. The collection task runs as a one-time action from the
+root server.
+
+For the PerfMon lab, run the task against the role servers in scope and
+retrieve the logs directly from those machines. PerfMon logs are large and are
+not uploaded by the Health Check tasks. For the optional FillDB lab, disable
+the performance logging after the capture period and retrieve the complete log
+set, including rollover files.
+
+When a capture window is longer than the class session, the task run can be
+demonstrated live and the instructor-provided sanitized capture can be used for
+the analysis portion of the exercise.

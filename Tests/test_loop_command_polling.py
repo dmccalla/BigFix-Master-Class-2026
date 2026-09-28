@@ -227,7 +227,8 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
         == ["Status", "Devices / Source", "% of Source"]
         for table in doc.tables
     )
-    assert any("Client Loop Workbook" in p.text for p in doc.paragraphs)
+    assert any("Command polling data includes client loop timing" in p.text for p in doc.paragraphs)
+    assert not any("generated with this module" in p.text for p in doc.paragraphs)
     assert not any(
         "Context Signal" in [cell.text for cell in table.rows[0].cells]
         for table in doc.tables

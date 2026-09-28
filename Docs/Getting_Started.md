@@ -1,6 +1,6 @@
 # Getting Started
 
-This guide takes you from the release zip to your first set of outputs. It
+This guide takes you from the project folder to your first set of outputs. It
 uses the sample capture that ships with the Workbench, so no BigFix
 deployment is needed to follow it.
 
@@ -10,11 +10,14 @@ deployment is needed to follow it.
 - Python 3.12 or newer. Install it from python.org and tick **Add Python to
   PATH** during setup.
 - Microsoft Edge or Google Chrome. Edge is already on Windows.
+- Microsoft Word and Excel are the preferred and tested applications for
+  opening the Mini Reports and Excel workbooks. LibreOffice and other
+  compatible applications may work, but they have not been fully vetted.
 
 ## Install
 
-1. Extract the zip to a folder you can write to, such as `Documents`. Keep
-   the folder structure as it is.
+1. Place the project folder somewhere you can write to, such as `Documents`.
+   Keep the folder structure as it is.
 2. Open `Launchers` and double-click **Run Diagnostics Workbench.cmd**.
 3. The first run explains that the Workbench keeps its packages in its own
    private environment, a `.venv` folder next to the code. Press a key to

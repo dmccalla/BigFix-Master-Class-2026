@@ -223,7 +223,7 @@ def test_worksheet_stamp_moves_data_validation():
 
 
 # ---------------------------------------------------------------------------
-# Injection stripping: the stamp never rides into the full report
+# Injection stripping: the stamp never rides into the assembled document
 # ---------------------------------------------------------------------------
 
 

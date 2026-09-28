@@ -1,0 +1,615 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Task>
+		<Title>BigFix Master Class -- Enable FillDB Performance Logging (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-banner-warn{margin-bottom:4px;border:1px solid #e2b6b6;background:#fdecec;padding:9px 12px}
+.hc-bannerhd-warn{font-size:13px;margin-bottom:8px;font-weight:bold;color:#a11a10}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+.hc-flabel{font-size:12px;margin-bottom:3px;font-weight:bold;color:#000032}
+.hc-form{margin-top:6px;border:1px solid #c7d9e0;border-left:4px solid #17707f;background:#f5fafb;padding:6px 11px 8px;font-size:13px;color:#000032}
+.hc-form LABEL{font-size:13px;color:#000032;cursor:pointer}
+.hc-form P{margin:5px 0}
+.hc-in{font-family:'Segoe UI',sans-serif;font-size:13px;border:1px solid #b9c8d8;background:#fff;color:#000032;padding:2px 4px;width:200px}
+.hc-note{font-size:12px;border:1px solid #ebd3a8;background:#fcf6ea;color:#7a5a18;padding:5px 9px;margin:0 0 6px;line-height:1.4}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Enable FillDB Performance Logging</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>Enables temporary FillDB performance logging for health-check collection.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Restarts FillDB</B><SPAN>The FillDB service restarts when logging is enabled and disabled.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Adds overhead</B><SPAN>Performance logging adds overhead; keep the disable plan visible.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Companion WARNING task</B><SPAN>An alert task reports where logging is left enabled.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
+<DIV id=hcNotes class=hc-body style="DISPLAY: none">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Enables FillDB performance logging. Log size and duration options are set in the User Input and Parameters section. <BR></FONT></DIV>
+<DIV><STRONG></STRONG><FONT size=2>&nbsp;</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This will only be relevant on BigFix root servers that do not already have FillDB Performance logging enabled. </FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000><FONT size=2>Creates the Health Check folder structure on the same drive that the BigFix&nbsp;root server&nbsp;is installed on.&nbsp;</FONT><FONT size=2>Edit the actionscript parameters if you want something different.</FONT></FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Run this as a one-time action.</FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px">
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2><STRONG>The FillDB service must restart when logging is enabled and disabled.</STRONG></FONT></DIV></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<DIV style="FONT-SIZE: 14px">
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>More information about BigFix&nbsp;logging can be found </FONT><A href="https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Installation/c_logfiles.html"><FONT color=#000000 size=2>here</FONT></A><FONT color=#000000 size=2>.</FONT></DIV></DIV></FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>
+<DIV style="FONT-SIZE: 14px">
+<DIV style="FONT-SIZE: 14px">If a DNS alias or fake root hostname is in use, click Edit on the Root Server Hostname field in the User Input section and enter the correct name before running. Otherwise the API login and all of the task API calls will most likely fail.</DIV></DIV></FONT></DIV></LI></UL></DIV>
+<DIV class=hc-sec style="MARGIN-TOP: 12px">User Input and Parameters</DIV>
+<DIV class=hc-form><BR>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<TABLE>
+<TBODY>
+<FORM>
+<TR>
+<TD>
+<DIV class=hc-sec style="MARGIN-TOP: 10px">Log Size</FONT></STRONG><FONT size=2 face=Arial><EM><BR></EM><BR><FONT size=2 face=Arial>FillDB Performance logging will rotate log files automatically&nbsp;at a&nbsp;<STRONG>default file size of 100 MB</STRONG> and a&nbsp;cap of 10 files - giving us a total of 1 GB of logs. This is&nbsp;the recommended starting point for the total amount of log files needed for analysis. </FONT><FONT size=2 face=Arial>For&nbsp;situations where&nbsp;you want&nbsp;a different&nbsp; maximum total for the FillDB Performance log files, use the field below.&nbsp; </FONT><FONT size=2 face=Arial>The minimum total size being&nbsp;500 MB (so enter "500")&nbsp;and the maximum total size being&nbsp;4 GB (enter "4000").&nbsp;</FONT></FONT> 
+<P></P>
+<P><FONT size=2 face=Arial><STRONG>Note:</STRONG> The maximum total size can be greater than 4 GB but for this automation we are using 4 GB as a guardrail.&nbsp; A set of logs that size can take a while to analyze later on.</P></FONT></DIV></TD></TR>
+<TR>
+<TD>
+<P>
+<DIV class=hc-flabel>FillDB Performance Log Maximum Total Size (MB)</DIV><INPUT id=fillDBPerfLogsSizeMB class=hc-in><FONT size=2 face=Arial>.</FONT> 
+<P></P></TD></TR>
+<TR>
+<TD>
+<P><FONT size=2 face=Arial><INPUT onclick=toggleLogSizeFields(this.checked) id=fillDBPerfLogsSizeNoLimit type=checkbox value=nolimit name=fillDBPerfLogsSizeNoLimit UNCHECKED>Do Not Modify&nbsp;the Default Maximum Total Log File Size</FONT></P></TD></TR>
+<TR>
+<TD>
+<P><STRONG><FONT size=3 face=Arial>Log Duration 
+<DIV></DIV>
+<P><FONT size=2 face=Arial>FillDB Performance logging adds some overhead and should not be enabled without a clear plan to disable it when logging is no longer needed. </FONT><FONT size=2 face=Arial>This task&nbsp;can&nbsp;generate a sub-task to disable FillDB Performance logging after a specified number of hours.&nbsp;</FONT></P>
+<P><FONT size=2 face=Arial>Enter the maximum duration for FillDB Performance logging in the field below.&nbsp; </FONT></P></FONT></STRONG></TD></TR>
+<TR>
+<TD>
+<P>
+<DIV class=hc-flabel>FillDB Performance Logging Duration (Hours)</DIV><INPUT id=fillDBPerfLogsDuration class=hc-in value=24> 
+<DIV style="MARGIN-TOP: 6px"><FONT size=2><B>Note:</B> Default is 24 hours, which is what a health check uses. For troubleshooting outside a health check you can raise it (up to 168). If you are running an actual health check, leave it at 24 unless you have a specific reason to change it.</FONT></DIV>
+<P></P>
+<P><FONT size=2 face=Arial>To run open-ended&nbsp;logging, select the checkbox below.&nbsp;There is a companion task named "WARNING: BigFix Master Class -- Disable FillDB Performance Logging" to disable logging at any time.</FONT></P></TD></TR>
+<TR>
+<TD>
+<P><FONT face=Arial><FONT size=2><INPUT onclick=toggleDurationFields(this.checked) id=fillDBPerfLogsNoDisable type=checkbox value=noduration name=fillDBPerfLogsNoDisable UNCHECKED><LABEL for=fillDBPerfLogsNoDisable>Do Not Automatically Disable Logging</LABEL></FONT></FONT></P></TD></TR>
+<TR>
+<TD><FONT size=2 face=Arial>
+<DIV class=hc-sec style="MARGIN-TOP: 10px">Credentials</DIV>
+<P>Enter in the credentials for a master operator (MO) so this task can generate the action to disable FillDB Performance logging using the BigFix REST API after the duration specified above. These credentials will be protected by using the secure parameters feature. </P>
+<P><STRONG>Note:</STRONG> If SAML is enabled then please enter in a local BigFix MO account.<BR></P></FONT></TD></TR>
+<TR>
+<TD>
+<DIV class=hc-flabel>API Username</DIV><INPUT id=apiUsername class=hc-in><BR></TD></TR>
+<TR>
+<TD>
+<DIV class=hc-flabel>API Password</DIV><INPUT id=apiPassword class=hc-in type=password><BR></TD></TR>
+<TR>
+<TD>
+<DIV class=hc-flabel>Confirm API Password</DIV><INPUT id=apiPasswordConfirm class=hc-in type=password></TD></TR>
+<TR>
+<TD>
+<DIV class=hc-flabel style="MARGIN-TOP: 14px">Root Server Hostname (auto-detected)</DIV><INPUT disabled id=rootServerName class=hc-in maxLength=253><script>(function(){var v='';try{v=EvaluateRelevance('host name of root server');}catch(e){}if(!(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False')){try{v=EvaluateRelevance('name of bes computer whose (root server flag of it = true)');}catch(e2){v='';}}if(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False'){var el=document.getElementById('rootServerName');if(el){el.value=v;}}})();</script> <SPAN onclick="var e=document.getElementById('rootServerName');e.disabled=false;e.style.backgroundColor='#ffffff';e.style.color='#000032';e.focus();this.style.display='none';" id=rootServerEdit style="FONT-SIZE: 12px; CURSOR: pointer; FONT-WEIGHT: bold; COLOR: #17707f">Edit</SPAN> 
+<DIV style="FONT-SIZE: 12px; MARGIN-TOP: 5px; COLOR: #000032"><FONT color=#000000>If this is a DNS alias or fake root, click Edit and enter the correct hostname. Otherwise the API login and all of the task API calls will most likely fail.</FONT></DIV></TD></TR></FORM></TBODY></TABLE><BR><script>var fillDBPerfLogsSizeNoLimit = '';
+var fillDBPerfLogsNoDisable = '';
+
+function toggleLogSizeFields(value) {
+    fillDBPerfLogsSizeNoLimit = value;
+    var fillDBPerfLogsSizeMB = document.getElementById("fillDBPerfLogsSizeMB");
+    if (value) {
+        fillDBPerfLogsSizeMB.value = "";
+        fillDBPerfLogsSizeMB.disabled = true;
+        alert("WARNING: Log files can grow to be large so make sure adequate disk space is available.");
+        return true;
+    } else {
+        fillDBPerfLogsSizeMB.value = "";
+        fillDBPerfLogsSizeMB.disabled = false;
+    }
+}
+
+function toggleDurationFields(value) {
+        fillDBPerfLogsNoDisable = value;
+        var fillDBPerfLogsDuration = document.getElementById("fillDBPerfLogsDuration");
+        var apiUserName = document.getElementById("apiUserName");
+        var apiPassword = document.getElementById("apiPassword");
+        var apiPasswordConfirm = document.getElementById("apiPasswordConfirm");
+    if (value) {
+        apiUserName.value = "";
+        apiUserName.disabled = true;
+        apiPassword.value = "";
+        apiPassword.disabled = true;
+        apiPasswordConfirm.value = "";
+        apiPasswordConfirm.disabled = true;
+        fillDBPerfLogsDuration.value = "";
+        fillDBPerfLogsDuration.disabled = true;
+        alert("WARNING: Be sure you have a plan in place to disable logging once the health check is completed.");
+        return true;
+    } else {
+        apiUserName.value = "";
+        apiUserName.disabled = false;
+        apiPassword.value = "";
+        apiPassword.disabled = false;
+        apiPasswordConfirm.value = "";
+        apiPasswordConfirm.disabled = false;
+        fillDBPerfLogsDuration.value = "";
+        fillDBPerfLogsDuration.disabled = false;
+    }
+}
+
+document.body.ontakeaction = function(event) {
+    // Warn if Day 1 is still collecting or a Day 2 capture is already running.
+    // Day 1 must finish first. Its load would distort the capture.
+    // Do not start a second capture while an earlier Perfmon or FillDB capture is still active.
+    // This is a warning and not a blocker. OK continues and Cancel stops.
+    if (event.contentID == 'Action1') {
+        var day1Open = EvaluateRelevance('exists bes action whose ((name of it contains "Collect SQL Server Information" or name of it contains "Collect Deployment Information" or name of it contains "Collect Deployment Overview" or name of it contains "Collect Deployment Health" or name of it contains "Deployment & SQL Data Collection") and state of it = "Open" and status of result of it as string != "Fixed")');
+        var perfmonActive = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Setup and Run Perfmon Counters" and state of it = "Open" and (now - time issued of it < 24*hour))');
+        var fillDBActive = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Disable FillDB Performance Logging" and state of it = "Open" and status of result of it as string != "Fixed")');
+        if (day1Open === 'True' || perfmonActive === 'True' || fillDBActive === 'True') { if (!confirm('A Day 1 or Day 2 task is already running. Let it finish before you start the Day 2 capture. Overlapping runs can distort the health check data.')) { return false; } }
+    }
+    if (event.contentID == 'Action1') {
+        if (EvaluateRelevance('master flag of current console user') === "False") {
+            alert('<?jxlat Only Master Operators can run this Task.?>');
+            return false;
+        } else
+    var rootServerWindows = EvaluateRelevance('exists bes computer whose (root server flag of it = true AND operating system of it starts with "Win")');
+    var fillDBPerfLogsSizeNoLimit = document.getElementById("fillDBPerfLogsSizeNoLimit").checked;
+    var fillDBPerfLogsNoDisable = document.getElementById("fillDBPerfLogsNoDisable").checked;
+
+    if (rootServerWindows === 'false') {
+        alert("This task can only be run on Windows-based BigFix root servers");
+        return false;
+    } else
+    var fillDBPerfLogsSizeMB = document.getElementById("fillDBPerfLogsSizeMB").value;
+    if ((fillDBPerfLogsSizeMB == null || fillDBPerfLogsSizeMB == "") && fillDBPerfLogsSizeNoLimit == false) {
+        alert("Maximum log files total size field must not be blank." );
+        return false;
+    } else
+    if (isNaN(fillDBPerfLogsSizeMB) && fillDBPerfLogsSizeNoLimit == false) {
+        alert("Maximum log files total size field can only contain numerical characters.");
+        return false;
+    } else
+    if (fillDBPerfLogsSizeMB < 500 && fillDBPerfLogsSizeNoLimit == false) {
+        alert("Please enter a value greater than 500 MB.");
+        return false;
+    } else
+    if (fillDBPerfLogsSizeMB > 4000 && fillDBPerfLogsSizeNoLimit == false) {
+        alert("Please enter a value lower than 4000 MB.");
+        return false;
+    } else
+        var fillDBPerfLogsSizeByte = (fillDBPerfLogsSizeMB * 1024 * 1024);
+        var fillDBPerfLogsDuration = document.getElementById("fillDBPerfLogsDuration").value;
+    if ((fillDBPerfLogsDuration == null || fillDBPerfLogsDuration == "") && fillDBPerfLogsNoDisable == false) {
+        alert("FillDB Performance logging duration field must not be blank." );
+        return false;
+    } else
+    if (isNaN(fillDBPerfLogsDuration) && fillDBPerfLogsNoDisable == false) {
+        alert("FillDB Performance logging duration field can only contain numerical characters.");
+        return false;
+    } else
+    if (fillDBPerfLogsDuration > 168) {
+        alert("Please enter a value lower than 168 hours (7 days).");
+        return false;
+    } else
+    var apiUsername = document.getElementById("apiUsername").value;
+    var apiPassword = document.getElementById("apiPassword").value;
+    var apiPasswordConfirm = document.getElementById("apiPasswordConfirm").value;
+    var rootServerName = document.getElementById("rootServerName").value;
+    if (rootServerName == "") { alert("Root Server Hostname must not be blank. Click Edit and enter the root server hostname or IP address."); return false; }
+    if (rootServerName.length > 253) { alert("Root Server Hostname is too long (max 253 characters)."); return false; }
+    var _rsIp = rootServerName.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    var _rsOk = false;
+    if (_rsIp) { _rsOk = true; for (var _ri = 1; _ri <= 4; _ri++) { if (parseInt(_rsIp[_ri], 10) > 255) { _rsOk = false; } } }
+    else if (/^[A-Za-z0-9._-]+$/.test(rootServerName) && /[A-Za-z]/.test(rootServerName)) { _rsOk = true; }
+    if (!_rsOk) { alert("Root Server Hostname does not look like a valid hostname or IP address."); return false; }
+    if ((apiUsername == null || apiUsername == "")  && fillDBPerfLogsNoDisable == false) {
+        alert("API Username field must not be blank.");
+        return false;
+    } else
+    if ((apiPassword == null || apiPassword == "") && fillDBPerfLogsNoDisable == false) {
+        alert("API Password field must not be blank.");
+        return false;
+    } else
+    if ((apiPassword !== apiPasswordConfirm)  && fillDBPerfLogsNoDisable == false) {
+        alert("API Password fields do not match.");
+        return false;
+    } else {
+        TakeSecureFixletAction(Relevance('id of current fixlet'), Relevance('id of current bes site'), "Action1", { rootServerName: rootServerName }, {
+            apiUsername: apiUsername,
+            apiPassword: apiPassword,
+            fillDBPerfLogsDuration: fillDBPerfLogsDuration,
+            fillDBPerfLogsNoDisable: fillDBPerfLogsNoDisable,
+            fillDBPerfLogsSizeMB: fillDBPerfLogsSizeMB,
+            fillDBPerfLogsSizeByte: fillDBPerfLogsSizeByte,
+            fillDBPerfLogsSizeNoLimit: fillDBPerfLogsSizeNoLimit
+        });
+    }
+    return false;
+}}</script></DIV></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2><FONT color=#000000>Windows</FONT></DIV><BR>
+<DIV class=hc-sec>Action log note</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> uses 1 when files were copied, and <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>2.0 - Updated FillDB performance logging controls and timed cleanup guidance.&nbsp;</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT><FONT size=2><FONT size=2></DIV><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
+function hcSync(){var els=document.getElementsByTagName('INPUT');for(var i=0;i<els.length;i++){var el=els[i];if(el.className&&el.className.indexOf('hc-in')!==-1){el.style.backgroundColor=el.disabled?'#eef1f5':'#ffffff';el.style.color=el.disabled?'#98a2b0':'#000032';}}}
+var _w_toggleLogSizeFields=toggleLogSizeFields;toggleLogSizeFields=function(v){var r=_w_toggleLogSizeFields(v);hcSync();return r;};
+var _w_toggleDurationFields=toggleDurationFields;toggleDurationFields=function(v){var r=_w_toggleDurationFields(v);hcSync();return r;};
+hcSync();</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS ROOT SERVER  */ (exists main gather service AND not exists relay service AND windows of operating system) AND /* LOGGING NOT SET */ (not exists value "EnablePerformanceLogging" whose (it as string = "1") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry)</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-17</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 02:36:12 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[
+//* ====================================================================================================>
+//*     
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This task will enable FillDB Performance logging and, if chosen, spawn a 
+//*   	BigFix action to disable FillDB Performance logging after a specified duration (hours).
+//*
+//* ====================================================================================================>
+
+//* ====================================================================================================>
+//*
+//*     SET SOME PARAMETERS
+//*
+//*     - These parameters can be used to control the location and naming of the various health check files 
+//*     and folders. 
+//*
+//*     - Ideally, the only thing that would be changed here would be the driveLetter.  Be careful about
+//*     adjusting anything else.
+//*
+//* ====================================================================================================>
+
+
+action parameter query "restart" with description "To enable these changes you need to restart the FillDB Service. Enter 'Y' to confirm you are aware of the service restart for both the enablement of logging and the disabling of logging later, if chosen. Click Cancel to exit the task if you wish to do this at another time." with default "N"
+parameter "res" = "{parameter "restart" of action as string as lowercase}"
+
+if {(parameter "res") is "y"}
+
+parameter "driveLetter" = "C:"
+parameter "checkType" = "Platform"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
+parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
+parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
+parameter "backupFolder" = "{parameter "rootFolder" & "\Backup"}"
+parameter "resultsBackupFolder" = "{parameter "backupFolder" & "\Results"}"
+parameter "xmlFilesFolder" = "{parameter "rootFolder" & "\XML_Files"}"
+parameter "logsFolder" = "{parameter "resultsFolder" & "\Logs"}"
+parameter "fillDBPerfLogsFolder"="{parameter "logsFolder" & "\FillDB_Performance"}"
+parameter "fillDBPerfLogsBackupFolder" = "{parameter "resultsBackupFolder" & "\Logs\FillDB_Performance"  & "\" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now)}"
+parameter "fillDBPerfLogsName"="{"FillDBperf.log"}"
+parameter "fillDBPerfLogsFullName"="{parameter "fillDBPerfLogsFolder" & "\" & parameter "fillDBPerfLogsName"}"
+
+//* ====================================================================================================>
+//*
+//*     BACKUP EXISTING FILES, IF PRESENT.  THIS IS MORE FOR TROUBLESHOOTING.  
+//*
+//* ====================================================================================================>
+
+if {if (exists folder (parameter "fillDBPerfLogsFolder")) then (exists files of folder (parameter "fillDBPerfLogsFolder")) else (false)}
+folder create "{parameter "fillDBPerfLogsBackupFolder"}"
+waithidden cmd.exe /C xcopy "{parameter "fillDBPerfLogsFolder" & "\*.log"}" "{parameter "fillDBPerfLogsBackupFolder" & "\*.log"}" /E /Y
+waithidden cmd.exe /C del /F /Q "{parameter "fillDBPerfLogsFolder" & "\*.*"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     DELETE ANY EXISTING FOLDERS, SCRIPTS, ETC. SO WE CAN CREATE FRESH CONTENT
+//*
+//* ====================================================================================================>
+
+//  Nothing to delete here...
+
+//* ====================================================================================================>
+//*
+//*     BUILD OUT THE FOLDER STRUCTURE TO SUPPORT THE GLOBAL TASK
+//*
+//* ====================================================================================================>
+
+folder create "{parameter "xmlFilesFolder"}"
+folder create "{parameter "rootFolder"}"
+folder create "{parameter "fillDBPerfLogsFolder"}"
+
+//* ====================================================================================================>
+//*
+//*     ENABLE FILLDB PERFORMANCE LOGGING AND RESTART THE SERVICE
+//*
+//* ====================================================================================================>
+
+//*
+//*   Save the existing log file setting value so we can set it back later to the original using the 
+//*   disable debug logging task.
+//* 
+
+setting "__FillDB_Perf_Logs_Backup_Value"="{if (exists value "PerformanceDataPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry) then (value "PerformanceDataPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string) else ("was not set")}" on "{parameter "action issue date" of action}" for client
+
+waithidden cmd.exe /C net stop filldb
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"="{escape of (parameter "fillDBPerfLogsFullName")}"
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "EnablePerformanceLogging"="1"
+//*
+//* 4.0.1 
+//* Log max size might be present already so we need to remove it to avoid unexpected behavior.
+//*
+regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfLogFileSizeLimit"
+
+//*
+//*     If a log file size limit was chosen then set the log sizes limit
+//*
+
+if {parameter "fillDBPerfLogsSizeNoLimit" as integer != -1}
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfLogFileSizeLimit"=dword:{parameter "fillDBPerfLogsSizeByte" as integer as hexadecimal}
+endif
+
+//*
+//*   Reassurance note. FillDB performance logging is redirected to the HC folder, so its
+//*   configured log folder goes quiet. Leave a clear notice in that original folder.
+//*
+
+if {exists values whose (it != "" and it as lowercase != "was not set" and it contains "\" and exists folder (preceding text of last "\" of it)) of settings "__FillDB_Perf_Logs_Backup_Value" of client}
+waithidden cmd.exe /C if exist "{(preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}" del /F /Q "{(preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}"
+delete __createfile
+
+createfile until _HC_FILLDB_PERFORMANCE_MOVED_EOF_
+BigFix Master Class Notice
+
+FillDB performance logging has been temporarily redirected to a dedicated health check log file. The configured FillDB performance log folder will appear inactive during this time.
+
+Active Health Check FillDB Performance Log File: {parameter "fillDBPerfLogsFullName"}
+
+Started: {(((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & " at " & (two digit hour of it as string & ":" & two digit minute of it as string) of time (local time zone) of it) of now)}
+Log Type: FillDB performance logging
+
+The configured FillDB performance log path is restored when the generated disable action runs. This notice is removed by that action.
+
+If the health check is complete but logging did not revert automatically, run the companion task named "WARNING: BigFix Master Class -- FillDB Performance Logging is Enabled (2.0)" in the BigFix console. After the configured path is restored, delete this notice if it remains.
+_HC_FILLDB_PERFORMANCE_MOVED_EOF_
+
+move __createfile "{(preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}"
+endif
+
+//*
+//*     Sleep 5 secs and start back up
+//*
+
+waithidden cmd.exe /C ping 127.0.0.1 -n 10 -w 500> nul
+waithidden cmd.exe /C net start filldb
+
+//*
+//*		If the log rotation and size limit is not selected (or not) then add a note about that to the readme file.
+//*     false = -1
+//*
+
+if {parameter "fillDBPerfLogsSizeNoLimit" as integer = -1}
+waithidden cmd.exe /C echo The FillDB Performance log in this folder is *active* but it is not being capped at a maximum size. > "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
+waithidden cmd.exe /C echo See the action 'BigFix Master Class -- Enable FillDB Performance Logging' for details. >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}" 
+elseif {parameter "fillDBPerfLogsSizeNoLimit" as integer != -1}
+waithidden cmd.exe /C echo The FillDB Performance log in this folder is *active* and will be capped at a total file size of {parameter "fillDBPerfLogsSizeMB"} MB. > "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
+waithidden cmd.exe /C echo See the action 'BigFix Master Class -- Enable FillDB Performance Logging' for details. >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}" 
+endif
+
+//*
+//*		If the logging duration is not open (or not) ended then add a note about that to the readme file.
+//*     false = -1
+//*
+
+if {parameter "fillDBPerfLogsNoDisable" as integer = -1}
+waithidden cmd.exe /C echo Automatic disabling of logging was not chosen when logging was initiated. It is *highly* recommended that you disable FillDB Performance logging once your health check is completed. >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}" 
+waithidden cmd.exe /C echo The companion task named 'WARNING: BigFix Master Class -- FillDB Performance Logging is Enabled (2.0)' can be used to disable logging at any time. >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
+elseif {parameter "fillDBPerfLogsNoDisable" as integer != -1}
+waithidden cmd.exe /C echo Automatic disabling of logging was chosen when logging was initiated. See the auto-generated action titled "BigFix Master Class -- Disable FillDB Performance Logging on {((( month of it as two digits & "/" & day_of_month of it as two digits & "/" & year of it as string) of date(local time zone) of it) & " at " &  ((two digit hour of it as string & ":" & two digit minute of it as string) of time (local time zone) of it )) of (now + (parameter "fillDBPerfLogsDuration" as integer * hour))}" >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}" 
+
+//*
+//*		Drop a breadcrumb for the disable action to key off of.
+//* 
+
+setting "__FillDB_Perf_Logs_Expiration" = "{now + (parameter "fillDBPerfLogsDuration" as integer * hour)}" on "{parameter "action issue date" of action}" for client
+
+
+//* ====================================================================================================>
+//*
+//*     CREATE AND POST THE "DISABLE FILLDB PERFORMANCE LOGGING" TASK
+//*
+//* ====================================================================================================>
+
+delete "{parameter "xmlFilesFolder" & "\disable_filldb_performance_logging.xml"}"
+delete __createfile
+
+createfile until _END_
+<?xml version="1.0" encoding="utf-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" SkipUI="true">
+    <SingleAction>
+    <Title>BigFix Master Class -- Disable FillDB Performance Logging (WILL RESTART FILLDB SERVICE)  on {((( month of it as two digits & "/" & day_of_month of it as two digits & "/" & year of it as string) of date(local time zone) of it) & " at " &  ((two digit hour of it as string & ":" & two digit minute of it as string) of time (local time zone) of it )) of (now + (parameter "fillDBPerfLogsDuration" as integer * hour))}</Title>
+    <Relevance>/* IS A WINDOWS ROOT SERVER */ (exists main gather service and not exists relay service AND windows of operating system) AND /* FILLDB PERF LOGGING IS ENABLED */ ( exists value "EnablePerformanceLogging" whose (it as string = "1") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry) AND (exists setting "__FillDB_Perf_Logs_Expiration" whose (now > value of it as time) of client)</Relevance>
+    <ActionScript>
+//* ====================================================================================================>
+//*     
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This task will disable filldb performance logging and set the log file info back to whatever
+//*		it was before it was enabled by the "BigFix Master Class -- Enable FillDB Performance 
+//*		Logging" action.
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C net stop "filldb"
+
+//*
+//*		Disable logging and set the log info back to whatever it was before we made the change to 
+//*		centralized HC logging
+//*
+
+if {{exists values whose (it as lowercase != "was not set") of settings "__FillDB_Perf_Logs_Backup_Value" of client}
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"="{{escape of concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client}"
+else
+regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"
+endif
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "EnablePerformanceLogging"="0"
+regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfLogFileSizeLimit"
+
+//*
+//*		Sleep 5 secs - without this sometimes the service does not come back up
+//*
+
+waithidden cmd.exe /C ping 127.0.0.1 -n 10 -w 500> nul
+waithidden cmd.exe /C net start filldb
+
+//*
+//*		Delete the expiration breadcrumb
+//*
+
+setting delete "__FillDB_Perf_Logs_Expiration" on "{parameter "action issue date"}" for client
+if {{exists values whose (it contains "\" and exists file ((preceding text of last "\" of it) &amp; "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt")) of settings "__FillDB_Perf_Logs_Backup_Value" of client}
+waithidden cmd.exe /C if exist "{{(preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) &amp; "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}" del /F /Q "{{(preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) &amp; "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}"
+endif
+setting delete "__FillDB_Perf_Logs_Backup_Value" on "{parameter "action issue date"}" for client
+
+//*
+//*		Write out / update a readme file.
+//* 
+
+waithidden cmd.exe /C echo The FillDB Performance log in this folder is no longer active and is ready for analysis.  > "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
+waithidden cmd.exe /C echo Logging was automatically disabled by the auto-generated action titled "BigFix Master Class -- Disable FillDB Performance Logging on {((( month of it as two digits & "/" & day_of_month of it as two digits & "/" & year of it as string) of date(local time zone) of it) & " at " &  ((two digit hour of it as string & ":" & two digit minute of it as string) of time (local time zone) of it )) of (now + (parameter "fillDBPerfLogsDuration" as integer * hour))}". >> "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}" 
+ </ActionScript>
+		<SuccessCriteria Option="RunToCompletion"></SuccessCriteria>
+		<Settings>
+			<PreActionShowUI>false</PreActionShowUI>
+			<HasRunningMessage>false</HasRunningMessage>
+			<HasTimeRange>false</HasTimeRange>
+			<HasStartTime>false</HasStartTime>
+			<HasEndTime>true</HasEndTime>
+			<EndDateTimeLocalOffset>P2D</EndDateTimeLocalOffset>
+			<HasDayOfWeekConstraint>false</HasDayOfWeekConstraint>
+			<UseUTCTime>false</UseUTCTime>
+			<ActiveUserRequirement>NoRequirement</ActiveUserRequirement>
+			<ActiveUserType>AllUsers</ActiveUserType>
+			<HasWhose>false</HasWhose>
+			<PreActionCacheDownload>false</PreActionCacheDownload>
+			<Reapply>false</Reapply>
+			<HasReapplyLimit>false</HasReapplyLimit>
+			<ReapplyLimit>0</ReapplyLimit>
+			<HasReapplyInterval>false</HasReapplyInterval>
+			<HasRetry>false</HasRetry>
+			<HasTemporalDistribution>false</HasTemporalDistribution>
+			<ContinueOnErrors>true</ContinueOnErrors>
+			<PostActionBehavior Behavior="Nothing"></PostActionBehavior>
+			<IsOffer>false</IsOffer>
+		</Settings>
+		<SettingsLocks>
+			<ActionUITitle>false</ActionUITitle>
+			<PreActionShowUI>false</PreActionShowUI>
+			<PreAction>
+				<Text>false</Text>
+				<AskToSaveWork>false</AskToSaveWork>
+				<ShowActionButton>false</ShowActionButton>
+				<ShowCancelButton>false</ShowCancelButton>
+				<DeadlineBehavior>false</DeadlineBehavior>
+				<ShowConfirmation>false</ShowConfirmation>
+			</PreAction>
+			<HasRunningMessage>false</HasRunningMessage>
+			<RunningMessage>
+				<Text>false</Text>
+			</RunningMessage>
+			<TimeRange>false</TimeRange>
+			<StartDateTimeOffset>false</StartDateTimeOffset>
+			<EndDateTimeOffset>false</EndDateTimeOffset>
+			<DayOfWeekConstraint>false</DayOfWeekConstraint>
+			<ActiveUserRequirement>false</ActiveUserRequirement>
+			<ActiveUserType>false</ActiveUserType>
+			<Whose>false</Whose>
+			<PreActionCacheDownload>false</PreActionCacheDownload>
+			<Reapply>false</Reapply>
+			<ReapplyLimit>false</ReapplyLimit>
+			<RetryCount>false</RetryCount>
+			<RetryWait>false</RetryWait>
+			<TemporalDistribution>false</TemporalDistribution>
+			<ContinueOnErrors>false</ContinueOnErrors>
+			<PostActionBehavior>
+				<Behavior>false</Behavior>
+				<AllowCancel>false</AllowCancel>
+				<Deadline>false</Deadline>
+				<Title>false</Title>
+				<Text>false</Text>
+			</PostActionBehavior>
+			<IsOffer>false</IsOffer>
+			<AnnounceOffer>false</AnnounceOffer>
+			<OfferCategory>false</OfferCategory>
+			<OfferDescriptionHTML>false</OfferDescriptionHTML>
+		</SettingsLocks>
+		<IsUrgent>false</IsUrgent>
+	</SingleAction>
+</BES>
+_END_
+
+move __createfile "{parameter "xmlFilesFolder" & "\disable_filldb_performance_logging.xml"}"
+
+//*
+//*     Login to the API and post the XML file to generate the action.
+//*
+
+waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user={parameter "apiUsername"} --password={parameter "apiPassword"} --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" POST {parameter "xmlFilesFolder" & "\disable_filldb_performance_logging.xml"} https://localhost:{parameter "apiPort"}/api/actions
+endif
+
+elseif {(parameter "res") is "n"}
+	exit -1
+endif]]></ActionScript>
+		</DefaultAction>
+	</Task>
+</BES>

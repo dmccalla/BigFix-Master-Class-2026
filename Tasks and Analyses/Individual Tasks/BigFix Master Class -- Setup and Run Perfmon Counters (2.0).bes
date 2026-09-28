@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Task>
+		<Title>BigFix Master Class -- Setup and Run Perfmon Counters (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',Tahoma,Arial,sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+.hc-flabel{font-size:12px;margin-bottom:3px;font-weight:bold;color:#000032}
+.hc-form{margin-top:6px;border:1px solid #c7d9e0;border-left:4px solid #17707f;background:#f5fafb;padding:8px 11px;font-size:13px;color:#000032;line-height:1.4}
+.hc-note{font-size:12px;border:1px solid #ebd3a8;background:#fcf6ea;color:#7a5a18;padding:6px 9px;margin:8px 0 6px;line-height:1.4}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Setup and Run Perfmon Counters</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>Starts the BFPerf counter set for a 24-hour performance capture on Windows BigFix role servers and supporting SQL Servers.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Target server roles only</B><SPAN>Run on root, Web Reports, WebUI, Plugin Portal, Explorer, Server Automation Plan Engine, MCP Server, and supporting SQL Server hosts.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>24-hour capture</B><SPAN>Samples every 60 seconds for 1440 samples.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Logs are not capped</B><SPAN>Confirm adequate disk space before running.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-note><FONT size=2><B>Manual retrieval required:</B> Perfmon counter logs are expected to be 256 MB or larger and are not uploaded by the Health Check tasks. After the capture stops, retrieve the Perfmon log directly from every targeted machine.</FONT></DIV>
+<DIV class=hc-note><FONT size=2><B>Timing matters:</B> Start this after heavy deployment/API collection is out of the way. Running heavy collection while Perfmon is active can inflate the performance picture.</FONT></DIV>
+<DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
+<DIV id=hcNotes class=hc-body style="DISPLAY: none">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task automates the Perfmon portion of the BigFix Master Class.</FONT></DIV>
+<UL>
+<LI><FONT color=#000000 size=2>Backs up any existing Perfmon results for this task.</FONT> 
+<LI><FONT color=#000000 size=2>Creates the Health Check folder structure on the same drive as the BigFix client, or C: on SQL Servers.</FONT> 
+<LI><FONT color=#000000 size=2>Creates, starts, and logs the BFPerf counter set using the BigFix capacity-planning counter list.</FONT> 
+<LI><FONT color=#000000 size=2>Writes a short README beside the logs with the stop, start, and delete commands for the counter set.</FONT></LI></UL>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI><FONT color=#000000 size=2><STRONG><FONT size=2><STRONG>Retrieve the Perfmon log directly from every targeted machine after the capture stops. These files are expected to be 256 MB or larger and are not uploaded by the Health Check tasks.</STRONG>&nbsp;</FONT></STRONG></FONT>
+<LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
+<LI><FONT color=#000000 size=2>Run as a one-time action on supported BigFix role servers and supporting SQL Servers.</FONT>
+<LI><FONT color=#000000 size=2>If the SQL Server is remote, run this task against that SQL Server too.</FONT> 
+<LI><FONT color=#000000 size=2>The monitor is named BFPerf.</FONT> 
+<LI><FONT color=#000000 size=2>The SQL counters only apply to SQL Servers. Inspect the SQL Server counter names first if the customer uses named instances or non-standard counter names.</FONT></LI></UL>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Windows</FONT></DIV></DIV>
+<P><script>
+document.body.ontakeaction = function(event) {
+    // Warn if Day 1 is still collecting or a Day 2 capture is already running.
+    // Day 1 must finish first. Its load would distort the capture.
+    // Do not start a second capture while an earlier Perfmon or FillDB capture is still active.
+    // This is a warning and not a blocker. OK continues and Cancel stops.
+    if (event.contentID == 'Action1') {
+        var day1Open = EvaluateRelevance('exists bes action whose ((name of it contains "Collect SQL Server Information" or name of it contains "Collect Deployment Information" or name of it contains "Collect Deployment Overview" or name of it contains "Collect Deployment Health" or name of it contains "Deployment & SQL Data Collection") and state of it = "Open" and status of result of it as string != "Fixed")');
+        var perfmonActive = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Setup and Run Perfmon Counters" and state of it = "Open" and (now - time issued of it < 24*hour))');
+        var fillDBActive = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Disable FillDB Performance Logging" and state of it = "Open" and status of result of it as string != "Fixed")');
+        if (day1Open === 'True' || perfmonActive === 'True' || fillDBActive === 'True') { if (!confirm('A Day 1 or Day 2 task is already running. Let it finish before you start the Day 2 capture. Overlapping runs can distort the health check data.')) { return false; } }
+    }
+    if (event.contentID == 'Action1') {
+        if (EvaluateRelevance('master flag of current console user') === 'False') {
+            alert('<?jxlat Only Master Operators can run this Task.?>');
+            return false;
+        }
+    }
+}
+function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
+</script> </P>
+<DIV class=hc-sec>Action log note</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> uses 1 when files were copied, and <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Expanded Perfmon targeting to all supported BigFix role servers and SQL Server hosts.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS BIGFIX ROLE SERVER OR SQL SERVER; PLAIN RELAYS ARE EXCLUDED */ (windows of operating system) AND ((exists main gather service) OR (exists service "BESWebReportsServer") OR (exists webui service) OR (exists plugin portal service) OR (exists explorer service) OR (exists folder (value "EnterpriseClientFolder" of key "HKEY_LOCAL_MACHINE\Software\Bigfix\EnterpriseClient" of registry as string &amp; "Applications\PlanEngine")) OR (exists service "bes-mcp-server") OR (exists it whose (it as lowercase starts with "sql server (") of display names of services))</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-24</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Thu, 24 Sep 2026 23:15:00 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[
+//* ====================================================================================================>
+//*     
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This task will setup and run a perfmon counter set (refer to the MXTooklit for more info)
+//*
+//* ====================================================================================================>
+
+//* ====================================================================================================>
+//*
+//*     SET SOME PARAMETERS
+//*
+//*     - These parameters can be used to control the location and naming of the various health check files 
+//*     and folders. 
+//*
+//*     - Ideally, the only thing that would be changed here would be the driveLetter.  Be careful about
+//*     adjusting anything else.  Add more parameters for more folders. Do not declare any hardcoded
+//*		parameters.  
+//*
+//* ====================================================================================================>
+
+parameter "driveLetter" = "{(if (exists it) then (name of drive of it) else ("C:")) of regapp "BESClient.exe"}"
+parameter "checkType" = "Platform"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "perfmonLogsBackupFolder" = "{parameter "rootFolder" & "\Backup\Results\Perfmon\" & computer name & "_" & ((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now}"
+parameter "scriptsFolder" = "{parameter "rootFolder" & "\Scripts"}"
+parameter "perfmonScriptsFolder" = "{parameter "scriptsFolder" & "\Perfmon"}"
+parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
+parameter "perfmonLogsFolder" = "{parameter "resultsFolder" & "\Perfmon"}"
+
+//* ====================================================================================================>
+//*
+//*     BACKUP EXISTING FILES, IF PRESENT.    
+//*
+//* ====================================================================================================>
+
+if {exists folder (parameter "perfmonLogsFolder")}
+waithidden cmd.exe /C mkdir "{parameter "perfmonLogsBackupFolder"}" 
+waithidden cmd.exe /C xcopy "{parameter "perfmonLogsFolder"}" "{parameter "perfmonLogsBackupFolder"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     DELETE ANY EXISTING FOLDERS, SCRIPTS, ETC. SO WE CAN CREATE FRESH CONTENT
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C rd /s /q "{parameter "perfmonScriptsFolder"}"
+waithidden cmd.exe /C rd /s /q "{parameter "perfmonLogsFolder"}"
+
+//* ====================================================================================================>
+//*
+//*     BUILD OUT THE FOLDER STRUCTURE TO SUPPORT THE TASK
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C mkdir "{parameter "rootFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "perfmonScriptsFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "perfmonLogsFolder"}"
+
+//* ====================================================================================================>
+//*
+//*     SETUP AND RUN PERFMON
+//*
+//* ====================================================================================================>
+
+//*
+//*		Stop/remove anything existing then setup/run the counter set
+//*
+
+delete __createfile
+delete bfPerfMonSetup.bat
+createfile until _END_
+logman stop BFPerf  > "{parameter "perfmonScriptsFolder" & "\perfmonSetup.log"}"
+logman delete BFPerf >> "{parameter "perfmonScriptsFolder" & "\perfmonSetup.log"}"
+logman create counter BFPerf -f bincirc -v mmddhhmm -ow -c "\LogicalDisk(*)\*" "\Memory\*" "\Network Interface(*)\*" "\Paging File(*)\*" "\PhysicalDisk(*)\*" "\Processor(*)\*" "\Process(*)\*" "\Redirector\*" "\Server\*" "\System\*" "\Thread(*)\*" "\SQLServer:Databases(*)\*" "\SQLServer:Locks(*)\*" "\SQLServer:Transactions(*)\*" "\SQLServer:Wait Statistics(*)\*" -o "{(parameter "perfmonLogsFolder") & "\Perfmon_" & computer name}" -si 60 -sc 1440 >> "{parameter "perfmonScriptsFolder" & "\perfmonSetup.log"}"
+logman start BFPerf > "{parameter "perfmonScriptsFolder" & "\perfmonRun.log"}"
+_END_
+
+move __createfile "{parameter "perfmonScriptsFolder" & "\perfmonSetup.bat"}"
+waithidden cmd.exe /C "{parameter "perfmonScriptsFolder" & "\perfmonSetup.bat"}"
+
+//*
+//*		Write out a readme file 
+//*
+
+waithidden cmd.exe /C echo The perfmon log may still be an active log file if it is less than 24 hours old. > "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo Before attempting to use it make sure the log is not active or the logs may not contain enough data. >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo To stop logging by hand use the following command: >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo      logman stop BFPerf >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo To start logging by hand use the following command: >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo      logman start BFPerf >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo To remove the counter set use the following command:  >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+waithidden cmd.exe /C echo      logman delete BFPerf >> "{(parameter "perfmonLogsFolder") & "\" & "_README.txt"}" 
+
+]]></ActionScript>
+		</DefaultAction>
+	</Task>
+</BES>

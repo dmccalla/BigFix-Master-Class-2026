@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Analysis>
+		<Title>BigFix Master Class -- Agent Performance Counters - Basic (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>BIGFIX MASTER CLASS</DIV>
+<DIV class=hc-h1>Agent Performance Counters - Basic</DIV>
+<DIV class=hc-rule>&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>This analysis collects the client evaluation-loop counters used by the BigFix Master Class. Activate it before running the associated collection task so clients have time to report useful data.&nbsp; </FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU ACTIVATE</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Activate before collection</B><SPAN>Allow at least 24-48 hours of reporting before collecting the data.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Used by the collection task</B><SPAN>The Collect Agent Performance Counter Data task reads these analysis results.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Deactivate when finished</B><SPAN>Leave inactive when not actively collecting health check data.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Client-side data</B><SPAN>Applies to supported BigFix clients across operating systems.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
+<DIV id=hcNotes class=hc-body style="DISPLAY: none">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<P><FONT color=#000000>This analysis captures a basic set of BigFix client evaluation-loop counters. The health check uses these values to identify clients, analyses, or properties that may be contributing to long evaluation cycles or delayed client responsiveness.</FONT></P>
+<P><FONT color=#000000>The BigFix client evaluates content in action-only and full-background modes. Action-only cycles are usually shorter, while full-background cycles include normal content evaluation. This analysis records the combined client-side evaluation behavior so the health check can review the overall pattern.</FONT></P>
+<UL>
+<LI><FONT color=#000000>Client Version </FONT>
+<LI><FONT color=#000000>Maximum Cycle Minutes </FONT>
+<LI><FONT color=#000000>Average Cycle Minutes </FONT>
+<LI><FONT color=#000000>Top 10 Slowest Evaluations </FONT>
+<LI><FONT color=#000000>Evaluations Slower than 1 Minute </FONT>
+<LI><FONT color=#000000>Evaluations Slower than 15 Minutes </FONT>
+<LI><FONT color=#000000>Last UDP Ping </FONT>
+<LI><FONT color=#000000>Receiving UDP Pings</FONT> 
+<LI><FONT color=#000000>Command&nbsp;Polling Enabled</FONT> 
+<LI><FONT color=#000000>Command Polling Seconds</FONT>&nbsp;</LI></UL></FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000>FastHashVerify client settings are also collected when available: enablement, work ms, and sleep ms. A missing setting means the BigFix client default is in effect.</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<UL>
+<LI><FONT color=#000000>Activate this analysis at least 24-48 hours before running the collection task so enough clients have time to report. </FONT>
+<LI><FONT color=#000000>Run the paired collection task after this analysis has populated data. </FONT>
+<LI><FONT color=#000000>The Top 10 Slowest Evaluations value may contain property lookup identifiers. The collection task converts those values into friendly names where possible. </FONT>
+<LI><FONT color=#000000>If the analysis is not being used for a current health check, deactivate it to avoid collecting unnecessary client evaluation data. </FONT></LI></UL></FONT></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All supported BigFix client versions and operating systems.</FONT></DIV>
+<DIV class=hc-sec><FONT color=#000000 size=2></FONT>&nbsp;</DIV></DIV>
+<P><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}</script> </P>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling and FastHashVerify client settings.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>
+		<Relevance>true</Relevance>
+		<Source>Internal</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-23</SourceReleaseDate>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 01:06:52 +0000</Value>
+		</MIMEField>
+		<Domain>BESC</Domain>
+		<Property Name="Platform Health Check - Client Version" ID="1" EvaluationPeriod="P1D">version of client</Property>
+		<Property Name="Platform Health Check - Maximum Cycle Minutes" ID="3" EvaluationPeriod="P1D">((maximum of it /1000* second)/minute) of evaluationcycle of client</Property>
+		<Property Name="Platform Health Check - Average Cycle Minutes" ID="4" EvaluationPeriod="P1D">relative significance place 1 of (average of evaluationcycle of client as floating point / 1000 / 60)</Property>
+		<Property Name="Platform Health Check - Top 10 Slow Evaluations" ID="30" EvaluationPeriod="P1D">track fixlets of evaluationcycle of client</Property>
+		<Property Name="Platform Health Check - Evaluations Slower than 1 Minute" ID="31" EvaluationPeriod="P1D"><![CDATA[it whose (preceding text of first ":" of it as floating point > 60 as floating point) of track fixlets of evaluationcycle of client]]></Property>
+		<Property Name="Platform Health Check - Evaluations Slower than 15 Minutes" ID="32" EvaluationPeriod="P1D"><![CDATA[it whose (preceding text of first ":" of it as floating point > 900 as floating point) of track fixlets of evaluationcycle of client]]></Property>
+		<Property Name="Platform Health Check - Last UDP Ping" ID="33" EvaluationPeriod="P1D">last command times of client</Property>
+		<Property Name="Platform Health Check - Receiving UDP Pings" ID="34" EvaluationPeriod="P1D"><![CDATA[exist last command time of client | exists lines containing " command received" of files whose (length of name of it = 12 and modification time of it > now - 2*day) of folders "Logs" of folders "__Global" of data folders of client]]></Property>
+		<Property Name="Platform Health Check - Command Polling Enabled" ID="35" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Comm_CommandPollEnable" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Comm_CommandPollEnable" of client) else "Not Set"</Property>
+		<Property Name="Platform Health Check - Command Polling Interval" ID="36" EvaluationPeriod="P1D">if (exists values whose (it = "1") of settings "_BESClient_Comm_CommandPollEnable" of client) then (if exists values whose (it != "") of settings "_BESClient_Comm_CommandPollIntervalSeconds" of client then (concatenation "" of values whose (it != "") of settings "_BESClient_Comm_CommandPollIntervalSeconds" of client) else "Not Set") else ("Not Enabled")</Property>
+		<Property Name="Platform Health Check - FastHashVerify Enabled" ID="37" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Download_FastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Download_FastHashVerify" of client) else "Not Set"</Property>
+		<Property Name="Platform Health Check - FastHashVerify Work ms" ID="38" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_WorkFastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_WorkFastHashVerify" of client) else "Not Set"</Property>
+		<Property Name="Platform Health Check - FastHashVerify Sleep ms" ID="39" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_SleepFastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_SleepFastHashVerify" of client) else "Not Set"</Property>
+	</Analysis>
+</BES>

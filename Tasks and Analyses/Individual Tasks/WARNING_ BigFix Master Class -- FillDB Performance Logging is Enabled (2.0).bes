@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Fixlet>
+		<Title>WARNING: BigFix Master Class -- FillDB Performance Logging is Enabled (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-banner-warn{margin-bottom:4px;border:1px solid #e2b6b6;background:#fdecec;padding:9px 12px}
+.hc-bannerhd-warn{font-size:13px;margin-bottom:8px;font-weight:bold;color:#a11a10}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+.hc-flabel{font-size:12px;margin-bottom:3px;font-weight:bold;color:#000032}
+.hc-form{margin-top:6px;border:1px solid #c7d9e0;border-left:4px solid #17707f;background:#f5fafb;padding:6px 11px 8px;font-size:13px;color:#000032}
+.hc-form LABEL{font-size:13px;color:#000032;cursor:pointer}
+.hc-form P{margin:5px 0}
+.hc-in{font-family:'Segoe UI',sans-serif;font-size:13px;border:1px solid #b9c8d8;background:#fff;color:#000032;padding:2px 4px;width:200px}
+.hc-note{font-size:12px;border:1px solid #ebd3a8;background:#fcf6ea;color:#7a5a18;padding:5px 9px;margin:0 0 6px;line-height:1.4}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>FillDB Performance Logging is Enabled</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>This task is for disabling FillDB performance logging</FONT>.</DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on servers where this logging is still enabled.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Run once</B><SPAN>One-time action.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Will&nbsp;restart the service</B><SPAN>The service will restart when logging is disabled.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000><FONT size=2>This task is for disabling FillDB performance logging.&nbsp; FillDB performance logging should not be running unless needed.</FONT><BR></FONT>&nbsp;</DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task will only be relevant on BigFix root servers that have FillDB performance logging currently enabled.</FONT></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px">
+<P><FONT color=#000000 size=2>Run this as a one-time action.</FONT></P></DIV>
+<LI>
+<DIV style="FONT-SIZE: 14px">
+<DIV style="FONT-SIZE: 14px"><FONT size=2><FONT color=#000000 size=3><STRONG>The FillDB service must be restarted to disable&nbsp;performance logging.</STRONG></FONT> </FONT></DIV></DIV></LI></UL></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Windows</FONT></DIV><BR>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Converted from a task to a fixlet, since it reports a setting to fix rather than an action to run.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
+
+     if (event.contentID == 'Action1') {
+
+         if (EvaluateRelevance('master flag of current console user') === "False") {
+
+             alert('<?jxlat Only Master Operators can run this Task.?>');
+
+             return false;
+
+         }
+
+     }
+
+ }</script> <script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
+function hcSync(){var els=document.getElementsByTagName('INPUT');for(var i=0;i<els.length;i++){var el=els[i];if(el.className&&el.className.indexOf('hc-in')!==-1){el.style.backgroundColor=el.disabled?'#eef1f5':'#ffffff';el.style.color=el.disabled?'#98a2b0':'#000032';}}}
+
+hcSync();</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS ROOT SERVER */ (exists main gather service and not exists relay service AND windows of operating system) AND /* LOGGING IS ENABLED */ (exists value "EnablePerformanceLogging" whose (it as string = "1") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry)</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-15</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 02:36:12 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[
+//* ====================================================================================================>
+//*     
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This task will disable filldb performance logging.
+//*
+//* ====================================================================================================>
+
+action parameter query "restart" with description "To disable logging you need to restart the FillDB service. Enter 'Y' to confirm you are aware of the service restart. Click Cancel to exit the task if you wish to do this at another time." with default "N"
+parameter "res" = "{parameter "restart" of action as string as lowercase}"
+
+if {(parameter "res") is "y"}
+
+parameter "driveLetter" = "{preceding texts of firsts "\" of (value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string)}"
+parameter "checkType" = "Platform"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
+parameter "logsFolder" = "{parameter "resultsFolder" & "\Logs"}"
+parameter "fillDBPerfLogsFolder"="{parameter "logsFolder" & "\FillDB_Performance"}"
+parameter "fillDBPerfNoticeFolder" = "{if (exists values whose (it contains "\") of settings "__FillDB_Perf_Logs_Backup_Value" of client) then (preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) else (if exists value "PerformanceDataPath" whose (it as string contains "\") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry then (preceding text of last "\" of (value "PerformanceDataPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string)) else (""))}"
+
+//*
+//*		Set the log info back to whatever it was before we made the change to centralized HC logging
+//*
+
+waithidden cmd.exe /C net stop filldb
+
+if {exists values whose (it as lowercase != "was not set") of settings "__FillDB_Perf_Logs_Backup_Value" of client}
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"="{escape of concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client}"
+else
+regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"
+endif
+regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "EnablePerformanceLogging"="0"
+regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfLogFileSizeLimit"
+
+//* Remove reassurance notes while the saved original log path is still available.
+if {(parameter "fillDBPerfNoticeFolder" != "") and (exists folder (parameter "fillDBPerfNoticeFolder"))}
+if {exists file (parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_LOGS_MOVED_README.txt")}
+waithidden cmd.exe /C if exist "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_LOGS_MOVED_README.txt"}" del /F /Q "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_LOGS_MOVED_README.txt"}"
+endif
+if {exists file (parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt")}
+waithidden cmd.exe /C if exist "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}" del /F /Q "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}"
+endif
+endif
+
+//*
+//*		Sleep 5 secs - without this sometimes the service does not come back up
+//*
+
+waithidden cmd.exe /C ping 127.0.0.1 -n 10 -w 500> nul
+waithidden cmd.exe /C net start filldb
+
+waithidden cmd.exe /C echo The FillDB Performance log in this folder is no longer active and is ready for analysis.  > "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
+
+
+
+setting delete "__FillDB_Perf_Logs_Expiration" on "{parameter "action issue date" of action}" for client
+setting delete "__FillDB_Perf_Logs_Backup_Value" on "{parameter "action issue date" of action}" for client
+
+elseif {(parameter "res") is "n"}
+	exit -1
+endif]]></ActionScript>
+			<SuccessCriteria Option="RunToCompletion"></SuccessCriteria>
+		</DefaultAction>
+	</Fixlet>
+</BES>

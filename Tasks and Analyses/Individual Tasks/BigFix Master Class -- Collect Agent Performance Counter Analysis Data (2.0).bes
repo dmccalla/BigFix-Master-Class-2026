@@ -1,0 +1,973 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Task>
+		<Title>BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-banner-warn{margin-bottom:4px;border:1px solid #e2b6b6;background:#fdecec;padding:9px 12px}
+.hc-bannerhd-warn{font-size:13px;margin-bottom:8px;font-weight:bold;color:#a11a10}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+.hc-flabel{font-size:12px;margin-bottom:3px;font-weight:bold;color:#000032}
+.hc-form{margin-top:6px;border:1px solid #c7d9e0;border-left:4px solid #17707f;background:#f5fafb;padding:6px 11px 8px;font-size:13px;color:#000032}
+.hc-form LABEL{font-size:13px;color:#000032;cursor:pointer}
+.hc-form P{margin:5px 0}
+.hc-in{font-family:'Segoe UI',sans-serif;font-size:13px;border:1px solid #b9c8d8;background:#fff;color:#000032;padding:2px 4px;width:200px}
+.hc-note{font-size:12px;border:1px solid #ebd3a8;background:#fcf6ea;color:#7a5a18;padding:5px 9px;margin:0 0 6px;line-height:1.4}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Collect Agent Performance Counter Analysis Data</DIV>
+<DIV class=hc-lead><FONT color=#000000>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Agent Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><SPAN><FONT color=#000000><STRONG>Rolled up in Day 4</STRONG></FONT></SPAN><SPAN><SPAN>Also runs from the Day task module list.</SPAN></SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Run once</B><SPAN>One-time action.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs in batches</B><SPAN>The capture runs in batches of 1,000 computers. A large deployment takes longer to finish.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
+<DIV id=hcNotes class=hc-body style="DISPLAY: none">
+<DIV class=hc-sec>Description</DIV><FONT size=2>
+<P style="FONT-SIZE: 14px"><STRONG><FONT color=#000000>The "BigFix Master Class -- Agent Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. Its suggested that the analysis be activated for at least 24 hours before collecting the data.</FONT></STRONG></P>
+<P style="FONT-SIZE: 14px"><FONT color=#000000>This task automates the Agent Performance lab collection for the BigFix Master Class.&nbsp; This task will perform the following steps: </FONT></P>
+<DIV style="FONT-SIZE: 14px">
+<UL>
+<LI><FONT color=#000000>Backup any existing health check deployment information results.&nbsp; </FONT>
+<LI><FONT color=#000000>Create the existing collection directory structure on the C: drive.&nbsp; </FONT>
+<UL>
+<LI><FONT color=#000000><STRONG>Note:</STRONG> Edit the actionscript if you want something different.</FONT></LI></UL>
+<LI><FONT color=#000000>This will query the REST API to gather, on a per-machine basis: average and maximum loop times, UDP notification information, command polling settings, FastHashVerify client settings, and the Top 10 slowest evaluating pieces of content. </FONT>
+<LI><FONT color=#000000>The data sets are saved as XML captures and then processed to output aggregated data points. </FONT></LI></UL></DIV>
+<UL>
+<LI><FONT color=#000000>The Report Builder reads these files directly. Enable the option in the User Input and Parameters section to also generate the human readable CSV version.</FONT> 
+<LI><FONT color=#000000>The friendly name step reads the XML captures directly. It always writes top10-query-results.csv and udp-notification-results.csv.</FONT></FONT></LI></UL>
+<DIV class=hc-sec><FONT color=#000000><STRONG>Deployment Notes</STRONG></FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<UL>
+<LI><FONT color=#000000>This task can only be run by Master Operators. </FONT>
+<LI><FONT color=#000000>This will only be relevant on BigFix root servers. Run it as a one-time action only. </FONT>
+<LI><FONT color=#000000>If a DNS alias or fake root hostname is in use, click Edit on the Root Server Hostname field in the User Input section and enter the correct name before running. Otherwise the API login and all of the task API calls will most likely fail.</FONT> 
+<LI><FONT color=#000000>Most common error here is a bad login.</FONT></LI></UL></FONT></DIV></DIV>
+<DIV class=hc-sec style="MARGIN-TOP: 12px">User Input and Parameters</DIV>
+<DIV class=hc-form>
+<DIV>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2>Enter in the credentials for a master operator so this task can collect the root server information using the BigFix REST API.&nbsp; These credentials will be&nbsp;protected by using the&nbsp;secure&nbsp;paramater feature. </FONT></DIV>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><STRONG>Note:</STRONG> If SAML is enabled then please enter in a local BigFix MO account.<BR><BR>API Username:<BR></FONT><INPUT id=apiUserName class=hc-in><FONT size=2> <BR>API Password:<BR></FONT><INPUT id=apiPassword class=hc-in type=password><FONT size=2> <BR>Confirm Password:<BR></FONT><INPUT id=apiPasswordConfirm class=hc-in type=password> 
+<DIV style="MARGIN-TOP: 16px"><FONT size=2>Root Server Hostname (auto-detected):</FONT><BR><INPUT disabled id=rootServerName class=hc-in maxLength=253><script>(function(){var v='';try{v=EvaluateRelevance('host name of root server');}catch(e){}if(!(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False')){try{v=EvaluateRelevance('name of bes computer whose (root server flag of it = true)');}catch(e2){v='';}}if(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False'){var el=document.getElementById('rootServerName');if(el){el.value=v;}}})();</script> <SPAN onclick="var e=document.getElementById('rootServerName');e.disabled=false;e.style.backgroundColor='#ffffff';e.style.color='#000032';e.focus();this.style.display='none';" id=rootServerEdit style="FONT-SIZE: 12px; CURSOR: pointer; FONT-WEIGHT: bold; COLOR: #17707f">Edit</SPAN></DIV>
+<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">If this is a DNS alias or fake root, click Edit and enter the correct hostname. Otherwise the API login and all of the task API calls will most likely fail.</DIV>
+<DIV style="MARGIN-TOP: 16px"><INPUT id=generateLogFiles type=checkbox> <FONT size=2><B>Also generate the human readable loop CSV file</B></FONT></DIV>
+<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">Leave unchecked when using the Report Builder. It reads the loop XML capture directly. Enable this to also get the converted CSV for manual review. This adds processing time on large deployments.</DIV><FONT size=2></FONT></DIV>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><script>document.body.ontakeaction = function(event) {
+    // Warn if an earlier stage is still active (Day 1 collection, the Day 2 capture, or Day 3 logging).
+    // A pending disable action means an earlier stage is still logging.
+    // This is a warning and not a blocker.
+    if (event.contentID == 'Action1') {
+        var day1Live = EvaluateRelevance('exists bes actions whose ((name of it contains "Collect SQL Server Information" or name of it contains "Collect Deployment Information" or name of it contains "Collect Deployment Overview" or name of it contains "Collect Deployment Health" or name of it contains "Deployment & SQL Data Collection") and state of it = "Open" and status of result of it as string != "Fixed")');
+        var perfmonLive = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Setup and Run Perfmon Counters" and state of it = "Open" and (now - time issued of it < 24*hour))');
+        var loggingWindowOpen = EvaluateRelevance('exists bes actions whose (name of it contains "BigFix Master Class -- Disable " and state of it = "Open" and status of result of it as string != "Fixed")');
+        if (day1Live === 'True' || perfmonLive === 'True' || loggingWindowOpen === 'True') { if (!confirm('A Day 1, Day 2, or Day 3 task is already running. Let it finish before you start Day 4. Overlapping runs can distort the health check data.')) { return false; } }
+    }
+    if (event.contentID == 'Action1') {
+        if (EvaluateRelevance('master flag of current console user') === "False") {
+            alert('<?jxlat Only Master Operators can run this Task.?>');
+            return false;}
+        } 
+
+    var apiUsername = document.getElementById( "apiUsername" ).value;
+    var apiPassword = document.getElementById( "apiPassword" ).value;
+    var apiPasswordConfirm = document.getElementById( "apiPasswordConfirm" ).value;
+    var rootServerName = document.getElementById( "rootServerName" ).value;
+    var generateLogFiles = document.getElementById( "generateLogFiles" ).checked ? "1" : "0";
+    if (rootServerName == "") { alert("Root Server Hostname must not be blank. Click Edit and enter the root server hostname or IP address."); return false; }
+    if (rootServerName.length > 253) { alert("Root Server Hostname is too long (max 253 characters)."); return false; }
+    var _rsIp = rootServerName.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    var _rsOk = false;
+    if (_rsIp) { _rsOk = true; for (var _ri = 1; _ri <= 4; _ri++) { if (parseInt(_rsIp[_ri], 10) > 255) { _rsOk = false; } } }
+    else if (/^[A-Za-z0-9._-]+$/.test(rootServerName) && /[A-Za-z]/.test(rootServerName)) { _rsOk = true; }
+    if (!_rsOk) { alert("Root Server Hostname does not look like a valid hostname or IP address."); return false; }
+   
+var isHCAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Health Checks Analysis" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
+var isBCVAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Component Versions" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
+var isAgentPerformanceBasicActive = EvaluateRelevance( 'exists activations whose (active flag of it) of bes fixlets whose (name of it contains "BigFix Master Class -- Agent Performance Counters - Basic")' );
+
+if ( isHCAnalysisActive == "False" )
+{alert("The BES Health Checks analysis in the BES Support site must be enabled."); return false;}
+
+if ( isBCVAnalysisActive == "False" )
+{alert("The BES Component Versions analysis in the BES Support site must be enabled."); return false;}
+
+if ( isAgentPerformanceBasicActive == "False" )
+{alert("Warning: The task could not confirm that the BigFix Master Class -- Agent Performance Counters - Basic analysis is active. If it was renamed, verify the correct analysis is imported, activated, and returning data before continuing.");}
+
+if (apiUsername == null || apiUsername == "")  {
+        alert("API Username field must not be blank.");
+        return false;
+    } else
+    if (apiPassword == null || apiPassword == "")  {
+        alert("API Password field must not be blank.");
+        return false;
+    } else
+    if (apiPassword !== apiPasswordConfirm )  {
+        alert("API Password fields do not match.");
+        return false;
+    } 
+    
+else
+
+    {TakeSecureFixletAction( Relevance('id of current fixlet'), Relevance('id of current bes site'), "Action1", { rootServerName: rootServerName, generateLogFiles: generateLogFiles }, { apiUsername: apiUsername , apiPassword: apiPassword } );}
+    return false;
+}</script> <BR></DIV></FONT></DIV></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Windows</FONT></DIV><BR>
+<DIV class=hc-sec>Action log note</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> uses 1 when files were copied, and <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling and FastHashVerify settings, actionable BigFix API errors, and adaptive batch retries for large deployments.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2></FONT>&nbsp;</DIV><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
+function hcSync(){var els=document.getElementsByTagName('INPUT');for(var i=0;i<els.length;i++){var el=els[i];if(el.className&&el.className.indexOf('hc-in')!==-1){el.style.backgroundColor=el.disabled?'#eef1f5':'#ffffff';el.style.color=el.disabled?'#98a2b0':'#000032';}}}
+
+hcSync();</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS ROOT SERVER */ (exists main gather service and not exists relay service) AND (windows of operating system) </Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-24</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 02:36:12 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[//* ====================================================================================================>
+//*
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This will capture the agent performance counters basic 2.0 analysis data.
+//*
+//* ====================================================================================================>
+
+//* ====================================================================================================>
+//*
+//*     SET SOME PARAMETERS
+//*
+//* ====================================================================================================>
+
+parameter "driveLetter" = "C:"
+parameter "checkType" = "Platform"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
+parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
+parameter "rootServerURL"="https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"}"
+parameter "toolsFolder" = "{parameter "rootFolder" & "\Tools"}"
+parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
+parameter "scriptsFolder" = "{parameter "rootFolder" & "\Scripts"}"
+parameter "loopScriptsFolder" = "{parameter "scriptsFolder" & "\Client_Loop"}"
+parameter "loopResultsFolder" = "{parameter "resultsFolder" & "\Client_Loop"}"
+parameter "loopResultsBackupFolder" = "{parameter "rootFolder" & "\Backup\Results\Client_Loop\" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now)}"
+parameter "loopFileXML" = "{parameter "loopResultsFolder" & "\Client_Loop_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "loopFile" =  "{parameter "loopResultsFolder" & "\Client_Loop_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".csv"}"
+parameter "top10FileXML" = "{parameter "loopResultsFolder" & "\Top10_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "top10File" =  "{parameter "loopResultsFolder" & "\Top10_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".csv"}"
+parameter "udpFileXML" = "{parameter "loopResultsFolder" & "\UDP_Notifications_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "udpFile" =  "{parameter "loopResultsFolder" & "\UDP_Notifications_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".csv"}"
+
+if {exists folder (parameter "loopResultsFolder")}
+
+// Backup existing results
+waithidden cmd.exe /C mkdir {parameter "loopResultsBackupFolder"}
+waithidden cmd.exe /C xcopy "{parameter "loopResultsFolder"}" "{parameter "loopResultsBackupFolder"}" /E /Y
+endif
+
+// Clean up any existing data to start fresh
+waithidden cmd.exe /C rd /s /q "{parameter "loopResultsFolder"}"
+waithidden cmd.exe /C rd /s /q "{parameter "toolsFolder"}"
+
+// Buld out the directory structure
+waithidden cmd.exe /C mkdir "{parameter "rootFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "loopResultsFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "loopScriptsFolder"}"
+
+// Loing to the API
+waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user={parameter "apiUsername"} --password={parameter "apiPassword"} --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
+
+// Loop Times
+// UDP Notification
+// Top 10 Evals
+
+// Build out the powershell script to do the data manipulation
+delete "{parameter "loopScriptsFolder" & "\query_properties.ps1"}"
+delete "query_properties.ps1"
+delete __createfile
+
+createfile until __END__
+#!/usr/bin/env pwsh
+# Copyright (c) 2026 Duncan McCalla
+# SPDX-License-Identifier: MIT
+#
+# BigFix Master Class Report Builder
+# Standalone utility: retain this notice when copying this file outside the repository.
+# See the LICENSE and NOTICE files in the project root for license text and attribution.
+
+# query_properties.ps1
+# Reads the Agent Performance Counter XML captures and writes CSVs for loop
+# data, the Top 10 slowest evaluations, and UDP notification results.
+# Fast on big estates. Rows fold into per-lookup totals in one pass.
+# The API is queried once per analysis, not once per property.
+param(
+    [Alias("LoopInputXml")]
+    [string]$LoopXml = "",
+    [Alias("UdpInputXml")]
+    [string]$UdpXml = "",
+    [Alias("InputFile")]
+    [string]$Top10Input = "",
+    [string]$ApiQueryUrl = "",
+    [Alias("OutputCsv")]
+    [string]$OutputTop10Csv = ".\top10-query-results.csv",
+    [Alias("UdpOutputCsv")]
+    [string]$OutputUdpCsv = ".\udp-notification-results.csv",
+    [Alias("LoopOutputCsv")]
+    [string]$OutputLoopCsv = "",
+    [string]$BigFixUsername = "",
+    [string]$BigFixPassword = "",
+    [string]$LogFile = ".\top10_script_execution.log",
+    [int]$TopCount = 10,
+    [int]$TimeoutSec = 120,
+    [int]$QueryAttempts = 2,
+    # Capture mode. A single session-relevance query over the whole estate is
+    # cut short by the server on a large deployment, and the truncation is
+    # silent: the action still succeeds and the capture is simply short. These
+    # run the same relevance in slices and append each slice to the capture,
+    # which the answer scanner already accepts as concatenated documents.
+    [string]$CaptureLoopXml = "",
+    [string]$CaptureUdpXml = "",
+    [string]$CaptureTop10Xml = "",
+    [int]$BatchSize = 1000,
+    # Extra relevance clause narrowing which computers are captured, for
+    # example 'exists bes computer group whose (name of it = "Pilot")'. Left
+    # empty the capture covers every computer.
+    [string]$ComputerFilter = "",
+    [switch]$IgnoreCertificateErrors,
+    [switch]$Quiet
+)
+
+$ErrorActionPreference = "Stop"
+[Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+
+function Log($Message, $Level = "INFO") {{
+    $line = "$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss') [$Level] $Message"
+    if (-not $Quiet) {{ Write-Host $line }
+    try {{ Add-Content -LiteralPath $LogFile -Value $line -Encoding UTF8 } catch {{ }
+}
+
+function Fail($Message) {{ Log $Message "ERROR"; exit 1 }
+
+function Err($ErrorRecord) {{
+    $m = $ErrorRecord.Exception.Message
+    if ($ErrorRecord.Exception.InnerException) {{ $m += " | " + $ErrorRecord.Exception.InnerException.Message }
+    $m
+}
+
+function BigFixQueryErrorMessage($Xml) {{
+    $node = $Xml.BESAPI.Query.Error
+    if ($null -eq $node) {{ return "" }
+    if ($node -is [System.Xml.XmlElement]) {{
+        $message = $node.InnerText
+    } else {{
+        $message = "$node"
+    }
+    if ([string]::IsNullOrWhiteSpace($message)) {{
+        try {{ $message = $node.OuterXml } catch {{ }
+    }
+    if ([string]::IsNullOrWhiteSpace($message)) {{
+        $message = "BigFix returned an unspecified query error."
+    }
+    $message.Trim()
+}
+
+# Matches one answer element. Capture files can hold several concatenated XML
+# documents, so answers are scanned instead of DOM parsed.
+$AnswerRegex = [regex]::new('<Answer\b[^>]*>(.*?)</Answer>', 'Singleline, Compiled')
+# One top10 row. Example: 12.5: BES Support.123:Some Property
+$Top10LineRegex = [regex]::new('^(?:\d+\s+\d+(?:\.\d+)?%\s+)?(?<sec>\d+(?:\.\d+)?):\s*(?<lookup>.+)$', 'Compiled')
+# Splits a lookup into site, analysis id, and property.
+$LookupRegex = [regex]::new('^(?<site>.+)\.(?<analysisId>\d+):(?<property>.+)$', 'Compiled')
+# Splits a resolved property descriptor back into its fields.
+$DescriptorRegex = [regex]::new('^Analysis Name=(?<an>.*) \| Display Name=(?<dn>.*) \| Name=(?<n>.*) \| Source Name=(?<sn>.*) \| Source ID=(?<sid>.*)$', 'Compiled')
+
+# Returns every answer in the file. Falls back to plain text lines.
+function ReadAnswers($Path) {{
+    if ([string]::IsNullOrWhiteSpace($Path)) {{ return @() }
+    if (-not (Test-Path -LiteralPath $Path)) {{ Fail "Input file is missing: $Path" }
+    $raw = Get-Content -Raw -LiteralPath $Path -ErrorAction Stop
+    if ($null -eq $raw) {{ return @() }
+    $found = $AnswerRegex.Matches($raw)
+    $out = New-Object System.Collections.Generic.List[string]
+    if ($found.Count -gt 0) {{
+        foreach ($m in $found) {{ $out.Add(([System.Net.WebUtility]::HtmlDecode($m.Groups[1].Value)).Trim()) }
+        return $out
+    }
+    foreach ($line in ($raw -split "`r?`n")) {{
+        $t = $line.Trim()
+        if ($t.Length) {{ $out.Add($t) }
+    }
+    $out
+}
+
+# Computer names can contain commas. Extra leading fields merge back into the name.
+function SplitAnswerFields($Line, $Expected) {{
+    $parts = @("$Line".Split(","))
+    if ($parts.Count -le $Expected) {{ return $parts }
+    $leadingCount = $parts.Count - $Expected + 1
+    $merged = @((($parts | Select-Object -First $leadingCount) -join ",").Trim())
+    $merged += @($parts | Select-Object -Skip $leadingCount)
+    $merged
+}
+
+function JoinAnswerFieldSlice($Values, [int]$Start, [int]$End) {{
+    $items = New-Object System.Collections.Generic.List[string]
+    for ($i = $Start; $i -le $End -and $i -lt $Values.Count; $i++) {{
+        if ($i -ge 0) {{ $items.Add("$($Values[$i])") }
+    }
+    (($items.ToArray()) -join ",").Trim()
+}
+
+function IsLoopMetricField($Value) {{
+    $text = "$Value".Trim()
+    if (-not $text) {{ return $false }
+    if ($text -match '^(?i:not reported|error)$') {{ return $true }
+    if ($text -match '(?i)property does not exist|duplicates:|multiple results') {{ return $true }
+    if ($text -match '^-?\d+(\.\d+)?$') {{ return $true }
+    if ($text -match '^\d+:\d{{1,2}(:\d{{1,2}(\.\d+)?)?$') {{ return $true }
+    return $false
+}
+
+function SplitLoopAnswerFields($Line) {{
+    $parts = @("$Line".Split(","))
+    if ($parts.Count -le 7) {{
+        while ($parts.Count -lt 7) {{ $parts += "" }
+        return $parts
+    }
+
+    if ($parts.Count -lt 10) {{
+        $tailStart = $parts.Count - 3
+        $middleEnd = $parts.Count - 4
+        for ($i = 1; $i -lt $middleEnd; $i++) {{
+            if ((IsLoopMetricField $parts[$i]) -and (IsLoopMetricField $parts[$i + 1])) {{
+                return @(
+                    (JoinAnswerFieldSlice $parts 0 ($i - 1)),
+                    "$($parts[$i])".Trim(),
+                    "$($parts[$i + 1])".Trim(),
+                    (JoinAnswerFieldSlice $parts ($i + 2) $middleEnd),
+                    "$($parts[$tailStart])".Trim(),
+                    "$($parts[$tailStart + 1])".Trim(),
+                    "$($parts[$tailStart + 2])".Trim()
+                )
+            }
+        }
+        return @(SplitAnswerFields $Line 7)
+    }
+
+    if ($parts.Count -eq 10) {{
+        return $parts
+    }
+
+    $tailStart = $parts.Count - 6
+    $middleEnd = $parts.Count - 7
+    for ($i = 1; $i -lt $middleEnd; $i++) {{
+        if ((IsLoopMetricField $parts[$i]) -and (IsLoopMetricField $parts[$i + 1])) {{
+            return @(
+                (JoinAnswerFieldSlice $parts 0 ($i - 1)),
+                "$($parts[$i])".Trim(),
+                "$($parts[$i + 1])".Trim(),
+                (JoinAnswerFieldSlice $parts ($i + 2) $middleEnd),
+                "$($parts[$tailStart])".Trim(),
+                "$($parts[$tailStart + 1])".Trim(),
+                "$($parts[$tailStart + 2])".Trim(),
+                "$($parts[$tailStart + 3])".Trim(),
+                "$($parts[$tailStart + 4])".Trim(),
+                "$($parts[$tailStart + 5])".Trim()
+            )
+        }
+    }
+
+    SplitAnswerFields $Line 10
+}
+
+function BuildLoopFromAnswers($Answers, $OutputPath) {{
+    if ([string]::IsNullOrWhiteSpace($OutputPath)) {{ return }
+    $columns = @(
+        "Computer Name",
+        "Platform Health Check - Maximum Cycle Minutes",
+        "Platform Health Check - Average Cycle Minutes",
+        "Platform Health Check - Last UDP Ping",
+        "Platform Health Check - Receiving UDP Pings",
+        "Platform Health Check - Command Polling Enabled",
+        "Platform Health Check - Command Polling Interval",
+        "Platform Health Check - FastHashVerify Enabled",
+        "Platform Health Check - FastHashVerify Work ms",
+        "Platform Health Check - FastHashVerify Sleep ms"
+    )
+    $loopRows = New-Object System.Collections.Generic.List[object]
+    foreach ($answer in $Answers) {{
+        if (-not $answer) {{ continue }
+        if ($answer -match '^\s*Computer Name\s*,') {{ continue }
+        $parts = @(SplitLoopAnswerFields $answer)
+        if ($parts.Count -eq 7) {{ $parts += @("", "", "") }
+        if ($parts.Count -lt 10) {{ continue }
+        $loopRows.Add([pscustomobject]@{{
+            "Computer Name" = $parts[0].Trim()
+            "Platform Health Check - Maximum Cycle Minutes" = $parts[1].Trim()
+            "Platform Health Check - Average Cycle Minutes" = $parts[2].Trim()
+            "Platform Health Check - Last UDP Ping" = $parts[3].Trim()
+            "Platform Health Check - Receiving UDP Pings" = $parts[4].Trim()
+            "Platform Health Check - Command Polling Enabled" = $parts[5].Trim()
+            "Platform Health Check - Command Polling Interval" = $parts[6].Trim()
+            "Platform Health Check - FastHashVerify Enabled" = $parts[7].Trim()
+            "Platform Health Check - FastHashVerify Work ms" = $parts[8].Trim()
+            "Platform Health Check - FastHashVerify Sleep ms" = $parts[9].Trim()
+        })
+    }
+    if ($loopRows.Count) {{
+        $loopRows | Select-Object $columns | Export-Csv -LiteralPath $OutputPath -NoTypeInformation
+        Log "Loop CSV written: $OutputPath ($($loopRows.Count) rows)"
+    } else {{
+        ($columns -join ",") | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+        Log "Loop CSV written (header-only): $OutputPath"
+    }
+}
+
+function IsUdpAnswer($Line) {{
+    $parts = @(SplitAnswerFields $Line 4)
+    if ($parts.Count -lt 4) {{ return $false }
+    return "$($parts[3])".Trim() -match '^(?i:true|false|yes|no|not reported|platform health check - receiving udp pings\b|receiving udp pings\b)'
+}
+
+function BuildUdpFromAnswers($Answers, $OutputPath) {{
+    $columns = @("Computer Name", "IPv4 Addresses", "Relay", "Platform Health Check - Receiving UDP Pings")
+    $udpRows = New-Object System.Collections.Generic.List[object]
+    foreach ($answer in $Answers) {{
+        if (-not $answer) {{ continue }
+        if ($answer -match '^\s*Computer Name\s*,') {{ continue }
+        $parts = @(SplitAnswerFields $answer 4)
+        if ($parts.Count -lt 4) {{ continue }
+        if (-not (IsUdpAnswer $answer)) {{ continue }
+        $udpRows.Add([pscustomobject]@{{
+            "Computer Name" = $parts[0].Trim()
+            "IPv4 Addresses" = $parts[1].Trim()
+            "Relay" = $parts[2].Trim()
+            "Platform Health Check - Receiving UDP Pings" = $parts[3].Trim()
+        })
+    }
+    if ($udpRows.Count) {{
+        $udpRows | Select-Object $columns | Export-Csv -LiteralPath $OutputPath -NoTypeInformation
+        Log "UDP notification CSV written: $OutputPath ($($udpRows.Count) rows)"
+    } else {{
+        ($columns -join ",") | Set-Content -LiteralPath $OutputPath -Encoding UTF8
+        Log "UDP CSV written (header-only): $OutputPath"
+    }
+}
+
+# One query returns every property of the analysis, in the same text format
+# the old per property query used, so the CSV Result strings are unchanged.
+function AnalysisRelevance($Site, $AnalysisId) {{
+    '("Analysis Name=" & name of source analysis of it & " | Display Name=" & display name of it & " | Name=" & name of it & " | Source Name=" & source name of it & " | Source ID=" & (source id of it as string)) of bes properties whose (name of site of source analysis of it = "' + $Site + '" and id of source analysis of it = ' + $AnalysisId + ')'
+}
+
+# API setup, done once and only when something actually needs the API.
+$script:ApiReady = $false
+function EnsureApiReady($Purpose) {{
+    if ($script:ApiReady) {{ return }
+    if ([string]::IsNullOrWhiteSpace($ApiQueryUrl)) {{ Fail "ApiQueryUrl is required for $Purpose" }
+    if ([string]::IsNullOrWhiteSpace($BigFixUsername) -or [string]::IsNullOrWhiteSpace($BigFixPassword)) {{ Fail "BigFix credentials were not supplied." }
+    $script:ApiQueryUrl = $ApiQueryUrl.Trim().TrimEnd("/")
+    if ($script:ApiQueryUrl -notmatch "/api/query$") {{
+        if ($script:ApiQueryUrl -match "/api$") {{ $script:ApiQueryUrl += "/query" } else {{ $script:ApiQueryUrl += "/api/query" }
+    }
+    $auth = [Convert]::ToBase64String([Text.Encoding]::ASCII.GetBytes(("{{0}:{{1}" -f $BigFixUsername, $BigFixPassword)))
+    $script:Headers = @{{ Authorization = "Basic $auth"; Accept = "application/xml" }
+    if ($IgnoreCertificateErrors) {{
+        if (-not ("BigFixTrustAll" -as [type])) {{
+            Add-Type "using System.Net; public static class BigFixTrustAll {{ public static void Enable() {{ ServicePointManager.ServerCertificateValidationCallback = delegate {{ return true; }; } }"
+        }
+        [BigFixTrustAll]::Enable()
+        Log "Certificate validation bypass enabled." "WARN"
+    }
+    $script:ApiReady = $true
+}
+
+# Raw response body, so a capture keeps the server's own XML rather than a
+# re-serialised copy. Errors are raised, never written to the capture: a
+# truncated or failed query must not look like a short estate.
+function InvokeBigFixQueryRaw($Relevance, $Purpose = "BigFix API query") {{
+    $url = $script:ApiQueryUrl + "?relevance=" + [Uri]::EscapeDataString($Relevance)
+    $attempt = 0
+    while ($attempt -lt $QueryAttempts) {{
+        $attempt++
+        try {{
+            $response = Invoke-WebRequest -Uri $url -Headers $script:Headers -UseBasicParsing -TimeoutSec $TimeoutSec
+            $content = $response.Content
+            [xml]$xml = $content
+            $queryError = BigFixQueryErrorMessage $xml
+            if ($queryError) {{ throw "BigFix query error: $queryError" }
+            return [pscustomobject]@{{
+                Content = $content
+                Count   = @($xml.BESAPI.Query.Result.Answer | Where-Object {{ $null -ne $_ }).Count
+            }
+        } catch {{
+            $detail = Err $_
+            if ($attempt -ge $QueryAttempts) {{
+                throw "$Purpose failed after $attempt attempt(s). Details: $detail"
+            }
+            Log "$Purpose failed on attempt $attempt/$QueryAttempts. Retrying. Details: $detail" "WARN"
+            Start-Sleep -Seconds $attempt
+        }
+    }
+}
+
+function ComputerSetRelevance($Filter) {{
+    if ([string]::IsNullOrWhiteSpace($Filter)) {{ return "set of BES computers" }
+    "set of BES computers whose ($Filter)"
+}
+
+# Slice boundaries taken from the real ids rather than a fixed stride, so every
+# batch holds BatchSize computers however sparsely the ids are allocated.
+function GetComputerIdBatches($Filter, $Size) {{
+    $setRel = ComputerSetRelevance $Filter
+    $idRel = "(id of it as string) of elements of $setRel"
+    $ids = @(InvokeBigFixQuery $idRel | ForEach-Object {{ [int64]$_ } | Sort-Object)
+    if (-not $ids.Count) {{ return @() }
+    Log "Computers in scope: $($ids.Count)"
+    $batches = New-Object System.Collections.Generic.List[object]
+    for ($i = 0; $i -lt $ids.Count; $i += $Size) {{
+        $last = [Math]::Min($i + $Size, $ids.Count) - 1
+        $batchIds = @($ids[$i..$last])
+        $batches.Add([pscustomobject]@{{
+            Low      = $ids[$i]
+            High     = $ids[$last]
+            Expected = $last - $i + 1
+            Ids      = $batchIds
+        })
+    }
+    $batches
+}
+
+function NewComputerIdBatch($Ids) {{
+    $items = @($Ids)
+    [pscustomobject]@{{
+        Low      = $items[0]
+        High     = $items[$items.Count - 1]
+        Expected = $items.Count
+        Ids      = $items
+    }
+}
+
+# A failed or silently short response is retried in smaller slices. This keeps
+# large deployments moving while still failing with the exact computer id and
+# BigFix error when one endpoint cannot be queried safely.
+function CaptureBatchWithFallback($Template, $OutputPath, $Label, $Filter, $Batch, $BatchName, [bool]$RequireFullCount) {{
+    $scope = "id of it >= $($Batch.Low) and id of it <= $($Batch.High)"
+    if (-not [string]::IsNullOrWhiteSpace($Filter)) {{ $scope = "($Filter) and $scope" }
+    $rel = $Template.Replace("COMPUTERSET", "set of BES computers whose ($scope)")
+    try {{
+        $result = InvokeBigFixQueryRaw $rel "$Label batch $BatchName"
+        if ($RequireFullCount -and $result.Count -lt $Batch.Expected) {{
+            throw "Short response: $($result.Count) answers for $($Batch.Expected) computers."
+        }
+        Add-Content -LiteralPath $OutputPath -Value $result.Content -Encoding UTF8
+        Log "$Label batch $($BatchName): ids $($Batch.Low)-$($Batch.High), $($result.Count) answers"
+        return [int]$result.Count
+    } catch {{
+        $detail = Err $_
+        if ($Batch.Expected -le 1) {{
+            throw "$Label batch $BatchName failed for computer id $($Batch.Low). Details: $detail"
+        }
+        $split = [int][Math]::Floor($Batch.Ids.Count / 2)
+        $leftIds = @($Batch.Ids[0..($split - 1)])
+        $rightIds = @($Batch.Ids[$split..($Batch.Ids.Count - 1)])
+        Log "$Label batch $BatchName failed for ids $($Batch.Low)-$($Batch.High). Retrying as two smaller batches. Details: $detail" "WARN"
+        $left = NewComputerIdBatch $leftIds
+        $right = NewComputerIdBatch $rightIds
+        $leftCount = CaptureBatchWithFallback $Template $OutputPath $Label $Filter $left "$BatchName.a" $RequireFullCount
+        $rightCount = CaptureBatchWithFallback $Template $OutputPath $Label $Filter $right "$BatchName.b" $RequireFullCount
+        return [int]$leftCount + [int]$rightCount
+    }
+}
+
+# Runs one relevance template per batch and appends each response to the
+# capture. The template must contain the COMPUTERSET token where the computer
+# set belongs.
+function CaptureBatched($Template, $OutputPath, $Label, $Filter, $Size) {{
+    EnsureApiReady "capturing $Label"
+    $batches = @(GetComputerIdBatches $Filter $Size)
+    if (-not $batches.Count) {{ Fail "No computers in scope for $Label. Check the ComputerFilter." }
+    Remove-Item -LiteralPath $OutputPath -ErrorAction SilentlyContinue
+    $expected = ($batches | Measure-Object -Property Expected -Sum).Sum
+    $captured = 0
+    $index = 0
+    foreach ($b in $batches) {{
+        $index++
+        $captured += CaptureBatchWithFallback $Template $OutputPath $Label $Filter $b "$index/$($batches.Count)" $true
+    }
+    # The whole point of the exercise. A short capture is reported, not shipped.
+    if ($captured -lt $expected) {{
+        Fail "$Label capture is short: $captured answers for $expected computers. Lower -BatchSize and run again."
+    }
+    Log "$Label capture complete: $captured answers for $expected computers -> $OutputPath"
+    $captured
+}
+
+function InvokeBigFixQuery($Relevance) {{
+    $url = $ApiQueryUrl + "?relevance=" + [Uri]::EscapeDataString($Relevance)
+    Log "Request URL: $url"
+    $response = InvokeBigFixQueryRaw $Relevance "BigFix API query"
+    [xml]$xml = $response.Content
+    # A zero-answer Result yields $null, and $null through a pipeline is one
+    # iteration, not none. Without this filter an empty result reads as a
+    # single blank row: a phantom computer id of 0, or a descriptor that
+    # "did not parse".
+    @($xml.BESAPI.Query.Result.Answer | Where-Object {{ $null -ne $_ } | ForEach-Object {{ $_.InnerText })
+}
+
+# --- Main ------------------------------------------------------------------
+
+try {{
+    "BigFix single-input query started: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')" | Set-Content -LiteralPath $LogFile -Encoding UTF8
+} catch {{
+    if (-not $Quiet) {{ Write-Host "ERROR: Cannot write log file: $LogFile" }
+    exit 1
+}
+if ($QueryAttempts -lt 1) {{ $QueryAttempts = 1 }
+
+# --- Capture ---------------------------------------------------------------
+# Same relevance the task used to run through a single iem call, with the
+# computer set factored out so it can be sliced. COMPUTERSET is substituted per
+# batch.
+$LoopTemplate = @'
+(item 0 of it & "," & item 1 of it & "," & item 2 of it & "," & item 3 of it & "," & item 4 of it & "," & item 5 of it & "," & item 6 of it & "," & item 7 of it & "," & item 8 of it & "," & item 9 of it)
+of (item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it)
+of
+(
+  (
+    (if exists name of item 0 of it then name of item 0 of it else "Computer ID " & (id of item 0 of it as string)),
+    (if (size of item 1 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 1 of it)) else (if (size of item 1 of it > 1) then (("Platform Health Check - Maximum Cycle Minutes Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 1 of it) as string) else ("Platform Health Check - Maximum Cycle Minutes Property Does Not Exist"))),
+    (if (size of item 2 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 2 of it)) else (if (size of item 2 of it > 1) then (("Platform Health Check - Average Cycle Minutes Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 2 of it) as string) else ("Platform Health Check - Average Cycle Minutes Property Does Not Exist"))),
+    (if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Last UDP Ping Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Last UDP Ping Property Does Not Exist"))),
+    (if (size of item 4 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 4 of it)) else (if (size of item 4 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 4 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist"))),
+    (if (size of item 5 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 5 of it)) else (if (size of item 5 of it > 1) then (("Platform Health Check - Command Polling Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 5 of it) as string) else ("Platform Health Check - Command Polling Enabled Property Does Not Exist"))),
+    (if (size of item 6 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 6 of it)) else (if (size of item 6 of it > 1) then (("Platform Health Check - Command Polling Interval Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 6 of it) as string) else ("Platform Health Check - Command Polling Interval Property Does Not Exist"))),
+    (if (size of item 7 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 7 of it)) else (if (size of item 7 of it > 1) then (("Platform Health Check - FastHashVerify Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 7 of it) as string) else ("Platform Health Check - FastHashVerify Enabled Property Does Not Exist"))),
+    (if (size of item 8 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 8 of it)) else (if (size of item 8 of it > 1) then (("Platform Health Check - FastHashVerify Work ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 8 of it) as string) else ("Platform Health Check - FastHashVerify Work ms Property Does Not Exist"))),
+    (if (size of item 9 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 9 of it)) else (if (size of item 9 of it > 1) then (("Platform Health Check - FastHashVerify Sleep ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 9 of it) as string) else ("Platform Health Check - FastHashVerify Sleep ms Property Does Not Exist")))
+  )
+  of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it)
+)
+of
+(
+  COMPUTERSET,
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Maximum Cycle Minutes") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Average Cycle Minutes") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Last UDP Ping") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Enabled") as lowercase or name of it as lowercase = ("Platform Health Check - Command Polling Enbaled") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Interval") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Enabled") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Work ms") as lowercase),
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Sleep ms") as lowercase)
+)
+'@
+$LoopTemplate = ($LoopTemplate -replace '\s+', ' ').Trim()
+
+$UdpTemplate = '(item 0 of it & ", " & item 1 of it & ", " & item 2 of it & ", " & item 3 of it) of (item 0 of it, item 1 of it, item 2 of it, item 3 of it) of (((if exists name of item 0 of it then name of item 0 of it else "Computer ID " & (id of item 0 of it as string)),(if (size of item 1 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 1 of it)) else (if (size of item 1 of it > 1) then (("IP Address Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 1 of it) as string) else ("IP Address Property Does Not Exist"))),(if (size of item 2 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 2 of it)) else (if (size of item 2 of it > 1) then (("Relay Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 2 of it) as string) else ("Relay Property Does Not Exist"))),(if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist")))) of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it)) of (COMPUTERSET, set of bes properties whose (reserved flag of it AND name of it as lowercase = ("IP Address") as lowercase), set of bes properties whose (name of it as lowercase = ("Relay") as lowercase), set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase))'
+
+# The original Top 10 query had no computer set at all, so it could not be
+# sliced and had no expected count to check against. Scoping it by computer
+# gives it both.
+$Top10Template = 'values of results (elements of COMPUTERSET, bes property whose (name of it = "Platform Health Check - Top 10 Slow Evaluations"))'
+
+if (-not [string]::IsNullOrWhiteSpace($CaptureLoopXml)) {{
+    [void](CaptureBatched $LoopTemplate $CaptureLoopXml "Loop times" $ComputerFilter $BatchSize)
+    $LoopXml = $CaptureLoopXml
+}
+if (-not [string]::IsNullOrWhiteSpace($CaptureUdpXml)) {{
+    [void](CaptureBatched $UdpTemplate $CaptureUdpXml "UDP notification" $ComputerFilter $BatchSize)
+    $UdpXml = $CaptureUdpXml
+}
+if (-not [string]::IsNullOrWhiteSpace($CaptureTop10Xml)) {{
+    # Not every computer reports this property, so a short answer count here is
+    # expected rather than a failure. Reported for visibility only.
+    EnsureApiReady "capturing Top 10"
+    $batches = @(GetComputerIdBatches $ComputerFilter $BatchSize)
+    Remove-Item -LiteralPath $CaptureTop10Xml -ErrorAction SilentlyContinue
+    $t10 = 0
+    $n = 0
+    foreach ($b in $batches) {{
+        $n++
+        $t10 += CaptureBatchWithFallback $Top10Template $CaptureTop10Xml "Top 10" $ComputerFilter $b "$n/$($batches.Count)" $false
+    }
+    Log "Top 10 capture complete: $t10 answers from $($batches.Count) batches -> $CaptureTop10Xml"
+    $Top10Input = $CaptureTop10Xml
+}
+
+if (-not (Test-Path -LiteralPath $LoopXml)) {{ Fail "Loop XML input is missing: $LoopXml" }
+$top10Source = if ([string]::IsNullOrWhiteSpace($Top10Input)) {{ $LoopXml } else {{ $Top10Input }
+
+# Loop CSV.
+if (-not [string]::IsNullOrWhiteSpace($OutputLoopCsv)) {{
+    $loopAnswers = ReadAnswers $LoopXml
+    Log "Collected $($loopAnswers.Count) loop answers from $LoopXml"
+    BuildLoopFromAnswers $loopAnswers $OutputLoopCsv
+}
+
+# UDP CSV.
+if ([string]::IsNullOrWhiteSpace($UdpXml)) {{
+    Log "UDP XML input omitted; writing header-only UDP CSV" "WARN"
+    BuildUdpFromAnswers @() $OutputUdpCsv
+} else {{
+    $udpAnswers = ReadAnswers $UdpXml
+    Log "Collected $($udpAnswers.Count) UDP notification answers from $UdpXml"
+    BuildUdpFromAnswers $udpAnswers $OutputUdpCsv
+}
+
+# One pass over the top10 rows. Each row updates count, total, and max for
+# its lookup. No row objects, no grouping, no sorting of raw rows.
+$agg = New-Object 'System.Collections.Generic.Dictionary[string,object]'
+$rowsSeen = 0
+foreach ($answer in (ReadAnswers $top10Source)) {{
+    $m = $Top10LineRegex.Match("$answer".Trim().Trim([char]0xFEFF).Trim('"'))
+    if (-not $m.Success) {{ continue }
+    $rowsSeen++
+    $lookup = $m.Groups['lookup'].Value.Trim()
+    $sec = 0.0
+    [void][double]::TryParse($m.Groups['sec'].Value, [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$sec)
+    $stats = $null
+    if ($agg.TryGetValue($lookup, [ref]$stats)) {{
+        $stats[0]++
+        $stats[1] += $sec
+        if ($sec -gt $stats[2]) {{ $stats[2] = $sec }
+    } else {{
+        $agg[$lookup] = [double[]]@(1, $sec, $sec)
+    }
+}
+Log "Aggregated $rowsSeen top10 rows into $($agg.Count) distinct lookups from $top10Source"
+
+$topColumns = @("Occurrences", "AvgClientProcessingSeconds", "TotalClientProcessingSeconds", "MaxClientProcessingSeconds", "Status", "Result")
+if ($agg.Count -eq 0) {{
+    Log "No Top10 rows found in input; writing header-only Top10 CSV"
+    ($topColumns -join ",") | Set-Content -LiteralPath $OutputTop10Csv -Encoding UTF8
+    exit 0
+}
+if ($TopCount -le 0) {{ $TopCount = 10 }
+
+# Classify each distinct lookup. Background rows resolve locally.
+$candidates = New-Object System.Collections.Generic.List[object]
+foreach ($entry in $agg.GetEnumerator()) {{
+    $stats = $entry.Value
+    $c = [pscustomobject]@{{
+        Lookup = $entry.Key; Site = ""; AnalysisId = 0; Property = ""
+        NeedsLookup = $false; Status = "OK"; Result = ""
+        Occurrences = [int]$stats[0]
+        AvgClientProcessingSeconds = $stats[1] / $stats[0]
+        TotalClientProcessingSeconds = $stats[1]
+        MaxClientProcessingSeconds = $stats[2]
+    }
+    $m = $LookupRegex.Match($entry.Key)
+    if (-not $m.Success) {{
+        $c.Status = "PARSE FAILED"
+        $c.Result = "Expected lookup format: Site Name.AnalysisId:Property Name"
+    } else {{
+        $c.Site = $m.Groups['site'].Value.Trim()
+        $c.AnalysisId = [int]$m.Groups['analysisId'].Value
+        $c.Property = $m.Groups['property'].Value.Trim()
+        if ($c.Property -eq "Background Evaluation") {{
+            if ($c.Site -match '^CustomSite_(.+)$') {{ $c.Result = "Background Evaluation of Custom Site: $($matches[1])" }
+            else {{ $c.Result = "Background Evaluation of External Site: $($c.Site)" }
+        } else {{
+            $c.NeedsLookup = $true
+        }
+    }
+    $candidates.Add($c)
+}
+Log "Prepared candidate groups: $($candidates.Count)"
+
+if (@($candidates | Where-Object {{ $_.NeedsLookup }).Count -gt 0) {{
+    EnsureApiReady "resolving Top10 lookups"
+}
+
+# One API query per distinct analysis. Index every returned descriptor by
+# display name, name, source name, and source id. The dictionary is case
+# sensitive to match relevance equality.
+$analysisIndex = New-Object 'System.Collections.Generic.Dictionary[string,object]'
+$analysisError = New-Object 'System.Collections.Generic.Dictionary[string,string]'
+foreach ($c in $candidates) {{
+    if (-not $c.NeedsLookup) {{ continue }
+    # Id first: the id is numeric, so the first pipe is always the separator.
+    $key = "$($c.AnalysisId)|$($c.Site)"
+    if ($analysisIndex.ContainsKey($key) -or $analysisError.ContainsKey($key)) {{ continue }
+    try {{
+        $rows = @(InvokeBigFixQuery (AnalysisRelevance $c.Site $c.AnalysisId))
+        $index = New-Object 'System.Collections.Generic.Dictionary[string,object]'
+        foreach ($row in $rows) {{
+            $d = $DescriptorRegex.Match("$row")
+            if (-not $d.Success) {{ Log "Descriptor did not parse: $row" "WARN"; continue }
+            $keys = @(("D|" + $d.Groups['dn'].Value), ("N|" + $d.Groups['n'].Value), ("S|" + $d.Groups['sn'].Value))
+            $sid = [int64]0
+            if ([int64]::TryParse($d.Groups['sid'].Value.Trim(), [ref]$sid)) {{ $keys += ("I|" + $sid) }
+            foreach ($k in $keys) {{
+                if (-not $index.ContainsKey($k)) {{ $index[$k] = New-Object System.Collections.Generic.List[string] }
+                $index[$k].Add("$row")
+            }
+        }
+        $analysisIndex[$key] = $index
+        Log "Fetched $($rows.Count) property descriptors for $($c.Site) analysis $($c.AnalysisId)"
+    } catch {{
+        $analysisError[$key] = Err $_
+        Log "Analysis query failed for $($c.Site) analysis $($c.AnalysisId): $($analysisError[$key])" "WARN"
+    }
+}
+
+# Resolve every lookup locally. A lookup matches on display name, name,
+# source name, or trailing digits as source id. Same rule as the old
+# per property relevance. Prop 007 matches source id 7.
+foreach ($c in $candidates) {{
+    if (-not $c.NeedsLookup) {{ continue }
+    $key = "$($c.AnalysisId)|$($c.Site)"
+    if ($analysisError.ContainsKey($key)) {{
+        $c.Status = "ERROR"
+        $c.Result = $analysisError[$key]
+        continue
+    }
+    $index = $analysisIndex[$key]
+    $keys = @(("D|" + $c.Property), ("N|" + $c.Property), ("S|" + $c.Property))
+    $sid = [int64]0
+    if ($c.Property -match '(\d+)$' -and [int64]::TryParse($matches[1], [ref]$sid)) {{ $keys += ("I|" + $sid) }
+    $seenRows = New-Object 'System.Collections.Generic.HashSet[string]'
+    $answers = New-Object System.Collections.Generic.List[string]
+    foreach ($k in $keys) {{
+        $bucket = $null
+        if ($index.TryGetValue($k, [ref]$bucket)) {{
+            foreach ($row in $bucket) {{ if ($seenRows.Add($row)) {{ $answers.Add($row) } }
+        }
+    }
+    if ($answers.Count) {{ $c.Status = "OK"; $c.Result = ($answers -join " ; ") }
+    else {{ $c.Status = "NO RESULTS"; $c.Result = $c.Lookup }
+}
+
+# Group by resolved name. Lookups resolving to the same name merge with
+# exact combined stats.
+$groups = New-Object 'System.Collections.Generic.Dictionary[string,object]'
+foreach ($c in $candidates) {{
+    $g = $null
+    if (-not $groups.TryGetValue($c.Result, [ref]$g)) {{
+        $g = @{{ Occurrences = 0; Total = 0.0; Max = 0.0; Statuses = New-Object 'System.Collections.Generic.HashSet[string]' }
+        $groups[$c.Result] = $g
+    }
+    $g.Occurrences += $c.Occurrences
+    $g.Total += $c.TotalClientProcessingSeconds
+    if ($c.MaxClientProcessingSeconds -gt $g.Max) {{ $g.Max = $c.MaxClientProcessingSeconds }
+    [void]$g.Statuses.Add($c.Status)
+}
+
+$report = New-Object System.Collections.Generic.List[object]
+foreach ($entry in $groups.GetEnumerator()) {{
+    $g = $entry.Value
+    $report.Add([pscustomobject]@{{
+        Occurrences = [int]$g.Occurrences
+        AvgClientProcessingSeconds = [math]::Round($g.Total / $g.Occurrences, 3)
+        TotalClientProcessingSeconds = [math]::Round($g.Total, 3)
+        MaxClientProcessingSeconds = [math]::Round($g.Max, 3)
+        Status = (@($g.Statuses | Sort-Object) -join " ; ")
+        Result = $entry.Key
+        SortSeconds = $g.Total / $g.Occurrences
+    })
+}
+
+# Slowest average first. Ties break on total, then occurrences, then name.
+$report = @($report | Sort-Object @{{e={{$_.SortSeconds};d=$true}, @{{e={{$_.TotalClientProcessingSeconds};d=$true}, @{{e={{$_.Occurrences};d=$true}, Result | Select-Object -First $TopCount)
+if ($report.Count) {{
+    $report | Select-Object $topColumns | Export-Csv -LiteralPath $OutputTop10Csv -NoTypeInformation
+} else {{
+    ($topColumns -join ",") | Set-Content -LiteralPath $OutputTop10Csv -Encoding UTF8
+}
+
+$ok = @($candidates | Where-Object {{ $_.Status -eq "OK" }).Count
+$none = @($candidates | Where-Object {{ $_.Status -eq "NO RESULTS" }).Count
+$err = @($candidates | Where-Object {{ $_.Status -eq "ERROR" }).Count
+$parse = @($candidates | Where-Object {{ $_.Status -eq "PARSE FAILED" }).Count
+Log "Query run finished. OK=$ok; No Results=$none; Errors=$err; Parse Failed=$parse"
+Log "Top10 Result CSV: $OutputTop10Csv"
+
+# Exit 2 means some rows failed. The CSV is still written.
+if ($err -gt 0 -or $parse -gt 0) {{ exit 2 }
+exit 0
+__END__
+
+move __createfile "{parameter "loopScriptsFolder" & "\query_properties.ps1"}"
+waithidden cmd.exe /C ""%SystemRoot%\System32\WindowsPowerShell\v1.0\powershell.exe" -NoProfile -ExecutionPolicy Bypass -File "{parameter "loopScriptsFolder" & "\query_properties.ps1"}" -CaptureLoopXml "{parameter "loopFileXML"}" -CaptureUdpXml "{parameter "udpFileXML"}" -CaptureTop10Xml "{parameter "top10FileXML"}" -BatchSize {parameter "queryBatchSize" of action | "1000"} -ComputerFilter "{parameter "computerFilter" of action | ""}" -Top10Input "{parameter "top10FileXML"}" -UdpXml "{parameter "udpFileXML"}" -ApiQueryUrl "{parameter "rootServerURL"}" -OutputTop10Csv "{parameter "loopResultsFolder" & "\top10-query-results.csv"}" -OutputLoopCsv "{parameter "loopFile"}" -OutputUdpCsv "{parameter "loopResultsFolder" & "\udp-notification-results.csv"}" -BigFixUsername "{parameter "apiUsername"}" -BigFixPassword "{parameter "apiPassword"}" -LogFile "{parameter "loopResultsFolder" & "\top10_script_execution.log"}" -TopCount 10 -IgnoreCertificateErrors > "{parameter "loopResultsFolder" & "\query_properties_console.log"}" 2>&1"
+continue if {exit code of action = 0}
+
+// Generate human readable log files if chosen. This must run after the
+// PowerShell capture creates the XML files.
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+// Loop CSV is written by query_properties.ps1 with real CSV escaping.
+
+delete __appendfile
+delete "{parameter "top10File"}"
+appendfile Top 10 Slow Evaluations
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "top10FileXML"))}
+move __appendfile "{parameter "top10File"}"
+
+delete __appendfile
+delete "{parameter "udpFile"}"
+appendfile Computer Name,IP Address,Relay,Receiving UDP Notifications
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "udpFileXML"))}
+move __appendfile "{parameter "udpFile"}"
+endif
+
+// DO NOT REMOVE THIS NEXT COMMAND!!
+delete "{parameter "loopScriptsFolder" & "\query_properties.ps1"}"
+
+//*
+//*		Comment this out if you don't need to trouebleshoot and want the files cleared out.
+//*
+
+//waithidden cmd.exe /C del -f {parameter "loopResultsFolder" & "\*.xml"}
+//waithidden cmd.exe /C del -f {parameter "loopScriptsFolder" & "\*.ps1"}
+]]></ActionScript>
+		</DefaultAction>
+	</Task>
+</BES>

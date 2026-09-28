@@ -1,0 +1,1206 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Task>
+		<Title>BigFix Master Class -- Collect Deployment Information (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-banner-warn{margin-bottom:4px;border:1px solid #e2b6b6;background:#fdecec;padding:9px 12px}
+.hc-bannerhd-warn{font-size:13px;margin-bottom:8px;font-weight:bold;color:#a11a10}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+.hc-toggle{font-size:13px;font-weight:bold;color:#17707f;cursor:pointer;margin:10px 0 2px;border-top:1px solid #dce6f0;padding-top:10px}
+.hc-flabel{font-size:12px;margin-bottom:3px;font-weight:bold;color:#000032}
+.hc-form{margin-top:6px;border:1px solid #c7d9e0;border-left:4px solid #17707f;background:#f5fafb;padding:6px 11px 8px;font-size:13px;color:#000032}
+.hc-form LABEL{font-size:13px;color:#000032;cursor:pointer}
+.hc-form P{margin:5px 0}
+.hc-in{font-family:'Segoe UI',sans-serif;font-size:13px;border:1px solid #b9c8d8;background:#fff;color:#000032;padding:2px 4px;width:200px}
+.hc-note{font-size:12px;border:1px solid #ebd3a8;background:#fcf6ea;color:#7a5a18;padding:5px 9px;margin:0 0 6px;line-height:1.4}
+.hc-warn{font-size:12px;border-top:1px solid #e2b6b6;border-right:1px solid #e2b6b6;border-bottom:1px solid #e2b6b6;border-left:3px solid #c62828;background:#fdecec;color:#8a1c14;padding:7px 10px;margin:6px 0 0;line-height:1.45}
+.hc-warn B{color:#a11a10}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Collect Deployment Information</DIV>
+<DIV class=hc-lead><FONT color=#000000>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>Collects deployment information for the Master Class report, including action, operator, content, client setting, and related deployment data.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Skips endpoints it does not apply to.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Run once</B><SPAN>One-time action.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Rolled up in Day 1-4</B><SPAN>Also runs from the Day task module list.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-warn><FONT size=2><B>Performance Warning:</B> This task can run from a few minutes in small or lab deployments to multiple hours in large, busy, or slow production deployments. It adds load on the Web Reports server handling <TT>/api/query</TT> calls, so it is best run during off-peak hours.</FONT></DIV>
+<DIV class=hc-note><FONT size=2><B>Runtime guide:</B> With all options selected this task runs 300 individual <TT>/api/query</TT> calls, plus 2 admin API calls and the initial login. Runtime depends on endpoint count, relay count, action history, content/site/property volume, activated analyses, and server/API/database performance. The <I>Pause between API queries</I> option below defaults to 1 second; increasing the pause lowers burst load but adds roughly that many seconds per API query.</FONT></DIV>
+<DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
+<DIV id=hcNotes class=hc-body style="DISPLAY: none">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<P><FONT color=#000000>This task collects deployment information used by the BigFix Master Class report. It captures action, operator, content, client setting, and related deployment data for later analysis.</FONT></P>
+<UL>
+<LI><FONT color=#000000>Backup any existing health check deployment information results.&nbsp; </FONT>
+<LI><FONT color=#000000>Create the existing collection directory structure on the same drive that the BigFix client is installed on.&nbsp; </FONT>
+<UL>
+<LI><FONT color=#000000><STRONG>Note:</STRONG> Edit the actionscript if you want something different.</FONT></LI></UL>
+<LI><FONT color=#000000>Based on the options selected in the User Input and Parameters section below, this will query the REST API to gather the appropriate information.&nbsp; This does not reach out and touch relays and clients. </FONT>
+<LI><FONT color=#000000>The results are saved as XML captures. The Report Builder reads these files directly. Enable the option in the User Input and Parameters section to also generate human readable .log files. </FONT>
+<LI><FONT color=#000000>This is supplementary data compared to the&nbsp;Deployment Information data from the Deployment Health Checks dashboard.</FONT></FONT></LI></UL></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>
+<UL>
+<LI><FONT color=#000000>This task can only be run by Master Operators. </FONT>
+<LI><FONT color=#000000>This will only be relevant on BigFix root servers. Run it as a one-time action only. </FONT>
+<LI><FONT color=#000000>The BES Health Checks and BES Component Versions analyses must be enabled and data should be populated. </FONT>
+<LI><FONT color=#000000>If a DNS alias or fake root hostname is in use, click Edit on the Root Server Hostname field in the User Input section and enter the correct name before running. Otherwise the API login and all of the task API calls will most likely fail.</FONT></LI></UL></FONT></DIV></DIV>
+<DIV class=hc-sec style="MARGIN-TOP: 12px">User Input and Parameters</DIV>
+<DIV class=hc-form>
+<DIV>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2>Enter in the credentials for a master operator so this task can collect the root server information using the BigFix REST API.&nbsp; These credentials will be&nbsp;protected by using the&nbsp;secure&nbsp;paramater feature. </FONT></DIV>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><STRONG>Note:</STRONG> If SAML is enabled then please enter in a local BigFix MO account.<BR><BR>API Username:<BR></FONT><INPUT id=apiUserName class=hc-in><FONT size=2> <BR>API Password:<BR></FONT><INPUT id=apiPassword class=hc-in type=password><FONT size=2> <BR>Confirm Password:<BR></FONT><INPUT id=apiPasswordConfirm class=hc-in type=password> 
+<DIV style="MARGIN-TOP: 16px"><FONT size=2>Root Server Hostname (auto-detected):</FONT><BR><INPUT disabled id=rootServerName class=hc-in maxLength=253><script>(function(){var v='';try{v=EvaluateRelevance('host name of root server');}catch(e){}if(!(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False')){try{v=EvaluateRelevance('name of bes computer whose (root server flag of it = true)');}catch(e2){v='';}}if(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False'){var el=document.getElementById('rootServerName');if(el){el.value=v;}}})();</script> <SPAN onclick="var e=document.getElementById('rootServerName');e.disabled=false;e.style.backgroundColor='#ffffff';e.style.color='#000032';e.focus();this.style.display='none';" id=rootServerEdit style="FONT-SIZE: 12px; CURSOR: pointer; FONT-WEIGHT: bold; COLOR: #17707f">Edit</SPAN></DIV>
+<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">If this is a DNS alias or fake root, click Edit and enter the correct hostname. Otherwise the API login and all of the task API calls will most likely fail.</DIV>
+<DIV style="MARGIN-TOP: 10px"><FONT size=2>Pause between API queries (seconds):</FONT><BR><INPUT id=queryDelaySeconds class=hc-in size=6 value=1> 
+<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">Defaults to 1 second. Enter 0 to disable pacing. Increasing the pause lowers burst load but adds roughly that many seconds per API query.</DIV></DIV><FONT size=2><BR></DIV></FONT>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectGeneral CHECKED type=checkbox name=collectGeneral><STRONG>General Deployment Info</STRONG><BR>This option will collect basic BigFix deployent information including license info, computer/relay counts, component versions, advanced deployment options, and unmanaged asset counts.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectRootServer CHECKED type=checkbox name=collectRootServer><STRONG>Root Server Info</STRONG><BR>This option will collect FillDB info, root server hardware info, web reports SSL info, check for gather failures, and check registration list sizes.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectRelay CHECKED type=checkbox name=collectRelay><STRONG>Relays Info</STRONG><BR>This option will collect relay server version info, report times, relay selection info, clients per relay, relays per relay, and actionsite version&nbsp;information.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectRelayAffiliation CHECKED type=checkbox name=collectRelayAffiliation><STRONG>Relay Affiliation Info</STRONG><BR>This option extends the Relays Info option&nbsp;to capture relay affiliation seek list and advertisement lift settings information.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectClient CHECKED type=checkbox name=collectClient><STRONG>Clients Info</STRONG><BR>This option will collect various client information such as client versions, OS counts, number of locked computers, relay selection method, number of computers reporting in across certain time spans, and distances between clients and relays.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectClientSettings CHECKED type=checkbox name=collectClientSettings><STRONG>Client Settings Info</STRONG><BR>This option extends the Client Info option to collect _BESClient_Relay/_Enterprise Server/_BESGather and _BESClient prefix client settings on root servers and relays, all _BESClient settings from clients except&nbsp;_BESClient_Emsg, _BESClient_SecureRegistration, _BESClient_ActionManager, _BESClinet_Actionarchiver, _BESClient_Diagnostics_Password as well&nbsp;as a specific section dedicated to ICMP failsafe and CPU usage client settings.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectOperator CHECKED type=checkbox name=collectOperator><STRONG>Operator Info</STRONG><BR>This option will collect operator counts (master and non-master), custom content author counts, computers managed counts, number of roles, operator login counts and times.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectContent CHECKED type=checkbox name=collectContent><STRONG>Content Info</STRONG><BR>This option will collect a variety of information related to the number of sites, fixlets/tasks, properties, analyses, baselines, and computer groups.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectProperty CHECKED type=checkbox name=collectProperty><STRONG>Property Activation Info</STRONG><BR>This option extends the Content Info option to return lists of all activated properties and all properties activated with sub-5 minutes report times. </FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectAction CHECKED type=checkbox name=collectAction><STRONG>Actions Info</STRONG><BR>This option will collect action count info (all status'), multiple action groups with too many components, open actions with superseded source content, action counts by operator type, actions by source site, and actions by date.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=generateLogFiles type=checkbox name=generateLogFiles><STRONG>Also Generate Human Readable Log Files</STRONG><BR>Leave unchecked when using the Report Builder. It reads the XML captures directly. Enable this to also convert each capture to a readable .log file for manual review. The conversion adds processing time on large deployments.</FONT></P>
+<DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><script>document.body.ontakeaction = function(event) {
+    if (event.contentID == 'Action1') {
+        if (EvaluateRelevance('master flag of current console user') === "False") {
+            alert('<?jxlat Only Master Operators can run this Task.?>');
+            return false;}
+        } 
+
+    var apiUsername = document.getElementById( "apiUserName" ).value.replace(/^\s+|\s+$/g, '');
+    var apiPassword = document.getElementById( "apiPassword" ).value;
+    var apiPasswordConfirm = document.getElementById( "apiPasswordConfirm" ).value;
+    var rootServerName = document.getElementById( "rootServerName" ).value;
+    var queryDelaySeconds = document.getElementById( "queryDelaySeconds" ).value.replace(/^\s+|\s+$/g, '');
+    if (rootServerName == "") { alert("Root Server Hostname must not be blank. Click Edit and enter the root server hostname or IP address."); return false; }
+    if (rootServerName.length > 253) { alert("Root Server Hostname is too long (max 253 characters)."); return false; }
+    var _rsIp = rootServerName.match(/^(\d{1,3})\.(\d{1,3})\.(\d{1,3})\.(\d{1,3})$/);
+    var _rsOk = false;
+    if (_rsIp) { _rsOk = true; for (var _ri = 1; _ri <= 4; _ri++) { if (parseInt(_rsIp[_ri], 10) > 255) { _rsOk = false; } } }
+    else if (/^[A-Za-z0-9._-]+$/.test(rootServerName) && /[A-Za-z]/.test(rootServerName)) { _rsOk = true; }
+    if (!_rsOk) { alert("Root Server Hostname does not look like a valid hostname or IP address."); return false; } 
+    var collectGeneral = document.getElementById('collectGeneral').checked.toString(); 
+    var collectRootServer = document.getElementById('collectRootServer').checked.toString(); 
+    var collectRelay = document.getElementById('collectRelay').checked.toString(); 		
+    var collectRelayAffiliation = document.getElementById('collectRelayAffiliation').checked.toString(); 		
+    var collectClient = document.getElementById('collectClient').checked.toString(); 		
+    var collectClientSettings = document.getElementById('collectClientSettings').checked.toString(); 	
+    var collectOperator = document.getElementById('collectOperator').checked.toString(); 	
+    var collectContent = document.getElementById('collectContent').checked.toString(); 	
+    var collectProperty = document.getElementById('collectProperty').checked.toString(); 			
+    var collectAction = document.getElementById('collectAction').checked.toString();
+    var generateLogFiles = document.getElementById('generateLogFiles').checked ? "1" : "0";
+   
+var isHCAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Health Checks Analysis" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
+var isBCVAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Component Versions" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
+
+if ( isHCAnalysisActive == "False" )
+{alert("The BES Health Checks analysis in the BES Support site must be enabled."); return false;}                             
+else
+
+if ( isBCVAnalysisActive == "False" )
+{alert("The BES Component Versions analysis in the BES Support site must be enabled."); return false;}                                
+
+else
+    if (apiUsername == null || apiUsername == "")  {
+        alert("API Username field must not be blank.");
+        return false;
+    } else
+    if (apiPassword == null || apiPassword == "")  {
+        alert("API Password field must not be blank.");
+        return false;
+    } else
+    if (apiPassword !== apiPasswordConfirm )  {
+        alert("API Password fields do not match.");
+        return false;
+    } else
+    if (!/^[0-9]+$/.test(queryDelaySeconds)) {
+        alert("Pause between API queries must be a whole number of seconds (0 or more).");
+        return false;
+    } else
+    if (parseInt(queryDelaySeconds, 10) > 300) {
+        alert("Pause between API queries is too large (max 300 seconds).");
+        return false;
+    } 
+    
+else
+
+if(collectGeneral === 'false' && collectRootServer === 'false' && collectRelay === 'false' && collectRelayAffiliation === 'false' && collectClient === 'false' && collectClientSettings === 'false' && collectOperator === 'false' && collectContent === 'false' && collectProperty === 'false' && collectAction === 'false' ) { 	alert("Choose at least one data set to collect.");return false; }
+else
+
+//if (collectGeneral === 'true')
+//{var general001 = EvaluateRelevance( '"Deployment Age: " & ((now - (minimum of (creation times of bes users))) / day )  as string' );
+//return true;}
+//            {alert("general001"); return true;}         
+//else
+
+    {TakeSecureFixletAction( Relevance('id of current fixlet'), Relevance('id of current bes site'), "Action1", { rootServerName: rootServerName, queryDelaySeconds: queryDelaySeconds, generateLogFiles: generateLogFiles }, { apiUsername: apiUsername , apiPassword: apiPassword , collectGeneral: collectGeneral , collectRootServer: collectRootServer , collectRelay: collectRelay , collectRelayAffiliation: collectRelayAffiliation , collectClient: collectClient , collectClientSettings: collectClientSettings , collectOperator: collectOperator , collectContent: collectContent , collectProperty: collectProperty , collectAction: collectAction  } );}
+    return false;
+}</script> <BR></DIV></FONT></DIV></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Windows</FONT></DIV><BR>
+<DIV class=hc-sec>Action log note</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> uses 1 when files were copied, and <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2></FONT>&nbsp;<FONT size=2>2.0 - Updated deployment data collection and task guidance.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>&nbsp;1.0 - Initial version<STRONG>.</STRONG></FONT></DIV><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
+function hcSync(){var els=document.getElementsByTagName('INPUT');for(var i=0;i<els.length;i++){var el=els[i];if(el.className&&el.className.indexOf('hc-in')!==-1){el.style.backgroundColor=el.disabled?'#eef1f5':'#ffffff';el.style.color=el.disabled?'#98a2b0':'#000032';}}}
+
+hcSync();</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS ROOT SERVER */ (exists main gather service and not exists relay service) AND (windows of operating system) </Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-26</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 02:36:12 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[
+//* ====================================================================================================>
+//*     
+//*     DESCRIPTION AND NOTES
+//*
+//*     - This will capture a variety of information depending on the options selected
+//*		by the operator.
+//*
+//* ====================================================================================================>
+
+//* ====================================================================================================>
+//*
+//*     SET SOME PARAMETERS
+//*
+//*     - These parameters can be used to control the location and naming of the various health check files 
+//*     and folders. 
+//*
+//*     - Ideally, the only thing that would be changed here would be the driveLetter.  Be careful about
+//*     adjusting anything else.  Add more parameters for more folders. Do not declare any hardcoded
+//*		parameters.  
+//*
+//* ====================================================================================================>
+
+parameter "driveLetter" = "C:"
+parameter "checkType" = "Platform"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
+parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
+parameter "apiQueryDelaySeconds" = "{if exists parameter "queryDelaySeconds" of action then parameter "queryDelaySeconds" of action as string else "1"}"
+parameter "toolsFolder" = "{parameter "rootFolder" & "\Tools"}"
+parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
+parameter "deploymentInfoResultsFolder" = "{parameter "resultsFolder" & "\Deployment_Information"}"
+// Deployment_Information is grouped into subfolders rather than one flat pile of files.
+// The Report Builder resolves captures recursively, so a package collected before this
+// change still builds.
+parameter "diGeneralFolder"   = "{parameter "deploymentInfoResultsFolder" & "\General"}"
+parameter "diServerFolder"    = "{parameter "deploymentInfoResultsFolder" & "\Server"}"
+parameter "diRelaysFolder"    = "{parameter "deploymentInfoResultsFolder" & "\Relays"}"
+parameter "diClientsFolder"   = "{parameter "deploymentInfoResultsFolder" & "\Clients"}"
+parameter "diContentFolder"   = "{parameter "deploymentInfoResultsFolder" & "\Content"}"
+parameter "diOperatorsFolder" = "{parameter "deploymentInfoResultsFolder" & "\Operators"}"
+
+parameter "deploymentInfoResultsBackupFolder" = "{parameter "rootFolder" & "\Backup\Results\Deployment_Information\" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now)}"
+parameter "generalInfoFileXML" = "{parameter "diGeneralFolder" & "\General_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+//parameter "generalInfoFileAdminToolXML" = "{parameter "diGeneralFolder" & "\General_Info_Admin_Tool_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "generalInfoFileAdminToolFieldsXML" = "{parameter "diGeneralFolder" & "\General_Info_Admin_Tool_Fields_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "generalInfoFileAdminToolOptionsXML" = "{parameter "diGeneralFolder" & "\General_Info_Admin_Tool_Options_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "generalInfoFile" =  "{parameter "diGeneralFolder" & "\General_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "rootServerInfoFileXML" = "{parameter "diServerFolder" & "\Root_Server_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "rootServerInfoFile" =  "{parameter "diServerFolder" & "\Root_Server_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "relayServerInfoFileXML" = "{parameter "diRelaysFolder" & "\Relay_Server_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "relayServerInfoFile" =  "{parameter "diRelaysFolder" & "\Relay_Server_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "relayAffiliationInfoFileXML" = "{parameter "diRelaysFolder" & "\Relay_Affiliation_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "relayAffiliationInfoFile" =  "{parameter "diRelaysFolder" & "\Relay_Affiliation_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "clientInfoFileXML" = "{parameter "diClientsFolder" & "\Client_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "clientInfoFile" =  "{parameter "diClientsFolder" & "\Client_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "clientSettingsInfoFileXML" = "{parameter "diClientsFolder" & "\Client_Settings_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "clientSettingsInfoFile" =  "{parameter "diClientsFolder" & "\Client_Settings_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "operatorInfoFileXML" = "{parameter "diOperatorsFolder" & "\Operator_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "operatorInfoFile" =  "{parameter "diOperatorsFolder" & "\Operator_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "contentInfoFileXML" = "{parameter "diContentFolder" & "\Content_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "contentInfoFile" =  "{parameter "diContentFolder" & "\Content_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "propertyInfoFileXML" = "{parameter "diContentFolder" & "\Property_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "propertyInfoFile" =  "{parameter "diContentFolder" & "\Property_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+parameter "actionInfoFileXML" = "{parameter "diContentFolder" & "\Action_Info_" & computer name & "_" & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".xml"}"
+parameter "actionInfoFile" =  "{parameter "diContentFolder" & "\Action_Info_" & computer name & "_"  & (((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now) & ".log"}"
+
+//* ====================================================================================================>
+//*
+//*     BACKUP EXISTING FILES, IF PRESENT.  
+//*
+//* ====================================================================================================>
+
+if {exists folder (parameter "deploymentInfoResultsFolder")}
+waithidden cmd.exe /C mkdir {parameter "deploymentInfoResultsBackupFolder"} 
+waithidden cmd.exe /C xcopy "{parameter "deploymentInfoResultsFolder"}" "{parameter "deploymentInfoResultsBackupFolder"}" /E /Y
+endif
+
+//* ====================================================================================================>
+//*
+//*     DELETE ANY EXISTING FOLDERS, SCRIPTS, ETC. SO WE CAN CREATE FRESH CONTENT
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C rd /s /q "{parameter "deploymentInfoResultsFolder"}"
+waithidden cmd.exe /C rd /s /q "{parameter "toolsFolder"}"
+
+//* ====================================================================================================>
+//*
+//*     BUILD OUT THE FOLDER STRUCTURE TO SUPPORT THE TASK
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C mkdir {parameter "rootFolder"}
+waithidden cmd.exe /C mkdir {parameter "deploymentInfoResultsFolder"}
+waithidden cmd.exe /C mkdir "{parameter "diGeneralFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "diServerFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "diRelaysFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "diClientsFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "diContentFolder"}"
+waithidden cmd.exe /C mkdir "{parameter "diOperatorsFolder"}"
+
+//* ====================================================================================================>
+//*
+//*     LOGIN TO THE API
+//*
+//* ====================================================================================================>
+
+waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user={parameter "apiUsername"} --password={parameter "apiPassword"} --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE GENERAL DEPLOYMENT INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectGeneral" = "true"}
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22GENERAL%20DEPLOYMENT%20INFORMATION%22 > {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Deployment%20Age%3A%20%22%20%26%20%28%28now%20-%20%28minimum%20of%20%28creation%20times%20of%20bes%20users%29%29%29%20%2F%20day%20%29%20as%20string%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Site%20Number%3A%20%22%20%26%20site%20number%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Registrar%20Number%3A%20%22%20%26%20registrar%20number%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Start%20Date%3A%20%22%20%26%20start%20date%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Expiration%20Date%3A%20%22%20%26%20expiration%20date%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Expiration%20State%3A%20%22%20%26%20expiration%20state%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Organization%3A%20%22%20%26%20organization%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+//waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Email%20Address%3A%20%22%20%26%20email%20address%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+//waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Common%20Name%3A%20%22%20%26%20common%20name%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Gather%20URL%3A%20%22%20%26%20gather%20url%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Evaluation%3A%20%22%20%26%20evaluation%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Maximum%20Seat%20Count%3A%20%22%20%26%20maximum%20seat%20count%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22License%20Seat%20Count%20State%3A%20%22%20%26%20seat%20count%20state%20of%20bes%20license%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20BES%20Servers%3A%20%22%20%26%20number%20of%20values%20whose%20%28it%20%3D%20%22BES%20Root%20Server%22%20or%20it%20%3D%20%22Main%20BES%20Server%22%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%3A%20%22%20%26%20number%20of%20bes%20computers%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Active%20Computers%3A%20%22%20%26%20number%20of%20computers%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20%28%28now%20-%20%28value%20of%20it%20as%20time%29%29%20%3C%201%20%2A%20day%29%29%20of%20bes%20properties%20%22Last%20Report%20Time%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Relays%3A%20%22%20%26%20number%20of%20computers%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20as%20lowercase%20contains%20%22yes%22%29%20of%20bes%20properties%20%22BES%20Relay%20Service%20Installed%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Console%20Computers%3A%20%22%20%26%20number%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20as%20string%20contains%20%22.%22%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Console%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Client%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Client%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Api%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20API%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Server%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Relay%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Relay%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Using%20Efficient%20MIME%3F%3A%20%22%20%26%20not%20exists%20bes%20deployment%20options%20%22usePre70ClientCompatibleMIME%22%20AND%20not%20exists%20value%20of%20bes%20deployment%20options%20%22usePre70ClientCompatibleMIME%22%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Unmanaged%20Assets%3A%20%22%20%26%20number%20of%20bes%20unmanagedassets%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Scan%20Points%3A%20%22%20%26%20number%20of%20unique%20values%20of%20values%20of%20fields%20whose%20%28name%20of%20it%20%3D%20%22Scan%20Point%22%29%20of%20bes%20unmanagedassets%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Unmanaged%20Asset%20Sources%3A%20%22%20%26%20number%20of%20unique%20values%20of%20sources%20of%20bes%20unmanagedassets%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Cache%20Latency%20Metric%3A%20%22%20%26%20((now%20-%20(maximum%20of%20(last%20report%20time%20of%20it)%20of%20bes%20computers%20whose%20(exist%20last%20report%20time%20of%20it))))%20as%20string >> {parameter "generalInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "generalInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "generalInfoFileXML"))}
+move __appendfile "{parameter "generalInfoFile"}"
+endif
+
+//*
+//* 		Some things cannot be retrieved via the API or we want to use client relevance instead.  That can go here.
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+waithidden cmd.exe /C echo {"Actionsite Size: " & (sum of sizes of files of folder ((preceding text of first "BESClient.exe" of pathname of regapps "BESClient.exe") & "__BESData\actionsite") / 1000) as string & " KB"} >> {parameter "generalInfoFile"}
+
+//*
+//* 		Some API calls return data in a different format than the GET query calls above. We grab admin options and fields here and parse the XML responses.
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET admin/fields >> {parameter "generalInfoFileAdminToolFieldsXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET admin/options >> {parameter "generalInfoFileAdminToolOptionsXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the Admin Tool Options and Fields XML files and format things so they are human readable. 
+//*
+
+if {exists xml documents of files (parameter "generalInfoFileAdminToolFieldsXML")}
+waithidden cmd.exe /C echo {(node values of child nodes of xpaths "Name" of it, node values of child nodes of xpaths "Value" of it) of xpaths "/BESAPI/AdminField" of xml documents of files (parameter "generalInfoFileAdminToolFieldsXML")} >> {parameter "generalInfoFile"}
+else
+waithidden cmd.exe /C echo Admin Tool fields were not available to the supplied API account. >> {parameter "generalInfoFile"}
+endif
+
+if {exists xml documents of files (parameter "generalInfoFileAdminToolOptionsXML")}
+waithidden cmd.exe /C echo {(node name of it, node values of child nodes of it) of child nodes of child nodes of child nodes of xml documents of files (parameter "generalInfoFileAdminToolOptionsXML")} >> {parameter "generalInfoFile"}
+else
+waithidden cmd.exe /C echo Admin Tool options were not available to the supplied API account. >> {parameter "generalInfoFile"}
+endif
+endif
+
+else
+waithidden cmd.exe /C echo General deployment information was not selected for capture. > "{parameter "diGeneralFolder" & "\GENERAL_INFO_NOT_SELECTED.txt"}"
+endif
+
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE ROOT SERVER INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectRootServer" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22ROOT%20SERVER%20INFORMATION%22 > {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Server%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Api%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20API%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%20on%20BES%20Server%3A%20%22%20%26%20number%20of%20values%20whose%20%28gather%20url%20of%20bes%20license%20as%20lowercase%20contains%20it%20as%20lowercase%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20CPU%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20values%20of%20results%20from%20%28bes%20properties%20%22CPU%22%29%20whose%20%28exists%20value%20of%20it%29%20of%20computers%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%3D%20%22BES%20Root%20Server%22%20or%20value%20of%20it%20%3D%20%22Main%20BES%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20RAM%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20values%20of%20results%20from%20%28bes%20properties%20%22RAM%22%29%20whose%20%28exists%20value%20of%20it%29%20of%20computers%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%3D%20%22BES%20Root%20Server%22%20or%20value%20of%20it%20%3D%20%22Main%20BES%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20OS%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20values%20of%20results%20from%20%28bes%20properties%20%22OS%22%29%20whose%20%28exists%20value%20of%20it%29%20of%20computers%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%3D%20%22BES%20Root%20Server%22%20or%20value%20of%20it%20%3D%20%22Main%20BES%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Server%20Hardware%20Information%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20%28it%20as%20trimmed%20string%29%20of%20values%20of%20%28results%20%28properties%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20%3D%20TRUE%20AND%20name%20of%20it%20as%20lowercase%20contains%20%22hardware%20information%22%29%2C%20it%29%20whose%20%28exists%20value%20of%20it%29%29%20of%20bes%20computers%20whose%20%28exists%20value%20of%20result%20%28bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%2Cit%29%20and%20%28value%20of%20result%20%28bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%2Cit%29%20%3D%20%22BES%20Root%20Server%22%20or%20value%20of%20result%20%28bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%2Cit%29%20%3D%20%22Main%20BES%20Server%22%29%29%20as%20string >> {parameter "rootServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "rootServerInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "rootServerInfoFileXML"))}
+move __appendfile "{parameter "rootServerInfoFile"}"
+endif
+
+//*
+//* 		Some things cannot be retrieved via the API or we want to use client relevance instead.  That can go here.
+//*
+
+waithidden cmd.exe /C echo {concatenation "; " of (((name of it & " - Total Space: " & (total space of it / 1024 / 1024) as string & "MB") & " - Free Space: " & ((free space of it / 1024 / 1024) as string & "MB")) of drives whose (type of it = "DRIVE_FIXED"))} >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Log File Size: " & (if (it > 0) then (if (it < (1024*1024) ) then ((it / 1024) as string & " KB") else ((it / (1024*1024)) as string & " MB")) else ("N/A")) of (if (name of operating system starts with "Win") then (if (exists service "BESRootServer") then (size of file (value "DataDirectoryPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string & "\FillDB.log")) else (-1)) else (if (exists main gather service) then (size of file (key ("DebugOut") of section ("Software\BigFix\Enterprise Server\FillDB") of file "/var/opt/BESServer/besserver.config")) else (-1)))} >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"Number of Files in Buffer Dir: " & (if (exists main gather service) then ((number of files of it + number of files of folders of it) of folder (if (name of operating system starts with "Win") then (value "BufferDir" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of registry as string) else (key ("BufferDir") of section ("Software\BigFix\Enterprise Server\FillDB") of file "besserver.config" of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client)))as string) else ("N/A"))} >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"Buffer Dir Size: " & (if (exists main gather service) then ((number of files of it + number of files of folders of it) of folder (if (name of operating system starts with "Win") then (value "BufferDir" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of registry as string) else (key ("BufferDir") of section ("Software\BigFix\Enterprise Server\FillDB") of file "besserver.config" of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client)))as string) else ("N/A"))} >> "{parameter "rootServerInfoFile"}"
+//waithidden cmd.exe /C echo {"Gather Status Failures: " &  (concatenation "  ||  " of lines whose (it as lowercase contains "gathererror" and it as lowercase does not contain "shutdown while in gatherpending" and it as lowercase does not contain "hasite_") of file (if (name of operating system starts with "Win") then (if ((value whose (name of it as string as lowercase contains "version") of key "HKLM\Software\BigFix\Enterprise Server\" of registry as string) < "8") then (value "InboxLocation" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\GatherService" of registry as string & "\GatherState.xml") else ((value "StoragePath" of key "HKEY_LOCAL_MACHINE\Software\BigFix\Enterprise Server\GlobalOptions" of registry as string) & "Mirror Server\inbox\GatherState.xml")) else (pathname of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client) & "/Mirror Server/inbox/GatherState.xml"))) } >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"Registration List Size: " & (if (exists file(it)) then ((size of file (it) / 1024) as string & " KB") else "N/A") of (if (name of operating system starts with "Win") then (value "RegistrationList Location" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\ClientRegister" of registry as string) else (pathname of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client) & "/ClientRegisterData/registrationlist.txt"))} >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"Web Reports SSL: " & (if (exists service "BESWebReportsServer") then (if (exists setting "_WebReports_HTTPServer_UseSSLFlag" whose (value of it = "1") of client) then ("HTTPS") else ("HTTP")) else ("N/A"))} >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Number of DB Updating Threads): " & (value "NumberOfDBUpdatingThreads" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Number of DB Updating Threads for Query): " & (value "NumberOfDBUpdatingThreadsForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Number of Parsing Threads): " & (value "NumberOfParsingThreads" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Number of Parsing Threads For Query): " & (value "NumberOfParsingThreadsForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Parallelism Enabled): " & (value "ParallelismEnabled" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+waithidden cmd.exe /C echo {"FillDB Parallelism (Parallelism Enabled For Query): " & (value "ParallelismEnabledForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)}  >> "{parameter "rootServerInfoFile"}"
+
+else
+waithidden cmd.exe /C echo Root Server information was not selected for capture. > "{parameter "diServerFolder" & "\ROOT_SERVER_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE RELAY SERVER INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectRelay" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22RELAY%20SERVER%20INFORMATION%22 > {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Relay%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20whose%20%28it%20contains%20%22.%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Relay%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Active%20BES%20Relays%3A%20%22%20%26%20number%20of%20computers%20of%20results%20from%20%28bes%20properties%20%22Last%20Report%20Time%22%20whose%20%28reserved%20flag%20of%20it%29%29%20whose%20%28exists%20value%20of%20it%20and%20%28now%20-%20value%20of%20it%20as%20time%29%20%3C%201%20%2A%20day%29%20of%20%28computers%20of%20results%20whose%20%28exists%20value%20of%20it%20AND%20value%20of%20it%20as%20lowercase%20contains%20%22yes%22%29%20of%20bes%20properties%20%22BES%20Relay%20Service%20Installed%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%20Using%20Automatic%20Relay%20Selection%3A%20%22%20%26%20number%20of%20results%20whose%20%28exists%20value%20of%20it%20AND%20value%20of%20it%20%3D%20%22Automatic%22%29%20of%20bes%20properties%20%22BES%20Relay%20Selection%20Method%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%20Using%20Manual%20Relay%20Selection%3A%20%22%20%26%20number%20of%20results%20whose%20%28exists%20value%20of%20it%20AND%20value%20of%20it%20%3D%20%22Manual%22%29%20of%20bes%20properties%20%22BES%20Relay%20Selection%20Method%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Number%20of%20Clients%20per%20Relay%3A%20%22%20%26%20%28if%20%28exists%20it%20as%20integer%29%20then%20it%20as%20integer%20else%200%29%20of%20mean%20of%20multiplicities%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%21%3D%20%22BES%20Root%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Number%20of%20Clients%20per%20Relay%3A%20%22%20%26%20if%20%28exists%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%21%3D%20%22BES%20Root%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20then%20%28maximum%20of%20multiplicities%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%21%3D%20%22BES%20Root%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20else%200 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Minimum%20Number%20of%20Clients%20per%20Relay%3A%20%22%20%26%20if%20%28exists%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%21%3D%20%22BES%20Root%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20then%20%28minimum%20of%20multiplicities%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28exists%20value%20of%20it%20and%20value%20of%20it%20%21%3D%20%22BES%20Root%20Server%22%29%20of%20bes%20properties%20%22Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20else%200 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Distances%20to%20Relays%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20%28unique%20values%20of%20%28%28values%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%3B%28%22255--%22%20%26%20%28number%20of%20results%20whose%20%28error%20flag%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20string%29%29%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Distance%20to%20Relays%3A%20%22%20%26%20mean%20of%20%28it%20as%20integer%29%20of%20%28values%20whose%20%28exists%20it%20as%20integer%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20integer%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Clients%20with%20Unknown%20Relay%20Distance%3A%20%22%20%26%20%28number%20of%20results%20whose%20%28error%20flag%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%C2%A0 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Distance%20to%20Relays%3A%20%22%20%26%20maximum%20of%20%28it%20as%20integer%29%20of%20%28values%20whose%20%28exists%20it%20as%20integer%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Latest%20relay%20Report%20Time%20timestamp%3A%20%22%20%26%20maximum%20of%20(last%20report%20time%20of%20it)%20of%20bes%20computers%20whose%20(relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20reported%20within%20the%20last%2024%20hours%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(24*%20hour))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20reported%20within%20the%20last%201%20hours%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(1*%20hour))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20reported%20within%20the%20last%2015%20minutes%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(15%20*%20minute))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20that%20have%20not%20reported%20within%20the%20last%201%20hour%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3C%20(now%20-%20(60%20*%20minute))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20that%20have%20not%20reported%20within%20the%20last%201%20day%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3C%20(now%20-%20(1440%20*%20minute))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20relays%20that%20have%20not%20reported%20within%20the%20last%201%20day%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3C%20(now%20-%20(10080%20*%20minute))%20and%20relay%20server%20flag%20of%20it)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Relays%20with%20over%201000%20Clients%3A%20%22%20%26%20number%20of%20(item%200%20of%20it)%20of%20((it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20(relay%20servers%20of%20it)%20of%20bes%20computers%20whose%20(exist%20relay%20server%20of%20it))%20whose%20(item%201%20of%20it%20%3E%201000)%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Current%20Actionsite%20Version%3A%20%22%20%26%20(maximum%20of%20((values%20of%20results%20from%20(bes%20properties%20whose%20(name%20of%20it%20%3D%20%22BES%20Health%20Checks%3A%3AActionsite%20Version%22))%20of%20bes%20computers%20whose%20(root%20server%20flag%20of%20it%20%3D%20TRUE))%20as%20integer)%20as%20string) >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Relays%20with%20Stale%20Actionsite%20Versions%20(based%20upon%20BES%20Health%20Checks%3A%3AActionsite%20Version)%20-%20Version%2C%20Relay%20Name%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(concatenation%20%22%22%20of%20((name%20of%20computer%20of%20item%201%20of%20it%20%26%20%22%20-%20%22%20%26%20value%20of%20item%201%20of%20it))%20of%20(maximum%20of%20((values%20of%20results%20from%20(bes%20properties%20whose%20(name%20of%20it%20%3D%20%22BES%20Health%20Checks%3A%3AActionsite%20Version%22))%20of%20bes%20computers%20whose%20(root%20server%20flag%20of%20it%20%3D%20TRUE))%20as%20integer)%20%2C%20results%20whose%20(exists%20value%20of%20it)%20of%20bes%20properties%20whose%20(name%20of%20it%20%3D%20%22BES%20Health%20Checks%3A%3AActionsite%20Version%22%20))%20whose%20(value%20of%20item%201%20of%20it%20as%20integer%20%3C%20item%200%20of%20it%20as%20integer)) >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Relay%20Server%20Aggregation%20Statistics%20(Total%20Child%20Count)%20-%20Relay%20Name%2C%20Number%20of%20Machines%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20(relay%20server%20of%20it)%20of%20bes%20computers%20whose%20(exist%20relay%20server%20of%20it))%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Relay%20Server%20Aggregation%20Statistics%20(Client%20Child%20Count)%20-%20Relay%20Name%2C%20Number%20of%20Machines%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20(relay%20server%20of%20it)%20of%20bes%20computers%20whose%20(exist%20relay%20server%20of%20it%20AND%20not%20relay%20server%20flag%20of%20it))%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Relay%20Server%20Aggregation%20Statistics%20(Relay%20Child%20Count)%20-%20Relay%20Name%2C%20Number%20of%20Machines%22 >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20(relay%20server%20of%20it)%20of%20bes%20computers%20whose%20(exist%20relay%20server%20of%20it%20AND%20relay%20server%20flag%20of%20it))%20as%20string >> {parameter "relayServerInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "relayServerInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "relayServerInfoFileXML"))}
+move __appendfile "{parameter "relayServerInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Relay Server information was not selected for capture. > "{parameter "diRelaysFolder" & "\RELAY_SERVER_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE RELAY AFFILIATION INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectRelayAffiliation" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22RELAY%20AFFILIATION%20INFORMATION%22  > {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22_BESClient_Register_Affiliation_SeekList%2C%20Number%20of%20Machines%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(%0A(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it)%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D((%22_BESClient_Register_Affiliation_SeekList%22)as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Register_Affiliation_SeekList%22%20as%20lowercase))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it)))%20as%20string >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22_BESRelay_Register_Affiliation_Advertisementlist%2C%20Number%20of%20Machines%22 >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(%0A(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it)%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D((%22_BESRelay_Register_Affiliation_Advertisementlist%22)as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESRelay_Register_Affiliation_Advertisementlist%22%20as%20lowercase))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it)))%20as%20string >> {parameter "relayAffiliationInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "relayAffiliationInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "relayAffiliationInfoFileXML"))}
+move __appendfile "{parameter "relayAffiliationInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Relay Server information was not selected for capture. > "{parameter "diRelaysFolder" & "\RELAY_AFFILIATION_INFO_NOT_SELECTED.txt"}"
+endif
+
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE CLIENT INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectClient" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22CLIENT%20INFORMATION%22 > {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22BES%20Client%20Version%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20property%20whose%20%28name%20of%20it%20%3D%20%22BES%20Client%20Version%22%20and%20name%20of%20site%20of%20source%20analysis%20of%20it%20%3D%20%22BES%20Support%22%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Operating%20System%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22OS%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Operating%20System%20Type%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28if%20%28exists%20bes%20properties%20%22OS%20Type%20-%20Windows%22%29%20then%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22OS%20Type%20-%20Windows%22%20else%20nothings%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Subnets%3A%20%22%20%26%20%28if%20%28exists%20bes%20properties%20%22Subnet%20Address%22%29%20then%20%28number%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22Subnet%20Address%22%20%29%20else%20%280%29%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Subnets%20With%20Over%20One%20Computer%3A%20%22%20%26%20%28if%20%28exists%20bes%20properties%20%22subnet%20address%22%29%20then%20%28number%20of%20unique%20values%20whose%20%28multiplicity%20of%20it%20%3E%202%29%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22subnet%20address%22%29%20else%200%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Number%20of%20Computers%20per%20Subnet%3A%20%22%20%26%20%28if%20%28exists%20bes%20properties%20%22subnet%20address%22%29%20then%20%28mean%20of%20multiplicities%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22subnet%20address%22%20as%20integer%29%20else%200%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Number%20of%20Computers%20per%20Subnet%3A%20%22%20%26%20%28if%20%28exists%20bes%20properties%20%22subnet%20address%22%29%20then%20%28maximum%20of%20multiplicities%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22subnet%20address%22%20as%20integer%29%20else%200%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Unlocked%20Computers%3A%20%22%20%26%20number%20of%20values%20whose%20%28it%20%3D%20%22No%22%29%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22Locked%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Operating%20System%20Language%20Counts%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28if%20%28exists%20bes%20properties%20%22OS%20Language%20-%20Windows%22%29%20then%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20values%20of%20results%20whose%20%28not%20error%20flag%20of%20it%20and%20exists%20value%20of%20it%29%20of%20bes%20properties%20%22OS%20Language%20-%20Windows%22%20else%20nothings%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Latest%20Computer%20Report%20Time%20timestamp%3A%20%22%20%26%20maximum%20of%20(last%20report%20time%20of%20it)%20of%20bes%20computers%20as%20string >> {parameter "clientInfoFileXML"} 
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Earliest%20Computer%20Report%20Time%20timestamp%3A%20%22%20%26%20minimum%20of%20(last%20report%20time%20of%20it)%20of%20bes%20computers%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20machines%20reported%20within%20the%20last%2024%20hours%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(24*%20hour)))%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20machines%20reported%20within%20the%20last%201%20hours%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(1*%20hour)))%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20machines%20reported%20within%20the%20last%2015%20minutes%3A%20%22%20%26%20number%20of%20bes%20computers%20whose%20(last%20report%20time%20of%20it%20%3E%20(now%20-%20(15%20*%20minute)))%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%20Using%20Automatic%20Relay%20Selection%3A%20%22%20%26%20number%20of%20results%20whose%20%28exists%20value%20of%20it%20AND%20value%20of%20it%20%3D%20%22Automatic%22%29%20of%20bes%20properties%20%22BES%20Relay%20Selection%20Method%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Computers%20Using%20Manual%20Relay%20Selection%3A%20%22%20%26%20number%20of%20results%20whose%20%28exists%20value%20of%20it%20AND%20value%20of%20it%20%3D%20%22Manual%22%29%20of%20bes%20properties%20%22BES%20Relay%20Selection%20Method%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Distances%20to%20Relays%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20%28unique%20values%20of%20%28%28values%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%3B%28%22255--%22%20%26%20%28number%20of%20results%20whose%20%28error%20flag%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20string%29%29%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Distance%20to%20Relays%3A%20%22%20%26%20mean%20of%20%28it%20as%20integer%29%20of%20%28values%20whose%20%28exists%20it%20as%20integer%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20integer%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Clients%20with%20Unknown%20Relay%20Distance%3A%20%22%20%26%20%28number%20of%20results%20whose%20%28error%20flag%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%20as%20string%29 >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Distance%20to%20Relays%3A%20%22%20%26%20maximum%20of%20%28it%20as%20integer%29%20of%20%28values%20whose%20%28exists%20it%20as%20integer%29%20of%20results%20whose%20%28exists%20value%20of%20it%29%20of%20bes%20properties%20%22Distance%20to%20BES%20Relay%22%20whose%20%28reserved%20flag%20of%20it%29%29%20as%20string >> {parameter "clientInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "clientInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "clientInfoFileXML"))}
+move __appendfile "{parameter "clientInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Client information was not selected for capture. > "{parameter "diClientsFolder" & "\CLIENT_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE CLIENT SETTINGS INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectClientSettings" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22CLIENT%20SETTINGS%20INFORMATION%22 > {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Root Server and Relays
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ROOT%20SERVER%20AND%20RELAY%20SETTINGS%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Description%3A%20Unique%20client%20settings%20specified%20on%20relays%20(limited%20to%20_BESClient_Relay%2C%20_Enterprise%20Server%2C%20_BESGather%20and%20_BESRelay%20prefix%20settings)%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Setting%20Name%2C%20Setting%20Value%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=substrings%20separated%20by%20%22%7C%22%20of%20%28%28%28item%200%20of%20it%29%20as%20string%29%20%26%20%22%7C%22%20%26%20%28item%201%20of%20it%20as%20string%29%29%0Aof%20%28%28it%2Cmultiplicity%20of%20it%29%20of%20unique%20values%20of%28%28name%20of%20it%20%7C%20%22No-Name-Err-Trap%22%29%20%26%22%20%7C%20%22%26%20%28value%20of%20it%20%7C%20%22No-Val-Err-Trap%22%29%29%20of%20client%20settings%20whose%20%28name%20of%20it%20as%20lowercase%20Starts%20with%28%22_BESClient_Relay%22as%20lowercase%29%29%20of%20bes%20computers%20whose%28relay%20server%20flag%20of%20it%29%3B%0A%28it%2Cmultiplicity%20of%20it%29%20of%20unique%20values%20of%28%28name%20of%20it%20%7C%20%22No-Name-Err-Trap%22%29%20%26%22%20%7C%20%22%26%20%28value%20of%20it%20%7C%20%22No-Val-Err-Trap%22%29%29%20of%20client%20settings%20whose%20%28name%20of%20it%20as%20lowercase%20Starts%20with%20%28%22_BESRelay%22%20as%20lowercase%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESRelay_Diagnostics_Password%22%29%20as%20lowercase%29%29%29%20of%20bes%20computers%20whose%28relay%20server%20flag%20of%20it%29%3B%0A%28it%2Cmultiplicity%20of%20it%29%20of%20unique%20values%20of%28%28name%20of%20it%20%7C%20%22No-Name-Err-Trap%22%29%20%26%22%20%7C%20%22%26%20%28value%20of%20it%20%7C%20%22No-Val-Err-Trap%22%29%29%20of%20client%20settings%20whose%20%28name%20of%20it%20as%20lowercase%20Starts%20with%28%20%22_BESGather%22%20as%20lowercase%29%29%20of%20bes%20computers%20whose%28relay%20server%20flag%20of%20it%29%3B%0A%28it%2Cmultiplicity%20of%20it%29%20of%20unique%20values%20of%28%28name%20of%20it%20%7C%20%22No-Name-Err-Trap%22%29%20%26%22%20%7C%20%22%26%20%28value%20of%20it%20%7C%20%22No-Val-Err-Trap%22%29%29%20of%20client%20settings%20whose%20%28name%20of%20it%20as%20lowercase%20Starts%20with%20%28%22_Enterprise%20Server%22%20as%20lowercase%29%29%20of%20bes%20computers%20whose%28relay%20server%20flag%20of%20it)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Clients
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20CLIENT%20SETTINGS%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Description%3A%20Unique%20client%20settings%20specified%20on%20clients%20%28non-relays%2C%20limited%20to%20_BESClient_%20prefix%20settings%20excluding%20archive%20manager%20settings%2C%20_BESClient_Emsg%2C%20_BESClient_SecureRegistration%2C%20_BESClient_ActionManager%2C%20_BESClinet_Actionarchiver%2C%20_BESClient_Diagnostics_Password%20settings.%20Also%20contains%20a%20special%20section%20for%20ICMP%20control%20settings.%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Setting%20Name%2C%20Setting%20Value%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(substrings%20separated%20by%20%22%7C%22%20of%20%28%28%28item%200%20of%20it%29%20as%20string%29%20%26%20%22%7C%22%20%26%20%28item%201%20of%20it%20as%20string%29%29%29%20of%20%28%28it%2Cmultiplicity%20of%20it%29%20of%20unique%20values%20of%28%28name%20of%20it%20%7C%20%22No-Name-Err-Trap%22%29%20%26%22%20%7C%20%22%26%20%28value%20of%20it%20%7C%20%22No-Val-Err-Trap%22%29%29%20of%20client%20settings%20whose%20%28%28name%20of%20it%20as%20lowercase%20Starts%20with%28%22_BESClient%22as%20lowercase%29%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESClient_ArchiveManager%22%29%20as%20lowercase%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESClient_ActionManager%22%29%20as%20lowercase%29%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESClient_EMsg%22%29%20as%20lowercase%29%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESClient_SecureRegistration%22%29%20as%20lowercase%29%29%20AND%20%28NOT%20%28name%20of%20it%20as%20lowercase%20starts%20with%20%28%22_BESRelay_Diagnostics_Password%20%22%29%20as%20lowercase%29%29%20%29%29%20of%20bes%20computers%20whose%28NOT%20relay%20server%20flag%20of%20it)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		ICMP Controls
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ICMP%20CONTROLS%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_Automatic%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)of%0A(%22__RelaySelect_Automatic%20%3D%201%22%2C(number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it))%20as%20string%3B%0A%22__RelaySelect_Automatic%20%3D%200%22%2C(number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%220%22%20)%20of%20it))%20as%20string) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_MaximumTTLToPing%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Undefined%22%2C((number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20%20%3D%20((%22_BESClient_RelaySelect_MaximumTTLToPing%22)%20)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20%20%3D(%22_BESClient_RelaySelect_MaximumTTLToPing%22%20))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22)%20of%20it))) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_IntervalSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Undefined%22%2C((number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20%20%3D%20((%22_BESClient_RelaySelect_IntervalSeconds%22)%20)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20%20%3D(%22_BESClient_RelaySelect_IntervalSeconds%22%20))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22)%20of%20it))) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_MaxRetryIntervalSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%20(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Undefined%22%2C((number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20%20%3D%20((%22_BESClient_RelaySelect_MaxRetryIntervalSeconds%22)%20)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20%20%3D(%22_BESClient_RelaySelect_MaxRetryIntervalSeconds%22%20))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22)%20of%20it))) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_MinRetryIntervalSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%20(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Undefined%22%2C((number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20%20%3D%20((%22_BESClient_RelaySelect_MinRetryIntervalSeconds%22)%20)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20%20%3D(%22_BESClient_RelaySelect_MinRetryIntervalSeconds%22%20))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22)%20of%20it))) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_RelaySelect_ResistFailureIntervalSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%20(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Undefined%22%2C((number%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22%20and%20value%20of%20it%20as%20string%20%3D%20%221%22%20)%20of%20it%20AND%20NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20%20%3D%20((%22_BESClient_RelaySelect_ResistFailureIntervalSeconds%22)%20)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20%20%3D(%22_BESClient_RelaySelect_ResistFailureIntervalSeconds%22%20))%20of%20bes%20computers%20whose%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20%3D%20%22__RelaySelect_Automatic%22)%20of%20it))) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESCient_Report_MinimumInterval%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT(exist%20client%20setting%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Report_MinimumInterval%22)%20as%20lowercase)%20and%20exist%20value%20of%20it)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Report_MinimumInterval%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Resource_InterruptSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT(exist%20client%20setting%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Resource_InterruptSeconds%22)%20as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Resource_InterruptSeconds%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Command Polling
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20COMMAND%20POLLING%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Comm_CommandPollEnable%2C%20Number%20of%20Machines%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Comm_CommandPollInterval%22)as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Comm_CommandPollInterval%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Comm_CommandPollIntervalSeconds%2C%20Number%20of%20Machines%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Comm_CommandPollIntervalSeconds%22)as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Comm_CommandPollIntervalSeconds%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Client CPU Usage
+//*
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20CLIENT%20CPU%20USAGE%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Resource_WorkNormal%2C%20Number%20of%20Machines%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Resource_WorkNormal%22)%20as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Resource_WorkNormal%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Resource_SleepNormal%2C%20Number%20of%20Machines%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Resource_SleepNormal%22)%20as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Resource_SleepNormal%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Resource_SleepIdle%2C%20Number%20of%20Machines%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Resource_SleepIdle%22)%20as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Resource_SleepIdle%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Value%20of%20_BESClient_Resource_WorkIdle%2C%20Number%20of%20Machines%20%22 >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(item%200%20of%20it%2C%20item%201%20of%20it%20as%20string)%20of%20((%22Default%22%2C((number%20of%20bes%20computers%20whose%20(NOT%20(exist%20client%20setting%20whose%20(%20name%20of%20it%20as%20lowercase%20%3D%20((%22_BESClient_Resource_WorkIdle%22)%20as%20lowercase)%20and%20exist%20value%20of%20it%20)%20of%20it)))%20as%20string))%3B(((it)%20as%20string%2C(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20values%20of%20client%20settings%20whose%20(name%20of%20it%20as%20lowercase%20%3D%20(%22_BESClient_Resource_WorkIdle%22%20as%20lowercase))%20of%20bes%20computers)) >> {parameter "clientSettingsInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "clientSettingsInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "clientSettingsInfoFileXML"))}
+move __appendfile "{parameter "clientSettingsInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Client information was not selected for capture. > "{parameter "diClientsFolder" & "\CLIENT_SETTINGS_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE OPERATOR INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectOperator" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22OPERATOR%20INFORMATION%22 > {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Console%20Operators%3A%20%22%20%26%20number%20of%20bes%20users%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Master%20Operators%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28master%20flag%20of%20it%20%3D%20true%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Non-Master%20Operators%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28master%20flag%20of%20it%20%3D%20false%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Number%20of%20Computers%20Managed%20by%20Non-Master%20Operators%3A%20%22%20%26%20if%20%28exists%20bes%20users%20whose%20%28not%20master%20flag%20of%20it%29%20%29%20then%20%28%20mean%20of%20%28if%20%28exists%20administered%20computers%20of%20it%29%20then%20%28number%20of%20administered%20computers%20of%20it%29%20else%200%29%20of%20bes%20users%20whose%20%28not%20master%20flag%20of%20it%29%20as%20integer%29%20else%200 >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Minimum%20Number%20of%20Computers%20Managed%3A%20%22%20%26%20minimum%20of%20%28number%20of%20administered%20computers%20of%20it%29%20of%20bes%20users%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Number%20of%20Computers%20Managed%3A%20%22%20%26%20maximum%20of%20%28number%20of%20administered%20computers%20of%20it%29%20of%20bes%20users%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Custom%20Content%20Authors%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28custom%20content%20flag%20of%20it%20%3D%20true%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20Days%20Last%20Logged%20In%3A%20%22%20%26%20mean%20of%20%28%28now%20-%20last%20login%20time%20of%20it%29%20%2Fday%29%20of%20bes%20users%20whose%20%28exists%20last%20login%20time%20of%20it%29%20as%20integer%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Operators%20Never%20Logged%20In%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28not%20exists%20last%20login%20time%20of%20it%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Operators%20Not%20Logged%20for%20Three%20Months%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28exists%20last%20login%20time%20of%20it%20AND%20%28now%20-%20last%20login%20time%20of%20it%20%3E%2013%20%2A%20week%29%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Operators%20Not%20Logged%20for%20One%20Month%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20%28exists%20last%20login%20time%20of%20it%20AND%20%28now%20-%20last%20login%20time%20of%20it%20%3C%204%20%2A%20week%29%29%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20created%20within%20the%20last%2024%20hours%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20((%20exist%20creation%20time%20of%20it)%20and%20(%20creation%20time%20of%20it%20%3E%3D%20(now%20-%2024*hour)%20))%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20logged%20in%20within%20the%20last%2024%20hours%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20((%20exist%20last%20login%20time%20of%20it)%20and%20(%20last%20login%20time%20of%20it%20%3E%3D%20(now%20-%2024%20*%20hour)%20))%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20that%20have%20not%20logged%20in%20for%20over%2090%20days%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20(%20(exist%20last%20login%20time%20of%20it%20and%20last%20login%20time%20of%20it%20%3C%3D%20(now%20-%2090*day))%20and%20exist%20last%20login%20time%20of%20it%20)%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20that%20have%20not%20logged%20in%20for%20over%2060%20days%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20(%20(exist%20last%20login%20time%20of%20it%20and%20last%20login%20time%20of%20it%20%3C%3D%20(now%20-%2060*day))%20and%20exist%20last%20login%20time%20of%20it%20)%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20that%20have%20not%20logged%20in%20for%20over%2030%20days%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20(%20(exist%20last%20login%20time%20of%20it%20and%20last%20login%20time%20of%20it%20%3C%3D%20(now%20-%2030*day))%20and%20exist%20last%20login%20time%20of%20it%20)%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20operators%20that%20have%20never%20logged%20in%3A%20%22%20%26%20number%20of%20bes%20users%20whose%20(%20not%20(exist%20last%20login%20time%20of%20it%20))%20as%20string >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Bes%20Roles%3A%20%22%20%26%20(number%20of%20bes%20roles%20as%20string%20 >> {parameter "operatorInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "operatorInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "operatorInfoFileXML"))}
+move __appendfile "{parameter "operatorInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Operator information was not selected for capture. > "{parameter "diOperatorsFolder" & "\OPERATOR_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE CONTENT INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectContent" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22CONTENT%20INFORMATION%22 > {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Fixlets%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28fixlet%20flag%20of%20it%20%3D%20true%20AND%20applicable%20computer%20count%20of%20it%20%3E%200%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%20%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28fixlet%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Tasks%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28task%20flag%20of%20it%20%3D%20true%20AND%20applicable%20computer%20count%20of%20it%20%3E%200%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%20%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28task%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%20%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Analyses%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20%3D%20true%20AND%20%28exists%20best%20activation%20whose%20%28active%20flag%20of%20it%20%3D%20true%29%20of%20it%29%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%20%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20true%20%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Hidden%20Fixlets%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28fixlet%20flag%20of%20it%20%3D%20true%20AND%20applicable%20computer%20count%20of%20it%20%3E%200%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28fixlet%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Hidden%20Tasks%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28task%20flag%20of%20it%20%3D%20true%20AND%20applicable%20computer%20count%20of%20it%20%3E%200%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28task%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Hidden%20Analyses%3A%20%22%20%26%20%28%28number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20%3D%20true%20AND%20%28exists%20best%20activation%20whose%20%28active%20flag%20of%20it%20%3D%20true%29%20of%20it%29%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%20%26%20%22%20%2F%20%22%20%26%20%28number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20%3D%20true%20AND%20globally%20visible%20flag%20of%20it%20%3D%20false%29%20as%20string%29%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Baselines%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28baseline%20flag%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Average%20number%20of%20Components%20per%20Baselines%3A%20%22%20%26%20if%20%28exists%20bes%20fixlets%20whose%20%28baseline%20flag%20of%20it%29%29%20then%20%28mean%20of%20%28number%20of%20components%20of%20component%20groups%20of%20it%29%20of%20bes%20fixlets%20whose%20%28baseline%20flag%20of%20it%29%20as%20integer%29%20else%200 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Maximum%20Number%20of%20Components%20per%20Baseline%3A%20%22%20%26%20if%20%28exists%20bes%20fixlets%20whose%20%28baseline%20flag%20of%20it%29%29%20then%20%28maximum%20of%20%28number%20of%20components%20of%20component%20groups%20of%20it%29%20of%20bes%20fixlets%20whose%20%28baseline%20flag%20of%20it%29%29%20else%200 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Properties%3A%20%22%20%26%20number%20of%20bes%20properties%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Actived%20Properties%3A%20%22%20%26%20number%20of%20properties%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20AND%20exists%20activation%20of%20it%20AND%20exists%20active%20flags%20of%20activations%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Custom%20Properties%3A%20%22%20%26%20number%20of%20bes%20properties%20whose%20%28custom%20flag%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Activated%20Analyses%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20AND%20exists%20activation%20of%20it%20AND%20exists%20active%20flags%20of%20activations%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Automatic%20Computer%20Groups%3A%20%22%20%26%20number%20of%20bes%20computer%20groups%20whose%20(Automatic%20flag%20of%20it)%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Manual%20Computer%20Groups%3A%20%22%20%26%20number%20of%20bes%20computer%20groups%20whose%20(NOT(Automatic%20flag%20of%20it))%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20External%20Sites%3A%20%22%20%26%20(number%20of%20bes%20sites%20as%20string) >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Custom%20Sites%3A%20%22%20%26%20number%20of%20bes%20custom%20sites%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Automatic%20Computer%20Groups%3A%20%22%20%26%20number%20of%20bes%20computer%20groups%20whose%20(Automatic%20flag%20of%20it)%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Manual%20Computer%20Groups%3A%20%22%20%26%20number%20of%20bes%20computer%20groups%20whose%20(NOT(Automatic%20flag%20of%20it))%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Names%20of%20External%20Sites%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20unique%20values%20of%20names%20of%20bes%20sites%20whose%20%28custom%20site%20flag%20of%20it%20%3D%20false%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Names%20of%20Custom%20Sites%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20unique%20values%20of%20names%20of%20bes%20custom%20sites >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20EXTERNAL%20SITES%20INFORMATION%20%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Display%20Name%2C%20Site%20Version%2C%20Number%20of%20Subscribed%20Computers%2C%20Most%20Recent%20Fixlet%20Modification%2C%20Number%20of%20Fixlets%20Within%20the%20Site%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(display%20name%20of%20it%2Cversion%20of%20it%20as%20string%2Cnumber%20of%20subscribed%20computers%20of%20it%20as%20string%2C(maximum%20of%20modification%20times%20of%20fixlets%20whose%20(exist%20modification%20time%20of%20it)%20of%20it)%20as%20string%2Curl%20of%20it)%20of%20unique%20values%20of%20%20sites%20of%20bes%20fixlets%20whose%20(NOT%20(Custom%20Flag%20of%20it)%20AND%20(NOT%20(custom%20site%20flag%20of%20it))%20AND%20(NOT%20(operator%20site%20flag%20of%20it)))%20 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20CUSTOM%20SITES%20INFORMATION%20%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Site%20Name%2C%20Number%20of%20Subscribed%20Computers%2C%20Number%20of%20Fixlets%20Within%20the%20Site%2C%20Number%20of%20Writers%20to%20Site%2C%20Number%20of%20Readers%20to%20Site%2C%20Number%20of%20Owners%20to%20Site%22  >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(name%20of%20it%2C%20number%20of%20subscribed%20computers%20of%20it%20as%20string%2C%20(number%20of%20fixlets%20whose%20(custom%20flag%20of%20it)of%20it)%20as%20string%2C%20number%20of%20writers%20of%20it%20as%20string%2C%20number%20of%20readers%20of%20it%20as%20string%2C%20number%20of%20owners%20of%20it%20as%20string)%20of%20unique%20values%20of%20bes%20custom%20sites%20  >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "contentInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "contentInfoFileXML"))}
+move __appendfile "{parameter "contentInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Content information was not selected for capture. > "{parameter "diContentFolder" & "\CONTENT_INFO_NOT_SELECTED.txt"}"
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE PROPERTY INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectProperty" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22PROPERTY%20INFORMATION%22 > {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Properties%3A%20%22%20%26%20(number%20of%20bes%20properties)%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Custom%20Properties%3A%20%22%20%26%20number%20of%20bes%20properties%20whose%20(custom%20flag%20of%20it)%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Active%20Properties%3A%20%22%20%26%20(number%20of%20properties%20of%20bes%20fixlets%20whose%20(analysis%20flag%20of%20it%20AND%20exists%20activation%20of%20it%20AND%20exists%20active%20flags%20of%20activations%20of%20it))%20as%20string%20 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Activated%20Analysis%3A%20%22%20%26%20(number%20of%20bes%20fixlets%20whose%20(analysis%20flag%20of%20it%20AND%20exists%20activation%20of%20it%20AND%20exists%20active%20flags%20of%20activations%20of%20it))%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Property%20Activations%20sourced%20within%20custom%20sites%3A%20%22%20%26%20(%20number%20of%20(names%20of%20it%2C%20names%20of%20sites%20of%20source%20analyses%20of%20it%2C%20ids%20of%20it%2C%20names%20of%20issuers%20of%20best%20activations%20of%20source%20analyses%20of%20it)%20of%20bes%20properties%20whose(%20(custom%20site%20flag%20of%20source%20analysis%20of%20it%20)%20AND%20(active%20flag%20of%20best%20activation%20of%20it%20OR%20active%20flag%20of%20activation%20of%20it)%20of%20source%20analysis%20of%20it))%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Property%20Activations%20sourced%20from%20opsite%20content%3A%20%22%20%26%20(%20number%20of%20(names%20of%20it%2C%20names%20of%20sites%20of%20source%20analyses%20of%20it%2C%20ids%20of%20it%2C%20names%20of%20issuers%20of%20best%20activations%20of%20source%20analyses%20of%20it)%20of%20bes%20properties%20whose(%20(operator%20site%20flag%20of%20source%20analysis%20of%20it%20)%20AND%20(active%20flag%20of%20best%20activation%20of%20it%20OR%20active%20flag%20of%20activation%20of%20it)%20of%20source%20analysis%20of%20it))%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Property%20Activations%20sourced%20from%20actionsite%20content%3A%20%22%20%26%20(%20number%20of%20(names%20of%20it%2C%20names%20of%20sites%20of%20source%20analyses%20of%20it%2C%20ids%20of%20it%2C%20names%20of%20issuers%20of%20best%20activations%20of%20source%20analyses%20of%20it)%20of%20bes%20properties%20whose(%20(master%20site%20flag%20of%20source%20analysis%20of%20it)%20AND%20(active%20flag%20of%20best%20activation%20of%20it%20OR%20active%20flag%20of%20activation%20of%20it)%20of%20source%20analysis%20of%20it))%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Property%20Activations%20sourced%20from%20external%20site%20content%3A%20%22%20%26%20(%20number%20of%20(names%20of%20it%2C%20names%20of%20sites%20of%20source%20analyses%20of%20it%2C%20ids%20of%20it%2C%20names%20of%20issuers%20of%20best%20activations%20of%20source%20analyses%20of%20it)%20of%20bes%20properties%20whose(%20(external%20site%20flag%20of%20site%20of%20source%20analysis%20of%20it)%20AND%20(active%20flag%20of%20best%20activation%20of%20it%20OR%20active%20flag%20of%20activation%20of%20it)%20of%20source%20analysis%20of%20it))%20as%20string >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%2F%2F%3D%3D%3D%3D%3D%20Custom%20BES%20Properties%20with%20frequent%20evaluations%20%28sub%2015%20minutes%29%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Property%20Name%2C%20Source%20Analysis%20Site%20Name%2C%20Property%20ID%2C%20Issued%20By%2C%20Evaluation%20Interval%22 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%28%28names%20of%20it%2C%20names%20of%20sites%20of%20source%20analyses%20of%20it%2C%20ids%20of%20it%2C%20names%20of%20issuers%20of%20best%20activations%20of%20source%20analyses%20of%20it%2C%20evaluation%20period%20of%20it%29%20of%20bes%20properties%20whose%28evaluation%20period%20of%20it%20%3C%3D%205%2Aminute%20AND%20%28custom%20site%20flag%20of%20source%20analysis%20of%20it%20OR%20operator%20site%20flag%20of%20source%20analysis%20of%20it%20OR%20master%20site%20flag%20of%20source%20analysis%20of%20it%29%20AND%20%28active%20flag%20of%20best%20activation%20of%20it%20OR%20active%20flag%20of%20activation%20of%20it%29%20of%20source%20analysis%20of%20it%29%29>> {parameter "propertyInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "propertyInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "propertyInfoFileXML"))}
+move __appendfile "{parameter "propertyInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Property information was not selected for capture. > {parameter "diContentFolder" & "\PROPERTY_INFO_NOT_SELECTED.txt"}
+endif
+
+//* ====================================================================================================>
+//*
+//*     CAPTURE ACTION INFORMATION
+//*
+//* ====================================================================================================>
+
+if {parameter "collectAction" = "true"}
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22ACTION%20INFORMATION%22 > {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Generated%3A%20%22%20%26%20now%20as%20string >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Report%20Version%3A%201.0%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Open%20Top%20Level%20Actions%3A%20%22%20%26%20number%20of%20top%20level%20bes%20actions%20whose%20%28state%20of%20it%20as%20string%20as%20lowercase%20%3D%20%22open%22%29%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Open%20Actions%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20%28state%20of%20it%20as%20string%20as%20lowercase%20%3D%20%22open%22%29%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Actions%3A%20%22%20%26%20(number%20of%20bes%20actions%20as%20string)%20  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Actions%20by%20Current%20State%3A%20%22%20%26%20concatenation%20%22%3B%20%22%20of%20(%22(%22%20%26%20it%20as%20string%20%26%20%22%3A%20%22%20%26%20(%20multiplicity%20of%20it%20as%20string)%20%20%26%20%22)%22)%20of%20unique%20values%20of%20states%20of%20bes%20actions%20whose%20(exist%20state%20of%20it)%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Actions%20per%20Site%3A%20%22%20%26%20concatenation%20%22%2C%20%22%20of%20%28it%20as%20string%29%20of%20%28it%20%26%20%22--%22%20%26%20%28multiplicity%20of%20it%20as%20string%29%29%20of%20unique%20values%20of%20names%20of%20sites%20of%20source%20fixlets%20of%20bes%20actions%20whose%20%28exists%20source%20fixlet%20of%20it%29%20as%20string >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Large%20multiple%20action%20group%20in%20open%20state%20with%20greater%20than%20100%20component%20actions%3A%20%22%20%26%20number%20of%20%20bes%20actions%20whose%20%20(multiple%20flag%20of%20it%20and%20number%20of%20member%20actions%20of%20it%20%3E%20100%20and%20state%20of%20it%20%3D%20%22Open%22)%20as%20string >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Large%20multiple%20action%20group%20in%20open%20state%20with%20greater%20than%20250%20component%20actions%3A%20%22%20%26%20number%20of%20%20bes%20actions%20whose%20%20(multiple%20flag%20of%20it%20and%20number%20of%20member%20actions%20of%20it%20%3E%20250%20and%20state%20of%20it%20%3D%20%22Open%22)%20as%20string >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Large%20multiple%20action%20group%20in%20open%20state%20with%20greater%20than%20500%20component%20actions%3A%20%22%20%26%20number%20of%20%20bes%20actions%20whose%20%20(multiple%20flag%20of%20it%20and%20number%20of%20member%20actions%20of%20it%20%3E%20500%20and%20state%20of%20it%20%3D%20%22Open%22)%20as%20string%20 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Open%20actions%20targeting%20method%20specified%3A%20%22%20%26%20concatenation%20%22%3B%20%22of%20(%22(%22%20%26%20it%20%26%20%22%3A%20%22%20%26%20(%20multiplicity%20of%20it)%20as%20string%20%26%20%22)%22)%20of%20unique%20values%20of%20targeting%20methods%20of%20bes%20actions%20whose%20(state%20of%20it%20as%20lowercase%20%3D%20%22open%22%20and%20exist%20targeting%20method%20of%20it)%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20actions%20with%20multiple%20flag%20specified%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20(exist%20multiple%20flag%20of%20it%20and%20multiple%20flag%20of%20it)%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20actions%20with%20single%20flag%20specified%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20(exist%20single%20flag%20of%20it%20and%20single%20flag%20of%20it)%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20open%20actions%20associated%20to%20content%20that%20has%20since%20been%20superseded%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20(exist%20mime%20field%20%22x-fixlet-superseded%22%20of%20source%20fixlet%20of%20it%20and%20state%20of%20it%20%3D%20%22Open%22)%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20open%20actions%20issued%20by%20master%20operators%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20((exist%20state%20whose%20(it%20as%20lowercase%20%3D%20%22open%22)%20of%20it)%20AND%20(exist%20issuer%20whose%20(master%20flag%20of%20it)%20of%20it))%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20open%20actions%20issued%20by%20non%20master%20operators%3A%20%22%20%26%20number%20of%20bes%20actions%20whose%20((exist%20state%20whose%20(it%20as%20lowercase%20%3D%20%22open%22)%20of%20it)%20AND%20(exist%20issuer%20whose%20(NOT%20master%20flag%20of%20it)%20of%20it))%20as%20string  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ACTIONS%20BY%20ISSUER%20(ALL)%20%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Name%20of%20Issuer%2C%20Number%20of%20Actions%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20names%20of%20issuers%20of%20bes%20actions%20whose%20(exist%20name%20of%20issuer%20of%20it) >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ACTIONS%20BY%20ISSUER%20(OPEN)%20%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Name%20of%20Issuer%2C%20Number%20of%20Actions%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(it%2C%20multiplicity%20of%20it)%20of%20unique%20values%20of%20names%20of%20issuers%20of%20bes%20actions%20whose%20(exist%20name%20of%20issuer%20of%20it%20and%20exist%20state%20of%20it%20and%20state%20of%20it%20%3D%20%22Open%22) >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ACTIONS%20BY%20DATE%20%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Timeframe%2C%20State%2C%20%23%20of%20Actions%20In%20State%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(%0A(%20%22Actions%20issued%20Today%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(1%20*%20day)))))%0A%3B(%20%22Actions%20issued%20less%20than%207%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(7%20*%20day)))))%0A%3B(%20%22Actions%20issued%20less%20than%2015%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(15%20*%20day)))))%0A%3B(%20%22Actions%20issued%20less%20than%2030%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(30%20*%20day)))))%0A%3B(%20%22Actions%20issued%20less%20than%2060%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(60%20*%20day)))))%0A%3B(%20%22Actions%20issued%20less%20than%2090%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3E%20(now%20-%20(90%20*%20day)))))%0A%3B(%20%22Actions%20issued%20greater%20than%2015%20days%20ago%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)%20and%20(time%20issued%20of%20it%20%3C%20(now%20-%20(90%20*%20day)))))%0A%3B(%20%22Actions%20issued%20without%20an%20issue%20date%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(NOT%20exist%20time%20issued%20of%20it)%20))%0A%3B(%20%22All%20Time%20Action%20issue%20state%22%2C(it%2Cmultiplicity%20of%20it)%20of%20unique%20values%20of%20states%20of%20%20bes%20actions%20whose%20(%20(exist%20state%20of%20it)%20AND%20(exist%20time%20issued%20of%20it)))%0A)  >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%2F%2F%3D%3D%3D%3D%3D%20ACTIONS%20BY%20SOURCE%20%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%3D%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Column%20Headers%3A%20Site%20Name%2C%20State%2C%20%23%20of%20Actions%20In%20State%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22%20%22 >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=(%0A%20(it%2C%20%22Open%22%2C%20%20(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20names%20of%20sites%20of%20source%20fixlets%20whose%20(exist%20site%20of%20it)%20of%20bes%20actions%20whose(%20exist%20source%20fixlet%20of%20it%20and%20state%20of%20it%20%3D%20%22Open%22)%3B%0A%20(it%2C%20%22Stopped%22%2C%20%20(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20names%20of%20sites%20of%20source%20fixlets%20whose%20(exist%20site%20of%20it)%20of%20bes%20actions%20whose(%20exist%20source%20fixlet%20of%20it%20and%20state%20of%20it%20%3D%20%22Stopped%22)%3B%0A%20(it%2C%20%22Expired%22%2C%20%20(multiplicity%20of%20it)%20as%20string)%20of%20unique%20values%20of%20names%20of%20sites%20of%20source%20fixlets%20whose%20(exist%20site%20of%20it)%20of%20bes%20actions%20whose(%20exist%20source%20fixlet%20of%20it%20and%20state%20of%20it%20%3D%20%22Expired%22)) >> {parameter "actionInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+
+//*
+//* 		Parse the XML and format things so they are human readable. 
+//*
+
+if {(parameter "generateLogFiles" | "0") = "1"}
+delete __appendfile
+delete "{parameter "actionInfoFile"}"
+appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of following texts of firsts ">" of lines whose (it contains "Answer") of file (parameter "actionInfoFileXML"))}
+move __appendfile "{parameter "actionInfoFile"}"
+endif
+
+else
+waithidden cmd.exe /C echo Action information was not selected for capture. > {parameter "diContentFolder" & "\ACTION_INFO_NOT_SELECTED.txt"}
+endif
+
+//* ====================================================================================================>
+//*
+//*     CLEAN UP - REMOVE XML FILES
+//*
+//* ====================================================================================================>
+
+
+//*
+//*		Uncomment this out if you need to trouebleshoot and want the keep the files around
+//*
+
+// waithidden cmd.exe /C del -f {parameter "deploymentInfoResultsFolder" & "\*.xml"}]]></ActionScript>
+		</DefaultAction>
+	</Task>
+</BES>

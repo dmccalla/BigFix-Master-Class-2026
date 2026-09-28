@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Fixlet>
+		<Title>WARNING: BigFix Master Class -- POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>FillDB Performance Logging Set to Non-Default</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>
+<DIV class=hc-lead><FONT color=#000000>This warning&nbsp;fixlet indicates that the normal/default logging configurations for the service are not in&nbsp;place and will return them&nbsp;back to the documented default values.&nbsp; </FONT></DIV>
+<DIV class=hc-lead><FONT color=#000000><STRONG>Do not run it&nbsp;just because it is relevant.&nbsp; </STRONG>Run it if it is relevant AFTER the health check so you do not interfere with logging during the health check.</FONT></DIV></FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on Windows root servers where FillDB performance logging has drifted.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Run once</B><SPAN>One-time action.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Will restart FillDB</B><SPAN>The FillDB service must restart for the reset to take effect.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This warning is an insurance policy for the FillDB performance log after health check logging has been enabled and disabled. Toggling the capture on and off repeatedly can leave the performance log pointing somewhere unexpected, because each enable overwrites the saved original with whatever the path is at that moment. It clears <TT>PerformanceDataPath</TT>, sets <TT>EnablePerformanceLogging</TT> to 0, and restores the 100 MB file rotation limit, which leaves performance logging off and the deployment in its day to day state. It does not change normal FillDB logging, FillDB query performance logging, or FillDB debug/verbose logging.</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
+<LI><FONT color=#000000 size=2>This task is relevant only on Windows BigFix root servers.</FONT> 
+<LI><FONT color=#000000 size=2>Run this as a one-time action after confirming the FillDB service can be restarted.</FONT> </LI></UL></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>Windows root server.</FONT></DIV><BR>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Updated FillDB post-health-check warning guidance.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
+     if (event.contentID == 'Action1') {
+         if (EvaluateRelevance('master flag of current console user') === "False") {
+             alert('<?jxlat Only Master Operators can run this Task.?>');
+             return false;
+         }
+     }
+ }
+</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
+		<Relevance>/* IS A WINDOWS ROOT SERVER */ (exists main gather service and not exists relay service) AND /* DEFAULT FILLDB PERFORMANCE LOGGING HAS DRIFTED */ ((exists value "EnablePerformanceLogging" whose (it as string = "1") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry) OR (exists value "PerformanceDataPath" whose (it as string != "") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry))</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-17</SourceReleaseDate>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Mon, 21 Sep 2026 02:36:12 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink><![CDATA[&nbsp;to reset FillDB performance logging to the documented default values.]]></PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[
+//* ====================================================================================================
+//*
+//*     Reset logging to the documented default values.
+//*		Reference: https://help.hcl-software.com/bigfix/11.0/platform/Platform/Config/r_logfiles.html
+//*
+//* ====================================================================================================
+
+action parameter query "restart" with description "To reset FillDB performance logging you need to restart the FillDB service. Enter 'Y' to confirm you are aware of the service restart. Click Cancel to exit the task if you wish to do this at another time." with default "N"
+parameter "res" = "{parameter "restart" of action as string as lowercase}"
+
+if {(parameter "res") is "y"}
+	parameter "fillDBPerfNoticeFolder" = "{if (exists values whose (it contains "\") of settings "__FillDB_Perf_Logs_Backup_Value" of client) then (preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) else (if exists value "PerformanceDataPath" whose (it as string contains "\") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry then (preceding text of last "\" of (value "PerformanceDataPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string)) else (""))}"
+
+	waithidden cmd.exe /C net stop FillDB
+
+	regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"=""
+	regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "EnablePerformanceLogging"="0"
+	regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfLogFileSizeLimit"
+
+//*
+//*     Sleep 5 secs and start back up
+//*
+
+	waithidden cmd.exe /C ping 127.0.0.1 -n 5 -w 500> nul
+	waithidden cmd.exe /C net start FillDB
+
+	//* Remove Health Check notices before clearing the saved path.
+	if {(parameter "fillDBPerfNoticeFolder" != "") and (exists folder (parameter "fillDBPerfNoticeFolder"))}
+		if {exists file (parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_LOGS_MOVED_README.txt")}
+			delete "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_LOGS_MOVED_README.txt"}"
+		endif
+		if {exists file (parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt")}
+			waithidden cmd.exe /C if exist "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}" del /F /Q "{parameter "fillDBPerfNoticeFolder" & "\_HEALTHCHECK_FILLDB_PERFORMANCE_LOGS_MOVED_README.txt"}"
+		endif
+	endif
+
+	//* Clear the health check's own markers so a later toggle starts from a clean slate.
+	setting delete "__FillDB_Perf_Logs_Backup_Value" on "{parameter "action issue date"}" for client
+	setting delete "__FillDB_Perf_Logs_Expiration" on "{parameter "action issue date"}" for client
+
+endif
+]]></ActionScript>
+			<SuccessCriteria Option="RunToCompletion"></SuccessCriteria>
+		</DefaultAction>
+	</Fixlet>
+</BES>

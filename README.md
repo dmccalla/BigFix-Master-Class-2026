@@ -57,6 +57,8 @@ corresponding BigFix collection tasks first.
 - [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
 - [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
   and the files each module reads.
+- [Student Lab Guide](Docs/Master_Class_Lab_Guide.docx) contains the three
+  standalone exercises for the Master Class.
 
 ## License
 

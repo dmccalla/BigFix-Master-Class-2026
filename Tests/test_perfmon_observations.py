@@ -210,7 +210,9 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 80
     )
     assert (
-        get_perfmon_charts.get_threshold("Processor_Total_Processor_Time", vm=True)["min"]
+        get_perfmon_charts.get_threshold("Processor_Total_Processor_Time", vm=True)[
+            "min"
+        ]
         == 50
     )
     assert (
@@ -218,7 +220,8 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 10
     )
     assert (
-        get_perfmon_charts.get_threshold("Paging_File_Total_Usage_Peak")["critical"] == 5
+        get_perfmon_charts.get_threshold("Paging_File_Total_Usage_Peak")["critical"]
+        == 5
     )
     assert (
         get_perfmon_charts.get_threshold(
@@ -245,9 +248,113 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 0
     )
     assert (
-        get_perfmon_charts.get_threshold("PhysicalDisk_Total_Disk_Transfers_sec")["type"]
+        get_perfmon_charts.get_threshold("PhysicalDisk_Total_Disk_Transfers_sec")[
+            "type"
+        ]
         == "informational"
     )
+
+
+def test_packet_counter_analysis_uses_non_negative_sample_increases() -> None:
+    counter = "Network_Interface_1_Packets_Received_Discarded"
+    raw = pd.Series([100, 100, 103, 101, 108], dtype="float64")
+
+    analyzed = get_perfmon_charts.counter_analysis_series(raw, counter)
+
+    assert pd.isna(analyzed.iloc[0])
+    assert analyzed.iloc[1] == 0
+    assert analyzed.iloc[2] == 3
+    assert pd.isna(analyzed.iloc[3])
+    assert analyzed.iloc[4] == 7
+
+
+def test_analyze_reports_packet_increases_not_cumulative_values() -> None:
+    counter = "Network_Interface_1_Packets_Received_Discarded"
+    df = pd.DataFrame(
+        {
+            "Time": pd.date_range("2026-08-18 07:52:00", periods=5, freq="min"),
+            counter: [100, 100, 103, 101, 108],
+        }
+    )
+
+    chart_df, findings = get_perfmon_charts.analyze(
+        df,
+        [counter],
+        memory_gb=0,
+        disk_count=0,
+        vm=False,
+        rolling_window=10,
+        pct=0.98,
+        pad=1.15,
+        sample_start_str="08-18-2026 07:52",
+        sample_end_str="08-18-2026 07:56",
+        mem_src="Parameter Supplied",
+        cpu_src="Parameter Supplied",
+        disk_src="Parameter Supplied",
+    )
+
+    finding = findings[0]
+    assert finding["Status"] == "Critical"
+    assert finding["Average"] == 3.33
+    assert finding["Maximum"] == 7.0
+    assert finding["Samples"] == 3
+    assert finding["Violations"] == 2
+    values = chart_df[counter].tolist()
+    assert pd.isna(values[0])
+    assert values[1:3] == [0.0, 3.0]
+    assert pd.isna(values[3])
+    assert values[4] == 7.0
+
+
+def test_blank_counter_is_cannot_verify_instead_of_disappearing() -> None:
+    counter = "Paging_File_Total_Usage_Peak"
+    df = pd.DataFrame(
+        {
+            "Time": pd.date_range("2026-08-18 07:52:00", periods=2, freq="min"),
+            counter: [None, None],
+        }
+    )
+
+    _chart_df, findings = get_perfmon_charts.analyze(
+        df,
+        [counter],
+        memory_gb=384,
+        disk_count=0,
+        vm=False,
+        rolling_window=10,
+        pct=0.98,
+        pad=1.15,
+        sample_start_str="08-18-2026 07:52",
+        sample_end_str="08-18-2026 07:53",
+        mem_src="Parameter Supplied",
+        cpu_src="Parameter Supplied",
+        disk_src="Parameter Supplied",
+    )
+
+    assert findings[0]["Status"] == "Not Available"
+    assert findings[0]["Samples"] == 0
+    observations = get_perfmon_charts.build_perfmon_observations(
+        findings,
+        [
+            {"Setting": "Analyzed System", "Value": "BFAPP01"},
+            {"Setting": "Sample Count", "Value": 2},
+        ],
+    )
+    assert observations["sections"]["Memory Health"]["status"] == "Not Available"
+    assert (
+        "No samples were recorded"
+        in observations["sections"]["Memory Health"]["observation"]
+    )
+    assert observations["summary"]["status_counts"]["Not Available"] == 1
+
+
+def test_zero_counter_text_distinguishes_valid_zero_from_missing_data() -> None:
+    assert get_perfmon_charts.zero_counter_strip_text(
+        "Paging_File_Total_Usage_Peak", True
+    ) == ("0% page-file usage recorded", "PASS", "#1F8A5B")
+    assert get_perfmon_charts.zero_counter_strip_text(
+        "Paging_File_Total_Usage_Peak", False
+    ) == ("No samples recorded", "CANNOT VERIFY", "#595959")
 
 
 def test_export_and_load_perfmon_observations(tmp_path: Path) -> None:
@@ -401,6 +508,44 @@ def test_zero_perfmon_counter_exports_compact_strip(tmp_path: Path) -> None:
 
     assert width > 2000
     assert height < 300
+
+
+def test_long_network_interface_counter_exports_with_portable_filename(
+    tmp_path: Path,
+) -> None:
+    counter = (
+        "Network_Interface_Broadcom_NetXtreme_E-Series_Advanced_Dual-port_25Gb_"
+        "SFP28_Ethernet_OCP_3_0_Adapter_2_Packets_Outbound_Discarded"
+    )
+    df = pd.DataFrame(
+        {
+            "Time": pd.to_datetime(["2026-08-18 07:52:00", "2026-08-18 07:53:00"]),
+            counter: [0, 0],
+        }
+    )
+    findings = [{"Counter": counter, "Status": "OK"}]
+
+    chart_folder = tmp_path / ("chart-output-" + ("x" * 60))
+    chart_folder.mkdir()
+
+    get_perfmon_charts.export_png_charts(
+        df,
+        [counter],
+        findings,
+        str(chart_folder),
+        rolling_window=10,
+        pct=0.98,
+        pad=1.15,
+        sample_start_str="08/18/2026 07:52",
+        sample_end_str="08/18/2026 07:53",
+        host_name="USORDU102PWX1AP",
+    )
+
+    charts = list(chart_folder.glob("*.png"))
+    assert len(charts) == 1
+    assert len(str(charts[0])) <= 240
+    assert "Packets_Outbound_Discarded" in charts[0].name
+    assert charts[0].stat().st_size > 0
 
 
 def test_export_perfmon_png_charts_clears_stale_images(tmp_path: Path) -> None:
@@ -628,6 +773,63 @@ def test_perfmon_summary_renders_priority_items_as_bullets() -> None:
     assert "• " in xml
     assert "PhysicalDisk_Total_Avg_Disk_ms_Transfer - Critical; peak 75.2" in xml
     assert "Paging_File_Total_Usage_Peak - Critical; peak 88.2" in xml
+
+
+def test_perfmon_summary_renders_supplied_hardware_context() -> None:
+    observations = {
+        "environment": {
+            "Analyzed System": "BFTEST01",
+            "Analyzed System Physical Memory (GB)": 64,
+            "Physical Memory Source": "Parameter Supplied",
+            "Logical Processor Count": 32,
+            "Logical Processor Source": "Parameter Supplied",
+            "Physical Disk Count": 4,
+            "Physical Disk Source": "Parameter Supplied",
+            "Virtual Machine": False,
+        },
+        "summary": {"lines": ["PerfMon analysis completed."]},
+        "sections": {},
+    }
+
+    xml = inject_perfmon_charts.build_summary_xml(observations)
+
+    assert "PerfMon Hardware Context" in xml
+    assert "BFTEST01" in xml
+    assert "64 GB (Parameter Supplied)" in xml
+    assert "32 (Parameter Supplied)" in xml
+    assert "4 (Parameter Supplied)" in xml
+    assert "No" in xml
+
+
+def test_perfmon_observation_calls_out_affected_counters() -> None:
+    section = {
+        "status": "Critical",
+        "observation": "The standard was not met.",
+        "counters_detail": [
+            {
+                "counter": "Network_Interface_X710_Packets_Received_Discarded",
+                "status": "Critical",
+                "average": 10.53,
+                "maximum": 6102,
+                "violations": 66,
+                "violation_percent": 1.39,
+            },
+            {
+                "counter": "Network_Interface_X710_Packets_Outbound_Discarded",
+                "status": "OK",
+                "average": 0,
+                "maximum": 0,
+            },
+        ],
+    }
+
+    xml = inject_perfmon_charts.observation_paragraph_xml(section)
+
+    assert "Affected Counters Requiring Review" in xml
+    assert "Network_Interface_X710_Packets_Received_Discarded" in xml
+    assert "peak 6102" in xml
+    assert "66 readings (1.39%) above the standard" in xml
+    assert "Network_Interface_X710_Packets_Outbound_Discarded" not in xml
 
 
 def test_dedup_docpr_ids_preserves_valid_id_attribute() -> None:
@@ -925,7 +1127,8 @@ def test_perfmon_scorecard_score_and_rating() -> None:
 
 def test_perfmon_section_source_id_maps_counter_areas() -> None:
     assert (
-        inject_perfmon_charts.perfmon_section_source_id("Storage Latency") == "PRF-INF-02"
+        inject_perfmon_charts.perfmon_section_source_id("Storage Latency")
+        == "PRF-INF-02"
     )
     assert (
         inject_perfmon_charts.perfmon_section_source_id("CPU Privileged Time")

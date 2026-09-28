@@ -28,6 +28,7 @@ Requirements:
 """
 
 import argparse
+import hashlib
 import json
 import math
 import os
@@ -126,6 +127,28 @@ _ALPHA = 0.12
 # ---------------------------------------------------------------------------
 
 
+def is_packet_counter(name: str) -> bool:
+    """Return whether a counter is a cumulative packet error/discard counter."""
+    return "Packets_" in name and ("Errors" in name or "Discarded" in name)
+
+
+def counter_analysis_series(series: pd.Series, name: str) -> pd.Series:
+    """Return the values used for scoring and charting a counter.
+
+    Windows network packet error/discard counters are cumulative. Analyze their
+    non-negative increase between samples so a pre-existing counter value is not
+    reported as packet loss throughout the entire capture window.
+    """
+    values = pd.to_numeric(series, errors="coerce")
+    if not is_packet_counter(name):
+        return values
+
+    delta = values.diff()
+    # A negative delta indicates a counter reset or wrap. It is not evidence of
+    # packet errors, so leave that interval unscored instead of inventing a value.
+    return delta.where(delta >= 0)
+
+
 def clean_counter_name(path: str, include_host: bool = False) -> str:
     """Convert a raw relog CSV column header to a safe identifier."""
     host_match = re.match(r"^\\\\([^\\]+)\\", path)
@@ -176,7 +199,9 @@ def perfmon_host_label(hosts: list[str] | tuple[str, ...] | None) -> str:
         return host_list[0]
     if len(host_list) <= 3:
         return "Multiple hosts: " + ", ".join(host_list)
-    return "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
+    return (
+        "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
+    )
 
 
 def perfmon_chart_title(
@@ -184,7 +209,14 @@ def perfmon_chart_title(
 ) -> str:
     """Build the per-counter chart title with analyzed-system context."""
     host = str(host_name or "").strip() or "Not detected"
-    return f"{counter_name}\nSystem: {host} | Capture window: {sample_window}"
+    metric_note = (
+        " (non-negative increase between samples)"
+        if is_packet_counter(counter_name)
+        else ""
+    )
+    return (
+        f"{counter_name}{metric_note}\nSystem: {host} | Capture window: {sample_window}"
+    )
 
 
 def perfmon_context_line(sample_window: str, host_name: str = "") -> str:
@@ -317,13 +349,16 @@ def get_threshold(
             "note": note,
         }
 
-    if "Packets_" in name and ("Errors" in name or "Discarded" in name):
+    if is_packet_counter(name):
         return {
             "type": "max",
             "critical": 0,
             "warn": 0,
-            "label": "~= 0 (no packet errors/discards)",
-            "note": "Packet errors and discards should approach zero per interface",
+            "label": "~= 0 increase (no packet errors/discards)",
+            "note": (
+                "Packet errors and discards should approach zero per interface; "
+                "evaluated as the non-negative increase between samples"
+            ),
         }
 
     if "Disk_Transfers_sec" in name:
@@ -411,7 +446,7 @@ def counter_section(counter_name: str) -> str:
 
 
 def status_rank(status: str) -> int:
-    return {"Critical": 0, "Warning": 1, "OK": 2}.get(status, 3)
+    return {"Critical": 0, "Warning": 1, "Not Available": 2, "OK": 3}.get(status, 4)
 
 
 def fmt_number(value) -> str:
@@ -434,6 +469,8 @@ def short_threshold_text(value: str) -> str:
         return "the documented standard"
     if text in {"No threshold defined", "No matching counter data"}:
         return text
+    if "packet errors and discards" in text.lower():
+        return "no packet-error/discard increase between samples"
     if "no passive fail" in text.lower() or text.lower().startswith("no saturation"):
         return text
     match = re.search(
@@ -479,7 +516,7 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
             -int(item.get("Violations", 0)),
             -float(item.get("ViolationPercent", 0)),
             -int(item.get("Warnings", 0)),
-            -float(item.get("Maximum", 0)),
+            -float(item.get("Maximum") or 0),
         ),
     )
     worst = ordered[0]
@@ -498,10 +535,21 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
     confidence = worst.get("Confidence", "Unknown")
     threshold_src = worst.get("ThresholdSource", "")
 
-    if status == "Critical":
+    if status == "Not Available":
+        result = (
+            f"No samples were recorded for {worst.get('Counter', 'this counter')} "
+            f"during this capture window, so it could not be verified against "
+            f"{threshold_display}. Do not treat this area as validated."
+        )
+    elif status == "Critical":
+        metric = (
+            "had an average per-sample increase of"
+            if is_packet_counter(str(worst.get("Counter", "")))
+            else "averaged"
+        )
         result = (
             f"The standard was not met for this capture window. The worst counter "
-            f"averaged {average} against the standard ({threshold_display}) -- the sustained "
+            f"{metric} {average} against the standard ({threshold_display}) -- the sustained "
             f"average, not a transient spike, is over the limit. It peaked at "
             f"{maximum}, with {violations} of {samples} readings ({violation_pct}%) "
             f"above the standard. Breach window: {peak_window}."
@@ -545,7 +593,7 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
                 f"stayed within the limit."
             )
 
-    if confidence and confidence != "High":
+    if confidence and confidence != "High" and status != "Not Available":
         result += f" Confidence is {confidence.lower()} because one or more hardware context values were inferred or not supplied."
 
     if len(ordered) > 1:
@@ -617,7 +665,13 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
     total = len(findings)
     critical = sum(1 for item in findings if item.get("Status") == "Critical")
     warning = sum(1 for item in findings if item.get("Status") == "Warning")
+    unavailable = sum(1 for item in findings if item.get("Status") == "Not Available")
     ok = sum(1 for item in findings if item.get("Status") == "OK")
+    unavailable_suffix = (
+        f"; {count_phrase(unavailable, 'counter')} could not be verified"
+        if unavailable
+        else ""
+    )
     ok_verb = "was" if ok == 1 else "were"
     worst = sorted(
         findings,
@@ -625,7 +679,7 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
             status_rank(item.get("Status", "")),
             -int(item.get("Violations", 0)),
             -float(item.get("ViolationPercent", 0)),
-            -float(item.get("Maximum", 0)),
+            -float(item.get("Maximum") or 0),
         ),
     )[:3]
 
@@ -634,13 +688,22 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
             f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
             f"capture window. {count_phrase(critical, 'counter')} did not "
             f"meet the NFR standard; {count_phrase(warning, 'counter')} should be "
-            f"monitored; {count_phrase(ok, 'counter')} {ok_verb} within standard."
+            f"monitored; {count_phrase(ok, 'counter')} {ok_verb} within standard"
+            f"{unavailable_suffix}."
         )
     elif warning:
         posture = (
             f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
             f"capture window. No counters failed the NFR standard; "
             f"{count_phrase(warning, 'counter')} should be monitored; "
+            f"{count_phrase(ok, 'counter')} {ok_verb} within standard"
+            f"{unavailable_suffix}."
+        )
+    elif unavailable:
+        posture = (
+            f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
+            f"capture window. No counters failed the NFR standard; "
+            f"{count_phrase(unavailable, 'counter')} could not be verified; "
             f"{count_phrase(ok, 'counter')} {ok_verb} within standard."
         )
     else:
@@ -659,14 +722,19 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
             f"{env.get('Sample End', 'unknown')} across {env.get('Sample Count', 'unknown')} readings."
         ),
     ]
-    review_items = [
-        (
-            f"{item.get('Counter')} - {item.get('Status')}; "
-            f"peak {fmt_number(item.get('Maximum'))}"
-        )
-        for item in worst
-        if item.get("Status") != "OK"
-    ]
+    review_items = []
+    for item in worst:
+        if item.get("Status") == "OK":
+            continue
+        if item.get("Status") == "Not Available":
+            review_items.append(
+                f"{item.get('Counter')} - Cannot Verify; no samples recorded"
+            )
+        else:
+            review_items.append(
+                f"{item.get('Counter')} - {item.get('Status')}; "
+                f"peak {fmt_number(item.get('Maximum'))}"
+            )
     if review_items:
         summary_lines.append("Highest-priority review items:")
     else:
@@ -680,6 +748,7 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
             "status_counts": {
                 "Critical": critical,
                 "Warning": warning,
+                "Not Available": unavailable,
                 "OK": ok,
                 "Total": total,
             },
@@ -764,6 +833,59 @@ def time_window_phrase(times: pd.Series) -> str:
     return f"{hours:.1f} hr" if hours < 10 else f"{hours:.0f} hr"
 
 
+def zero_counter_strip_text(col: str, has_samples: bool) -> tuple[str, str, str]:
+    """Return the message, status label, and status color for a zero chart."""
+    if not has_samples:
+        return "No samples recorded", "CANNOT VERIFY", "#595959"
+    if is_packet_counter(col):
+        return "No packet errors or discards recorded", "PASS", "#1F8A5B"
+    if "Usage_Peak" in col:
+        return "0% page-file usage recorded", "PASS", "#1F8A5B"
+    return "All recorded values were 0", "PASS", "#1F8A5B"
+
+
+_CHART_FILENAME_SUFFIXES = (
+    "Packets_Outbound_Discarded",
+    "Packets_Outbound_Errors",
+    "Packets_Received_Discarded",
+    "Packets_Received_Errors",
+    "Current_Disk_Queue_Length",
+    "Avg_Disk_ms_Transfer",
+    "Disk_Transfers_sec",
+    "Processor_Queue_Length",
+    "Processor_Time",
+    "Privileged_Time",
+)
+
+
+def perfmon_chart_filename(counter: str, png_folder: str | os.PathLike[str]) -> str:
+    """Return a portable PNG name without losing injection's metric suffix.
+
+    Windows can reject a valid chart when a long network-interface instance is
+    combined with a customer/run folder path. Keep the metric suffix so the
+    injector's filename patterns still match, and add a digest so shortened
+    names remain unique.
+    """
+    original = f"{counter}.png"
+    folder_text = os.path.abspath(os.fspath(png_folder))
+    max_name_length = max(32, 240 - len(folder_text) - 1)
+    if len(original) <= max_name_length:
+        return original
+
+    digest = hashlib.sha1(counter.encode("utf-8")).hexdigest()[:12]
+    suffix = next(
+        (value for value in _CHART_FILENAME_SUFFIXES if counter.endswith(value)),
+        counter[-32:],
+    )
+    stem_length = max_name_length - len(".png")
+    suffix_length = min(len(suffix), max(12, stem_length - len(digest) - 3))
+    suffix = suffix[-suffix_length:]
+    prefix_length = stem_length - len(digest) - len(suffix) - 2
+    if prefix_length > 0:
+        return f"{counter[:prefix_length]}_{digest}_{suffix}.png"
+    return f"{digest}_{suffix}.png"[:max_name_length]
+
+
 def render_zero_counter_strip(
     col: str,
     png_path: str,
@@ -771,6 +893,8 @@ def render_zero_counter_strip(
     threshold: dict | None,
     sample_window: str,
     has_samples: bool,
+    sample_count: int = 0,
+    true_max: float = 0,
     host_name: str = "",
 ) -> None:
     fig = plt.figure(figsize=(14.3, 1.15), dpi=200)
@@ -778,13 +902,11 @@ def render_zero_counter_strip(
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
 
-    if not has_samples:
-        message = "No samples recorded"
-    elif re.search(r"(errors?|discard)", col, flags=re.IGNORECASE):
-        message = "No errors recorded"
-    else:
-        message = "No activity recorded"
-    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
+    message, result_label, result_color = zero_counter_strip_text(col, has_samples)
+    standard = (
+        f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
+    )
+    max_display = f"{true_max:g}%" if "Usage_Peak" in col else f"{true_max:g}"
 
     fig.text(
         0.025,
@@ -798,10 +920,10 @@ def render_zero_counter_strip(
     fig.text(
         0.025,
         0.38,
-        f"{message} over {time_window_phrase(times)} - PASS",
+        f"{message} over {time_window_phrase(times)} - {result_label}",
         fontsize=20,
         fontweight="bold",
-        color="#1F8A5B",
+        color=result_color,
         family=_FONT_FAMILY,
     )
     fig.text(
@@ -816,7 +938,8 @@ def render_zero_counter_strip(
     fig.text(
         0.025,
         0.12,
-        f"{perfmon_context_line(sample_window, host_name)}  |  True Max: 0",
+        f"{perfmon_context_line(sample_window, host_name)}  |  "
+        f"Recorded samples: {sample_count:,}  |  True Max: {max_display}",
         fontsize=11,
         color=THEME.text,
         family=_FONT_FAMILY,
@@ -1000,25 +1123,49 @@ def analyze(
     disk_src: str,
 ) -> tuple[pd.DataFrame, list[dict]]:
     """
-    Build chart_df (clipped raw + rolling avg + split series) and findings list.
-    chart_df is a copy of df -- the original df is left unchanged.
+    Build chart_df (analysis values + rolling avg + split series) and findings.
+    The original df is left unchanged for the Raw Data workbook sheet.
     """
     chart_df = df.copy()
+    analysis_df = df.copy()
     findings = []
     new_cols = {}  # accumulated then concat'd once to avoid fragmentation
 
     for col in counter_cols:
         if col not in df.columns:
             continue
-        vals = df[col].dropna()
+        analysis_df[col] = counter_analysis_series(df[col], col)
+        chart_df[col] = analysis_df[col]
+        vals = analysis_df[col].dropna()
+        thr = get_threshold(col, memory_gb, disk_count, vm)
         if vals.empty:
+            findings.append(
+                {
+                    "Counter": col,
+                    "Category": counter_category(col),
+                    "Status": "Not Available",
+                    "Confidence": "Not Available",
+                    "Average": None,
+                    "Maximum": None,
+                    "Violations": 0,
+                    "ViolationPercent": 0.0,
+                    "Warnings": 0,
+                    "WarningPercent": 0.0,
+                    "Samples": 0,
+                    "Threshold": thr["note"] if thr else "No threshold defined",
+                    "ThresholdSource": threshold_source(
+                        col, mem_src, cpu_src, disk_src
+                    ),
+                    "SampleStart": sample_start_str,
+                    "SampleEnd": sample_end_str,
+                    "PeakViolationWindow": "No samples recorded",
+                }
+            )
             continue
 
         avg_val = float(vals.mean())
         max_val = float(vals.max())
         amax = axis_max(vals, pct, pad)
-        thr = get_threshold(col, memory_gb, disk_count, vm)
-
         # Clip extreme outliers for display (matching PS behavior)
         if amax is not None:
             chart_df[col] = chart_df[col].clip(upper=amax * 0.98)
@@ -1062,7 +1209,7 @@ def analyze(
                 "ThresholdSource": threshold_source(col, mem_src, cpu_src, disk_src),
                 "SampleStart": sample_start_str,
                 "SampleEnd": sample_end_str,
-                "PeakViolationWindow": peak_violation_window(df, col, thr),
+                "PeakViolationWindow": peak_violation_window(analysis_df, col, thr),
             }
         )
 
@@ -1126,8 +1273,14 @@ def export_excel(
         "ok": base_formats["status_pass"],
         "warn": base_formats["status_warning"],
         "crit": base_formats["status_fail"],
+        "unavailable": base_formats["status_neutral"],
     }
-    status_fmt = {"OK": fmt["ok"], "Warning": fmt["warn"], "Critical": fmt["crit"]}
+    status_fmt = {
+        "OK": fmt["ok"],
+        "Warning": fmt["warn"],
+        "Critical": fmt["crit"],
+        "Not Available": fmt["unavailable"],
+    }
 
     def write_header_row(ws, headers: list[str], row: int = 0):
         for c, h in enumerate(headers):
@@ -1178,12 +1331,18 @@ def export_excel(
     # ---- Worst Offenders ---------------------------------------------------
     ws_worst = wb.add_worksheet("Worst Offenders")
     worst = sorted(
-        [f for f in findings if f["Violations"] > 0 or f["Warnings"] > 0],
+        [
+            f
+            for f in findings
+            if f["Status"] == "Not Available"
+            or f["Violations"] > 0
+            or f["Warnings"] > 0
+        ],
         key=lambda x: (
             -x["Violations"],
             -x["ViolationPercent"],
             -x["Warnings"],
-            -x["Maximum"],
+            -(float(x["Maximum"]) if x["Maximum"] is not None else 0),
         ),
     )
     write_header_row(ws_worst, f_keys)
@@ -1398,7 +1557,7 @@ def export_png_charts(
         thr = get_threshold(col, memory_gb=memory_gb, disk_count=disk_count, vm=vm)
         max_raw = float(raw_vals.max()) if not raw_vals.empty else 0
 
-        png_path = os.path.join(png_folder, f"{col}.png")
+        png_path = os.path.join(png_folder, perfmon_chart_filename(col, png_folder))
         if max_raw == 0:
             render_zero_counter_strip(
                 col,
@@ -1407,6 +1566,8 @@ def export_png_charts(
                 thr,
                 sample_window,
                 has_samples=not raw_vals.empty,
+                sample_count=int(raw_vals.count()),
+                true_max=max_raw,
                 host_name=analyzed_system,
             )
             log.result("Graph (PNG)", png_path)
@@ -1751,6 +1912,13 @@ def main() -> None:
         {"Setting": "Sample Start", "Value": ss_str},
         {"Setting": "Sample End", "Value": se_str},
         {"Setting": "Sample Count", "Value": len(df_raw)},
+        {
+            "Setting": "Packet Counter Analysis",
+            "Value": (
+                "Cumulative packet error/discard counters are evaluated as "
+                "non-negative increases between samples; raw values remain in Raw Data."
+            ),
+        },
         {"Setting": "Percentile Used For Scaling", "Value": args.percentile},
         {"Setting": "Chart Scale Padding", "Value": args.padding},
         {"Setting": "Rolling Average Window", "Value": args.rolling_window},

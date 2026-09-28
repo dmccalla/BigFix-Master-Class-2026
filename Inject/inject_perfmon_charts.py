@@ -257,7 +257,35 @@ def observation_paragraph_xml(section: dict) -> str:
     """Render an observation paragraph from one section of perfmon_observations.json."""
     status = section.get("status", "Not Available")
     observation = section.get("observation", "").strip()
-    return status_paragraph_xml(status, "Observation", observation)
+    xml = status_paragraph_xml(status, "Observation", observation)
+    review_items = [
+        item
+        for item in section.get("counters_detail", [])
+        if item.get("status", "Not Available") not in {"OK", ""}
+    ]
+    if review_items:
+        xml += heading_paragraph_xml("Affected Counters Requiring Review", level=4)
+        for item in review_items:
+            item_status = item.get("status", "Not Available")
+            details = []
+            if item.get("average") is not None:
+                details.append(f"average {item['average']}")
+            if item.get("maximum") is not None:
+                details.append(f"peak {item['maximum']}")
+            if item.get("violations"):
+                violation_percent = item.get("violation_percent")
+                violation_text = f"{item['violations']} readings"
+                if violation_percent is not None:
+                    violation_text += f" ({violation_percent}%)"
+                details.append(f"{violation_text} above the standard")
+            if not details:
+                details.append("no samples were available for verification")
+            xml += status_paragraph_xml(
+                item_status,
+                "Counter",
+                f"{item.get('counter', 'Unnamed counter')}: {', '.join(details)}.",
+            )
+    return xml
 
 
 def table_cell_xml(
@@ -340,6 +368,86 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
             + "</w:tr>"
         )
 
+    return xml + "</w:tbl><w:p/>"
+
+
+def build_perfmon_hardware_context_xml(observations: dict) -> str:
+    """Build the supplied hardware context shown before the PerfMon summary."""
+    environment = observations.get("environment", {})
+    if not environment:
+        return ""
+
+    def value_with_source(value_key: str, source_key: str, suffix: str = "") -> str:
+        value = environment.get(value_key)
+        if value is None or value == "":
+            return ""
+        value_text = str(value)
+        if isinstance(value, bool):
+            value_text = "Yes" if value else "No"
+        if suffix:
+            value_text += suffix
+        source = environment.get(source_key)
+        if source:
+            value_text += f" ({source})"
+        return value_text
+
+    rows = [
+        ("Analyzed System", environment.get("Analyzed System", "")),
+        (
+            "Logical Processors",
+            value_with_source("Logical Processor Count", "Logical Processor Source"),
+        ),
+        (
+            "Physical Memory",
+            value_with_source(
+                "Analyzed System Physical Memory (GB)",
+                "Physical Memory Source",
+                " GB",
+            ),
+        ),
+        (
+            "Physical Disks",
+            value_with_source("Physical Disk Count", "Physical Disk Source"),
+        ),
+        (
+            "Virtual Machine",
+            value_with_source("Virtual Machine", "Virtual Machine Source"),
+        ),
+        (
+            "Capture Window",
+            environment.get("Sample Start", "")
+            and f"{environment.get('Sample Start')} to {environment.get('Sample End', '')}",
+        ),
+        ("Samples", environment.get("Sample Count", "")),
+    ]
+    rows = [(label, str(value)) for label, value in rows if value not in (None, "")]
+    if not rows:
+        return ""
+
+    widths = [3000, 6800]
+    xml = heading_paragraph_xml("PerfMon Hardware Context", level=3)
+    xml += (
+        "<w:tbl><w:tblPr>"
+        '<w:tblStyle w:val="BigFixContent"/>'
+        '<w:tblW w:w="5000" w:type="pct"/>'
+        '<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>'
+        "</w:tblPr><w:tblGrid>"
+        + "".join(f'<w:gridCol w:w="{width}"/>' for width in widths)
+        + "</w:tblGrid>"
+    )
+    xml += (
+        "<w:tr>"
+        + table_cell_xml("Hardware / Context", widths[0], bold=True)
+        + table_cell_xml("Entered / Detected Value", widths[1], bold=True)
+        + "</w:tr>"
+    )
+    for label, value in rows:
+        xml += (
+            "<w:tr>"
+            + table_cell_xml(label, widths[0])
+            + table_cell_xml(value, widths[1])
+            + "</w:tr>"
+        )
     return xml + "</w:tbl><w:p/>"
 
 
@@ -527,7 +635,9 @@ def validate_docx_package(docx_path: Path) -> None:
         rels_xml = zf.read("word/_rels/document.xml.rels").decode("utf-8")
         package_names = set(names)
         missing_targets: list[str] = []
-        for rel in re.findall(r"<Relationship\b[^>]*/?>", rels_xml, flags=re.IGNORECASE):
+        for rel in re.findall(
+            r"<Relationship\b[^>]*/?>", rels_xml, flags=re.IGNORECASE
+        ):
             if IMAGE_REL_TYPE not in rel and "image" not in rel.lower():
                 continue
             target_match = re.search(r'\bTarget="([^"]+)"', rel)
@@ -910,7 +1020,8 @@ def perfmon_section_score(counts: dict[str, int]) -> int | None:
     if total <= 0:
         return None
     weighted = sum(
-        counts.get(status, 0) * weight for status, weight in PERFMON_SCORE_WEIGHTS.items()
+        counts.get(status, 0) * weight
+        for status, weight in PERFMON_SCORE_WEIGHTS.items()
     )
     return round(weighted / total * 100)
 
@@ -1172,10 +1283,10 @@ def ensure_png_content_type(content_types_xml: str) -> str:
 def build_summary_xml(observations: dict) -> str:
     summary = observations.get("summary", {})
     lines = summary.get("lines", [])
-    if not lines:
+    xml = build_perfmon_hardware_context_xml(observations)
+    if not lines and not xml:
         return ""
     priority_items = [str(item) for item in summary.get("priority_items", []) if item]
-    xml = ""
     for line in lines:
         xml += text_paragraph_xml(str(line))
         if str(line).strip().rstrip(":").casefold() == "highest-priority review items":
@@ -1526,7 +1637,9 @@ def add_image_relationship(rels_xml: str, rid: str, target: str) -> str:
             "Template relationship file is missing closing </Relationships> tag."
         )
 
-    return rels_xml.replace("</Relationships>", relationship_xml + "</Relationships>", 1)
+    return rels_xml.replace(
+        "</Relationships>", relationship_xml + "</Relationships>", 1
+    )
 
 
 def png_dimensions(path: Path) -> tuple[int, int]:
@@ -1961,7 +2074,9 @@ def inject_perfmon_charts(
 
     log.step("Discovering placeholder images in template")
 
-    section_rids, section_insert_points, _ = discover_perfmon_sections(doc_xml, rels_xml)
+    section_rids, section_insert_points, _ = discover_perfmon_sections(
+        doc_xml, rels_xml
+    )
 
     log.step("Building chart-to-placeholder map")
 
@@ -2055,12 +2170,16 @@ def inject_perfmon_charts(
                     rf'(?:r:embed|r:id)="{re.escape(rid_to_remove)}"',
                     candidate_xml,
                 ):
-                    new_rels_xml = remove_relationship_by_id(new_rels_xml, rid_to_remove)
+                    new_rels_xml = remove_relationship_by_id(
+                        new_rels_xml, rid_to_remove
+                    )
                 new_doc_xml = candidate_xml
                 log.ok("OK")
             else:
                 position = injection["Position"]
-                new_doc_xml = new_doc_xml[:position] + insert_xml + new_doc_xml[position:]
+                new_doc_xml = (
+                    new_doc_xml[:position] + insert_xml + new_doc_xml[position:]
+                )
                 log.ok("OK")
 
         if scorecard_path and scorecard_path.exists():

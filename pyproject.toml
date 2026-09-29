@@ -22,3 +22,38 @@ dependencies = [
     # customtkinter powers the desktop UI.
     "customtkinter>=5.2.0,<6.0.0",
 ]
+
+[dependency-groups]
+dev = [
+    "bandit>=1.7.9",
+    "cyclonedx-bom>=4.0.0",
+    "mypy>=1.10",
+    "pip-audit>=2.7.0",
+    "pip-licenses>=5.0.0",
+    "pytest>=8.0.0",
+    "ruff>=0.5.0",
+    "vulture>=2.11",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["Tests"]
+python_files = ["test_*.py"]
+python_functions = ["test_*"]
+addopts = "-ra"
+markers = [
+    "integration: tests that execute full module pipelines or require realistic evidence files",
+    "slow: tests that can take several seconds or more",
+]
+
+[tool.ruff]
+line-length = 90
+target-version = "py312"
+extend-exclude = ["SampleData", "Fonts", "Templates"]
+
+[tool.ruff.lint]
+# E402: the scripts extend sys.path before importing shared modules.
+select = ["E", "F", "W", "I", "UP"]
+ignore = ["E402", "E501"]
+
+[tool.bandit]
+exclude_dirs = [".venv", "Temp", "Dist", "Tests", "SampleData"]

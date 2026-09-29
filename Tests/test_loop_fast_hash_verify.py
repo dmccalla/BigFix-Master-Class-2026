@@ -25,7 +25,9 @@ _HEADER = (
 
 def _doc(answers: list[str]) -> str:
     body = "".join(f'\t\t\t<Answer type="string">{a}</Answer>\n' for a in answers)
-    return f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    return (
+        f"{_HEADER}\t<Query>\n\t\t<Result>\n{body}\t\t</Result>\n\t</Query>\n</BESAPI>\n"
+    )
 
 
 def _sample_fast_hash_rows() -> list[loop.ProcessedRow]:
@@ -85,7 +87,9 @@ def test_fast_hash_verify_analysis_and_source_data() -> None:
     assert summary.settings_rows == [["20 ms", "60 ms", "2"], ["Not Set", "Not Set", "1"]]
 
     source = loop.processed_to_dataframe(processed)
-    assert list(source[["FastHashVerify", "FastHashVerify Work", "FastHashVerify Sleep"]].iloc[0]) == [
+    assert list(
+        source[["FastHashVerify", "FastHashVerify Work", "FastHashVerify Sleep"]].iloc[0]
+    ) == [
         "Enabled",
         "20 ms",
         "60 ms",
@@ -125,8 +129,13 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     assert "FastHashVerify Review" in headings
     assert any("large patch files" in p.text for p in doc.paragraphs)
-    assert any("Individual client FastHashVerify values include" in p.text for p in doc.paragraphs)
-    assert not any("Consider the customer's download workload" in p.text for p in doc.paragraphs)
+    assert any(
+        "Individual client FastHashVerify values include" in p.text
+        for p in doc.paragraphs
+    )
+    assert not any(
+        "Consider the customer's download workload" in p.text for p in doc.paragraphs
+    )
 
 
 def test_headerless_ten_field_loop_capture_maps_fast_hash_columns(tmp_path: Path) -> None:

@@ -210,9 +210,7 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 80
     )
     assert (
-        get_perfmon_charts.get_threshold("Processor_Total_Processor_Time", vm=True)[
-            "min"
-        ]
+        get_perfmon_charts.get_threshold("Processor_Total_Processor_Time", vm=True)["min"]
         == 50
     )
     assert (
@@ -220,8 +218,7 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 10
     )
     assert (
-        get_perfmon_charts.get_threshold("Paging_File_Total_Usage_Peak")["critical"]
-        == 5
+        get_perfmon_charts.get_threshold("Paging_File_Total_Usage_Peak")["critical"] == 5
     )
     assert (
         get_perfmon_charts.get_threshold(
@@ -248,9 +245,7 @@ def test_perfmon_nfr_thresholds_match_documented_perfmon_standards() -> None:
         == 0
     )
     assert (
-        get_perfmon_charts.get_threshold("PhysicalDisk_Total_Disk_Transfers_sec")[
-            "type"
-        ]
+        get_perfmon_charts.get_threshold("PhysicalDisk_Total_Disk_Transfers_sec")["type"]
         == "informational"
     )
 
@@ -1132,8 +1127,7 @@ def test_perfmon_scorecard_score_and_rating() -> None:
 
 def test_perfmon_section_source_id_maps_counter_areas() -> None:
     assert (
-        inject_perfmon_charts.perfmon_section_source_id("Storage Latency")
-        == "PRF-INF-02"
+        inject_perfmon_charts.perfmon_section_source_id("Storage Latency") == "PRF-INF-02"
     )
     assert (
         inject_perfmon_charts.perfmon_section_source_id("CPU Privileged Time")

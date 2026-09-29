@@ -2688,9 +2688,7 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         r.command_polling_enabled or r.command_polling_interval for r in rows
     )
     has_fast_hash_verify_data = any(
-        r.fast_hash_verify_enabled
-        or r.fast_hash_verify_work
-        or r.fast_hash_verify_sleep
+        r.fast_hash_verify_enabled or r.fast_hash_verify_work or r.fast_hash_verify_sleep
         for r in rows
     )
 

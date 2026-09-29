@@ -199,9 +199,7 @@ def perfmon_host_label(hosts: list[str] | tuple[str, ...] | None) -> str:
         return host_list[0]
     if len(host_list) <= 3:
         return "Multiple hosts: " + ", ".join(host_list)
-    return (
-        "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
-    )
+    return "Multiple hosts: " + ", ".join(host_list[:3]) + f" + {len(host_list) - 3} more"
 
 
 def perfmon_chart_title(
@@ -903,9 +901,7 @@ def render_zero_counter_strip(
     ax.axis("off")
 
     message, result_label, result_color = zero_counter_strip_text(col, has_samples)
-    standard = (
-        f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
-    )
+    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
     max_display = f"{true_max:g}%" if "Usage_Peak" in col else f"{true_max:g}"
 
     fig.text(
@@ -1153,9 +1149,7 @@ def analyze(
                     "WarningPercent": 0.0,
                     "Samples": 0,
                     "Threshold": thr["note"] if thr else "No threshold defined",
-                    "ThresholdSource": threshold_source(
-                        col, mem_src, cpu_src, disk_src
-                    ),
+                    "ThresholdSource": threshold_source(col, mem_src, cpu_src, disk_src),
                     "SampleStart": sample_start_str,
                     "SampleEnd": sample_end_str,
                     "PeakViolationWindow": "No samples recorded",
@@ -1334,9 +1328,7 @@ def export_excel(
         [
             f
             for f in findings
-            if f["Status"] == "Not Available"
-            or f["Violations"] > 0
-            or f["Warnings"] > 0
+            if f["Status"] == "Not Available" or f["Violations"] > 0 or f["Warnings"] > 0
         ],
         key=lambda x: (
             -x["Violations"],

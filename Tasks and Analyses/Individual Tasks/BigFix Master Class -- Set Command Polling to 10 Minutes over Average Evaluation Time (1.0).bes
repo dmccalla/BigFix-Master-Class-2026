@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Fixlet>
+		<Title>BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (1.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Set Command Polling to 10 Minutes over Average Evaluation Time</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>Enables command polling on BigFix clients and sets the poll interval to the average evaluation cycle plus 10 minutes. The interval is never set below 20 minutes.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action, reapply daily</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on clients that are not the root server or a relay and whose command polling is off or outside the target range.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>20 minute floor</B><SPAN>An average evaluation cycle under 10 minutes gives a 1200 second interval.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>Clients listen for UDP commands from their parent relay or server. UDP can be blocked by a firewall or lost under heavy network traffic. Command polling lets the client ask for commands on a schedule. The interval should not be shorter than the client's average evaluation loop.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task sets <TT>_BESClient_Comm_CommandPollEnable</TT> to 1. If the average evaluation loop is under 10 minutes it sets <TT>_BESClient_Comm_CommandPollIntervalSeconds</TT> to 1200. Otherwise it sets the interval to the average evaluation loop plus 600 seconds. See <A href="https://help.hcl-software.com/bigfix/11.0/platform/Platform/Config/r_client_set.html">List of settings and Detailed Descriptions</A> for reference.</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
+<LI><FONT color=#000000 size=2>Run this as a policy action created in the Master Action Site and the BigFix Management domain. Use the Dynamically target by property option and direct it at the All Computers group. Set it to reapply daily.</FONT> 
+<LI><FONT color=#000000 size=2>Root and relay servers are excluded by relevance.</FONT> </LI>
+</UL></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All BigFix client platforms except root and relay servers.</FONT></DIV><BR>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
+     if (event.contentID == 'Action1') {
+         if (EvaluateRelevance('master flag of current console user') === "False") {
+             alert('<?jxlat Only Master Operators can run this Task.?>');
+             return false;
+         }
+     }
+ }
+</script> </DIV>]]></Description>
+		<Relevance> (if exists property "in proxy agent context" then ( not in proxy agent context ) else true )</Relevance>
+		<Relevance>/* NOT THE ROOT SERVER OR A RELAY SERVER */ (not exists main gather service and not exists relay service)</Relevance>
+		<Relevance><![CDATA[/* COMMAND POLLING IS NOT ENABLED */ (exists values whose (it != "1") of settings "_BESClient_Comm_CommandPollEnable" of client)  OR /* APPROPRIATE COMMAND POLLING INTERVAL IS NOT SET */  (if (exists values whose (it != "") of settings "_BESClient_Comm_CommandPollIntervalSeconds" of client) and (exists evaluationcycle of client) then (((value of setting "_BESClient_Comm_CommandPollIntervalSeconds" of client as integer) <= ((average of evaluationcycle of client as integer / 1000) as integer)) or ((((value of setting "_BESClient_Comm_CommandPollIntervalSeconds" of client as integer) - ((average of evaluationcycle of client as integer / 1000) as integer)) > 600) and ((value of setting "_BESClient_Comm_CommandPollIntervalSeconds" of client as integer) > 1200))) else false)]]></Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-23</SourceReleaseDate>
+		<SourceSeverity></SourceSeverity>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Tue, 29 Sep 2026 16:56:53 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[//* Enable command polling
+setting "_BESClient_Comm_CommandPollEnable"="1" on "{parameter "action issue date" of action}" for client
+
+//* If the average client loop is less than 10 minutes then set the client loop to 20 mintues, otherwise
+//* set command polling to a value in seconds that is the average client looop + 10 minutes (600 seconds)
+if {((average of evaluationcycle of client as integer / 1000) + 600) > 1200}
+	setting "_BESClient_Comm_CommandPollIntervalSeconds"="{(average of evaluationcycle of client as integer / 1000) + 600}" on "{now}" for client
+else 
+	setting "_BESClient_Comm_CommandPollIntervalSeconds"="1200" on "{now}" for client
+endif]]></ActionScript>
+		</DefaultAction>
+	</Fixlet>
+</BES>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Task>
+		<Title>BigFix Master Class -- Set CPU Utilization to 20% (Single Core) (1.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Set CPU Utilization to 20% (Single Core)</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>Sets the BigFix client to use up to 20 percent of one CPU core so it works faster. WorkIdle becomes 100 and SleepIdle becomes 400.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Always relevant</B><SPAN>Relevance is TRUE. Target the action deliberately.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Skips locked clients</B><SPAN>The action stops on clients where the action lock is set.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Per core figure</B><SPAN>On four cores the total impact is about 5 percent. On eight cores it is about 2.5 percent.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>The client is designed to use 1 to 2 percent of CPU on average. The settings apply to the processor the agent runs on, so on a multi-core computer the total is divided by the number of cores. With WorkIdle 100 and SleepIdle 400 on four cores the total is [100 / (100 + 400)] / 4, which is 5 percent.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>The first action sets <TT>_BESClient_Resource_WorkIdle</TT> to 100 and <TT>_BESClient_Resource_SleepIdle</TT> to 400. The second action opens the client settings reference.</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
+<LI><FONT color=#000000 size=2>Relevance is always true. Target the action at the computers that should use more CPU.</FONT> 
+<LI><FONT color=#000000 size=2>BigFix 11.0.7 is expected to add a setting for CPU use on multi-core systems. Details are not yet available.</FONT> </LI>
+</UL></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All BigFix client platforms.</FONT></DIV><BR>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
+     if (event.contentID == 'Action5') {
+         if (EvaluateRelevance('master flag of current console user') === "False") {
+             alert('<?jxlat Only Master Operators can run this Task.?>');
+             return false;
+         }
+     }
+ }
+</script> </DIV>]]></Description>
+		<Relevance>(if exists property "in proxy agent context" then ( not in proxy agent context ) else true )</Relevance>
+		<Relevance>TRUE</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-29</SourceReleaseDate>
+		<SourceSeverity></SourceSeverity>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-first-propagation</Name>
+			<Value>Tue, 22 Jun 2004 23:25:23 +0000</Value>
+		</MIMEField>
+		<MIMEField>
+			<Name>x-fixlet-domain_attributes</Name>
+			<Value>BES Component Client</Value>
+		</MIMEField>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Tue, 29 Sep 2026 18:44:51 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<Delay>PT1S</Delay>
+		<Action ID="Action5">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink><![CDATA[ to set the BES Client to use <B>very high</B> CPU usage (&lt; 20%).]]></PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell">// Set CPU useage to 20% of a single core. 
+// On an 4-core machine: The total system impact drops to roughly 5% total CPU.
+// On an 8-core machine: The total system impact drops to roughly 2.5% total CPU.
+
+// Note that BigFix 11.0.7 will offer a new setting to handle updating CPU use on multi-core sytems.
+continue if {not locked of action lock state} 
+
+setting "_BESClient_Resource_WorkIdle"="100" on "{parameter "action issue date" of action}" for client
+
+setting "_BESClient_Resource_SleepIdle"="400" on "{parameter "action issue date" of action}" for client</ActionScript>
+		</Action>
+		<Action ID="Link6">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> for more information on "_BESClient_Resource_WorkIdle", "_BESClient_Resource_SleepIdle", and other advanced BES configuration settings.</PostLink>
+			</Description>
+			<ActionScript MIMEType="text/x-uri">http://support.bigfix.com/bes/misc/besconfigsettings.html</ActionScript>
+		</Action>
+	</Task>
+</BES>

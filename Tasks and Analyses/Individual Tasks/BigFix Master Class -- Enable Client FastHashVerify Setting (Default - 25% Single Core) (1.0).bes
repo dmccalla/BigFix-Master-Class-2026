@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
+	<Fixlet>
+		<Title>BigFix Master Class -- Enable Client FastHashVerify Setting (Default - 25% Single Core) (1.0)</Title>
+		<Description><![CDATA[
+<STYLE>
+.hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
+.hc-wrap FONT{font-size:13px !important;font-weight:400 !important}
+.hc-eyebrow{font-size:12px;font-weight:bold;letter-spacing:1px;color:#17707f}
+.hc-h1{font-size:22px;font-weight:bold;color:#000032;margin:2px 0 0}
+.hc-rule{width:52px;height:3px;background:#17707f;margin:9px 0 12px;overflow:hidden}
+.hc-lead{font-size:13px;color:#000032;line-height:1.5;margin-bottom:12px;font-weight:400}
+.hc-sec{font-size:13px;font-weight:bold;color:#000032;margin:13px 0 3px}
+.hc-body{font-weight:400}
+.hc-wrap UL{margin:2px 0 6px;padding-left:20px}
+.hc-wrap LI{margin:1px 0;font-weight:400}
+.hc-banner{margin-bottom:4px;border:1px solid #ebd3a8;background:#fcf6ea;padding:9px 12px}
+.hc-bannerhd{font-size:13px;margin-bottom:8px;font-weight:bold;color:#8a5a00}
+.hc-bcell{padding-left:9px}
+.hc-bcell B{font-size:13px;color:#000032}
+.hc-bcell SPAN{font-size:12px;color:#000032;display:block;line-height:1.3;font-weight:400}
+</STYLE>
+
+<DIV id=seed_2 class=hc-wrap>
+<DIV class=hc-eyebrow>&nbsp;</DIV>
+<DIV class=hc-h1>Enable Client FastHashVerify Setting</DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
+<DIV class=hc-lead><FONT color=#000000>Enables FastHashVerify on BigFix clients and allocates about 25 percent of one CPU core to hash verification of downloaded files. Without it the client hashes downloads at the default 2 percent throttle.</FONT></DIV>
+<DIV class=hc-banner>
+<DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers.</SPAN></DIV></TD></TR>
+<TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on clients where _BESClient_Download_FastHashVerify is not 1.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Download hashing only</B><SPAN>Does not change the overall client CPU throttle.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
+<DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
+<DIV class=hc-sec>Description</DIV>
+<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>Large downloads take a long time to hash at the default client CPU throttle. FastHashVerify lets the client raise the throttle while it hashes downloaded files. This task sets three client settings.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2><TT>_BESClient_Download_FastHashVerify</TT> = 1<BR><TT>_BESClient_Resource_WorkFastHashVerify</TT> = 20 (the default)<BR><TT>_BESClient_Resource_SleepFastHashVerify</TT> = 60 (the default)</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>The setting does not apply when pre-cache is enabled. A pre-cached client already has time to download, so no extra CPU is used. See <A href="https://help.hcl-software.com/bigfix/11.0/platform/Platform/Config/r_client_set.html">List of settings and Detailed Descriptions</A> for reference.</FONT></DIV>
+<DIV class=hc-sec>Deployment Notes</DIV>
+<UL>
+<LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
+<LI><FONT color=#000000 size=2>Run this as a policy action created in the Master Action Site and the BigFix Management domain. Use the Dynamically target by property option and direct it at the All Computers group.</FONT> 
+<LI><FONT color=#000000 size=2>This is not the same as adjusting the overall client CPU use. The change applies only while the client hashes downloads.</FONT> </LI>
+</UL></DIV>
+<DIV class=hc-sec>Supported Platforms</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All BigFix client platforms.</FONT></DIV><BR>
+<DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
+     if (event.contentID == 'Action1') {
+         if (EvaluateRelevance('master flag of current console user') === "False") {
+             alert('<?jxlat Only Master Operators can run this Task.?>');
+             return false;
+         }
+     }
+ }
+</script> </DIV>]]></Description>
+		<Relevance> /* COMPUTER DOES NOT HAVE THE HASHING SETTING ENABLED */ not exists setting "_BESClient_Download_FastHashVerify" whose (value of it = "1") of client</Relevance>
+		<Category>BigFix Master Class</Category>
+		<DownloadSize>0</DownloadSize>
+		<Source>HCL BigFix AVP and Professional Services</Source>
+		<SourceID></SourceID>
+		<SourceReleaseDate>2026-09-10</SourceReleaseDate>
+		<SourceSeverity></SourceSeverity>
+		<CVENames></CVENames>
+		<SANSID></SANSID>
+		<MIMEField>
+			<Name>x-fixlet-modification-time</Name>
+			<Value>Tue, 29 Sep 2026 16:57:30 +0000</Value>
+		</MIMEField>
+		<Domain>BES </Domain>
+		<DefaultAction ID="Action1">
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to deploy this action.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell">//* Enable FastHashVerify and allocate ~25% of a single CPU core execution for hashes.  This is the Default for the setting when enabled. When NOT emabled is uses the default of 2%.  
+setting "_BESClient_Download_FastHashVerify"="1" on "{parameter "action issue date" of action}" for client
+setting "_BESClient_Resource_WorkFastHashVerify"="20" on "{parameter "action issue date" of action}" for client
+setting "_BESClient_Resource_SleepFastHashVerify"="60" on "{parameter "action issue date" of action}" for client</ActionScript>
+		</DefaultAction>
+	</Fixlet>
+</BES>

@@ -4,7 +4,356 @@
 # Master Class Diagnostics Workbench
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
+import contextlib
+import json
+from pathlib import Path
+from types import SimpleNamespace
+from unittest.mock import Mock
+
+import pytest
+from playwright.sync_api import Error as PlaywrightError
+from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
+
 from Lib.Design import html_charts
+
+_CLOSED = "Target page, context or browser has been closed"
+
+
+def _chart_page():
+    page = Mock()
+    page.locator.return_value.screenshot.side_effect = lambda *, path: Path(
+        path
+    ).write_bytes(b"rendered")
+    return page
+
+
+def _chart_browser(*pages):
+    browser = Mock()
+    browser.is_connected.return_value = True
+    browser.new_page.side_effect = list(pages)
+    return browser
+
+
+@pytest.fixture
+def chart_runtime(monkeypatch):
+    page = _chart_page()
+    browser = _chart_browser(page)
+    launch = Mock(return_value=browser)
+    playwright = SimpleNamespace(chromium=SimpleNamespace(launch=launch))
+    monkeypatch.setattr(
+        "playwright.sync_api.sync_playwright",
+        lambda: contextlib.nullcontext(playwright),
+    )
+    monkeypatch.setattr(html_charts, "_ensure_playwright_browser_windows_hidden", Mock())
+    monkeypatch.setattr(
+        html_charts, "_hide_playwright_driver_window", contextlib.nullcontext
+    )
+    monkeypatch.setattr(html_charts, "_browser_channels", lambda: ("msedge", "chrome"))
+    build_html = Mock(return_value="<html></html>")
+    monkeypatch.setattr(html_charts, "_build_html", build_html)
+    return SimpleNamespace(
+        page=page, browser=browser, launch=launch, build_html=build_html
+    )
+
+
+def test_render_batch_reuses_browser_and_preserves_options(chart_runtime, tmp_path):
+    second = _chart_page()
+    chart_runtime.browser.new_page.side_effect = [chart_runtime.page, second]
+    outputs = [tmp_path / "first.png", tmp_path / "second.png"]
+    jobs = [("dashboard", {"title": str(i)}, out) for i, out in enumerate(outputs)]
+
+    assert (
+        html_charts.render_charts(
+            jobs, scale=2, card_width=1000, type_floor_native_px=40, type_scale=1.2
+        )
+        == outputs
+    )
+
+    chart_runtime.launch.assert_called_once_with(channel="msedge", headless=True)
+    assert chart_runtime.browser.new_page.call_count == 2
+    for page, (_, data, out) in zip((chart_runtime.page, second), jobs):
+        page.set_content.assert_called_once_with(
+            "<html></html>", wait_until="networkidle"
+        )
+        page.wait_for_function.assert_called_once_with("window.__RENDERED__ === true")
+        page.locator.assert_called_once_with("#mount")
+        page.close.assert_called_once_with()
+        assert out.read_bytes() == b"rendered"
+        assert json.loads(out.with_suffix(".chartdata.json").read_text()) == {
+            "chart": "dashboard",
+            **data,
+        }
+    chart_runtime.browser.new_page.assert_called_with(device_scale_factor=2)
+    chart_runtime.build_html.assert_called_with(
+        "dashboard", {"title": "1"}, 1000, type_floor_css_px=20, type_scale=1.2
+    )
+    chart_runtime.browser.close.assert_called_once_with()
+
+
+def test_render_launch_falls_back_to_next_channel(chart_runtime, tmp_path):
+    chart_runtime.launch.side_effect = [
+        PlaywrightError("unavailable"),
+        chart_runtime.browser,
+    ]
+
+    assert html_charts.render_chart("dashboard", {}, tmp_path / "chart.png").exists()
+    assert [call.kwargs["channel"] for call in chart_runtime.launch.call_args_list] == [
+        "msedge",
+        "chrome",
+    ]
+
+
+def test_render_reports_all_launch_failures(chart_runtime, tmp_path):
+    error = PlaywrightError("unavailable")
+    chart_runtime.launch.side_effect = error
+
+    with pytest.raises(RuntimeError, match="No system Chromium") as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value.__cause__ is error
+    assert chart_runtime.launch.call_count == 2
+    chart_runtime.browser.new_page.assert_not_called()
+
+
+@pytest.mark.parametrize(
+    "stage", ["new_page", "set_content", "wait_for_function", "screenshot", "close"]
+)
+def test_render_recovers_once_from_target_closure(chart_runtime, tmp_path, stage, caplog):
+    error = PlaywrightError(_CLOSED)
+    if stage == "new_page":
+        chart_runtime.browser.new_page.side_effect = error
+    elif stage == "screenshot":
+        chart_runtime.page.locator.return_value.screenshot.side_effect = error
+    else:
+        getattr(chart_runtime.page, stage).side_effect = error
+    recovered_page = _chart_page()
+    recovered = _chart_browser(recovered_page)
+    chart_runtime.launch.side_effect = [chart_runtime.browser, recovered]
+    output = tmp_path / "chart.png"
+
+    assert html_charts.render_chart("dashboard", {"title": "Original"}, output) == output
+
+    assert chart_runtime.launch.call_count == 2
+    chart_runtime.build_html.assert_called_once()
+    chart_runtime.browser.close.assert_called_once()
+    recovered.close.assert_called_once()
+    recovered_page.close.assert_called_once()
+    assert output.read_bytes() == b"rendered"
+    assert (
+        json.loads(output.with_suffix(".chartdata.json").read_text())["title"]
+        == "Original"
+    )
+    assert "retrying once" in caplog.text
+
+
+def test_render_recovers_from_disconnected_browser(chart_runtime, tmp_path):
+    chart_runtime.browser.is_connected.return_value = False
+    chart_runtime.browser.new_page.side_effect = PlaywrightError("Connection closed")
+    recovered = _chart_browser(_chart_page())
+    chart_runtime.launch.side_effect = [chart_runtime.browser, recovered]
+
+    assert html_charts.render_chart("dashboard", {}, tmp_path / "chart.png").exists()
+    assert chart_runtime.launch.call_count == 2
+
+
+def test_render_retry_does_not_replay_completed_jobs(chart_runtime, tmp_path):
+    first = chart_runtime.page
+    chart_runtime.browser.new_page.side_effect = [first, PlaywrightError(_CLOSED)]
+    second = _chart_page()
+    chart_runtime.launch.side_effect = [chart_runtime.browser, _chart_browser(second)]
+    outputs = [tmp_path / "first.png", tmp_path / "second.png"]
+
+    assert (
+        html_charts.render_charts([("dashboard", {}, out) for out in outputs]) == outputs
+    )
+
+    first.locator.return_value.screenshot.assert_called_once_with(path=str(outputs[0]))
+    second.locator.return_value.screenshot.assert_called_once_with(path=str(outputs[1]))
+
+
+@pytest.mark.parametrize("later_job", [False, True])
+def test_render_recovery_budget_is_one_per_batch(chart_runtime, tmp_path, later_job):
+    chart_runtime.browser.new_page.side_effect = PlaywrightError(_CLOSED)
+    exhausted = PlaywrightError(_CLOSED)
+    pages = [_chart_page(), exhausted] if later_job else [exhausted]
+    recovered = _chart_browser(*pages)
+    chart_runtime.launch.side_effect = [chart_runtime.browser, recovered]
+    outputs = [tmp_path / "first.png", tmp_path / "second.png"]
+
+    with pytest.raises(PlaywrightError) as caught:
+        html_charts.render_charts([("dashboard", {}, out) for out in outputs])
+
+    assert caught.value is exhausted
+    assert chart_runtime.launch.call_count == 2
+    assert outputs[0].with_suffix(".chartdata.json").exists() is later_job
+    assert not outputs[1].exists()
+    recovered.close.assert_called_once()
+
+
+def test_render_recovery_launch_failure_propagates(chart_runtime, tmp_path):
+    chart_runtime.browser.new_page.side_effect = PlaywrightError(_CLOSED)
+    unavailable = PlaywrightError("relaunch unavailable")
+    chart_runtime.launch.side_effect = [chart_runtime.browser, unavailable, unavailable]
+
+    with pytest.raises(RuntimeError, match="relaunch unavailable"):
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert chart_runtime.launch.call_count == 3
+    chart_runtime.browser.close.assert_called_once()
+
+
+@pytest.mark.parametrize("connected", [True, False])
+@pytest.mark.parametrize(
+    "error",
+    [PlaywrightTimeoutError("timeout"), OSError(_CLOSED), ValueError("invalid data")],
+)
+def test_render_does_not_retry_timeout_or_non_browser_errors(
+    chart_runtime, tmp_path, connected, error
+):
+    chart_runtime.browser.is_connected.return_value = connected
+    chart_runtime.page.set_content.side_effect = error
+
+    with pytest.raises(type(error)) as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value is error
+    chart_runtime.launch.assert_called_once()
+    chart_runtime.page.close.assert_called_once()
+    chart_runtime.browser.close.assert_called_once()
+
+
+def test_render_does_not_retry_connected_browser_error(chart_runtime, tmp_path):
+    error = PlaywrightError("invalid selector")
+    chart_runtime.page.locator.return_value.screenshot.side_effect = error
+
+    with pytest.raises(PlaywrightError) as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value is error
+    chart_runtime.launch.assert_called_once()
+
+
+@pytest.mark.parametrize("stage", ["html", "mkdir", "sidecar"])
+def test_render_does_not_retry_data_or_output_failure(
+    chart_runtime, tmp_path, monkeypatch, stage
+):
+    error = (
+        OSError("output unavailable") if stage != "html" else ValueError("bad payload")
+    )
+    if stage == "html":
+        chart_runtime.build_html.side_effect = error
+    elif stage == "mkdir":
+        monkeypatch.setattr(Path, "mkdir", Mock(side_effect=error))
+    else:
+        monkeypatch.setattr(Path, "write_text", Mock(side_effect=error))
+
+    with pytest.raises(type(error)) as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value is error
+    chart_runtime.launch.assert_called_once()
+    chart_runtime.browser.close.assert_called_once()
+
+
+@pytest.mark.parametrize("resource", ["page", "browser", "both"])
+def test_render_cleanup_preserves_original_failure(chart_runtime, tmp_path, resource):
+    error = ValueError("original failure")
+    chart_runtime.page.set_content.side_effect = error
+    if resource in ("page", "both"):
+        chart_runtime.page.close.side_effect = RuntimeError("page cleanup failure")
+    if resource in ("browser", "both"):
+        chart_runtime.browser.close.side_effect = RuntimeError("browser cleanup failure")
+
+    with pytest.raises(ValueError) as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value is error
+    chart_runtime.page.close.assert_called_once()
+    chart_runtime.browser.close.assert_called_once()
+
+
+def test_render_recovery_survives_failed_cleanup(chart_runtime, tmp_path):
+    chart_runtime.page.set_content.side_effect = PlaywrightError(_CLOSED)
+    chart_runtime.page.close.side_effect = RuntimeError("page cleanup failure")
+    chart_runtime.browser.close.side_effect = RuntimeError("browser cleanup failure")
+    recovered = _chart_browser(_chart_page())
+    chart_runtime.launch.side_effect = [chart_runtime.browser, recovered]
+
+    assert html_charts.render_chart("dashboard", {}, tmp_path / "chart.png").exists()
+    assert chart_runtime.launch.call_count == 2
+
+
+@pytest.mark.parametrize("resource", ["page", "browser"])
+def test_render_cleanup_failure_without_prior_error_is_reported(
+    chart_runtime, tmp_path, resource
+):
+    error = RuntimeError("cleanup failure")
+    getattr(chart_runtime, resource).close.side_effect = error
+
+    with pytest.raises(RuntimeError) as caught:
+        html_charts.render_chart("dashboard", {}, tmp_path / "chart.png")
+
+    assert caught.value is error
+    chart_runtime.launch.assert_called_once()
+
+
+def _chart_path_with_length(folder, length):
+    prefix_length = len(str(folder.absolute()).encode("utf-16-le")) // 2 + 1
+    return folder / ("x" * (length - prefix_length - len(".png")) + ".png")
+
+
+def test_windows_chart_preflight_accepts_sidecar_at_boundary(monkeypatch, tmp_path):
+    monkeypatch.setattr(html_charts.sys, "platform", "win32")
+    output = _chart_path_with_length(tmp_path, 248)
+
+    html_charts._validate_chart_destination(output)
+
+    assert len(str(output.with_suffix(".chartdata.json"))) == 259
+
+
+@pytest.mark.parametrize("png_length", [249, 260])
+def test_windows_chart_preflight_rejects_before_any_batch_writes(
+    chart_runtime, monkeypatch, tmp_path, png_length
+):
+    monkeypatch.setattr(html_charts.sys, "platform", "win32")
+    folder = tmp_path / "not-created"
+    output = _chart_path_with_length(folder, png_length)
+    jobs = [("dashboard", {}, folder / "first.png"), ("dashboard", {}, output)]
+    offending = output if png_length == 260 else output.with_suffix(".chartdata.json")
+
+    with pytest.raises(
+        ValueError, match="Choose a shorter output folder or run name"
+    ) as caught:
+        html_charts.render_charts(jobs)
+
+    assert str(offending) in str(caught.value)
+    assert not folder.exists()
+    chart_runtime.launch.assert_not_called()
+    html_charts._ensure_playwright_browser_windows_hidden.assert_not_called()
+
+
+def test_windows_chart_preflight_resolves_relative_destination(monkeypatch, tmp_path):
+    monkeypatch.setattr(html_charts.sys, "platform", "win32")
+    monkeypatch.chdir(tmp_path)
+    output = _chart_path_with_length(tmp_path, 249)
+
+    with pytest.raises(ValueError, match="Chart output path is too long"):
+        html_charts._validate_chart_destination(output.name)
+
+
+def test_windows_chart_preflight_counts_utf16_units(monkeypatch, tmp_path):
+    monkeypatch.setattr(html_charts.sys, "platform", "win32")
+    output = _chart_path_with_length(tmp_path, 248)
+    output = output.with_name("\U0001f600" + output.name[1:])
+
+    with pytest.raises(ValueError, match="260 UTF-16 units"):
+        html_charts._validate_chart_destination(output)
+
+
+def test_chart_preflight_leaves_non_windows_paths_unchanged(monkeypatch, tmp_path):
+    monkeypatch.setattr(html_charts.sys, "platform", "linux")
+
+    html_charts._validate_chart_destination(_chart_path_with_length(tmp_path, 300))
 
 
 def test_report_width_override_includes_snapshot_chart() -> None:

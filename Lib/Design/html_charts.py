@@ -36,6 +36,8 @@ import base64
 import contextlib
 import functools
 import json
+import logging
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -195,6 +197,44 @@ def _hide_playwright_driver_window():
         asyncio.create_subprocess_exec = original
 
 
+def _launch_chart_browser(playwright):
+    last_err: Exception | None = None
+    for channel in _browser_channels():
+        try:
+            return playwright.chromium.launch(channel=channel, headless=True)
+        except Exception as exc:  # depends on host browsers
+            last_err = exc
+    raise RuntimeError(
+        "No system Chromium-based browser found for chart rendering. "
+        "Install Google Chrome or Microsoft Edge (Edge ships with "
+        f"Windows). Last error: {last_err}"
+    ) from last_err
+
+
+def _close_chart_resource(resource) -> None:
+    """Preserve an active rendering error if cleanup also fails."""
+    if sys.exc_info()[0] is None:
+        resource.close()
+    else:
+        with contextlib.suppress(Exception):
+            resource.close()
+
+
+def _validate_chart_destination(output: str | Path) -> None:
+    """Reject Windows destinations that exceed the conventional file-path limit."""
+    if sys.platform != "win32":
+        return
+    out = Path(os.path.abspath(output))
+    sidecar = out.parent / f"{out.stem}.chartdata.json"
+    for destination in (out, sidecar):
+        length = len(str(destination).encode("utf-16-le")) // 2
+        if length >= 260:
+            raise ValueError(
+                f"Chart output path is too long ({length} UTF-16 units; maximum 259): "
+                f"{destination}. Choose a shorter output folder or run name."
+            )
+
+
 def render_charts(
     jobs: list[tuple[str, dict, str | Path]],
     *,
@@ -203,62 +243,74 @@ def render_charts(
     type_floor_native_px: float = _TYPE_FLOOR_NATIVE_PX,
     type_scale: float | None = None,
 ) -> list[Path]:
-    """Render many charts with one browser. Returns the written PNG paths."""
+    """Render charts, allowing one browser-closure recovery per batch."""
+    for _, _, output in jobs:
+        _validate_chart_destination(output)
     _ensure_playwright_browser_windows_hidden()
 
+    from playwright.sync_api import Error as PlaywrightError
+    from playwright.sync_api import TimeoutError as PlaywrightTimeoutError
     from playwright.sync_api import sync_playwright
 
     outputs: list[Path] = []
     with _hide_playwright_driver_window(), sync_playwright() as p:
-        browser = None
-        last_err: Exception | None = None
-        for channel in _browser_channels():
-            try:
-                browser = p.chromium.launch(channel=channel, headless=True)
-                break
-            except Exception as exc:  # pragma: no cover - depends on host browsers
-                last_err = exc
-        if browser is None:
-            raise RuntimeError(
-                "No system Chromium-based browser found for chart rendering. "
-                "Install Google Chrome or Microsoft Edge (Edge ships with "
-                f"Windows). Last error: {last_err}"
-            )
+        browser = _launch_chart_browser(p)
+        retried = False
         try:
             for chart, data, output in jobs:
                 out = Path(output)
                 out.parent.mkdir(parents=True, exist_ok=True)
-                # Fresh page per chart so window.__RENDERED__ can't be stale from
-                # a prior job (the browser launch is what's expensive, not pages).
-                page = browser.new_page(device_scale_factor=scale)
-                try:
-                    page.set_content(
-                        _build_html(
+                html = _build_html(
+                    chart,
+                    data,
+                    card_width,
+                    type_floor_css_px=type_floor_native_px / scale,
+                    type_scale=type_scale,
+                )
+                while True:
+                    try:
+                        # Fresh pages keep readiness state local to this attempt.
+                        page = browser.new_page(device_scale_factor=scale)
+                        try:
+                            page.set_content(html, wait_until="networkidle")
+                            page.wait_for_function("window.__RENDERED__ === true")
+                            page.locator("#mount").screenshot(path=str(out))
+                        finally:
+                            _close_chart_resource(page)
+                        break
+                    except PlaywrightTimeoutError:
+                        raise
+                    except PlaywrightError as exc:
+                        target_closed = (
+                            "Target page, context or browser has been closed" in str(exc)
+                        )
+                        if retried or (browser.is_connected() and not target_closed):
+                            raise
+                        retried = True
+                        logging.getLogger(__name__).warning(
+                            "Chart browser closed while rendering %s (%s); "
+                            "retrying once. Error: %s",
                             chart,
-                            data,
-                            card_width,
-                            type_floor_css_px=type_floor_native_px / scale,
-                            type_scale=type_scale,
-                        ),
-                        wait_until="networkidle",
-                    )
-                    page.wait_for_function("window.__RENDERED__ === true")
-                    page.locator("#mount").screenshot(path=str(out))
-                    # Drop a human-readable sidecar with the exact data this PNG
-                    # was rendered from, so the chart can be re-rendered later
-                    # (Build/regenerate_charts.py) without re-collecting data
-                    # and so a chart you disagree with can be fixed by editing
-                    # this JSON instead of deleting the whole image.
-                    sidecar = out.parent / f"{out.stem}.chartdata.json"
-                    sidecar.write_text(
-                        json.dumps({"chart": chart, **data}, indent=2),
-                        encoding="utf-8",
-                    )
-                    outputs.append(out)
-                finally:
-                    page.close()
+                            out,
+                            exc,
+                        )
+                        _close_chart_resource(browser)
+                        browser = None
+                        browser = _launch_chart_browser(p)
+                # Drop a human-readable sidecar with the exact data this PNG
+                # was rendered from, so the chart can be re-rendered later
+                # (Build/regenerate_charts.py) without re-collecting data
+                # and so a chart you disagree with can be fixed by editing
+                # this JSON instead of deleting the whole image.
+                sidecar = out.parent / f"{out.stem}.chartdata.json"
+                sidecar.write_text(
+                    json.dumps({"chart": chart, **data}, indent=2),
+                    encoding="utf-8",
+                )
+                outputs.append(out)
         finally:
-            browser.close()
+            if browser is not None:
+                _close_chart_resource(browser)
     return outputs
 
 

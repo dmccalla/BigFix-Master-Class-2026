@@ -29,3 +29,10 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 ### Changed
 
 ### Fixed
+
+- Fail diagnostics runs when a generator fails or a required output is missing
+  or empty, including both Perfmon captures and the Mini Report, while
+  preserving the run log and avoiding false success messages.
+- Retry an interrupted chart browser once. Check Windows chart and sidecar path
+  lengths before rendering, and preserve counter matching when shortening
+  Perfmon filenames. Unsupported paths request a shorter output folder or name.

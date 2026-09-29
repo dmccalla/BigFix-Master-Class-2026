@@ -39,7 +39,6 @@ import itertools
 import json
 import platform
 import re
-import shutil
 import socket
 import subprocess
 import sys
@@ -768,7 +767,7 @@ def find_script(filename: str) -> Path:
 
 
 def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
-    """Run a Python child script, streaming its output through the run log."""
+    """Stream a Python child's output, raising if it exits unsuccessfully."""
     python_exe = sys.executable
     if sys.platform == "win32":
         pythonw = Path(sys.executable).parent / "pythonw.exe"
@@ -803,8 +802,8 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
     _flush_child_output(pending_child_line, log)
     returncode = process.wait()
 
-    if returncode != 0 and log:
-        log.warning(f"{script.name} exited with code {returncode}")
+    if returncode != 0:
+        raise RuntimeError(f"{script.name} exited with code {returncode}")
     return returncode
 
 
@@ -924,6 +923,23 @@ def _rename_glob(
                 log.warning(f"Could not rename {old.name} to {new_name}: {exc}")
             return old
     return new
+
+
+def _require_output_files(*paths: Path) -> None:
+    """Fail the run when a required artifact is missing or empty."""
+    for path in paths:
+        if not path.is_file() or path.stat().st_size == 0:
+            raise RuntimeError(f"Required output is missing or empty: {path}")
+
+
+def _require_perfmon_outputs(out_xlsx: Path) -> Path:
+    _require_output_files(out_xlsx)
+    chart_folder = out_xlsx.parent / (out_xlsx.stem + "_Charts")
+    charts = sorted(chart_folder.glob("*.png"))
+    if not charts:
+        raise RuntimeError(f"Required PNG graphs are missing or empty: {chart_folder}")
+    _require_output_files(*charts)
+    return chart_folder
 
 
 # ---------------------------------------------------------------------------
@@ -1151,7 +1167,7 @@ def _write_perfmon_mini_report(
         add_stub_front_matter(document, "PerfMon Infrastructure Analysis")
         document.save(str(base_path))
 
-        rc = run_python(
+        run_python(
             find_script("inject_perfmon_charts.py"),
             [
                 "--chart-folder",
@@ -1166,12 +1182,10 @@ def _write_perfmon_mini_report(
             ],
             log,
         )
-        if rc != 0 or not primary_path.exists():
-            _warn("PerfMon Mini Report generation failed for Capture 1.", log)
-            return False
+        _require_output_files(primary_path)
 
         if capture2_chart_folder:
-            rc = run_python(
+            run_python(
                 find_script("inject_perfmon_charts.py"),
                 [
                     "--chart-folder",
@@ -1186,17 +1200,11 @@ def _write_perfmon_mini_report(
                 ],
                 log,
             )
-            if rc != 0 or not output_path.exists():
-                _warn(
-                    "PerfMon Capture 2 could not be added to the Mini Report. "
-                    "The Capture 1 Mini Report is kept.",
-                    log,
-                )
-                shutil.copy2(primary_path, output_path)
+            _require_output_files(output_path)
 
     if log:
         log.info("PerfMon Mini Report", str(output_path))
-    return output_path.exists()
+    return True
 
 
 def _perfmon_chart_args(
@@ -1260,12 +1268,9 @@ def run_perfmon_pipeline(
         memory_gb=inputs.get("physical_memory_gb") or 0,
         is_vm=bool(inputs.get("is_vm")),
     )
-    rc = run_python(find_script("get_perfmon_charts.py"), args, log)
-    if rc != 0:
-        _warn(f"get_perfmon_charts.py exited with code {rc}.", log)
-        return
+    run_python(find_script("get_perfmon_charts.py"), args, log)
 
-    chart_folder = out_xlsx.parent / (out_xlsx.stem + "_Charts")
+    chart_folder = _require_perfmon_outputs(out_xlsx)
     if log:
         log.info("Output Excel", str(out_xlsx))
         log.info("Graph folder", str(chart_folder))
@@ -1282,22 +1287,11 @@ def run_perfmon_pipeline(
             memory_gb=inputs.get("capture2_physical_memory_gb") or 0,
             is_vm=bool(inputs.get("capture2_is_vm")),
         )
-        rc = run_python(find_script("get_perfmon_charts.py"), capture2_args, log)
-        if rc != 0:
-            _warn(f"get_perfmon_charts.py exited with code {rc} for Capture 2.", log)
-        else:
-            candidate = capture2_out_xlsx.parent / (capture2_out_xlsx.stem + "_Charts")
-            if candidate.exists():
-                capture2_chart_folder = candidate
-                if log:
-                    log.info("Capture 2 Excel", str(capture2_out_xlsx))
-                    log.info("Capture 2 graphs", str(capture2_chart_folder))
-            else:
-                _warn(f"Capture 2 graph folder not found ({candidate}).", log)
-
-    if not chart_folder.exists():
-        _warn(f"Graph folder not found ({chart_folder}). Mini Report skipped.", log)
-        return
+        run_python(find_script("get_perfmon_charts.py"), capture2_args, log)
+        capture2_chart_folder = _require_perfmon_outputs(capture2_out_xlsx)
+        if log:
+            log.info("Capture 2 Excel", str(capture2_out_xlsx))
+            log.info("Capture 2 graphs", str(capture2_chart_folder))
 
     mini_report_path = inputs["_out_folder"] / f"{prefix}_Perfmon_Mini_Report.docx"
     _write_perfmon_mini_report(
@@ -1442,10 +1436,7 @@ def run_loop_pipeline(
     if inputs.get("udp_notifications_file"):
         args += ["--udp-notifications-file", str(inputs["udp_notifications_file"])]
 
-    rc = run_python(find_script("get_loop_health.py"), args, log)
-    if rc != 0:
-        _warn(f"get_loop_health.py exited with code {rc}.", log)
-        return
+    run_python(find_script("get_loop_health.py"), args, log)
 
     _rename_glob(
         output_dir, "Client_Loop_Analysis_*.xlsx", f"{prefix}_Client_Loop.xlsx", log
@@ -1459,12 +1450,15 @@ def run_loop_pipeline(
         f"{prefix}_Client_Loop.chartdata.json",
         log,
     )
-    loop_docx = _rename_glob(
+    _rename_glob(
         output_dir, "Client_Loop_Analysis_*.docx", f"{prefix}_Client_Loop.docx", log
     )
-    if loop_docx is None:
-        _warn(f"No loop docx found in {output_dir}.", log)
-        return
+    loop_docx = output_dir / f"{prefix}_Client_Loop.docx"
+    _require_output_files(
+        output_dir / f"{prefix}_Client_Loop.xlsx",
+        output_dir / f"{prefix}_Client_Loop.png",
+        loop_docx,
+    )
     if log:
         log.info("Loop docx", str(loop_docx))
 
@@ -1554,10 +1548,8 @@ def run_filldb_pipeline(
     if style_template:
         args += ["--template", str(style_template)]
 
-    rc = run_python(find_script("get_filldb_performance.py"), args, log)
-    if rc != 0:
-        _warn(f"get_filldb_performance.py exited with code {rc}.", log)
-        return
+    run_python(find_script("get_filldb_performance.py"), args, log)
+    _require_output_files(output_docx, output_png)
     if log:
         log.info("FillDB docx", str(output_docx))
         log.info("FillDB PNG", str(output_png))

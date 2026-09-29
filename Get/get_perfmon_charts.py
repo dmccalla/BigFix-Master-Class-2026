@@ -853,6 +853,7 @@ _CHART_FILENAME_SUFFIXES = (
     "Processor_Queue_Length",
     "Processor_Time",
     "Privileged_Time",
+    "Usage_Peak",
 )
 
 
@@ -866,7 +867,7 @@ def perfmon_chart_filename(counter: str, png_folder: str | os.PathLike[str]) -> 
     """
     original = f"{counter}.png"
     folder_text = os.path.abspath(os.fspath(png_folder))
-    max_name_length = max(32, 240 - len(folder_text) - 1)
+    max_name_length = 240 - len(folder_text) - 1
     if len(original) <= max_name_length:
         return original
 
@@ -876,12 +877,17 @@ def perfmon_chart_filename(counter: str, png_folder: str | os.PathLike[str]) -> 
         counter[-32:],
     )
     stem_length = max_name_length - len(".png")
-    suffix_length = min(len(suffix), max(12, stem_length - len(digest) - 3))
-    suffix = suffix[-suffix_length:]
     prefix_length = stem_length - len(digest) - len(suffix) - 2
+    required_prefix = "PhysicalDisk" if counter.startswith("PhysicalDisk_") else ""
+    compact = f"{required_prefix + '_' if required_prefix else ''}{digest}_{suffix}.png"
+    if len(compact) > max_name_length:
+        raise ValueError(
+            f"PerfMon output path is too long to retain the counter name: {folder_text}. "
+            "Choose a shorter output folder or run name."
+        )
     if prefix_length > 0:
         return f"{counter[:prefix_length]}_{digest}_{suffix}.png"
-    return f"{digest}_{suffix}.png"[:max_name_length]
+    return compact
 
 
 def render_zero_counter_strip(

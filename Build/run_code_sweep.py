@@ -91,7 +91,13 @@ def _source_targets() -> list[str]:
 
 
 def _shipped_targets() -> list[str]:
-    return [folder for folder in SHIPPED_DIRS if (REPO_ROOT / folder).exists()]
+    # Only folders that hold Python. mypy exits 2 on a folder without any,
+    # and Utilities ships PowerShell and an executable.
+    return [
+        folder
+        for folder in SHIPPED_DIRS
+        if (REPO_ROOT / folder).exists() and any((REPO_ROOT / folder).rglob("*.py"))
+    ]
 
 
 def build_steps(*, apply_ruff_fixes: bool, skip_pip_audit: bool) -> list[SweepStep]:
@@ -193,7 +199,7 @@ def build_steps(*, apply_ruff_fixes: bool, skip_pip_audit: bool) -> list[SweepSt
                     "--ignore-missing-imports",
                     "--no-error-summary",
                     "--exclude",
-                    r"(^|/)sitecustomize\.py$",
+                    r"(^|[/\\])sitecustomize\.py$",
                     *_shipped_targets(),
                 ],
                 output_file="mypy.txt",

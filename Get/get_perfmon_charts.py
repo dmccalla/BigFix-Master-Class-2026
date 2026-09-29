@@ -870,7 +870,7 @@ def perfmon_chart_filename(counter: str, png_folder: str | os.PathLike[str]) -> 
     if len(original) <= max_name_length:
         return original
 
-    digest = hashlib.sha1(counter.encode("utf-8")).hexdigest()[:12]
+    digest = hashlib.sha1(counter.encode("utf-8"), usedforsecurity=False).hexdigest()[:12]
     suffix = next(
         (value for value in _CHART_FILENAME_SUFFIXES if counter.endswith(value)),
         counter[-32:],

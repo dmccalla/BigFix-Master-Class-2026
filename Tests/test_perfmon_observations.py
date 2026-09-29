@@ -786,6 +786,9 @@ def test_perfmon_summary_renders_supplied_hardware_context() -> None:
             "Physical Disk Count": 4,
             "Physical Disk Source": "Parameter Supplied",
             "Virtual Machine": False,
+            "Sample Start": "08-18-2026 07:52",
+            "Sample End": "08-19-2026 07:01",
+            "Sample Count": 1390,
         },
         "summary": {"lines": ["PerfMon analysis completed."]},
         "sections": {},
@@ -794,10 +797,12 @@ def test_perfmon_summary_renders_supplied_hardware_context() -> None:
     xml = inject_perfmon_charts.build_summary_xml(observations)
 
     assert "PerfMon Hardware Context" in xml
-    assert "BFTEST01" in xml
-    assert "64 GB (Parameter Supplied)" in xml
-    assert "32 (Parameter Supplied)" in xml
-    assert "4 (Parameter Supplied)" in xml
+    assert "BFTEST01" not in xml
+    assert "Capture Window" not in xml
+    assert "1390" not in xml
+    assert "64 GB (User supplied)" in xml
+    assert "32 (User supplied)" in xml
+    assert "4 (User supplied)" in xml
     assert "No" in xml
 
 

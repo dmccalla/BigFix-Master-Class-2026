@@ -387,12 +387,13 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
         if suffix:
             value_text += suffix
         source = environment.get(source_key)
+        if source == "Parameter Supplied":
+            source = "User supplied"
         if source:
             value_text += f" ({source})"
         return value_text
 
     rows = [
-        ("Analyzed System", environment.get("Analyzed System", "")),
         (
             "Logical Processors",
             value_with_source("Logical Processor Count", "Logical Processor Source"),
@@ -413,12 +414,6 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
             "Virtual Machine",
             value_with_source("Virtual Machine", "Virtual Machine Source"),
         ),
-        (
-            "Capture Window",
-            environment.get("Sample Start", "")
-            and f"{environment.get('Sample Start')} to {environment.get('Sample End', '')}",
-        ),
-        ("Samples", environment.get("Sample Count", "")),
     ]
     rows = [(label, str(value)) for label, value in rows if value not in (None, "")]
     if not rows:
@@ -438,7 +433,7 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
     xml += (
         "<w:tr>"
         + table_cell_xml("Hardware / Context", widths[0], bold=True)
-        + table_cell_xml("Entered / Detected Value", widths[1], bold=True)
+        + table_cell_xml("Value / Source", widths[1], bold=True)
         + "</w:tr>"
     )
     for label, value in rows:
@@ -1972,7 +1967,11 @@ def append_perfmon_capture_section(
 
     environment = observations.get("environment", {}) if observations else {}
     analyzed_system = str(environment.get("Analyzed System") or "").strip()
-    if analyzed_system:
+    has_system_summary = any(
+        str(line).startswith("Analyzed system:")
+        for line in observations.get("summary", {}).get("lines", [])
+    )
+    if analyzed_system and not has_system_summary:
         section_chunks.append(text_paragraph_xml(f"Analyzed system: {analyzed_system}"))
 
     def _append_png(zf: zipfile.ZipFile, png_path: Path) -> str:

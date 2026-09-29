@@ -743,6 +743,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._module_card_controls: dict[str, dict[str, object]] = {}
         self._group_count_label: ctk.CTkLabel | None = None
         self._perfmon_detect_tokens = {"perfmon": 0, "perfmon2": 0}
+        self._perfmon_detect_sources: dict[str, Path] = {}
         self._field_widgets: dict[str, ctk.CTkEntry] = {}
         self._field_rest_borders: dict[str, str] = {}
         self._ui_queue: queue.Queue = queue.Queue()
@@ -2585,9 +2586,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.module_input_override_vars[(key, field_key)].set(_display_path(path))
         self.module_vars[key].set(True)
         if key == "perfmon" and field_key == mod.file_key:
-            self._start_perfmon_detection()
+            self._start_perfmon_detection(auto=True)
         elif key == "perfmon" and field_key == "capture2_blg_path":
-            self._start_perfmon_detection(capture="perfmon2")
+            self._start_perfmon_detection(capture="perfmon2", auto=True)
         self._refresh_module_card_views([key])
         self._rebuild_expansion(key)
 
@@ -3057,8 +3058,14 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 self.perfmon2_processors_var,
                 self.perfmon2_disks_var,
             )
-        if auto and (processors_var.get().strip() or disks_var.get().strip()):
+        source = blg.resolve()
+        if (
+            auto
+            and self._perfmon_detect_sources.get(capture) == source
+            and (processors_var.get().strip() or disks_var.get().strip())
+        ):
             return
+        self._perfmon_detect_sources[capture] = source
         self._perfmon_detect_tokens[capture] += 1
         token = self._perfmon_detect_tokens[capture]
         processors_var.set(DETECTING)
@@ -3083,6 +3090,14 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self, capture: str, token: int, procs: int, disks: int, begin: str, end: str
     ) -> None:
         if token != self._perfmon_detect_tokens[capture]:
+            return
+        source = (
+            self._perfmon_input_path()
+            if capture == "perfmon"
+            else self._perfmon_capture2_path()
+        )
+        if source is None or source.resolve() != self._perfmon_detect_sources.get(capture):
+            self._perfmon_detect_sources.pop(capture, None)
             return
         if capture == "perfmon":
             processors_var, disks_var = (

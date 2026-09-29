@@ -412,13 +412,13 @@ waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1
 //* 		Parse the Admin Tool Options and Fields XML files and format things so they are human readable. 
 //*
 
-if {exists xml documents of files (parameter "generalInfoFileAdminToolFieldsXML")}
+if {if exists files (parameter "generalInfoFileAdminToolFieldsXML") whose (size of it > 0) then exists xml documents of files (parameter "generalInfoFileAdminToolFieldsXML") else false}
 waithidden cmd.exe /C echo {(node values of child nodes of xpaths "Name" of it, node values of child nodes of xpaths "Value" of it) of xpaths "/BESAPI/AdminField" of xml documents of files (parameter "generalInfoFileAdminToolFieldsXML")} >> {parameter "generalInfoFile"}
 else
 waithidden cmd.exe /C echo Admin Tool fields were not available to the supplied API account. >> {parameter "generalInfoFile"}
 endif
 
-if {exists xml documents of files (parameter "generalInfoFileAdminToolOptionsXML")}
+if {if exists files (parameter "generalInfoFileAdminToolOptionsXML") whose (size of it > 0) then exists xml documents of files (parameter "generalInfoFileAdminToolOptionsXML") else false}
 waithidden cmd.exe /C echo {(node name of it, node values of child nodes of it) of child nodes of child nodes of child nodes of xml documents of files (parameter "generalInfoFileAdminToolOptionsXML")} >> {parameter "generalInfoFile"}
 else
 waithidden cmd.exe /C echo Admin Tool options were not available to the supplied API account. >> {parameter "generalInfoFile"}

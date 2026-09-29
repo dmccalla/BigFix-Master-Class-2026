@@ -147,7 +147,7 @@ function toggleLogSizeFields(value) {
 function toggleDurationFields(value) {
         fillDBPerfLogsNoDisable = value;
         var fillDBPerfLogsDuration = document.getElementById("fillDBPerfLogsDuration");
-        var apiUserName = document.getElementById("apiUserName");
+        var apiUserName = document.getElementById("apiUsername");
         var apiPassword = document.getElementById("apiPassword");
         var apiPasswordConfirm = document.getElementById("apiPasswordConfirm");
     if (value) {
@@ -193,7 +193,7 @@ document.body.ontakeaction = function(event) {
     var fillDBPerfLogsSizeNoLimit = document.getElementById("fillDBPerfLogsSizeNoLimit").checked;
     var fillDBPerfLogsNoDisable = document.getElementById("fillDBPerfLogsNoDisable").checked;
 
-    if (rootServerWindows === 'false') {
+    if (rootServerWindows === 'False') {
         alert("This task can only be run on Windows-based BigFix root servers");
         return false;
     } else

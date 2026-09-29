@@ -97,7 +97,7 @@
             return false;}
         } 
 
-    var apiUsername = document.getElementById( "apiUsername" ).value;
+    var apiUsername = document.getElementById( "apiUserName" ).value;
     var apiPassword = document.getElementById( "apiPassword" ).value;
     var apiPasswordConfirm = document.getElementById( "apiPasswordConfirm" ).value;
     var rootServerName = document.getElementById( "rootServerName" ).value;

@@ -135,7 +135,7 @@ function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getEleme
 
 parameter "driveLetter" = "{(if (exists it) then (name of drive of it) else ("C:")) of regapp "BESClient.exe"}"
 parameter "checkType" = "Platform"
-parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Master_Class\" & parameter "checkType"}"
 parameter "perfmonLogsBackupFolder" = "{parameter "rootFolder" & "\Backup\Results\Perfmon\" & computer name & "_" & ((month of it as two digits & "-" & day_of_month of it as two digits & "-" & year of it as string) of date(local time zone) of it & "_" & (two digit hour of it as string & two digit minute of it as string) of time (local time zone) of it) of now}"
 parameter "scriptsFolder" = "{parameter "rootFolder" & "\Scripts"}"
 parameter "perfmonScriptsFolder" = "{parameter "scriptsFolder" & "\Perfmon"}"

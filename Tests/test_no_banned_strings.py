@@ -76,6 +76,12 @@ _TEXT_EXT = {
 # This guard names the strings it bans, so it cannot scan itself.
 _EXCL_FILES = {Path(__file__).resolve()}
 
+# Approved references retained after the Master Class task cleanup.
+_ALLOWED_BES_REFERENCES = (
+    "<Source>HCL BigFix AVP and Professional Services</Source>",
+    "https://help.hcltechsw.com/bigfix/11.0/platform/Platform/Installation/c_logfiles.html",
+)
+
 
 def _iter_text_files():
     for path in ROOT.rglob("*"):
@@ -95,6 +101,9 @@ def _hits(path: Path) -> list[str]:
     except OSError:
         return hits
     for number, line in enumerate(lines, 1):
+        if path.suffix.lower() == ".bes":
+            for reference in _ALLOWED_BES_REFERENCES:
+                line = line.replace(reference, "")
         folded = line.casefold()
         for needle in BANNED:
             if needle in line:

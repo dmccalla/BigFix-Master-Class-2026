@@ -64,7 +64,7 @@
 <UL>
 <LI><FONT color=#000000><STRONG>Note:</STRONG> Edit the actionscript if you want something different.</FONT></LI></UL>
 <LI><FONT color=#000000>Based on the options selected in the User Input and Parameters section below, this will query the REST API to gather the appropriate information.&nbsp; This does not reach out and touch relays and clients. </FONT>
-<LI><FONT color=#000000>The results are saved as XML captures. The Report Builder reads these files directly. Enable the option in the User Input and Parameters section to also generate human readable .log files. </FONT>
+<LI><FONT color=#000000>The results are saved as XML captures. The Workbench reads these files directly. Enable the option in the User Input and Parameters section to also generate human readable .log files. </FONT>
 <LI><FONT color=#000000>This is supplementary data compared to the&nbsp;Deployment Information data from the Deployment Health Checks dashboard.</FONT></FONT></LI></UL></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2>
@@ -92,7 +92,7 @@
 <P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectContent CHECKED type=checkbox name=collectContent><STRONG>Content Info</STRONG><BR>This option will collect a variety of information related to the number of sites, fixlets/tasks, properties, analyses, baselines, and computer groups.</FONT></P>
 <P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectProperty CHECKED type=checkbox name=collectProperty><STRONG>Property Activation Info</STRONG><BR>This option extends the Content Info option to return lists of all activated properties and all properties activated with sub-5 minutes report times. </FONT></P>
 <P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=collectAction CHECKED type=checkbox name=collectAction><STRONG>Actions Info</STRONG><BR>This option will collect action count info (all status'), multiple action groups with too many components, open actions with superseded source content, action counts by operator type, actions by source site, and actions by date.</FONT></P>
-<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=generateLogFiles type=checkbox name=generateLogFiles><STRONG>Also Generate Human Readable Log Files</STRONG><BR>Leave unchecked when using the Report Builder. It reads the XML captures directly. Enable this to also convert each capture to a readable .log file for manual review. The conversion adds processing time on large deployments.</FONT></P>
+<P style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><INPUT id=generateLogFiles type=checkbox name=generateLogFiles><STRONG>Also Generate Human Readable Log Files</STRONG><BR>Leave unchecked when using the Workbench. It reads the XML captures directly. Enable this to also convert each capture to a readable .log file for manual review. The conversion adds processing time on large deployments.</FONT></P>
 <DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><script>document.body.ontakeaction = function(event) {
     if (event.contentID == 'Action1') {
         if (EvaluateRelevance('master flag of current console user') === "False") {
@@ -225,7 +225,7 @@ hcSync();</script> </DIV>]]></Description>
 
 parameter "driveLetter" = "C:"
 parameter "checkType" = "Platform"
-parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Master_Class\" & parameter "checkType"}"
 parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
 parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
 parameter "apiQueryDelaySeconds" = "{if exists parameter "queryDelaySeconds" of action then parameter "queryDelaySeconds" of action as string else "1"}"
@@ -233,7 +233,7 @@ parameter "toolsFolder" = "{parameter "rootFolder" & "\Tools"}"
 parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
 parameter "deploymentInfoResultsFolder" = "{parameter "resultsFolder" & "\Deployment_Information"}"
 // Deployment_Information is grouped into subfolders rather than one flat pile of files.
-// The Report Builder resolves captures recursively, so a package collected before this
+// The Workbench resolves captures recursively, so a package collected before this
 // change still builds.
 parameter "diGeneralFolder"   = "{parameter "deploymentInfoResultsFolder" & "\General"}"
 parameter "diServerFolder"    = "{parameter "deploymentInfoResultsFolder" & "\Server"}"

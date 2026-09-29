@@ -63,7 +63,7 @@
 <LI><FONT color=#000000>This will query the REST API to gather, on a per-machine basis: average and maximum loop times, UDP notification information, command polling settings, FastHashVerify client settings, and the Top 10 slowest evaluating pieces of content. </FONT>
 <LI><FONT color=#000000>The data sets are saved as XML captures and then processed to output aggregated data points. </FONT></LI></UL></DIV>
 <UL>
-<LI><FONT color=#000000>The Report Builder reads these files directly. Enable the option in the User Input and Parameters section to also generate the human readable CSV version.</FONT> 
+<LI><FONT color=#000000>The Workbench reads these files directly. Enable the option in the User Input and Parameters section to also generate the human readable CSV version.</FONT> 
 <LI><FONT color=#000000>The friendly name step reads the XML captures directly. It always writes top10-query-results.csv and udp-notification-results.csv.</FONT></FONT></LI></UL>
 <DIV class=hc-sec><FONT color=#000000><STRONG>Deployment Notes</STRONG></FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2>
@@ -80,7 +80,7 @@
 <DIV style="MARGIN-TOP: 16px"><FONT size=2>Root Server Hostname (auto-detected):</FONT><BR><INPUT disabled id=rootServerName class=hc-in maxLength=253><script>(function(){var v='';try{v=EvaluateRelevance('host name of root server');}catch(e){}if(!(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False')){try{v=EvaluateRelevance('name of bes computer whose (root server flag of it = true)');}catch(e2){v='';}}if(v&&v.indexOf(' ')===-1&&v.indexOf('<')===-1&&v!=='False'){var el=document.getElementById('rootServerName');if(el){el.value=v;}}})();</script> <SPAN onclick="var e=document.getElementById('rootServerName');e.disabled=false;e.style.backgroundColor='#ffffff';e.style.color='#000032';e.focus();this.style.display='none';" id=rootServerEdit style="FONT-SIZE: 12px; CURSOR: pointer; FONT-WEIGHT: bold; COLOR: #17707f">Edit</SPAN></DIV>
 <DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">If this is a DNS alias or fake root, click Edit and enter the correct hostname. Otherwise the API login and all of the task API calls will most likely fail.</DIV>
 <DIV style="MARGIN-TOP: 16px"><INPUT id=generateLogFiles type=checkbox> <FONT size=2><B>Also generate the human readable loop CSV file</B></FONT></DIV>
-<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">Leave unchecked when using the Report Builder. It reads the loop XML capture directly. Enable this to also get the converted CSV for manual review. This adds processing time on large deployments.</DIV><FONT size=2></FONT></DIV>
+<DIV style="FONT-SIZE: 12px; MARGIN-BOTTOM: 4px; MARGIN-TOP: 5px; COLOR: #000032">Leave unchecked when using the Workbench. It reads the loop XML capture directly. Enable this to also get the converted CSV for manual review. This adds processing time on large deployments.</DIV><FONT size=2></FONT></DIV>
 <DIV style="PADDING-BOTTOM: 10px; PADDING-TOP: 10px; PADDING-LEFT: 10px; PADDING-RIGHT: 10px"><FONT size=2><script>document.body.ontakeaction = function(event) {
     // Warn if an earlier stage is still active (Day 1 collection, the Day 2 capture, or Day 3 logging).
     // A pending disable action means an earlier stage is still logging.
@@ -188,7 +188,7 @@ hcSync();</script> </DIV>]]></Description>
 
 parameter "driveLetter" = "C:"
 parameter "checkType" = "Platform"
-parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Master_Class\" & parameter "checkType"}"
 parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
 parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
 parameter "rootServerURL"="https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"}"
@@ -238,7 +238,7 @@ createfile until __END__
 # Copyright (c) 2026 Duncan McCalla
 # SPDX-License-Identifier: MIT
 #
-# BigFix Master Class Report Builder
+# BigFix Master Class Workbench
 # Standalone utility: retain this notice when copying this file outside the repository.
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 

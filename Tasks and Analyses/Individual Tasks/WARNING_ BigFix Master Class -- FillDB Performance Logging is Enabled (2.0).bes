@@ -122,7 +122,7 @@ if {(parameter "res") is "y"}
 
 parameter "driveLetter" = "{preceding texts of firsts "\" of (value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string)}"
 parameter "checkType" = "Platform"
-parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Master_Class\" & parameter "checkType"}"
 parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"
 parameter "logsFolder" = "{parameter "resultsFolder" & "\Logs"}"
 parameter "fillDBPerfLogsFolder"="{parameter "logsFolder" & "\FillDB_Performance"}"

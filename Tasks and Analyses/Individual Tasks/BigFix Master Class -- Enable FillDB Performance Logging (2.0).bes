@@ -324,7 +324,7 @@ if {(parameter "res") is "y"}
 
 parameter "driveLetter" = "C:"
 parameter "checkType" = "Platform"
-parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Health_Check\" & parameter "checkType"}"
+parameter "rootFolder" = "{parameter "driveLetter" & "\BigFix_Master_Class\" & parameter "checkType"}"
 parameter "cliFolder" = "{value "EnterpriseServerFolder" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of native registry as string & "IEM CLI"}"
 parameter "apiPort" = "{value "Port" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server" of x32 registry}"
 parameter "resultsFolder" = "{parameter "rootFolder" & "\Results"}"

@@ -224,7 +224,9 @@ CONFIG_PATH = _app_data_dir() / "last_build.config.json"
 DETECTING = "Detecting..."
 _LAYOUT_DEBOUNCE_MS = 40
 
-_RUN_FOLDER_RE = re.compile(r"^RUN_FOLDER:\s*(.+?)\s*$")
+_RUN_FOLDER_RE = re.compile(
+    r"^(?:RUN_FOLDER:|\s*Run folder\s*:)\s*(.+?)\s*$", re.IGNORECASE
+)
 _RUN_LOG_RE = re.compile(r"^\s*Run log\s*:\s*(.+?)\s*$")
 
 
@@ -752,6 +754,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._log_queue: queue.Queue[str] = queue.Queue()
         self._log_chunks: list[str] = []
         self._log_viewers: list[ctk.CTkTextbox] = []
+        self._open_output_buttons: list[ctk.CTkButton] = []
         self._build_running = False
         self._cancel_requested = False
         self._run_folder: Path | None = None
@@ -3842,6 +3845,24 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return self._run_folder
         return None
 
+    def _refresh_open_output_buttons(self) -> None:
+        state = "normal" if self._output_folder_to_open() is not None else "disabled"
+        buttons = [
+            button
+            for button in [getattr(self, "open_output_button", None)]
+            + self._open_output_buttons[:]
+            if button is not None
+        ]
+        for button in buttons:
+            try:
+                if button.winfo_exists():
+                    button.configure(state=state)
+                else:
+                    self._open_output_buttons.remove(button)
+            except TclError:
+                if button in self._open_output_buttons:
+                    self._open_output_buttons.remove(button)
+
     def _open_output_folder(self) -> None:
         folder = self._output_folder_to_open()
         if folder is None:
@@ -3879,7 +3900,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.build_button.configure(state="disabled", text="Building")
         self.cancel_button.configure(state="normal")
         self.view_logs_button.configure(state="normal")
-        self.open_output_button.configure(state="disabled")
+        self._refresh_open_output_buttons()
         self.progress_status_var.set("Starting...")
         self.progress_guidance_var.set("")
         self.progress_guidance_label.grid_remove()
@@ -3966,6 +3987,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             if match:
                 self._run_folder = Path(match.group(1))
                 self._footer_run_label.configure(text=str(self._run_folder))
+                self._refresh_open_output_buttons()
             match = _RUN_LOG_RE.match(line)
             if match:
                 self._run_log_path = Path(match.group(1))
@@ -3976,8 +3998,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.build_button.configure(state="normal", text="Build")
         self.cancel_button.configure(state="disabled")
         self.view_logs_button.configure(state="normal")
-        if self._output_folder_to_open() is not None:
-            self.open_output_button.configure(state="normal")
+        self._refresh_open_output_buttons()
         self._sync_nav()
         if self._cancel_requested:
             self.progress_status_var.set("Build canceled.")
@@ -4084,6 +4105,15 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         )
         open_output.configure(
             state="normal" if self._output_folder_to_open() is not None else "disabled"
+        )
+        self._open_output_buttons.append(open_output)
+        open_output.bind(
+            "<Destroy>",
+            lambda _event, button=open_output: (
+                self._open_output_buttons.remove(button)
+                if button in self._open_output_buttons
+                else None
+            ),
         )
         open_output.grid(row=0, column=1, padx=(8, 0), pady=12)
         self._pill_button(actions, "Close", window.destroy, fg=FOG, text_color=INK).grid(

@@ -34,6 +34,8 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Fixed
 
+- Enable Open Output after a completed build when the engine reports its
+  human-readable run-folder summary, including an already-open Build Logs window.
 - Keep FillDB Mini Report header and body rows aligned by centering both
   tables consistently. Preserve the existing table widths and shared style.
 - Correct ten Deployment Information queries and 110 collection section-header

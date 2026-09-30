@@ -44,7 +44,7 @@
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>24-hour capture</B><SPAN>Samples every 60 seconds for 1440 samples.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Logs are not capped</B><SPAN>Confirm adequate disk space before running.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
-<DIV class=hc-note><FONT size=2><B>Manual retrieval required:</B> Perfmon counter logs are expected to be 256 MB or larger and are not uploaded by the Health Check tasks. After the capture stops, retrieve the Perfmon log directly from every targeted machine.</FONT></DIV>
+<DIV class=hc-note><FONT size=2><B>Manual retrieval required:</B> Perfmon counter logs are expected to be 256 MB or larger and are not uploaded by the collection tasks. After the capture stops, retrieve the Perfmon log directly from every targeted machine.</FONT></DIV>
 <DIV class=hc-note><FONT size=2><B>Timing matters:</B> Start this after heavy deployment/API collection is out of the way. Running heavy collection while Perfmon is active can inflate the performance picture.</FONT></DIV>
 <DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
 <DIV id=hcNotes class=hc-body style="DISPLAY: none">
@@ -57,7 +57,7 @@
 <LI><FONT color=#000000 size=2>Writes a short README beside the logs with the stop, start, and delete commands for the counter set.</FONT></LI></UL>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <UL>
-<LI><FONT color=#000000 size=2><STRONG><FONT size=2><STRONG>Retrieve the Perfmon log directly from every targeted machine after the capture stops. These files are expected to be 256 MB or larger and are not uploaded by the Health Check tasks.</STRONG>&nbsp;</FONT></STRONG></FONT>
+<LI><FONT color=#000000 size=2><STRONG><FONT size=2><STRONG>Retrieve the Perfmon log directly from every targeted machine after the capture stops. These files are expected to be 256 MB or larger and are not uploaded by the collection tasks.</STRONG>&nbsp;</FONT></STRONG></FONT>
 <LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
 <LI><FONT color=#000000 size=2>Run as a one-time action on supported BigFix role servers and supporting SQL Servers.</FONT>
 <LI><FONT color=#000000 size=2>If the SQL Server is remote, run this task against that SQL Server too.</FONT> 

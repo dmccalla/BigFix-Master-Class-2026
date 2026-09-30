@@ -46,11 +46,12 @@ corresponding BigFix collection tasks first.
 | `Lib/` | Shared code: input handling, analysis helpers, chart and workbook themes |
 | `Assets/` | The Infographic chart template and the app icon |
 | `Fonts/` | Bundled open-source fonts (Inter, Roboto) |
-| `Templates/` | The Word style template the Mini Reports take their styles from |
+| `Build/` | The release and template builders, including `build_lab_guide.py` for the Student Lab Guide |
+| `Templates/` | The Word style template the Mini Reports take their styles from, and the lab guide template |
 | `SampleData/` | The fictional sample capture |
-| `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1` |
+| `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1`. The lab guide screenshot capture scripts |
 | `Launchers/` | The Windows launcher |
-| `Docs/` | Guides for attendees and the live lab collection workflow |
+| `Docs/` | Guides for attendees and the live lab collection workflow. `Lab_Guide_Assets/` holds the lab guide screenshots |
 
 ## Class Materials
 

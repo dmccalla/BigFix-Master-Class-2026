@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Fixlet>
-		<Title>BigFix Master Class -- Set CPU Utilization to 2% on Multi-Core Systems (2.0)</Title>
+		<Title>BigFix Master Class -- Set CPU Utilization to 2% on Windows Multi-Core Systems - Pre 11.0.7 (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
@@ -23,9 +23,9 @@
 
 <DIV id=seed_2 class=hc-wrap>
 <DIV class=hc-eyebrow>&nbsp;</DIV>
-<DIV class=hc-h1>Set CPU Utilization to 2% on Multi-Core Systems</DIV>
+<DIV class=hc-h1>Set CPU Utilization to 2% on Windows Multi-Core Systems - Pre 11.0.7</DIV>
 <DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
-<DIV class=hc-lead><FONT color=#000000>Sets WorkIdle and SleepIdle on multi-core computers so the BigFix client uses about 2 percent of total CPU across all cores.</FONT></DIV>
+<DIV class=hc-lead><FONT color=#000000>Sets WorkIdle and SleepIdle on multi-core computers so the BigFix client uses about 2 percent of total CPU across all cores. <FONT color=#000000 size=2><STRONG>BigFix 11.0.7 added a setting for CPU use on multi-core systems. This task mimics what that will do without the need for 11.0.7 BUT it only works on Window systems.&nbsp; You need 11.0.7 for cross-OS support.</STRONG></FONT></DIV></FONT>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -34,7 +34,7 @@
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
-<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action, reapply daily</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers.</SPAN></DIV></TD></TR>
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers.</SPAN></DIV></TD></TR>
 <TR>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on computers with more than one core where WorkIdle or SleepIdle differ from the target values.</SPAN></DIV></TD>
@@ -47,12 +47,11 @@
 <DIV class=hc-sec>Deployment Notes</DIV>
 <UL>
 <LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
-<LI><FONT color=#000000 size=2>Run this as a policy action created in the Master Action Site and the BigFix Management domain. Use the Dynamically target by property option and direct it at the All Computers group. Set it to reapply daily.</FONT> 
-<LI><FONT color=#000000 size=2>BigFix 11.0.7 is expected to add a setting for CPU use on multi-core systems. Details are not yet available.</FONT> </LI>
-</UL></DIV>
+<LI><FONT color=#000000 size=2>Run this as a policy action created in the Master Action Site and the BigFix Management domain. Use the Dynamically target by property option and direct it at the All Computers group. Set it to reapply daily.</FONT> </LI></UL></DIV>
 <DIV class=hc-sec>Supported Platforms</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All BigFix client platforms with more than one CPU core.</FONT></DIV><BR>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All Windows BigFix client platforms with more than one CPU core.</FONT></DIV><BR>
 <DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Version bump.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
      if (event.contentID == 'Action1') {
          if (EvaluateRelevance('master flag of current console user') === "False") {
@@ -63,6 +62,7 @@
  }
 </script> </DIV>]]></Description>
 		<Relevance> (if exists property "in proxy agent context" then ( not in proxy agent context ) else true )</Relevance>
+		<Relevance>windows of operating system</Relevance>
 		<Relevance><![CDATA[(sum of cores of cpupackage as floating point) > 1]]></Relevance>
 		<Relevance><![CDATA[(NOT (exists setting "_BESClient_Resource_WorkIdle" whose (exist value whose (it as string = (if ((sum of cores of cpupackage as floating point) > 10) then "100" else (((sum of cores of cpupackage as floating point) * 10) as integer as string)) ) of it)of client)) OR (NOT(((if (not exists setting "_BESClient_Resource_SleepIdle" of client OR not exists value of setting "_BESClient_Resource_SleepIdle" of client) then 480 else (value of setting "_BESClient_Resource_SleepIdle" of client as integer)) as floating point as integer) = 480))]]></Relevance>
 		<Category>BigFix Master Class</Category>
@@ -75,7 +75,7 @@
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Tue, 29 Sep 2026 18:44:29 +0000</Value>
+			<Value>Wed, 30 Sep 2026 14:56:10 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">

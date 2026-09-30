@@ -34,7 +34,7 @@
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
-<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action, reapply daily</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers.</SPAN></DIV></TD></TR>
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Policy action, reapply daily</B><SPAN>Create it in the Master Action Site with dynamic targeting on All Computers. Re-apply will "true up" the setting as the average loop changes.&nbsp; This is important.</SPAN></DIV></TD></TR>
 <TR>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Runs where relevant</B><SPAN>Only on clients that are not the root server or a relay and whose command polling is off or outside the target range.</SPAN></DIV></TD>
@@ -48,11 +48,11 @@
 <UL>
 <LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
 <LI><FONT color=#000000 size=2>Run this as a policy action created in the Master Action Site and the BigFix Management domain. Use the Dynamically target by property option and direct it at the All Computers group. Set it to reapply daily.</FONT> 
-<LI><FONT color=#000000 size=2>Root and relay servers are excluded by relevance.</FONT> </LI>
-</UL></DIV>
+<LI><FONT color=#000000 size=2>Root and relay servers are excluded by relevance.</FONT> </LI></UL></DIV>
 <DIV class=hc-sec>Supported Platforms</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>All BigFix client platforms except root and relay servers.</FONT></DIV><BR>
 <DIV class=hc-sec>Version and Release Notes</DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 -Version bump.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV><script> document.body.ontakeaction = function(event) {
      if (event.contentID == 'Action1') {
          if (EvaluateRelevance('master flag of current console user') === "False") {
@@ -75,7 +75,7 @@
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Tue, 29 Sep 2026 16:56:53 +0000</Value>
+			<Value>Wed, 30 Sep 2026 14:34:32 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">

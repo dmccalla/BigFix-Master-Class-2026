@@ -100,9 +100,15 @@ if ($env:VALIDATE_ONLY -eq '1') { $options.ValidateOnly = $true }
 
 def _powershell(code: str, **env: str) -> subprocess.CompletedProcess[str]:
     encoded = base64.b64encode(code.encode("utf-16-le")).decode("ascii")
+    # Windows PowerShell must rebuild its native paths when Python runs under pwsh.
+    child_env = {
+        key: value
+        for key, value in {**os.environ, "PACKAGE_SCRIPT": str(SCRIPT), **env}.items()
+        if key.casefold() != "psmodulepath"
+    }
     return subprocess.run(
         [POWERSHELL, "-NoProfile", "-NonInteractive", "-EncodedCommand", encoded],
-        env={**os.environ, "PACKAGE_SCRIPT": str(SCRIPT), **env},
+        env=child_env,
         capture_output=True,
         text=True,
         errors="replace",
@@ -139,6 +145,26 @@ def package_fixture():
         (root / "pyproject.toml").write_text('[project]\nversion = "1.0.0-dev"\n')
         (root / "files.json").write_text(json.dumps(files))
         yield root, files
+
+
+def test_windows_powershell_uses_native_modules(tmp_path, monkeypatch):
+    foreign_modules = tmp_path / "PowerShell7Modules"
+    foreign_modules.mkdir()
+    monkeypatch.setenv("PSModulePath", str(foreign_modules))
+    payload = tmp_path / "hash-input.txt"
+    payload.write_bytes(b"package hash verification")
+
+    result = _powershell(
+        "$ErrorActionPreference = 'Stop'; "
+        "(Get-FileHash -Algorithm SHA256 -LiteralPath $env:HASH_INPUT).Hash; "
+        "$env:PSModulePath",
+        HASH_INPUT=str(payload),
+    )
+
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert hashlib.sha256(payload.read_bytes()).hexdigest() in result.stdout.lower()
+    assert str(foreign_modules) not in result.stdout
+    assert os.environ["PSModulePath"] == str(foreign_modules)
 
 
 @pytest.mark.parametrize("keep", [False, True])

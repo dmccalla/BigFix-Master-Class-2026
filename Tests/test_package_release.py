@@ -45,7 +45,9 @@ $ast.FindAll({ param($node)
 
 # Substitute only external tool calls in a disposable copy of the parsed script.
 # The staging, copy, manifest, archive and cleanup statements run unchanged.
-BUILD_FIXTURE = LOAD_FUNCTIONS + r"""
+BUILD_FIXTURE = (
+    LOAD_FUNCTIONS
+    + r"""
 $text = Get-Content -Raw -LiteralPath $env:PACKAGE_SCRIPT
 $edits = @($ast.FindAll({ param($node)
     ($node -is [Management.Automation.Language.CommandAst] -and
@@ -93,6 +95,7 @@ if ($env:KEEP_STAGING -eq '1') { $options.KeepStaging = $true }
 if ($env:VALIDATE_ONLY -eq '1') { $options.ValidateOnly = $true }
 & $fixtureScript @options -OutputPath $env:PACKAGE_OUTPUT
 """
+)
 
 
 def _powershell(code: str, **env: str) -> subprocess.CompletedProcess[str]:
@@ -115,10 +118,17 @@ def package_fixture():
         root = Path(directory)
         (root / "Build").mkdir()
         files = [
-            "README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "requirements.txt",
-            "Launchers/Run Diagnostics Workbench.cmd", "App/diagnostics_workbench_ui.py",
-            "App/run_diagnostics.py", "Utilities/MXFillDBPerf.exe",
-            "Templates/Diagnostics_Style_Template.docx", "pyproject.toml",
+            "README.md",
+            "CHANGELOG.md",
+            "LICENSE",
+            "NOTICE",
+            "requirements.txt",
+            "Launchers/Run Diagnostics Workbench.cmd",
+            "App/diagnostics_workbench_ui.py",
+            "App/run_diagnostics.py",
+            "Utilities/MXFillDBPerf.exe",
+            "Templates/Diagnostics_Style_Template.docx",
+            "pyproject.toml",
             "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- "
             "POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
         ]
@@ -142,7 +152,9 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
     legacy_env.parent.mkdir()
     legacy_env.write_text("previous environment")
     result = _powershell(
-        BUILD_FIXTURE, FIXTURE_ROOT=str(root), PACKAGE_OUTPUT=output,
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT=output,
         KEEP_STAGING=str(int(keep)),
     )
     assert result.returncode == 0, result.stdout + result.stderr
@@ -162,11 +174,14 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
         with zipfile.ZipFile(archive) as zipped:
             contents = {
                 entry.filename.removeprefix(f"{PACKAGE}/"): zipped.read(entry)
-                for entry in zipped.infolist() if not entry.is_dir()
+                for entry in zipped.infolist()
+                if not entry.is_dir()
             }
             assert all(name.startswith(f"{PACKAGE}/") for name in zipped.namelist())
         assert set(contents) == set(files) | {
-            "START_HERE.txt", "sbom.cyclonedx.json", "THIRD_PARTY_NOTICES.md",
+            "START_HERE.txt",
+            "sbom.cyclonedx.json",
+            "THIRD_PARTY_NOTICES.md",
             "release-manifest.json",
         }
         for relative in files:
@@ -188,7 +203,8 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
         if workspace.exists():
             cleanup = _powershell(
                 LOAD_FUNCTIONS + "Remove-PackageDirectory $env:TARGET $env:PARENT",
-                TARGET=str(workspace), PARENT=str(workspace.parent),
+                TARGET=str(workspace),
+                PARENT=str(workspace.parent),
             )
             assert cleanup.returncode == 0, cleanup.stdout + cleanup.stderr
 
@@ -196,7 +212,10 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
 def test_failed_build_cleans_owned_workspace(package_fixture):
     root, _ = package_fixture
     result = _powershell(
-        BUILD_FIXTURE, FIXTURE_ROOT=str(root), PACKAGE_OUTPUT="output", FAIL_BUILD="1",
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
+        FAIL_BUILD="1",
     )
     assert result.returncode != 0
     assert "Injected environment failure" in result.stderr
@@ -208,7 +227,10 @@ def test_failed_build_cleans_owned_workspace(package_fixture):
 def test_validate_only_does_not_stage_or_call_python(package_fixture):
     root, _ = package_fixture
     result = _powershell(
-        BUILD_FIXTURE, FIXTURE_ROOT=str(root), PACKAGE_OUTPUT="output", VALIDATE_ONLY="1",
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
+        VALIDATE_ONLY="1",
     )
     assert result.returncode == 0, result.stdout + result.stderr
     assert "TEST_WORK_ROOT=" not in result.stdout
@@ -220,8 +242,11 @@ def test_long_temp_path_fails_before_staging_or_python(package_fixture):
     temporary = root / ("long-temp-" + "x" * 50)
     temporary.mkdir()
     result = _powershell(
-        BUILD_FIXTURE, FIXTURE_ROOT=str(root), PACKAGE_OUTPUT="output",
-        TEMP=str(temporary), TMP=str(temporary),
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
+        TEMP=str(temporary),
+        TMP=str(temporary),
     )
     assert result.returncode != 0
     assert "Set TEMP to a shorter directory" in result.stderr
@@ -236,7 +261,9 @@ def test_output_directory_is_not_recursively_replaced(package_fixture, suffix):
     sentinel.parent.mkdir(parents=True)
     sentinel.write_text("keep")
     result = _powershell(
-        BUILD_FIXTURE, FIXTURE_ROOT=str(root), PACKAGE_OUTPUT="output",
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
     )
     assert result.returncode != 0
     assert "Refusing to replace a directory or reparse point" in result.stderr
@@ -254,7 +281,8 @@ def test_cleanup_rejects_parent_sibling_and_traversal(tmp_path, target):
     sentinel.write_text("keep")
     result = _powershell(
         LOAD_FUNCTIONS + "Remove-PackageDirectory $env:TARGET $env:PARENT",
-        TARGET=str(destination), PARENT=str(parent),
+        TARGET=str(destination),
+        PARENT=str(parent),
     )
     assert result.returncode != 0
     assert "Refusing cleanup outside" in result.stderr
@@ -264,7 +292,8 @@ def test_cleanup_rejects_parent_sibling_and_traversal(tmp_path, target):
 @pytest.mark.parametrize("target", ["owned", "owned/link", "owned/link/child"])
 def test_cleanup_rejects_reparse_descendants_and_ancestors(tmp_path, target):
     result = _powershell(
-        LOAD_FUNCTIONS + r"""
+        LOAD_FUNCTIONS
+        + r"""
 $parent = $env:TEST_ROOT
 $owned = New-Item -ItemType Directory -Path (Join-Path $parent 'owned')
 $outside = New-Item -ItemType Directory -Path (Join-Path $parent 'outside\child') -Force
@@ -284,6 +313,7 @@ try {
     [IO.Directory]::Delete($link)
 }
 """,
-        TEST_ROOT=str(tmp_path), TARGET=target,
+        TEST_ROOT=str(tmp_path),
+        TARGET=target,
     )
     assert result.returncode == 0, result.stdout + result.stderr

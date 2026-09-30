@@ -45,7 +45,8 @@ def test_fixture_is_true_biff8_with_two_sheets() -> None:
     with xlrd.open_workbook(FIXTURE, on_demand=True) as book:
         assert book.biff_version == 80
         assert book.sheet_names() == [
-            "Agent Performance Counters", "Not the selected sheet"
+            "Agent Performance Counters",
+            "Not the selected sheet",
         ]
 
 

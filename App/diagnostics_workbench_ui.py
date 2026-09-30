@@ -3096,7 +3096,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             if capture == "perfmon"
             else self._perfmon_capture2_path()
         )
-        if source is None or source.resolve() != self._perfmon_detect_sources.get(capture):
+        if source is None or source.resolve() != self._perfmon_detect_sources.get(
+            capture
+        ):
             self._perfmon_detect_sources.pop(capture, None)
             return
         if capture == "perfmon":

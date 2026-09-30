@@ -72,7 +72,9 @@ def test_literal_javascript_dom_lookups_resolve(key):
 @pytest.fixture(scope="module")
 def browser():
     if os.environ.get("WORKBENCH_RUN_E2E") != "1" or sys.platform != "win32":
-        pytest.skip("Set WORKBENCH_RUN_E2E=1 on Windows for offline Edge description checks")
+        pytest.skip(
+            "Set WORKBENCH_RUN_E2E=1 on Windows for offline Edge description checks"
+        )
     from playwright.sync_api import sync_playwright
 
     with sync_playwright() as playwright:
@@ -92,7 +94,9 @@ def page(browser, tmp_path):
     try:
         evidence = page.evaluate("() => ({calls, dialogs})")
         evidence.update(page_errors=errors, browser_version=browser.version)
-        (tmp_path / "browser.json").write_text(json.dumps(evidence, indent=2), encoding="utf-8")
+        (tmp_path / "browser.json").write_text(
+            json.dumps(evidence, indent=2), encoding="utf-8"
+        )
         page.screenshot(path=str(tmp_path / "description.png"), full_page=True)
         assert not errors
     finally:
@@ -133,8 +137,10 @@ def expected_call(key, **overrides):
         public.update(overrides)
     else:
         secure.update(
-            fillDBPerfLogsDuration="1", fillDBPerfLogsNoDisable=False,
-            fillDBPerfLogsSizeMB="500", fillDBPerfLogsSizeByte=524288000,
+            fillDBPerfLogsDuration="1",
+            fillDBPerfLogsNoDisable=False,
+            fillDBPerfLogsSizeMB="500",
+            fillDBPerfLogsSizeByte=524288000,
             fillDBPerfLogsSizeNoLimit=False,
         )
         secure.update(overrides)
@@ -145,7 +151,9 @@ def expected_call(key, **overrides):
 def test_agent_launch_uses_secure_username_and_password(page, generate_logs):
     load(page, "agent")
     page.locator("#generateLogFiles").set_checked(generate_logs)
-    assert invoke(page) == [expected_call("agent", generateLogFiles="1" if generate_logs else "0")]
+    assert invoke(page) == [
+        expected_call("agent", generateLogFiles="1" if generate_logs else "0")
+    ]
 
 
 def test_filldb_automatic_launch_parameters(page):
@@ -155,15 +163,25 @@ def test_filldb_automatic_launch_parameters(page):
 
 def test_filldb_duration_checkbox_round_trip(page):
     load(page, "filldb")
-    fields = ("apiUsername", "apiPassword", "apiPasswordConfirm", "fillDBPerfLogsDuration")
+    fields = (
+        "apiUsername",
+        "apiPassword",
+        "apiPasswordConfirm",
+        "fillDBPerfLogsDuration",
+    )
     page.locator("#fillDBPerfLogsNoDisable").check()
     for field in fields:
         assert page.locator("#" + field).is_disabled()
         assert page.locator("#" + field).input_value() == ""
-    assert invoke(page) == [expected_call(
-        "filldb", apiUsername="", apiPassword="", fillDBPerfLogsDuration="",
-        fillDBPerfLogsNoDisable=True,
-    )]
+    assert invoke(page) == [
+        expected_call(
+            "filldb",
+            apiUsername="",
+            apiPassword="",
+            fillDBPerfLogsDuration="",
+            fillDBPerfLogsNoDisable=True,
+        )
+    ]
     page.locator("#fillDBPerfLogsNoDisable").uncheck()
     for field in fields:
         assert page.locator("#" + field).is_enabled()
@@ -181,11 +199,15 @@ def test_filldb_nonwindows_root_cannot_launch(page, manual_disable):
     page.locator("#fillDBPerfLogsNoDisable").set_checked(manual_disable)
     page.evaluate("scenario.windows = false")
     assert invoke(page) == []
-    assert page.evaluate("dialogs") == ["This task can only be run on Windows-based BigFix root servers"]
+    assert page.evaluate("dialogs") == [
+        "This task can only be run on Windows-based BigFix root servers"
+    ]
 
 
 @pytest.mark.parametrize("key", FILES)
-@pytest.mark.parametrize("guard", ["nonmaster", "busy", "blank_username", "password_mismatch"])
+@pytest.mark.parametrize(
+    "guard", ["nonmaster", "busy", "blank_username", "password_mismatch"]
+)
 def test_launch_guards_still_block(page, key, guard):
     load(page, key)
     if guard == "nonmaster":

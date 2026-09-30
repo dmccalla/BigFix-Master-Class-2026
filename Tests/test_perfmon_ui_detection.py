@@ -108,7 +108,10 @@ def detection(monkeypatch, tmp_path):
             "Begin: 09/03/2026 08:00:00",
             "End: 09/04/2026 09:00:00",
             *(rf"\\HOST\Processor({n})\% Processor Time" for n in range(cpus)),
-            *(rf"\\HOST\PhysicalDisk({n} C:)\Avg. Disk Queue Length" for n in range(disks)),
+            *(
+                rf"\\HOST\PhysicalDisk({n} C:)\Avg. Disk Queue Length"
+                for n in range(disks)
+            ),
         ]
 
     monkeypatch.setattr(ui, "IS_WINDOWS", True)
@@ -154,7 +157,9 @@ def test_browse_same_capture_preserves_override_and_replacement_refreshes(
 ):
     app, (first, second), queries = detection
     choices = iter((first, first, second))
-    monkeypatch.setattr(ui.filedialog, "askopenfilename", lambda **kwargs: str(next(choices)))
+    monkeypatch.setattr(
+        ui.filedialog, "askopenfilename", lambda **kwargs: str(next(choices))
+    )
     app._browse_module_input_field("perfmon", field)
     assert app.hardware(capture) == ("4", "1")
     getattr(app, f"{capture}_processors_var").set("8")

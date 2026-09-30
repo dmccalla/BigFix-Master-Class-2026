@@ -78,6 +78,41 @@ function Test-IncludedTrackedFile {
     return $true
 }
 
+function Remove-PackageDirectory {
+    param([string]$Path, [string]$ParentPath)
+
+    $parent = (Resolve-Path -LiteralPath $ParentPath).ProviderPath.TrimEnd('\')
+    $target = [IO.Path]::GetFullPath($Path).TrimEnd('\')
+    if (-not $target.StartsWith("$parent\", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing cleanup outside the staging parent: $target"
+    }
+    if (-not (Test-Path -LiteralPath $target)) { return }
+
+    # Check ancestors and descendants without following directory junctions.
+    $item = Get-Item -Force -LiteralPath $target
+    if (-not $item.PSIsContainer) { throw "Cleanup target is not a directory: $target" }
+    for ($ancestor = $item; $null -ne $ancestor; $ancestor = $ancestor.Parent) {
+        if ($ancestor.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+            throw "Refusing cleanup through a reparse point: $($ancestor.FullName)"
+        }
+    }
+    $pending = New-Object 'Collections.Generic.Stack[string]'
+    $pending.Push($target)
+    while ($pending.Count -gt 0) {
+        foreach ($child in Get-ChildItem -Force -LiteralPath $pending.Pop()) {
+            if ($child.Attributes -band [IO.FileAttributes]::ReparsePoint) {
+                throw "Refusing cleanup of a tree containing a reparse point: $($child.FullName)"
+            }
+            if ($child.PSIsContainer) { $pending.Push($child.FullName) }
+        }
+    }
+    $resolved = (Resolve-Path -LiteralPath $target).ProviderPath
+    if (-not $resolved.StartsWith("$parent\", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Refusing cleanup outside the staging parent: $resolved"
+    }
+    Remove-Item -Recurse -Force -LiteralPath $resolved
+}
+
 $version = Get-DeclaredVersion
 if ($version -match '[-+]' -and -not $ValidateOnly -and -not $AllowDevVersion) {
     throw "Refusing to package development version '$version'. Cut the release first (see Docs/Release_Process.md)."
@@ -119,56 +154,76 @@ if ($ValidateOnly) {
 
 $outputRoot = Join-Path $repoRoot $OutputPath
 New-Item -ItemType Directory -Force -Path $outputRoot | Out-Null
-$stagingPath = Join-Path $outputRoot "$packageStem-$version"
-$zipPath = "$stagingPath.zip"
+$packageName = "$packageStem-$version"
+$tempRoot = (Resolve-Path -LiteralPath ([IO.Path]::GetTempPath())).ProviderPath
+$workRoot = Join-Path $tempRoot ("mc-" + [Guid]::NewGuid().ToString("N").Substring(0, 12))
+$stagingPath = Join-Path $workRoot $packageName
+$sbomEnv = Join-Path $workRoot "_sbom_env"
+$zipPath = Join-Path $outputRoot "$packageName.zip"
 $checksumPath = "$zipPath.sha256"
-foreach ($stale in @($stagingPath, $zipPath, $checksumPath)) {
-    if (Test-Path -LiteralPath $stale) { Remove-Item -Recurse -Force -LiteralPath $stale }
-}
-New-Item -ItemType Directory -Force -Path $stagingPath | Out-Null
-
-foreach ($relativePath in $includedFiles) {
-    $source = Join-Path $repoRoot $relativePath
-    $destination = Join-Path $stagingPath $relativePath
-    New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
-    Copy-Item -LiteralPath $source -Destination $destination
-    if ($destination -like "*.cmd") {
-        # cmd.exe needs CRLF for goto labels. Enforce it whatever line endings
-        # the working copy happens to have, and never write a BOM.
-        $text = [IO.File]::ReadAllText($destination)
-        $text = $text -replace "`r?`n", "`r`n"
-        [IO.File]::WriteAllText($destination, $text, (New-Object Text.UTF8Encoding($false)))
+foreach ($relativePath in $includedFiles + @("START_HERE.txt", "sbom.cyclonedx.json", "THIRD_PARTY_NOTICES.md", "release-manifest.json")) {
+    $destination = [IO.Path]::GetFullPath((Join-Path $stagingPath $relativePath))
+    if (-not $destination.StartsWith("$stagingPath\", [StringComparison]::OrdinalIgnoreCase)) {
+        throw "Package file escapes the staging directory: $relativePath"
+    }
+    if ($destination.Length -ge 260 -or (Split-Path -Parent $destination).Length -ge 248) {
+        throw "Staging path is too long for Windows PowerShell. Set TEMP to a shorter directory: $destination"
     }
 }
-
-# SBOM and third-party notices describe exactly what the launcher installs:
-# a throwaway environment built from requirements.txt alone. The SBOM tools
-# stay in the repo's own environment and inspect that runtime environment,
-# so developer tools never leak into the inventory attendees receive.
-$toolPython = Get-RepoPython
-& $toolPython -c "import cyclonedx_py, piplicenses" 2>$null
-if ($LASTEXITCODE -ne 0) {
-    & $toolPython -m pip install --quiet --disable-pip-version-check cyclonedx-bom pip-licenses
-    if ($LASTEXITCODE -ne 0) { throw "Installing the SBOM tools failed (exit $LASTEXITCODE)" }
+foreach ($stale in @($zipPath, $checksumPath)) {
+    if (Test-Path -LiteralPath $stale) {
+        $item = Get-Item -Force -LiteralPath $stale
+        if ($item.PSIsContainer -or ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) {
+            throw "Refusing to replace a directory or reparse point: $stale"
+        }
+        Remove-Item -Force -LiteralPath $stale
+    }
 }
-$sbomEnv = Join-Path $outputRoot "_sbom_env"
-if (Test-Path -LiteralPath $sbomEnv) { Remove-Item -Recurse -Force -LiteralPath $sbomEnv }
-Write-Host "Building the runtime-only environment for the SBOM..."
-& $toolPython -m venv $sbomEnv
-if ($LASTEXITCODE -ne 0) { throw "Could not create the SBOM environment (exit $LASTEXITCODE)" }
-$runtimePython = Join-Path $sbomEnv "Scripts\python.exe"
-& $runtimePython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot "requirements.txt")
-if ($LASTEXITCODE -ne 0) { throw "Installing requirements.txt into the SBOM environment failed (exit $LASTEXITCODE)" }
-& $toolPython -m cyclonedx_py environment --of JSON -o (Join-Path $stagingPath "sbom.cyclonedx.json") $runtimePython
-if ($LASTEXITCODE -ne 0) { throw "cyclonedx-py failed (exit $LASTEXITCODE)" }
-# The notices are written from inside the runtime environment so the
-# inventory is exactly what the launcher installs. See the script's docstring
-# for why pip-licenses cannot be pointed at it from here.
-& $runtimePython (Join-Path $repoRoot "Build\third_party_notices.py") (Join-Path $stagingPath "THIRD_PARTY_NOTICES.md") --ignore pip
-if ($LASTEXITCODE -ne 0) { throw "Writing the third-party notices failed (exit $LASTEXITCODE)" }
-Remove-Item -Recurse -Force -LiteralPath $sbomEnv
+New-Item -ItemType Directory -Path $workRoot | Out-Null
+$buildSucceeded = $false
+try {
+    New-Item -ItemType Directory -Force -Path $stagingPath | Out-Null
 
-$startHere = @"
+    foreach ($relativePath in $includedFiles) {
+        $source = Join-Path $repoRoot $relativePath
+        $destination = Join-Path $stagingPath $relativePath
+        New-Item -ItemType Directory -Force -Path (Split-Path -Parent $destination) | Out-Null
+        Copy-Item -LiteralPath $source -Destination $destination
+        if ($destination -like "*.cmd") {
+            # cmd.exe needs CRLF for goto labels. Enforce it whatever line endings
+            # the working copy happens to have, and never write a BOM.
+            $text = [IO.File]::ReadAllText($destination)
+            $text = $text -replace "`r?`n", "`r`n"
+            [IO.File]::WriteAllText($destination, $text, (New-Object Text.UTF8Encoding($false)))
+        }
+    }
+
+    # SBOM and third-party notices describe exactly what the launcher installs:
+    # a throwaway environment built from requirements.txt alone. The SBOM tools
+    # stay in the repo's own environment and inspect that runtime environment,
+    # so developer tools never leak into the inventory attendees receive.
+    $toolPython = Get-RepoPython
+    & $toolPython -c "import cyclonedx_py, piplicenses" 2>$null
+    if ($LASTEXITCODE -ne 0) {
+        & $toolPython -m pip install --quiet --disable-pip-version-check cyclonedx-bom pip-licenses
+        if ($LASTEXITCODE -ne 0) { throw "Installing the SBOM tools failed (exit $LASTEXITCODE)" }
+    }
+    Write-Host "Building the runtime-only environment for the SBOM..."
+    & $toolPython -m venv $sbomEnv
+    if ($LASTEXITCODE -ne 0) { throw "Could not create the SBOM environment (exit $LASTEXITCODE)" }
+    $runtimePython = Join-Path $sbomEnv "Scripts\python.exe"
+    & $runtimePython -m pip install --quiet --disable-pip-version-check -r (Join-Path $repoRoot "requirements.txt")
+    if ($LASTEXITCODE -ne 0) { throw "Installing requirements.txt into the SBOM environment failed (exit $LASTEXITCODE)" }
+    & $toolPython -m cyclonedx_py environment --of JSON -o (Join-Path $stagingPath "sbom.cyclonedx.json") $runtimePython
+    if ($LASTEXITCODE -ne 0) { throw "cyclonedx-py failed (exit $LASTEXITCODE)" }
+    # The notices are written from inside the runtime environment so the
+    # inventory is exactly what the launcher installs. See the script's docstring
+    # for why pip-licenses cannot be pointed at it from here.
+    & $runtimePython (Join-Path $repoRoot "Build\third_party_notices.py") (Join-Path $stagingPath "THIRD_PARTY_NOTICES.md") --ignore pip
+    if ($LASTEXITCODE -ne 0) { throw "Writing the third-party notices failed (exit $LASTEXITCODE)" }
+    Remove-PackageDirectory -Path $sbomEnv -ParentPath $workRoot
+
+    $startHere = @"
 $productName $version
 
 1. Double-click Launchers\Run Diagnostics Workbench.cmd. The first run creates
@@ -181,35 +236,47 @@ $productName $version
 Release notes are in CHANGELOG.md. The software bill of materials is
 sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.
 "@
-[IO.File]::WriteAllText((Join-Path $stagingPath "START_HERE.txt"), $startHere, (New-Object Text.UTF8Encoding($false)))
+    [IO.File]::WriteAllText((Join-Path $stagingPath "START_HERE.txt"), $startHere, (New-Object Text.UTF8Encoding($false)))
 
-$sourceCommit = (& git -C $repoRoot rev-parse HEAD).Trim()
-$manifestFiles = @(
-    Get-ChildItem -Recurse -File -LiteralPath $stagingPath |
-        Sort-Object FullName |
-        ForEach-Object {
-            [ordered]@{
-                path = $_.FullName.Substring($stagingPath.Length + 1).Replace("\", "/")
-                bytes = $_.Length
-                sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+    $sourceCommit = (& git -C $repoRoot rev-parse HEAD).Trim()
+    $manifestFiles = @(
+        Get-ChildItem -Recurse -File -LiteralPath $stagingPath |
+            Sort-Object FullName |
+            ForEach-Object {
+                [ordered]@{
+                    path = $_.FullName.Substring($stagingPath.Length + 1).Replace("\", "/")
+                    bytes = $_.Length
+                    sha256 = (Get-FileHash -Algorithm SHA256 -LiteralPath $_.FullName).Hash.ToLowerInvariant()
+                }
             }
+    )
+    $manifest = [ordered]@{
+        product = $productName
+        version = $version
+        source_commit = $sourceCommit
+        created_utc = [DateTime]::UtcNow.ToString("o")
+        files = $manifestFiles
+    }
+    [IO.File]::WriteAllText((Join-Path $stagingPath "release-manifest.json"), ($manifest | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
+
+    Compress-Archive -LiteralPath $stagingPath -DestinationPath $zipPath -CompressionLevel Optimal
+    $zipHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zipPath).Hash.ToLowerInvariant()
+    [IO.File]::WriteAllText($checksumPath, "$zipHash  $([IO.Path]::GetFileName($zipPath))`n", (New-Object Text.UTF8Encoding($false)))
+    $buildSucceeded = $true
+
+} finally {
+    # Preserve the build error if conservative cleanup also refuses a path.
+    try {
+        if ($KeepStaging) {
+            Remove-PackageDirectory -Path $sbomEnv -ParentPath $workRoot
+            Write-Host "Staging folder  : $stagingPath"
+        } else {
+            Remove-PackageDirectory -Path $workRoot -ParentPath $tempRoot
         }
-)
-$manifest = [ordered]@{
-    product = $productName
-    version = $version
-    source_commit = $sourceCommit
-    created_utc = [DateTime]::UtcNow.ToString("o")
-    files = $manifestFiles
-}
-[IO.File]::WriteAllText((Join-Path $stagingPath "release-manifest.json"), ($manifest | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
-
-Compress-Archive -LiteralPath $stagingPath -DestinationPath $zipPath -CompressionLevel Optimal
-$zipHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zipPath).Hash.ToLowerInvariant()
-[IO.File]::WriteAllText($checksumPath, "$zipHash  $([IO.Path]::GetFileName($zipPath))`n", (New-Object Text.UTF8Encoding($false)))
-
-if (-not $KeepStaging) {
-    Remove-Item -Recurse -Force -LiteralPath $stagingPath
+    } catch {
+        if ($buildSucceeded) { throw }
+        Write-Warning "Staging cleanup failed: $_"
+    }
 }
 
 Write-Host "Release archive : $zipPath"

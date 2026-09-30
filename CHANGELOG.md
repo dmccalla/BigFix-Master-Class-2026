@@ -30,6 +30,11 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Fixed
 
+- Include the `xlrd` runtime reader for legacy `.xls` loop inputs.
+- Stage release packages in a short, unique temporary folder to avoid Windows
+  path-length failures while preserving the archive layout and guarded cleanup.
+- Correct collection-task descriptions: `xcopy` returns 0 for successful copies
+  and 1 when no matching files are found. Action scripts are unchanged.
 - Fail diagnostics runs when a generator fails or a required output is missing
   or empty, including both Perfmon captures and the Mini Report, while
   preserving the run log and avoiding false success messages.

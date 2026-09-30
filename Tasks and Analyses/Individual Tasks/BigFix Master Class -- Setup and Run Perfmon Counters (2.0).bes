@@ -87,7 +87,7 @@ document.body.ontakeaction = function(event) {
 function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
 </script> </P>
 <DIV class=hc-sec>Action log note</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> uses 1 when files were copied, and <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> returns 0 for a successful copy and 1 when no matching files were found; 1 is acceptable only when those files are optional. <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
 <DIV class=hc-sec>Version and Release Notes</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Expanded Perfmon targeting to all supported BigFix role servers and SQL Server hosts.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>

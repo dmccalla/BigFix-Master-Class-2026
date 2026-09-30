@@ -30,6 +30,9 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Fixed
 
+- Correct ten Deployment Information queries and 110 collection section-header
+  queries. Add regression coverage confirming the repaired responses preserve
+  Agent Performance context and loop workbook/Word output content.
 - Include the `xlrd` runtime reader for legacy `.xls` loop inputs.
 - Stage release packages in a short, unique temporary folder to avoid Windows
   path-length failures while preserving the archive layout and guarded cleanup.

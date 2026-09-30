@@ -12,6 +12,10 @@ from zipfile import ZipFile
 
 import filldb_perf_log as fpl
 import get_filldb_performance as filldb_report
+import pytest
+from docx import Document
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.oxml.ns import qn
 
 PNG_1X1 = (
     b"\x89PNG\r\n\x1a\n"
@@ -144,6 +148,42 @@ def test_filldb_word_places_score_method_note_below_chart(tmp_path: Path) -> Non
     assert "Count" in xml
     assert "Time (ms)" in xml
     assert xml.index("How This Score Is Calculated") < xml.index("<w:tbl")
+
+
+@pytest.mark.parametrize("with_template", [False, True])
+def test_filldb_table_headers_and_bodies_share_alignment(tmp_path, with_template):
+    output = tmp_path / "filldb.docx"
+    template = (
+        Path(__file__).resolve().parents[1]
+        / "Templates"
+        / "Diagnostics_Style_Template.docx"
+        if with_template
+        else None
+    )
+    rows = [
+        {
+            "FillDB Object": "Fixlet results:",
+            "Count": "143",
+            "Time (ms)": "428",
+            "Rate/s": "334",
+            "Health Check": "100% Great",
+        }
+    ]
+    filldb_report.write_word_output(rows, output, template_path=template)
+    document = Document(output)
+    assert len(document.tables) == 2
+    for table, expected_widths in zip(
+        document.tables,
+        (filldb_report.TABLE_WIDTHS, filldb_report.SUMMARY_TABLE_WIDTHS),
+        strict=True,
+    ):
+        assert table.alignment == WD_TABLE_ALIGNMENT.CENTER
+        assert table.style.style_id == "BigFixContent" or not with_template
+        assert [int(col.get(qn("w:w"))) for col in table._tbl.tblGrid] == expected_widths
+        for row in table.rows:
+            assert [cell.width.twips for cell in row.cells] == expected_widths
+            assert row._tr.trPr.find(qn("w:jc")) is None
+        assert table.rows[0]._tr.trPr.find(qn("w:tblHeader")) is not None
 
 
 # ---------------------------------------------------------------------------

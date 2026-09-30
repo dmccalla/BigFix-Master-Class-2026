@@ -39,7 +39,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from docx import Document
 from docx.document import Document as DocxDocument
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -516,7 +516,8 @@ def set_table_geometry(table, widths: list[int] | None = None) -> None:
     tbl_w.set(qn("w:w"), str(sum(widths)))
     tbl_w.set(qn("w:type"), "dxa")
 
-    remove_child(tbl_pr, "w:jc")
+    # Match the BigFixContent header row's alignment for the whole table.
+    table.alignment = WD_TABLE_ALIGNMENT.CENTER
     remove_child(tbl_pr, "w:tblLayout")
 
     grid = tbl.tblGrid

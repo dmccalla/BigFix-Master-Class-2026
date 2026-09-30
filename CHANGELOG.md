@@ -30,6 +30,8 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Fixed
 
+- Keep FillDB Mini Report header and body rows aligned by centering both
+  tables consistently. Preserve the existing table widths and shared style.
 - Correct ten Deployment Information queries and 110 collection section-header
   queries. Add regression coverage confirming the repaired responses preserve
   Agent Performance context and loop workbook/Word output content.

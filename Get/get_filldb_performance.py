@@ -516,12 +516,7 @@ def set_table_geometry(table, widths: list[int] | None = None) -> None:
     tbl_w.set(qn("w:w"), str(sum(widths)))
     tbl_w.set(qn("w:type"), "dxa")
 
-    # Center the whole table. BigFixContent centers its header row, so a table
-    # without its own jc shows the header shifted right of the body rows.
     remove_child(tbl_pr, "w:jc")
-    jc = OxmlElement("w:jc")
-    jc.set(qn("w:val"), "center")
-    tbl_w.addnext(jc)
     remove_child(tbl_pr, "w:tblLayout")
 
     grid = tbl.tblGrid

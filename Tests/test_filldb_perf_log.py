@@ -6,7 +6,6 @@
 
 from __future__ import annotations
 
-import re
 from datetime import datetime
 from pathlib import Path
 from zipfile import ZipFile
@@ -145,40 +144,6 @@ def test_filldb_word_places_score_method_note_below_chart(tmp_path: Path) -> Non
     assert "Count" in xml
     assert "Time (ms)" in xml
     assert xml.index("How This Score Is Calculated") < xml.index("<w:tbl")
-
-
-def test_filldb_word_tables_are_centered(tmp_path: Path) -> None:
-    """BigFixContent centers the header row, so the table must be centered too.
-
-    Without its own jc the header row sits to the right of the body rows.
-    """
-    output = tmp_path / "filldb.docx"
-    rows = [
-        {
-            "FillDB Object": "Fixlet results:",
-            "Count": "143",
-            "Time (ms)": "428",
-            "Rate/s": "334",
-            "Health Check": "100% Great",
-        }
-    ]
-    filldb_report.write_word_output(
-        rows,
-        output,
-        chart_path=_write_png(tmp_path / "filldb.png"),
-        metadata={"generated": "07/31/2026 09:00"},
-    )
-
-    with ZipFile(output) as zf:
-        xml = zf.read("word/document.xml").decode("utf-8")
-
-    tables = re.findall(r"<w:tbl>.*?</w:tbl>", xml, re.S)
-    assert len(tables) == 2
-    for table in tables:
-        tbl_pr = re.search(r"<w:tblPr>.*?</w:tblPr>", table, re.S).group(0)
-        assert '<w:jc w:val="center"/>' in tbl_pr
-        # Schema order: jc follows tblW.
-        assert tbl_pr.index("<w:tblW ") < tbl_pr.index("<w:jc ")
 
 
 # ---------------------------------------------------------------------------

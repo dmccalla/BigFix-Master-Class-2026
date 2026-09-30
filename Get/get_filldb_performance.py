@@ -221,6 +221,20 @@ def health_status(value: str) -> str:
     return "unknown"
 
 
+def filldb_assessment_note(rows: list[dict[str, str]]) -> str:
+    """Explain a Not Assessed FillDB score when the capture cannot be scored."""
+    scoreable = any(
+        health_status(row.get("Health Check", "")) in {"great", "good", "poor"}
+        for row in object_performance_rows(rows)
+    )
+    if scoreable:
+        return ""
+    return (
+        "Not Assessed: No FillDB object in this capture had a recognized health "
+        "result, so there was not enough data to calculate a health score."
+    )
+
+
 def clean_object_name(value: str) -> str:
     text = str(value or "").strip()
     return text.removesuffix(":")
@@ -485,6 +499,7 @@ def generate_filldb_chart(
         "dist": dist,
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
+        "assessmentNote": filldb_assessment_note(rows),
     }
     html_charts.render_chart("filldb", data, output_path)
 
@@ -756,6 +771,12 @@ def write_word_output(
             "FillDB Performance Chart",
         )
         document.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
+    assessment_note = filldb_assessment_note(rows)
+    if assessment_note:
+        note = document.add_paragraph(assessment_note)
+        note.paragraph_format.space_before = Pt(3)
+        note.paragraph_format.space_after = Pt(6)
+    if chart_path:
         add_score_method_note(document)
     build_word_table(document, rows)
     build_capture_summary_table(document, rows, metadata or {})

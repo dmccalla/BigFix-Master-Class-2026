@@ -150,6 +150,63 @@ def test_filldb_word_places_score_method_note_below_chart(tmp_path: Path) -> Non
     assert xml.index("How This Score Is Calculated") < xml.index("<w:tbl")
 
 
+def test_filldb_word_explains_not_assessed_score_below_chart(tmp_path: Path) -> None:
+    output = tmp_path / "filldb-not-assessed.docx"
+    chart = _write_png(tmp_path / "filldb.png")
+    rows = [
+        {
+            "FillDB Object": "Fixlet results:",
+            "Count": "143",
+            "Time (ms)": "428",
+            "Rate/s": "334",
+            "Health Check": "",
+        }
+    ]
+
+    filldb_report.write_word_output(rows, output, chart_path=chart)
+
+    document = Document(output)
+    paragraphs = [paragraph.text for paragraph in document.paragraphs]
+    note = (
+        "Not Assessed: No FillDB object in this capture had a recognized health "
+        "result, so there was not enough data to calculate a health score."
+    )
+    assert note in paragraphs
+    assert paragraphs.index(note) < paragraphs.index("How This Score Is Calculated")
+
+
+def test_filldb_chart_payload_explains_not_assessed_score(
+    tmp_path: Path, monkeypatch
+) -> None:
+    captured = {}
+
+    def fake_render_chart(chart, data, output_path):
+        captured["data"] = data
+
+    from Lib.Design import html_charts
+
+    monkeypatch.setattr(html_charts, "render_chart", fake_render_chart)
+    filldb_report.generate_filldb_chart(
+        [
+            {
+                "FillDB Object": "Fixlet results:",
+                "Count": "143",
+                "Time (ms)": "428",
+                "Rate/s": "334",
+                "Health Check": "Unknown",
+            }
+        ],
+        tmp_path / "filldb.png",
+        metadata={},
+    )
+
+    assert captured["data"]["status"]["label"] == "Not Assessed"
+    assert (
+        "not enough data to calculate a health score"
+        in captured["data"]["assessmentNote"]
+    )
+
+
 @pytest.mark.parametrize("with_template", [False, True])
 def test_filldb_table_headers_and_bodies_share_alignment(tmp_path, with_template):
     output = tmp_path / "filldb.docx"

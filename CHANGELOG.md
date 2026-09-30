@@ -34,6 +34,9 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Fixed
 
+- Explain the FillDB `Not Assessed` state when no captured object has a
+  recognized health result, so the Mini Report makes clear that there was not
+  enough data to calculate a health score.
 - Enable Open Output after a completed build when the engine reports its
   human-readable run-folder summary, including an already-open Build Logs window.
 - Keep FillDB Mini Report header and body rows aligned by centering both

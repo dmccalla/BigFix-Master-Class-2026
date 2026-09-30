@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Fixlet>
-		<Title>BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (1.0)</Title>
+		<Title>BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}

@@ -28,6 +28,10 @@ Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
 
 ### Changed
 
+- Label the four classroom client-setting examples as 2.0, matching the other
+  collection content. These examples remain Master Class-only; action logic
+  is unchanged.
+
 ### Fixed
 
 - Keep FillDB Mini Report header and body rows aligned by centering both

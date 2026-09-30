@@ -18,9 +18,28 @@ them.
   fails the suite on `shell=True`.
 - Dependencies are pinned in `requirements.txt`, audited for known
   vulnerabilities, and inventoried in the SBOM and the third-party notices
-  that ship with every release.
+  that ship with every release. A seven-day cooldown keeps new releases out.
+  See Dependency Cooldown below.
 - The sample data is fictional. Nothing in the repository or the package
   comes from a customer environment.
+
+## Dependency Cooldown
+
+No package version published in the last seven days is used. A malicious
+release is usually found and pulled within days, so the wait keeps it out.
+
+| Where | How |
+|---|---|
+| `pyproject.toml` | `[tool.uv] exclude-newer` holds the cutoff date. `uv lock` never picks a version published after it. |
+| `uv.lock` | The resolved set at that cutoff. |
+| `requirements.txt` | The full pinned runtime set exported from `uv.lock`, including the packages the top-level ones depend on. The launcher installs exactly this list, so an attendee's install gets the same versions. |
+| `.github/dependabot.yml` | `cooldown: default-days: 7`, so Dependabot never proposes a version younger than a week. |
+
+To take newer versions, run `Build\refresh-lockfile.ps1`. It moves the cutoff
+to seven days before the day it runs, re-locks, and exports
+`requirements.txt`. Commit `pyproject.toml`, `uv.lock` and `requirements.txt`
+together, then run the full test suite. Never edit the cutoff by hand to let
+a newer version in.
 
 ## Gate
 

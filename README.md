@@ -27,7 +27,9 @@ end to end before any data is collected.
   compatible applications may work, but they have not been fully vetted.
 
 The Workbench installs its own packages into a private `.venv` folder next
-to the code. Your Python installation is not changed.
+to the code. Your Python installation is not changed. Every package version
+is pinned and at least seven days old. See Dependency Cooldown in
+[Security](Docs/Security.md).
 
 ## Using The Workbench
 

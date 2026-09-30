@@ -1,0 +1,11 @@
+version: 2
+updates:
+  - package-ecosystem: "uv"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 5
+    # Same seven-day cooldown the lockfile enforces through [tool.uv]
+    # exclude-newer. Dependabot must not propose a version younger than that.
+    cooldown:
+      default-days: 7

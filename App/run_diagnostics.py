@@ -1606,8 +1606,8 @@ MODULES: list[Module] = [
         note=(
             "Use the Client_Loop_*.csv export or the Agent Performance Counters "
             "- Basic Excel/CSV export. The Advanced export includes additional "
-            "data and is not supported. FastHashVerify client settings are included "
-            "when supplied by the Agent Performance Counters export."
+            "data and is not supported. FastHashVerify and agent multicore client "
+            "settings are included when supplied by the Agent Performance Counters export."
         ),
     ),
     Module(

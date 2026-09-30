@@ -145,11 +145,11 @@ OUTPUT_TILE_FILLS = {
 # What each module does, for the row description and the Details expansion.
 MODULE_DETAILS = {
     "loop": {
-        "summary": "Reviews client evaluation loop performance and FastHashVerify settings.",
+        "summary": "Reviews client evaluation loop performance and client resource settings.",
         "does": (
             "Creates an Infographic, Excel file, and Mini Report. Optional data adds "
             "expensive evaluations, UDP notification coverage, Command Polling Review, "
-            "relay details, subnet details, and FastHashVerify settings."
+            "relay details, subnet details, FastHashVerify settings, and agent multicore settings."
         ),
         "use": (
             "Use this with a Client Loop XML or CSV capture. The Agent Performance "
@@ -157,7 +157,7 @@ MODULE_DETAILS = {
         ),
         "consultant": (
             "Confirm the collection period, slow client counts, UDP results, command "
-            "polling settings, expensive evaluations, and FastHashVerify settings."
+            "polling settings, expensive evaluations, FastHashVerify settings, and agent multicore settings."
         ),
     },
     "perfmon": {

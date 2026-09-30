@@ -118,6 +118,9 @@ class ProcessedRow:
     fast_hash_verify_enabled: str = ""
     fast_hash_verify_work: str = ""
     fast_hash_verify_sleep: str = ""
+    agent_multicore_scaling_enabled: str = ""
+    agent_multicore_max_core_utilization: str = ""
+    agent_multicore_work_type_scalar: str = ""
 
 
 @dataclass
@@ -231,6 +234,12 @@ class FastHashVerifySummary:
     settings_rows: list[list[str]]
 
 
+@dataclass
+class AgentMulticoreSummary:
+    total_devices: int
+    settings_rows: list[list[str]]
+
+
 # Accessible, colorblind-safer palette from the PowerShell version.
 TABLE_STYLE_ID = "BigFixContent"
 
@@ -269,6 +278,21 @@ FAST_HASH_VERIFY_SLEEP_COLUMN_NAMES = (
     "Platform Health Check - FastHashVerify Sleep ms",
     "FastHashVerify Sleep ms",
     "_BESClient_Resource_SleepFastHashVerify",
+)
+AGENT_MULTICORE_SCALING_COLUMN_NAMES = (
+    "Platform Health Check - Agent Multicore Scaling Enabled",
+    "Agent Multicore Scaling Enabled",
+    "_BESClient_Resource_ScaleWorkTimeWithCPUCores",
+)
+AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES = (
+    "Platform Health Check - Agent Multicore Max Core Utilization",
+    "Agent Multicore Max Core Utilization",
+    "_BESClient_Resource_MaxCoreUtilization",
+)
+AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES = (
+    "Platform Health Check - Agent Multicore Work Type Scalar",
+    "Agent Multicore Work Type Scalar",
+    "_BESClient_Resource_WorkTypeScalar",
 )
 
 
@@ -539,6 +563,14 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
                 "Platform Health Check - FastHashVerify Sleep ms",
             ]
         )
+    if column_count >= 13:
+        names.extend(
+            [
+                "Platform Health Check - Agent Multicore Scaling Enabled",
+                "Platform Health Check - Agent Multicore Max Core Utilization",
+                "Platform Health Check - Agent Multicore Work Type Scalar",
+            ]
+        )
     if column_count > len(names):
         names.extend(
             f"Extra Column {idx}" for idx in range(len(names) + 1, column_count + 1)
@@ -563,7 +595,10 @@ def _looks_like_loop_csv_metric(value: str) -> bool:
 
 
 def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[str]:
-    if expected == 10:
+    if expected == 13:
+        tail = [value.strip() for value in row[-9:]]
+        middle = row[:-9]
+    elif expected == 10:
         tail = [value.strip() for value in row[-6:]]
         middle = row[:-6]
     elif expected == 7:
@@ -583,9 +618,7 @@ def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[
             max_cycle = middle[idx].strip()
             avg_cycle = middle[idx + 1].strip()
             last_udp = ",".join(middle[idx + 2 :]).strip()
-            if expected == 7:
-                return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
-            if expected == 10:
+            if expected in {7, 10, 13}:
                 return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
             return [computer_name, max_cycle, avg_cycle, last_udp, tail[0]]
 
@@ -595,7 +628,7 @@ def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[
 def _merge_extra_leading_csv_fields(row: list[str], expected: int) -> list[str]:
     if len(row) <= expected:
         return row + [""] * max(0, expected - len(row))
-    if expected in {5, 7, 10}:
+    if expected in {5, 7, 10, 13}:
         repaired = _repair_loop_capture_row_with_commas(row, expected)
         if repaired:
             return repaired
@@ -623,6 +656,23 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
         if first_len <= 2:
             columns = ["Maximum Cycle Minutes", "Average Cycle Minutes"]
             expected = 2
+        elif first_len >= 13:
+            columns = [
+                "Computer Name",
+                "Maximum Cycle Minutes",
+                "Average Cycle Minutes",
+                "Last UDP Ping",
+                "Receiving UDP Pings",
+                "Platform Health Check - Command Polling Enabled",
+                "Platform Health Check - Command Polling Interval",
+                "Platform Health Check - FastHashVerify Enabled",
+                "Platform Health Check - FastHashVerify Work ms",
+                "Platform Health Check - FastHashVerify Sleep ms",
+                "Platform Health Check - Agent Multicore Scaling Enabled",
+                "Platform Health Check - Agent Multicore Max Core Utilization",
+                "Platform Health Check - Agent Multicore Work Type Scalar",
+            ]
+            expected = 13
         elif first_len >= 10:
             columns = [
                 "Computer Name",
@@ -1753,6 +1803,19 @@ def auto_detect_fast_hash_verify_columns(
     )
 
 
+def auto_detect_agent_multicore_columns(
+    df: pd.DataFrame,
+) -> tuple[str | None, str | None, str | None]:
+    """Find 11.0.7 agent multicore client-setting columns."""
+    return (
+        _column_lookup_normalized(df, AGENT_MULTICORE_SCALING_COLUMN_NAMES),
+        _column_lookup_normalized(
+            df, AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES
+        ),
+        _column_lookup_normalized(df, AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES),
+    )
+
+
 def auto_detect_udp_receiving_column(df: pd.DataFrame) -> str | None:
     return _column_lookup_normalized(
         df,
@@ -1827,6 +1890,25 @@ def display_fast_hash_verify_ms(value: Any) -> str:
         return "Unknown"
     if re.fullmatch(r"-?\d+(?:\.\d+)?", text):
         return f"{float(text):g} ms"
+    return text
+
+
+def display_client_setting(value: Any) -> str:
+    """Return an unmodified client setting value with explicit empty states."""
+    if value is None:
+        return "Not Set"
+    try:
+        if pd.isna(value):
+            return "Not Set"
+    except (TypeError, ValueError):
+        pass
+
+    text = str(value).strip()
+    folded = text.casefold()
+    if not folded or folded in {"nan", "none", "not set", "not reported"}:
+        return "Not Set"
+    if "does not exist" in folded or "duplicate" in folded or "error" in folded:
+        return "Unknown"
     return text
 
 
@@ -2267,6 +2349,9 @@ def process_rows(
     fast_hash_verify_enabled_column: str | None = None,
     fast_hash_verify_work_column: str | None = None,
     fast_hash_verify_sleep_column: str | None = None,
+    agent_multicore_scaling_column: str | None = None,
+    agent_multicore_max_core_utilization_column: str | None = None,
+    agent_multicore_work_type_scalar_column: str | None = None,
 ) -> tuple[list[ProcessedRow], int, int]:
     processed: list[ProcessedRow] = []
     not_reported_count = 0
@@ -2288,6 +2373,18 @@ def process_rows(
             fast_hash_verify_work_column,
             fast_hash_verify_sleep_column,
         ) = auto_detect_fast_hash_verify_columns(df)
+    if not any(
+        (
+            agent_multicore_scaling_column,
+            agent_multicore_max_core_utilization_column,
+            agent_multicore_work_type_scalar_column,
+        )
+    ):
+        (
+            agent_multicore_scaling_column,
+            agent_multicore_max_core_utilization_column,
+            agent_multicore_work_type_scalar_column,
+        ) = auto_detect_agent_multicore_columns(df)
 
     for _, row in df.iterrows():
         max_sec = convert_to_seconds(row.get(max_column), max_column)
@@ -2354,6 +2451,22 @@ def process_rows(
                     row.get(fast_hash_verify_sleep_column)
                 )
 
+            multicore_scaling = ""
+            multicore_max_core_utilization = ""
+            multicore_work_type_scalar = ""
+            if agent_multicore_scaling_column:
+                multicore_scaling = parse_fast_hash_verify_enabled(
+                    row.get(agent_multicore_scaling_column)
+                )
+            if agent_multicore_max_core_utilization_column:
+                multicore_max_core_utilization = display_client_setting(
+                    row.get(agent_multicore_max_core_utilization_column)
+                )
+            if agent_multicore_work_type_scalar_column:
+                multicore_work_type_scalar = display_client_setting(
+                    row.get(agent_multicore_work_type_scalar_column)
+                )
+
             processed.append(
                 ProcessedRow(
                     computer_name=computer_name,
@@ -2370,6 +2483,9 @@ def process_rows(
                     fast_hash_verify_enabled=fast_hash_enabled,
                     fast_hash_verify_work=fast_hash_work,
                     fast_hash_verify_sleep=fast_hash_sleep,
+                    agent_multicore_scaling_enabled=multicore_scaling,
+                    agent_multicore_max_core_utilization=multicore_max_core_utilization,
+                    agent_multicore_work_type_scalar=multicore_work_type_scalar,
                 )
             )
         else:
@@ -2567,6 +2683,40 @@ def fast_hash_verify_coverage_rows(
     ]
 
 
+def analyze_agent_multicore(
+    rows: list[ProcessedRow],
+) -> AgentMulticoreSummary | None:
+    """Group reported 11.0.7 agent multicore setting values without assessing them."""
+    multicore_rows = [
+        row
+        for row in rows
+        if row.agent_multicore_scaling_enabled
+        or row.agent_multicore_max_core_utilization
+        or row.agent_multicore_work_type_scalar
+    ]
+    if not multicore_rows:
+        return None
+
+    settings = Counter(
+        (
+            row.agent_multicore_scaling_enabled or "Not Set",
+            row.agent_multicore_max_core_utilization or "Not Set",
+            row.agent_multicore_work_type_scalar or "Not Set",
+        )
+        for row in multicore_rows
+    )
+    settings_rows = [
+        [scaling, utilization, scalar, f"{count:,}"]
+        for (scaling, utilization, scalar), count in sorted(
+            settings.items(), key=lambda item: (-item[1], item[0])
+        )
+    ]
+    return AgentMulticoreSummary(
+        total_devices=len(multicore_rows),
+        settings_rows=settings_rows,
+    )
+
+
 def calculate_metrics(
     processed: list[ProcessedRow],
     total_source_rows: int,
@@ -2691,6 +2841,12 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         r.fast_hash_verify_enabled or r.fast_hash_verify_work or r.fast_hash_verify_sleep
         for r in rows
     )
+    has_agent_multicore_data = any(
+        r.agent_multicore_scaling_enabled
+        or r.agent_multicore_max_core_utilization
+        or r.agent_multicore_work_type_scalar
+        for r in rows
+    )
 
     data = []
     for r in rows:
@@ -2717,6 +2873,14 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             row_dict["FastHashVerify"] = r.fast_hash_verify_enabled
             row_dict["FastHashVerify Work"] = r.fast_hash_verify_work
             row_dict["FastHashVerify Sleep"] = r.fast_hash_verify_sleep
+        if has_agent_multicore_data:
+            row_dict["Agent Multicore Scaling"] = r.agent_multicore_scaling_enabled
+            row_dict["Agent Multicore Max Core Utilization"] = (
+                r.agent_multicore_max_core_utilization
+            )
+            row_dict["Agent Multicore Work Type Scalar"] = (
+                r.agent_multicore_work_type_scalar
+            )
         data.append(row_dict)
     return pd.DataFrame(data)
 
@@ -2958,6 +3122,7 @@ def generate_excel(
     udp_summary: UdpNotificationSummary | None = None,
     command_polling_summary: CommandPollingSummary | None = None,
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
+    agent_multicore_summary: AgentMulticoreSummary | None = None,
     stamp: str = "",
 ) -> None:
     metrics_rows = [
@@ -3181,6 +3346,16 @@ def generate_excel(
                 fast_hash_verify_summary.settings_rows,
                 columns=["Work (ms)", "Sleep (ms)", "Devices"],
             ).to_excel(writer, sheet_name="FastHashVerify Settings", index=False)
+        if agent_multicore_summary:
+            pd.DataFrame(
+                agent_multicore_summary.settings_rows,
+                columns=[
+                    "Scale Work Time With CPU Cores",
+                    "Max Core Utilization",
+                    "Work Type Scalar",
+                    "Devices",
+                ],
+            ).to_excel(writer, sheet_name="Agent Multicore Settings", index=False)
 
     autosize_excel_columns(excel_output)
     if actionsite_pressure:
@@ -3434,6 +3609,7 @@ def generate_word(
     udp_summary: UdpNotificationSummary | None = None,
     command_polling_summary: CommandPollingSummary | None = None,
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
+    agent_multicore_summary: AgentMulticoreSummary | None = None,
     stamp: str = "",
     include_automated_findings: bool = False,
 ) -> None:
@@ -3773,6 +3949,24 @@ def generate_word(
             "configured balance between active hash calculation and sleep time."
         )
 
+    if agent_multicore_summary:
+        document.add_heading("Agent Multicore Settings", level=3)
+        document.add_paragraph(
+            "The following 11.0.7 client setting values were reported. They are "
+            "configuration context only; no assessment or finding is derived."
+        )
+        build_word_table(
+            document,
+            [
+                "Scale Work Time With CPU Cores",
+                "Max Core Utilization",
+                "Work Type Scalar",
+                "Devices",
+            ],
+            agent_multicore_summary.settings_rows,
+            {3},
+        )
+
     document.save(str(word_output))
 
 
@@ -3928,6 +4122,23 @@ def main() -> int:
             log.detail("FastHashVerify Work", fast_hash_verify_work_column)
         if fast_hash_verify_sleep_column:
             log.detail("FastHashVerify Sleep", fast_hash_verify_sleep_column)
+        (
+            agent_multicore_scaling_column,
+            agent_multicore_max_core_utilization_column,
+            agent_multicore_work_type_scalar_column,
+        ) = auto_detect_agent_multicore_columns(df)
+        if agent_multicore_scaling_column:
+            log.detail("Agent multicore scaling", agent_multicore_scaling_column)
+        if agent_multicore_max_core_utilization_column:
+            log.detail(
+                "Agent multicore max core utilization",
+                agent_multicore_max_core_utilization_column,
+            )
+        if agent_multicore_work_type_scalar_column:
+            log.detail(
+                "Agent multicore work type scalar",
+                agent_multicore_work_type_scalar_column,
+            )
 
         # Load UDP data early so it can be merged into the loop data
         udp_summary = load_udp_notification_summary(udp_notifications_file)
@@ -3956,6 +4167,13 @@ def main() -> int:
             fast_hash_verify_enabled_column=fast_hash_verify_enabled_column,
             fast_hash_verify_work_column=fast_hash_verify_work_column,
             fast_hash_verify_sleep_column=fast_hash_verify_sleep_column,
+            agent_multicore_scaling_column=agent_multicore_scaling_column,
+            agent_multicore_max_core_utilization_column=(
+                agent_multicore_max_core_utilization_column
+            ),
+            agent_multicore_work_type_scalar_column=(
+                agent_multicore_work_type_scalar_column
+            ),
         )
         if not processed:
             log.warn("No valid rows were parsed.")
@@ -3988,6 +4206,7 @@ def main() -> int:
         )
         command_polling_summary = analyze_command_polling(processed)
         fast_hash_verify_summary = analyze_fast_hash_verify(processed)
+        agent_multicore_summary = analyze_agent_multicore(processed)
 
         log.step("Summary")
         log.detail("Devices", metrics.total_devices)
@@ -4052,6 +4271,11 @@ def main() -> int:
             log.detail("FastHashVerify enabled", fast_hash_verify_summary.enabled_count)
             log.detail("FastHashVerify disabled", fast_hash_verify_summary.disabled_count)
             log.detail("FastHashVerify not set", fast_hash_verify_summary.not_set_count)
+        if agent_multicore_summary:
+            log.detail(
+                "Agent multicore settings reported",
+                agent_multicore_summary.total_devices,
+            )
 
         log.step("Generating Word-friendly accessible PNG health summary")
         generate_png(
@@ -4073,6 +4297,7 @@ def main() -> int:
             udp_summary=udp_summary,
             command_polling_summary=command_polling_summary,
             fast_hash_verify_summary=fast_hash_verify_summary,
+            agent_multicore_summary=agent_multicore_summary,
             stamp=stamp,
         )
 
@@ -4087,6 +4312,7 @@ def main() -> int:
                 udp_summary=udp_summary,
                 command_polling_summary=command_polling_summary,
                 fast_hash_verify_summary=fast_hash_verify_summary,
+                agent_multicore_summary=agent_multicore_summary,
                 stamp=stamp,
                 include_automated_findings=args.include_automated_findings,
             )

@@ -42,7 +42,7 @@ pillow==12.3.0
     #   matplotlib
 playwright==1.63.0
     # via master-class-diagnostics-workbench
-pyee==13.0.1
+pyee==14.0.0
     # via playwright
 pyparsing==3.3.3
     # via matplotlib

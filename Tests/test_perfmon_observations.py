@@ -1276,9 +1276,48 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
         media_files = [name for name in zf.namelist() if name.startswith("word/media/")]
 
     assert doc_xml.index("Additional PerfMon Capture") < doc_xml.index("Next Section")
-    assert "Analyzed system: BFSQL01" in doc_xml
+    # The server name follows the capture heading directly, in bold.
+    assert (
+        doc_xml.index("Additional PerfMon Capture")
+        < doc_xml.index("<w:b/></w:rPr><w:t>BFSQL01</w:t>")
+        < doc_xml.index("CPU Utilization")
+    )
     assert "CPU Utilization" in doc_xml
     assert any("perfmon_supplemental_" in name for name in media_files)
+
+
+def test_append_perfmon_capture_section_marks_a_missing_server_name(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(
+        inject_perfmon_charts,
+        "render_perfmon_scorecard",
+        lambda _observations, _output_path: None,
+    )
+    for index, environment in enumerate(({}, {"Analyzed System": "Not detected"})):
+        case = tmp_path / f"case{index}"
+        chart_folder = case / "charts"
+        chart_folder.mkdir(parents=True)
+        (chart_folder / "Processor_Total_Processor_Time.png").write_bytes(_TINY_PNG)
+        (chart_folder / "perfmon_observations.json").write_text(
+            json.dumps({"environment": environment, "summary": {}, "sections": {}}),
+            encoding="utf-8",
+        )
+        template = case / "template.docx"
+        output = case / "output.docx"
+        doc = Document()
+        doc.add_heading("PerfMon Counters Analysis", level=1)
+        doc.save(str(template))
+
+        inject_perfmon_charts.append_perfmon_capture_section(
+            chart_folder, template, output, section_title="PerfMon Capture 1"
+        )
+
+        with ZipFile(output) as zf:
+            doc_xml = zf.read("word/document.xml").decode("utf-8")
+        assert doc_xml.index("PerfMon Capture 1") < doc_xml.index(
+            "<w:b/></w:rPr><w:t>Server name missing</w:t>"
+        )
 
 
 def test_perfmon_scorecard_no_data_behavior() -> None:

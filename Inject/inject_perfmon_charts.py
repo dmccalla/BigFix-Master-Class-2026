@@ -1960,14 +1960,17 @@ def append_perfmon_capture_section(
     max_chart_width_in = usable_page_width_in(doc_xml)
     section_chunks: list[str] = [heading_paragraph_xml(section_title, level=2)]
 
+    # The server name sits right under the capture heading, above the scorecard,
+    # so the reader can tell which server a capture covers at a glance.
     environment = observations.get("environment", {}) if observations else {}
     analyzed_system = str(environment.get("Analyzed System") or "").strip()
-    has_system_summary = any(
-        str(line).startswith("Analyzed system:")
-        for line in observations.get("summary", {}).get("lines", [])
+    if not analyzed_system or analyzed_system == "Not detected":
+        analyzed_system = "Server name missing"
+    section_chunks.append(
+        "<w:p><w:pPr><w:keepNext/></w:pPr>"
+        "<w:r><w:rPr><w:b/></w:rPr>"
+        f"<w:t>{xml_text_escape(analyzed_system)}</w:t></w:r></w:p>"
     )
-    if analyzed_system and not has_system_summary:
-        section_chunks.append(text_paragraph_xml(f"Analyzed system: {analyzed_system}"))
 
     def _append_png(zf: zipfile.ZipFile, png_path: Path) -> str:
         nonlocal rels_xml, content_types_xml, next_rid, picture_id

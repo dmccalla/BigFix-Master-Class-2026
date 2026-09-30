@@ -1177,6 +1177,7 @@ def _write_perfmon_mini_report(
                 "--output-path",
                 str(primary_path),
                 "--append-only",
+                "--include-automated-findings",
                 "--section-title",
                 "PerfMon Capture 1",
             ],
@@ -1195,6 +1196,7 @@ def _write_perfmon_mini_report(
                     "--output-path",
                     str(output_path),
                     "--append-only",
+                    "--include-automated-findings",
                     "--section-title",
                     "PerfMon Capture 2",
                 ],
@@ -1435,6 +1437,7 @@ def run_loop_pipeline(
         args += ["--evaluation-times-file", str(inputs["top_offenders_file"])]
     if inputs.get("udp_notifications_file"):
         args += ["--udp-notifications-file", str(inputs["udp_notifications_file"])]
+    args += ["--include-automated-findings"]
 
     run_python(find_script("get_loop_health.py"), args, log)
 

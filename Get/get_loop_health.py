@@ -3435,6 +3435,7 @@ def generate_word(
     command_polling_summary: CommandPollingSummary | None = None,
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
     stamp: str = "",
+    include_automated_findings: bool = False,
 ) -> None:
     if Document is None:
         raise RuntimeError(
@@ -3489,6 +3490,26 @@ def generate_word(
         )
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
+
+    if include_automated_findings:
+        finding_impact = {
+            "WARNING": "High",
+            "CRITICAL": "Critical",
+        }.get(str(metrics.overall_status or "").upper())
+        if finding_impact:
+            document.add_heading("Automated Findings", level=3)
+            build_word_table(
+                document,
+                ["Finding ID", "Automated Finding"],
+                [
+                    [
+                        "CLT-01",
+                        f"{finding_impact}, client evaluation loop health "
+                        "below the healthy threshold.",
+                    ]
+                ],
+                {0},
+            )
 
     document.add_heading("BigFix Client Loop Performance Summary", level=3)
     document.add_paragraph(
@@ -3812,6 +3833,11 @@ def main() -> int:
     parser.add_argument(
         "--skip-word", action="store_true", help="Skip Word document generation"
     )
+    parser.add_argument(
+        "--include-automated-findings",
+        action="store_true",
+        help="Include the automated findings table in the Mini Report Word document.",
+    )
     add_stamp_arguments(parser)
     args = parser.parse_args()
 
@@ -4062,6 +4088,7 @@ def main() -> int:
                 command_polling_summary=command_polling_summary,
                 fast_hash_verify_summary=fast_hash_verify_summary,
                 stamp=stamp,
+                include_automated_findings=args.include_automated_findings,
             )
 
         log.ok("Client loop analysis built")

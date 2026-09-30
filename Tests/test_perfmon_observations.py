@@ -1138,6 +1138,50 @@ def test_perfmon_section_source_id_maps_counter_areas() -> None:
     )
 
 
+def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
+    observations = {
+        "sections": {
+            "CPU Utilization": {
+                "section": "CPU Utilization",
+                "status": "OK",
+            },
+            "Network Health": {
+                "section": "Network Health",
+                "status": "Critical",
+            },
+            "Memory Health": {
+                "section": "Memory Health",
+                "status": "Warning",
+            },
+        }
+    }
+
+    assert inject_perfmon_charts.perfmon_automated_finding_rows(observations) == [
+        (
+            "PRF-INF-07",
+            "Network Health automated NFR infrastructure assessment: Fail.",
+        ),
+        (
+            "PRF-INF-09",
+            "Memory Health automated NFR infrastructure assessment: Advisory.",
+        ),
+    ]
+    xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(
+        observations
+    )
+    assert "Automated Findings" in xml
+    assert "Finding ID" in xml
+    assert "PRF-INF-07" in xml
+    assert "PRF-INF-09" in xml
+    assert "CPU Utilization" not in xml
+    assert (
+        inject_perfmon_charts.build_perfmon_automated_findings_table_xml(
+            {"sections": {"CPU": {"section": "CPU Utilization", "status": "OK"}}}
+        )
+        == ""
+    )
+
+
 def test_perfmon_scorecard_payload_carries_finding_summary(
     monkeypatch, tmp_path: Path
 ) -> None:
@@ -1241,7 +1285,8 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
                 },
                 "sections": {
                     "CPU Utilization": {
-                        "status": "OK",
+                        "section": "CPU Utilization",
+                        "status": "Critical",
                         "observation": "CPU utilization remained within standard.",
                         "evidence": "Peak processor time was 22%.",
                     }
@@ -1269,6 +1314,7 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
         template,
         output,
         section_title="Additional PerfMon Capture",
+        include_automated_findings=True,
     )
 
     with ZipFile(output) as zf:
@@ -1283,6 +1329,8 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
         < doc_xml.index("CPU Utilization")
     )
     assert "CPU Utilization" in doc_xml
+    assert doc_xml.index("Automated Findings") < doc_xml.index("PRF-INF-04")
+    assert doc_xml.index("PRF-INF-04") < doc_xml.index("CPU Utilization")
     assert any("perfmon_supplemental_" in name for name in media_files)
 
 

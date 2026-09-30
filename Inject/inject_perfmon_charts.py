@@ -1054,6 +1054,58 @@ def perfmon_section_source_id(section_name: object) -> str:
     return ""
 
 
+def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str]]:
+    """Return the non-OK NFR findings already counted by the scorecard."""
+    findings: dict[str, str] = {}
+    for section_data in observations.get("sections", {}).values():
+        section_name = re.sub(
+            r"\s+", " ", str(section_data.get("section", ""))
+        ).strip()
+        status = str(section_data.get("status", "")).strip()
+        if not section_name or status.lower() in ("ok", "pass", "passed", "healthy"):
+            continue
+        source_id = perfmon_section_source_id(section_name)
+        if source_id and source_id not in findings:
+            findings[source_id] = (
+                f"{section_name} automated NFR infrastructure assessment: "
+                f"{status_label(status)}."
+            )
+    return [(source_id, findings[source_id]) for source_id in sorted(findings)]
+
+
+def build_perfmon_automated_findings_table_xml(observations: dict) -> str:
+    """Build the Mini Report table for scorecard-referenced findings."""
+    rows = perfmon_automated_finding_rows(observations)
+    if not rows:
+        return ""
+
+    widths = [2200, 7800]
+    xml = heading_paragraph_xml("Automated Findings", level=3)
+    xml += (
+        "<w:tbl><w:tblPr>"
+        '<w:tblStyle w:val="BigFixContent"/>'
+        '<w:tblW w:w="5000" w:type="pct"/>'
+        '<w:tblLook w:val="04A0" w:firstRow="1" w:lastRow="0" w:firstColumn="1" w:lastColumn="0" w:noHBand="0" w:noVBand="1"/>'
+        "</w:tblPr><w:tblGrid>"
+        + "".join(f'<w:gridCol w:w="{width}"/>' for width in widths)
+        + "</w:tblGrid>"
+    )
+    xml += (
+        "<w:tr>"
+        + table_cell_xml("Finding ID", widths[0], bold=True)
+        + table_cell_xml("Automated Finding", widths[1], bold=True)
+        + "</w:tr>"
+    )
+    for source_id, finding in rows:
+        xml += (
+            "<w:tr>"
+            + table_cell_xml(source_id, widths[0])
+            + table_cell_xml(finding, widths[1])
+            + "</w:tr>"
+        )
+    return xml + "</w:tbl><w:p/>"
+
+
 def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | None:
     """Render the PerfMon Infrastructure Analysis panel from the design HTML.
 
@@ -1938,6 +1990,7 @@ def append_perfmon_capture_section(
     template_path: Path,
     output_path: Path,
     section_title: str = "Additional PerfMon Capture",
+    include_automated_findings: bool = False,
 ) -> None:
     log.step("Scanning supplemental PerfMon graph folder")
     log.detail("Graph folder", chart_folder)
@@ -1991,6 +2044,11 @@ def append_perfmon_capture_section(
             section_chunks.append(_append_png(zf, scorecard_path))
             section_chunks.append(perfmon_score_method_note_xml())
 
+        if include_automated_findings:
+            findings_xml = build_perfmon_automated_findings_table_xml(observations)
+            if findings_xml:
+                section_chunks.append(findings_xml)
+
         summary_xml = build_summary_xml(observations)
         if summary_xml:
             section_chunks.append(summary_xml)
@@ -2035,6 +2093,7 @@ def inject_perfmon_charts(
     *,
     append_only: bool = False,
     section_title: str = "Additional PerfMon Capture",
+    include_automated_findings: bool = False,
 ) -> None:
     if append_only:
         append_perfmon_capture_section(
@@ -2042,6 +2101,7 @@ def inject_perfmon_charts(
             template_path=template_path,
             output_path=output_path,
             section_title=section_title,
+            include_automated_findings=include_automated_findings,
         )
         return
 
@@ -2255,6 +2315,11 @@ def main() -> int:
         help="Append this PerfMon graph folder as an additional capture instead of replacing placeholders.",
     )
     parser.add_argument(
+        "--include-automated-findings",
+        action="store_true",
+        help="Include the scorecard-referenced findings table in the Mini Report.",
+    )
+    parser.add_argument(
         "--section-title",
         default="Additional PerfMon Capture",
         help="Heading used when --append-only is set.",
@@ -2285,6 +2350,7 @@ def main() -> int:
             output_path=output_path,
             append_only=args.append_only,
             section_title=args.section_title,
+            include_automated_findings=args.include_automated_findings,
         )
 
         return 0

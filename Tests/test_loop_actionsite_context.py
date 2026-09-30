@@ -122,6 +122,55 @@ def test_loop_word_places_score_method_after_summary_without_context_table(
     )
 
 
+def test_loop_mini_report_includes_only_raised_automated_findings(
+    tmp_path: Path,
+) -> None:
+    warning_metrics = _sample_loop_metrics()
+    warning_metrics.overall_status = "WARNING"
+    word_output = tmp_path / "warning-loop.docx"
+
+    loop.generate_word(
+        warning_metrics,
+        _write_png(tmp_path / "warning-loop.png"),
+        word_output,
+        include_automated_findings=True,
+    )
+
+    doc = Document(str(word_output))
+    headings = [
+        paragraph.text
+        for paragraph in doc.paragraphs
+        if paragraph.style.name.startswith("Heading")
+    ]
+    findings_table = next(
+        table
+        for table in doc.tables
+        if table.cell(0, 0).text == "Finding ID"
+    )
+
+    assert headings.index("Automated Findings") < headings.index(
+        "BigFix Client Loop Performance Summary"
+    )
+    assert [cell.text for cell in findings_table.rows[1].cells] == [
+        "CLT-01",
+        "High, client evaluation loop health below the healthy threshold.",
+    ]
+
+    healthy_output = tmp_path / "healthy-loop.docx"
+    loop.generate_word(
+        _sample_loop_metrics(),
+        _write_png(tmp_path / "healthy-loop.png"),
+        healthy_output,
+        include_automated_findings=True,
+    )
+    healthy_headings = [
+        paragraph.text
+        for paragraph in Document(str(healthy_output)).paragraphs
+        if paragraph.style.name.startswith("Heading")
+    ]
+    assert "Automated Findings" not in healthy_headings
+
+
 def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
     deploy = tmp_path / "Deployment_Information"
     deploy.mkdir()

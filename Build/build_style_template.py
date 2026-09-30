@@ -11,7 +11,10 @@ build_style_template.py -- write Templates/Diagnostics_Style_Template.docx.
 The Mini Reports clone their styles from this document (see
 Lib/Themes/word_stub_utils.py). It carries no content: only the body font,
 the heading styles, and the BigFixContent table style the modules use.
-Run this script to regenerate the template; never edit the .docx by hand.
+The styles mirror the full Workbench's report template (Aptos body, the
+same heading sizes, colors, and spacing) so a Master Class Mini Report
+reads like one from the full Workbench. Run this script to regenerate the
+template; never edit the .docx by hand.
 
     python Build/build_style_template.py
 """
@@ -29,12 +32,18 @@ from docx.shared import Pt, RGBColor
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 OUTPUT = PROJECT_ROOT / "Templates" / "Diagnostics_Style_Template.docx"
 
-BODY_FONT = "Inter"
-INK = RGBColor(0x00, 0x00, 0x32)
+BODY_FONT = "Aptos"
+NAVY = RGBColor(0x0B, 0x16, 0x40)
+SLATE = RGBColor(0x10, 0x2A, 0x54)
+BLUE = RGBColor(0x14, 0x52, 0xE6)
 TABLE_STYLE_ID = "BigFixContent"
 
 # The shared table look: navy header row with white bold text, light banding,
 # a hairline grid with no inside vertical rules, centered cells.
+# The header row has no contextualSpacing, unlike the full Workbench's
+# template. With it, Word drops the space before every header cell whose
+# left neighbor has the same style, so only the first cell keeps it and its
+# text sits 3 pt lower than the rest of the header row.
 _W = 'xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"'
 TABLE_STYLE_XML = f"""
 <w:style {_W} w:type="table" w:customStyle="1" w:styleId="{TABLE_STYLE_ID}">
@@ -66,7 +75,6 @@ TABLE_STYLE_XML = f"""
     <w:pPr>
       <w:wordWrap/>
       <w:spacing w:before="80" w:after="80" w:line="240" w:lineRule="auto"/>
-      <w:contextualSpacing/>
       <w:jc w:val="center"/>
     </w:pPr>
     <w:rPr>
@@ -101,13 +109,29 @@ TABLE_STYLE_XML = f"""
 </w:style>
 """
 
-HEADING_SIZES = {1: 20, 2: 16, 3: 14, 4: 12}
+# Heading and body definitions copied from the full Workbench's report
+# template: (size in points, color, space before, space after, extra pPr).
+# The template's heading font is a licensed one this project does not ship,
+# so the headings use the body font in bold instead.
+HEADINGS = {
+    1: dict(size=24, color=NAVY, before=240, after=180, keep=True),
+    2: dict(size=18, color=SLATE, before=240, after=None, keep=True),
+    3: dict(size=14, color=NAVY, before=60, after=60, keep=False, line=276),
+    4: dict(size=14, color=BLUE, before=200, after=None, keep=True),
+}
+NORMAL_SPACING = (120, 120)
 
 
-def _set_font(style, size_pt: int | None = None, bold: bool | None = None) -> None:
+def _set_font(
+    style,
+    size_pt: int | None = None,
+    bold: bool | None = None,
+    color: RGBColor | None = None,
+) -> None:
     font = style.font
     font.name = BODY_FONT
-    font.color.rgb = INK
+    if color is not None:
+        font.color.rgb = color
     if size_pt is not None:
         font.size = Pt(size_pt)
     if bold is not None:
@@ -130,14 +154,36 @@ def _set_font(style, size_pt: int | None = None, bold: bool | None = None) -> No
             )
 
 
+def _set_spacing(
+    style, before: int | None, after: int | None, line: int | None = None
+) -> None:
+    fmt = style.paragraph_format
+    fmt.space_before = Pt(before / 20) if before is not None else None
+    fmt.space_after = Pt(after / 20) if after is not None else None
+    if line is not None:
+        fmt.line_spacing = line / 240
+
+
 def build(output: Path = OUTPUT) -> Path:
     document = Document()
     styles = document.styles
 
-    _set_font(styles["Normal"], size_pt=11)
-    for level, size in HEADING_SIZES.items():
-        _set_font(styles[f"Heading {level}"], size_pt=size, bold=True)
-    for name in ("Title", "Caption", "List Bullet", "List Number", "List Paragraph"):
+    # No color on Normal or in the document defaults. A paragraph style
+    # outranks a table style, so a color here would paint the BigFixContent
+    # header row's white text over its navy fill.
+    normal = styles["Normal"]
+    _set_font(normal, size_pt=11)
+    _set_spacing(normal, *NORMAL_SPACING)
+    for level, spec in HEADINGS.items():
+        heading = styles[f"Heading {level}"]
+        _set_font(heading, size_pt=spec["size"], bold=True, color=spec["color"])
+        # python-docx's stock Heading 4 is italic. The report template's is not.
+        heading.font.italic = False
+        _set_spacing(heading, spec["before"], spec["after"], spec.get("line"))
+        heading.paragraph_format.keep_with_next = spec["keep"]
+        heading.paragraph_format.keep_together = spec["keep"]
+    _set_font(styles["Title"], size_pt=28)
+    for name in ("Caption", "List Bullet", "List Number", "List Paragraph"):
         try:
             _set_font(styles[name])
         except KeyError:

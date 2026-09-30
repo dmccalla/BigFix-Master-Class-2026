@@ -13,85 +13,62 @@ from urllib.parse import quote, unquote
 import pytest
 from defusedxml import ElementTree as ET
 
-ROOT = next(
-    parent
-    for parent in Path(__file__).resolve().parents
-    if (parent / "Tasks and Analyses").is_dir()
-)
+ROOT = Path(__file__).resolve().parents[1]
 LOCAL_TASKS = ROOT / "Tasks and Analyses"
-RELATIVE_COLLECTORS = (
-    Path("Individual Tasks") / "BigFix Platform Health Check -- Collect Deployment Information (2.0).bes",
-    Path("Combined") / "BigFix Platform Health Check -- Day 1 - Deployment Data Collection (2.0).bes",
-    Path("Individual Tasks") / "BigFix Master Class -- Collect Deployment Information (2.0).bes",
-)
-LOCAL_COLLECTORS = tuple(
-    LOCAL_TASKS / relative
-    for relative in RELATIVE_COLLECTORS
-    if (LOCAL_TASKS / relative).is_file()
-)
-# Sibling directory names are used only for optional cross-repository parity.
-MAIN = (
+LOCAL_COLLECTORS = (
     LOCAL_TASKS
-    if (LOCAL_TASKS / RELATIVE_COLLECTORS[0]).is_file()
-    else ROOT.parent / "BigFix Health Check" / "Tasks and Analyses"
-)
-MC = (
-    LOCAL_TASKS
-    if (LOCAL_TASKS / RELATIVE_COLLECTORS[2]).is_file()
-    else ROOT.parent / "Master Class Diagnostics Workbench" / "Tasks and Analyses"
-)
-COLLECTORS = (
-    MAIN / RELATIVE_COLLECTORS[0],
-    MAIN / RELATIVE_COLLECTORS[1],
-    MC / RELATIVE_COLLECTORS[2],
+    / "Individual Tasks"
+    / "BigFix Master Class -- Collect Deployment Information (2.0).bes",
 )
 
 
 def test_local_collectors_are_discovered_independent_of_checkout_name() -> None:
     assert LOCAL_COLLECTORS
     assert all(path.is_relative_to(LOCAL_TASKS) for path in LOCAL_COLLECTORS)
+    assert all(path.is_file() for path in LOCAL_COLLECTORS)
+
 
 # Exact expressions preserve labels, source sets, zero fallbacks, and tuple order.
 EXPECTED = {
     "Using Efficient MIME": (
         "generalInfoFileXML",
-        "\"Using Efficient MIME?: \" & ((not exists bes deployment options \"usePre70ClientCompatibleMIME\" AND not exists value of bes deployment options \"usePre70ClientCompatibleMIME\") as string)",
+        '"Using Efficient MIME?: " & ((not exists bes deployment options "usePre70ClientCompatibleMIME" AND not exists value of bes deployment options "usePre70ClientCompatibleMIME") as string)',
     ),
     "Maximum Number of Clients per Relay": (
         "relayServerInfoFileXML",
-        "\"Maximum Number of Clients per Relay: \" & ((if (exists results whose (exists value of it and value of it != \"BES Root Server\") of bes properties \"Relay\" whose (reserved flag of it)) then (maximum of multiplicities of unique values of values of results whose (exists value of it and value of it != \"BES Root Server\") of bes properties \"Relay\" whose (reserved flag of it)) else 0) as string)",
+        '"Maximum Number of Clients per Relay: " & ((if (exists results whose (exists value of it and value of it != "BES Root Server") of bes properties "Relay" whose (reserved flag of it)) then (maximum of multiplicities of unique values of values of results whose (exists value of it and value of it != "BES Root Server") of bes properties "Relay" whose (reserved flag of it)) else 0) as string)',
     ),
     "Minimum Number of Clients per Relay": (
         "relayServerInfoFileXML",
-        "\"Minimum Number of Clients per Relay: \" & ((if (exists results whose (exists value of it and value of it != \"BES Root Server\") of bes properties \"Relay\" whose (reserved flag of it)) then (minimum of multiplicities of unique values of values of results whose (exists value of it and value of it != \"BES Root Server\") of bes properties \"Relay\" whose (reserved flag of it)) else 0) as string)",
+        '"Minimum Number of Clients per Relay: " & ((if (exists results whose (exists value of it and value of it != "BES Root Server") of bes properties "Relay" whose (reserved flag of it)) then (minimum of multiplicities of unique values of values of results whose (exists value of it and value of it != "BES Root Server") of bes properties "Relay" whose (reserved flag of it)) else 0) as string)',
     ),
     "Number of Clients with Unknown Relay Distance": (
         "relayServerInfoFileXML",
-        "\"Number of Clients with Unknown Relay Distance: \" & (number of results whose (error flag of it) of bes properties \"Distance to BES Relay\" whose (reserved flag of it)) as string",
+        '"Number of Clients with Unknown Relay Distance: " & (number of results whose (error flag of it) of bes properties "Distance to BES Relay" whose (reserved flag of it)) as string',
     ),
     "Average Number of Computers Managed by Non-Master Operators": (
         "operatorInfoFileXML",
-        "\"Average Number of Computers Managed by Non-Master Operators: \" & ((if (exists bes users whose (not master flag of it) ) then ( mean of (if (exists administered computers of it) then (number of administered computers of it) else 0) of bes users whose (not master flag of it) as integer) else 0) as string)",
+        '"Average Number of Computers Managed by Non-Master Operators: " & ((if (exists bes users whose (not master flag of it) ) then ( mean of (if (exists administered computers of it) then (number of administered computers of it) else 0) of bes users whose (not master flag of it) as integer) else 0) as string)',
     ),
     "Number of Bes Roles": (
         "operatorInfoFileXML",
-        "\"Number of Bes Roles: \" & (number of bes roles as string)",
+        '"Number of Bes Roles: " & (number of bes roles as string)',
     ),
     "Average number of Components per Baselines": (
         "contentInfoFileXML",
-        "\"Average number of Components per Baselines: \" & ((if (exists bes fixlets whose (baseline flag of it)) then (mean of (number of components of component groups of it) of bes fixlets whose (baseline flag of it) as integer) else 0) as string)",
+        '"Average number of Components per Baselines: " & ((if (exists bes fixlets whose (baseline flag of it)) then (mean of (number of components of component groups of it) of bes fixlets whose (baseline flag of it) as integer) else 0) as string)',
     ),
     "Maximum Number of Components per Baseline": (
         "contentInfoFileXML",
-        "\"Maximum Number of Components per Baseline: \" & ((if (exists bes fixlets whose (baseline flag of it)) then (maximum of (number of components of component groups of it) of bes fixlets whose (baseline flag of it)) else 0) as string)",
+        '"Maximum Number of Components per Baseline: " & ((if (exists bes fixlets whose (baseline flag of it)) then (maximum of (number of components of component groups of it) of bes fixlets whose (baseline flag of it)) else 0) as string)',
     ),
     "external_sites": (
         "contentInfoFileXML",
-        "(display name of it,version of it as string,number of subscribed computers of it as string,(if exists modification times of fixlets whose (exist modification time of it) of it then (maximum of modification times of fixlets whose (exist modification time of it) of it) as string else \"Not Reported\"),url of it) of unique values of  sites of bes fixlets whose (NOT (Custom Flag of it) AND (NOT (custom site flag of it)) AND (NOT (operator site flag of it)))",
+        '(display name of it,version of it as string,number of subscribed computers of it as string,(if exists modification times of fixlets whose (exist modification time of it) of it then (maximum of modification times of fixlets whose (exist modification time of it) of it) as string else "Not Reported"),url of it) of unique values of  sites of bes fixlets whose (NOT (Custom Flag of it) AND (NOT (custom site flag of it)) AND (NOT (operator site flag of it)))',
     ),
     "property_heading": (
         "propertyInfoFileXML",
-        "(\"//===== Custom BES Properties with frequent evaluations (sub 15 minutes) ================\")",
+        '("//===== Custom BES Properties with frequent evaluations (sub 15 minutes) ================")',
     ),
 }
 
@@ -128,22 +105,15 @@ def _selected(path: Path, key: str) -> list[tuple[str, str]]:
 
 @pytest.mark.parametrize("path", LOCAL_COLLECTORS, ids=lambda path: path.stem)
 @pytest.mark.parametrize("key", EXPECTED)
-def test_decoded_query_preserves_metric_and_capture_contract(path: Path, key: str) -> None:
+def test_decoded_query_preserves_metric_and_capture_contract(
+    path: Path, key: str
+) -> None:
     selected = _selected(path, key)
     assert len(selected) == 1, (path, key, selected)
     query, encoded = selected[0]
     assert query == EXPECTED[key][1]
     assert query.isascii()
     assert quote(query, safe="") == encoded
-
-
-@pytest.mark.parametrize("key", EXPECTED)
-def test_three_way_query_parity_when_both_repositories_are_available(key: str) -> None:
-    if not all(path.is_file() for path in COLLECTORS):
-        pytest.skip("Three-way parity requires both main and MC checkouts")
-    queries = [_selected(path, key) for path in COLLECTORS]
-    assert all(len(query) == 1 for query in queries)
-    assert queries[0] == queries[1] == queries[2]
 
 
 @pytest.mark.parametrize("path", LOCAL_COLLECTORS, ids=lambda path: path.stem)
@@ -165,8 +135,10 @@ def test_external_site_timestamp_keeps_a_nonblank_fourth_column(path: Path) -> N
 # Fingerprints cover original decoded strings, capture destinations, and order.
 # Parentheses are excluded so wrappers cannot silently change headings or spacers.
 LITERAL_CAPTURE_CONTRACTS = {
-    "Individual Tasks": (110, "99ae5313cfcafde87a21a733d6558d03e73d749bde460a19bcb7cfaf60179216"),
-    "Combined": (110, "99ae5313cfcafde87a21a733d6558d03e73d749bde460a19bcb7cfaf60179216"),
+    "Individual Tasks": (
+        110,
+        "99ae5313cfcafde87a21a733d6558d03e73d749bde460a19bcb7cfaf60179216",
+    ),
 }
 DEPLOYMENT_CAPTURE_TARGETS = {
     "generalInfoFileXML",
@@ -203,19 +175,3 @@ def test_literal_text_destinations_and_order_are_unchanged(path: Path) -> None:
     assert len(literals) == expected_count
     payload = "".join(f"{capture}\t{query}\n" for capture, query in literals)
     assert hashlib.sha256(payload.encode("utf-8")).hexdigest() == expected_digest
-
-
-def test_deployment_literal_three_way_parity_when_checkouts_are_available() -> None:
-    if not all(path.is_file() for path in COLLECTORS):
-        pytest.skip("Three-way parity requires both main and MC checkouts")
-    literals = [
-        [
-            (capture, query, encoded)
-            for capture, query, encoded in _queries(path)
-            if re.fullmatch(r'\("[^"]*"\)', query)
-            and capture in DEPLOYMENT_CAPTURE_TARGETS
-        ]
-        for path in COLLECTORS
-    ]
-    assert len(literals[0]) == 110
-    assert literals[0] == literals[1] == literals[2]

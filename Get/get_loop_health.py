@@ -1758,9 +1758,7 @@ def auto_detect_agent_multicore_columns(
     """Find 11.0.7 agent multicore client-setting columns."""
     return (
         _column_lookup_normalized(df, AGENT_MULTICORE_SCALING_COLUMN_NAMES),
-        _column_lookup_normalized(
-            df, AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES
-        ),
+        _column_lookup_normalized(df, AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES),
         _column_lookup_normalized(df, AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES),
     )
 
@@ -2435,7 +2433,9 @@ def process_rows(
             cpu_work_idle = ""
             cpu_sleep_idle = ""
             if agent_cpu_work_idle_column:
-                cpu_work_idle = display_client_setting(row.get(agent_cpu_work_idle_column))
+                cpu_work_idle = display_client_setting(
+                    row.get(agent_cpu_work_idle_column)
+                )
             if agent_cpu_sleep_idle_column:
                 cpu_sleep_idle = display_client_setting(
                     row.get(agent_cpu_sleep_idle_column)

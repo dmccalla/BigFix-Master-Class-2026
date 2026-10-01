@@ -83,6 +83,46 @@ def test_load_loop_input_from_capture_matches_csv(tmp_path: Path) -> None:
     assert from_xml.values.tolist() == from_csv.values.tolist()
 
 
+def _processed_loop_sample(path: Path):
+    df = get_loop_health.load_loop_input(path)
+    computer_column, max_column, avg_column = get_loop_health.auto_detect_columns(df)
+    df = get_loop_health.normalize_loop_time_columns(df, max_column, avg_column)
+    return get_loop_health.process_rows(
+        df,
+        computer_column,
+        max_column,
+        avg_column,
+    )
+
+
+def test_shipped_loop_samples_match_current_agent_performance_contract() -> None:
+    sample_dir = (
+        Path(__file__).resolve().parents[1]
+        / "SampleData"
+        / "BigFix Master Class 2026"
+        / "Client_Loop"
+    )
+    xml = sample_dir / "Client_Loop_09-14-2026_1718.xml"
+    csv_file = sample_dir / "Client_Loop_09-14-2026_1718.csv"
+
+    xml_df = get_loop_health.load_loop_input(xml)
+    csv_df = get_loop_health.load_loop_input(csv_file)
+    assert len(xml_df.columns) == 15
+    assert len(csv_df.columns) == 15
+
+    xml_rows, xml_not_reported, xml_errors = _processed_loop_sample(xml)
+    csv_rows, csv_not_reported, csv_errors = _processed_loop_sample(csv_file)
+    assert xml_rows == csv_rows
+    assert (xml_not_reported, xml_errors) == (csv_not_reported, csv_errors)
+
+    multicore = get_loop_health.analyze_agent_multicore(xml_rows)
+    assert multicore is not None
+    assert ["1", "80", "4", "2"] in multicore.settings_rows
+    assert ["Not Applicable", "Not Applicable", "Not Applicable", "6"] in (
+        multicore.settings_rows
+    )
+
+
 def test_load_loop_input_from_capture_accepts_comma_in_computer_name(
     tmp_path: Path,
 ) -> None:

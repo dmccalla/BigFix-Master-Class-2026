@@ -1058,9 +1058,7 @@ def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str]]:
     """Return the non-OK NFR findings already counted by the scorecard."""
     findings: dict[str, str] = {}
     for section_data in observations.get("sections", {}).values():
-        section_name = re.sub(
-            r"\s+", " ", str(section_data.get("section", ""))
-        ).strip()
+        section_name = re.sub(r"\s+", " ", str(section_data.get("section", ""))).strip()
         status = str(section_data.get("status", "")).strip()
         if not section_name or status.lower() in ("ok", "pass", "passed", "healthy"):
             continue

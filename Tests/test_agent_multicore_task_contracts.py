@@ -68,4 +68,4 @@ def test_agent_cpu_settings_collector_reads_all_fifteen_fields() -> None:
         assert property_name in content
     assert "item 14 of it" in content
     assert "SplitAnswerFields $Line 15" in content
-    assert '$parts[14].Trim()' in content
+    assert "$parts[14].Trim()" in content

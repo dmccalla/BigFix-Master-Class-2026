@@ -143,9 +143,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
         if paragraph.style.name.startswith("Heading")
     ]
     findings_table = next(
-        table
-        for table in doc.tables
-        if table.cell(0, 0).text == "Finding ID"
+        table for table in doc.tables if table.cell(0, 0).text == "Finding ID"
     )
 
     assert headings.index("Automated Findings") < headings.index(

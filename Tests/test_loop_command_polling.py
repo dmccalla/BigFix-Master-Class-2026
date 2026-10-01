@@ -117,8 +117,6 @@ def test_command_polling_analysis_groups_by_relay_and_subnet() -> None:
     )
 
 
-
-
 def test_command_polling_workbook_tabs_are_written(tmp_path: Path) -> None:
     processed = _sample_polling_rows()
     summary = loop.analyze_command_polling(processed)

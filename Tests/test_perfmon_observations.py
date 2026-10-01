@@ -1166,9 +1166,7 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
             "Memory Health automated NFR infrastructure assessment: Advisory.",
         ),
     ]
-    xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(
-        observations
-    )
+    xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(observations)
     assert "Automated Findings" in xml
     assert "Finding ID" in xml
     assert "PRF-INF-07" in xml

@@ -28,6 +28,11 @@ def _sample_rows() -> list[loop.ProcessedRow]:
                 "Not Set",
                 "1",
             ],
+            "Platform Health Check - Agent Total Physical CPU Core Count": [
+                "8",
+                "4",
+                "8",
+            ],
         }
     )
     df = loop.normalize_loop_time_columns(
@@ -67,12 +72,14 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
     assert summary is not None
     assert summary.total_devices == 3
     assert summary.settings_rows == [
-        ["On", "2"],
-        ["Not Set", "1"],
+        ["On", "8", "2"],
+        ["Not Set", "4", "1"],
     ]
 
     source = loop.processed_to_dataframe(processed)
-    assert list(source[["Agent Multicore Scaling"]].iloc[0]) == ["On"]
+    assert list(
+        source[["Agent Multicore Scaling", "Agent Total Physical CPU Core Count"]].iloc[0]
+    ) == ["On", "8"]
 
 
 def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) -> None:
@@ -94,9 +101,10 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     settings = list(wb["Agent Multicore Settings"].values)
     assert settings[0] == (
         "Scale Work Time With CPU Cores",
+        "Total Physical CPU Cores",
         "Devices",
     )
-    assert settings[1] == ("On", "2")
+    assert settings[1] == ("On", "8", "2")
 
     word_output = tmp_path / "loop.docx"
     loop.generate_word(

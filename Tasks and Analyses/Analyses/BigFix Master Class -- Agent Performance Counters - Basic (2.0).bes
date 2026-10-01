@@ -60,7 +60,7 @@
 <LI><FONT color=#000000>Command Polling Seconds</FONT>&nbsp;</LI></UL></FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000>FastHashVerify client settings are also collected when available: enablement, work ms, and sleep ms. A missing setting means the BigFix client default is in effect.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000>Client CPU idle settings are also collected when available: work idle and sleep idle.</FONT></DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000>Agent multicore client settings are also collected when available: scale work time with CPU cores, maximum core utilization, and work type scalar.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000>Total physical CPU core count is collected along with the BigFix 11.0.7 agent multicore setting when available. The multicore setting is Not Applicable on clients earlier than BigFix 11.0.7.</FONT></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2>
 <UL>
@@ -73,7 +73,7 @@
 <DIV class=hc-sec><FONT color=#000000 size=2></FONT>&nbsp;</DIV></DIV>
 <P><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}</script> </P>
 <DIV class=hc-sec>Version and Release Notes</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, CPU idle, and BigFix 11.0.7 agent multicore client settings.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, total physical CPU core count, CPU idle, and the BigFix 11.0.7 agent multicore client setting.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>
 		<Relevance>true</Relevance>
 		<Source>Internal</Source>
@@ -100,5 +100,6 @@
 		<Property Name="Platform Health Check - Agent Multicore Scaling Enabled" ID="40" EvaluationPeriod="P1D">if (version of client >= "11.0.7.0" as version) then (if (exists values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) then (if ((concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "1" OR (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "true") then "On" else "Off") else "Not Set") else "Not Applicable"</Property>
 		<Property Name="Platform Health Check - Agent CPU Work Idle" ID="43" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_WorkIdle" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_WorkIdle" of client) else "Not Set"</Property>
 		<Property Name="Platform Health Check - Agent CPU Sleep Idle" ID="44" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_SleepIdle" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_SleepIdle" of client) else "Not Set"</Property>
+		<Property Name="Platform Health Check - Agent Total Physical CPU Core Count" ID="45" EvaluationPeriod="P1D">((count of cpupackages) * (core of cpupackage)) as string</Property>
 	</Analysis>
 </BES>

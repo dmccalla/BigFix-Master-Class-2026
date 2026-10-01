@@ -119,6 +119,7 @@ class ProcessedRow:
     fast_hash_verify_work: str = ""
     fast_hash_verify_sleep: str = ""
     agent_multicore_scaling_enabled: str = ""
+    agent_total_physical_cpu_core_count: str = ""
     agent_cpu_work_idle: str = ""
     agent_cpu_sleep_idle: str = ""
 
@@ -289,6 +290,10 @@ AGENT_MULTICORE_SCALING_COLUMN_NAMES = (
     "Platform Health Check - Agent Multicore Scaling Enabled",
     "Agent Multicore Scaling Enabled",
     "_BESClient_Resource_ScaleWorkTimeWithCPUCores",
+)
+AGENT_TOTAL_PHYSICAL_CPU_CORE_COUNT_COLUMN_NAMES = (
+    "Platform Health Check - Agent Total Physical CPU Core Count",
+    "Agent Total Physical CPU Core Count",
 )
 AGENT_CPU_WORK_IDLE_COLUMN_NAMES = (
     "Platform Health Check - Agent CPU Work Idle",
@@ -557,10 +562,11 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
         "Platform Health Check - Agent Multicore Scaling Enabled",
         "Platform Health Check - Agent CPU Work Idle",
         "Platform Health Check - Agent CPU Sleep Idle",
+        "Platform Health Check - Agent Total Physical CPU Core Count",
     ]
     if len(df.columns) != len(columns):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 13 collection fields."
+            "Headerless Agent Performance captures must contain all 14 collection fields."
         )
     df.columns = columns
     return df
@@ -604,7 +610,7 @@ def _merge_extra_leading_csv_fields(row: list[str], expected: int) -> list[str]:
         return row
     if len(row) < expected:
         return []
-    if expected in {13, 15}:
+    if expected == 14:
         repaired = _repair_loop_capture_row_with_commas(row, expected)
         if repaired:
             return repaired
@@ -642,8 +648,9 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
             "Platform Health Check - Agent Multicore Scaling Enabled",
             "Platform Health Check - Agent CPU Work Idle",
             "Platform Health Check - Agent CPU Sleep Idle",
+            "Platform Health Check - Agent Total Physical CPU Core Count",
         ]
-        expected = 13
+        expected = 14
         data_rows = rows
 
     normalized = [
@@ -652,7 +659,7 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
     ]
     if any(len(row) != expected for row in normalized):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 13 collection fields."
+            "Headerless Agent Performance captures must contain all 14 collection fields."
         )
     return pd.DataFrame(normalized, columns=columns)
 
@@ -1742,6 +1749,13 @@ def auto_detect_agent_multicore_scaling_column(df: pd.DataFrame) -> str | None:
     return _column_lookup_normalized(df, AGENT_MULTICORE_SCALING_COLUMN_NAMES)
 
 
+def auto_detect_agent_total_physical_cpu_core_count_column(
+    df: pd.DataFrame,
+) -> str | None:
+    """Find the total physical CPU core count column."""
+    return _column_lookup_normalized(df, AGENT_TOTAL_PHYSICAL_CPU_CORE_COUNT_COLUMN_NAMES)
+
+
 def auto_detect_agent_cpu_idle_columns(
     df: pd.DataFrame,
 ) -> tuple[str | None, str | None]:
@@ -2321,6 +2335,7 @@ def process_rows(
     fast_hash_verify_work_column: str | None = None,
     fast_hash_verify_sleep_column: str | None = None,
     agent_multicore_scaling_column: str | None = None,
+    agent_total_physical_cpu_core_count_column: str | None = None,
     agent_cpu_work_idle_column: str | None = None,
     agent_cpu_sleep_idle_column: str | None = None,
 ) -> tuple[list[ProcessedRow], int, int]:
@@ -2346,6 +2361,10 @@ def process_rows(
         ) = auto_detect_fast_hash_verify_columns(df)
     if not agent_multicore_scaling_column:
         agent_multicore_scaling_column = auto_detect_agent_multicore_scaling_column(df)
+    if not agent_total_physical_cpu_core_count_column:
+        agent_total_physical_cpu_core_count_column = (
+            auto_detect_agent_total_physical_cpu_core_count_column(df)
+        )
     if not agent_cpu_work_idle_column and not agent_cpu_sleep_idle_column:
         agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
             auto_detect_agent_cpu_idle_columns(df)
@@ -2422,6 +2441,12 @@ def process_rows(
                     row.get(agent_multicore_scaling_column)
                 )
 
+            physical_cpu_core_count = ""
+            if agent_total_physical_cpu_core_count_column:
+                physical_cpu_core_count = display_client_setting(
+                    row.get(agent_total_physical_cpu_core_count_column)
+                )
+
             cpu_work_idle = ""
             cpu_sleep_idle = ""
             if agent_cpu_work_idle_column:
@@ -2450,6 +2475,7 @@ def process_rows(
                     fast_hash_verify_work=fast_hash_work,
                     fast_hash_verify_sleep=fast_hash_sleep,
                     agent_multicore_scaling_enabled=multicore_scaling,
+                    agent_total_physical_cpu_core_count=physical_cpu_core_count,
                     agent_cpu_work_idle=cpu_work_idle,
                     agent_cpu_sleep_idle=cpu_sleep_idle,
                 )
@@ -2658,11 +2684,15 @@ def analyze_agent_multicore(
         return None
 
     settings = Counter(
-        row.agent_multicore_scaling_enabled or "Not Set" for row in multicore_rows
+        (
+            row.agent_multicore_scaling_enabled or "Not Set",
+            row.agent_total_physical_cpu_core_count or "Not Reported",
+        )
+        for row in multicore_rows
     )
     settings_rows = [
-        [scaling, f"{count:,}"]
-        for scaling, count in sorted(
+        [scaling, physical_core_count, f"{count:,}"]
+        for (scaling, physical_core_count), count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
         )
     ]
@@ -2828,7 +2858,10 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         r.fast_hash_verify_enabled or r.fast_hash_verify_work or r.fast_hash_verify_sleep
         for r in rows
     )
-    has_agent_multicore_data = any(r.agent_multicore_scaling_enabled for r in rows)
+    has_agent_multicore_data = any(
+        r.agent_multicore_scaling_enabled or r.agent_total_physical_cpu_core_count
+        for r in rows
+    )
     has_agent_cpu_idle_data = any(
         r.agent_cpu_work_idle or r.agent_cpu_sleep_idle for r in rows
     )
@@ -2866,6 +2899,9 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             )
         if has_agent_multicore_data:
             row_dict["Agent Multicore Scaling"] = r.agent_multicore_scaling_enabled
+            row_dict["Agent Total Physical CPU Core Count"] = (
+                r.agent_total_physical_cpu_core_count
+            )
         if has_agent_cpu_idle_data:
             row_dict["Agent CPU Work Idle"] = r.agent_cpu_work_idle
             row_dict["Agent CPU Sleep Idle"] = r.agent_cpu_sleep_idle
@@ -3351,6 +3387,7 @@ def generate_excel(
                 agent_multicore_summary.settings_rows,
                 columns=[
                     "Scale Work Time With CPU Cores",
+                    "Total Physical CPU Cores",
                     "Devices",
                 ],
             ).to_excel(writer, sheet_name="Agent Multicore Settings", index=False)
@@ -3991,6 +4028,7 @@ def generate_word(
             document,
             [
                 "Scale Work Time With CPU Cores",
+                "Total Physical CPU Cores",
                 "Devices",
             ],
             agent_multicore_summary.settings_rows,
@@ -4155,6 +4193,14 @@ def main() -> int:
         agent_multicore_scaling_column = auto_detect_agent_multicore_scaling_column(df)
         if agent_multicore_scaling_column:
             log.detail("Agent multicore scaling", agent_multicore_scaling_column)
+        agent_total_physical_cpu_core_count_column = (
+            auto_detect_agent_total_physical_cpu_core_count_column(df)
+        )
+        if agent_total_physical_cpu_core_count_column:
+            log.detail(
+                "Agent total physical CPU core count",
+                agent_total_physical_cpu_core_count_column,
+            )
         agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
             auto_detect_agent_cpu_idle_columns(df)
         )
@@ -4191,6 +4237,7 @@ def main() -> int:
             fast_hash_verify_work_column=fast_hash_verify_work_column,
             fast_hash_verify_sleep_column=fast_hash_verify_sleep_column,
             agent_multicore_scaling_column=agent_multicore_scaling_column,
+            agent_total_physical_cpu_core_count_column=agent_total_physical_cpu_core_count_column,
             agent_cpu_work_idle_column=agent_cpu_work_idle_column,
             agent_cpu_sleep_idle_column=agent_cpu_sleep_idle_column,
         )

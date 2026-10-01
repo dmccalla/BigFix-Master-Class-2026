@@ -107,8 +107,8 @@ def test_shipped_loop_samples_match_current_agent_performance_contract() -> None
 
     xml_df = get_loop_health.load_loop_input(xml)
     csv_df = get_loop_health.load_loop_input(csv_file)
-    assert len(xml_df.columns) == 13
-    assert len(csv_df.columns) == 13
+    assert len(xml_df.columns) == 14
+    assert len(csv_df.columns) == 14
 
     xml_rows, xml_not_reported, xml_errors = _processed_loop_sample(xml)
     csv_rows, csv_not_reported, csv_errors = _processed_loop_sample(csv_file)
@@ -117,8 +117,8 @@ def test_shipped_loop_samples_match_current_agent_performance_contract() -> None
 
     multicore = get_loop_health.analyze_agent_multicore(xml_rows)
     assert multicore is not None
-    assert ["On", "2"] in multicore.settings_rows
-    assert ["Not Applicable", "6"] in multicore.settings_rows
+    assert ["On", "4", "2"] in multicore.settings_rows
+    assert ["Not Applicable", "4", "6"] in multicore.settings_rows
 
 
 def test_load_loop_input_from_capture_accepts_comma_in_computer_name(

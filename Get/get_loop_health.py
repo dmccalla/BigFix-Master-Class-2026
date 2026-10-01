@@ -119,8 +119,6 @@ class ProcessedRow:
     fast_hash_verify_work: str = ""
     fast_hash_verify_sleep: str = ""
     agent_multicore_scaling_enabled: str = ""
-    agent_multicore_max_core_utilization: str = ""
-    agent_multicore_work_type_scalar: str = ""
     agent_cpu_work_idle: str = ""
     agent_cpu_sleep_idle: str = ""
 
@@ -291,16 +289,6 @@ AGENT_MULTICORE_SCALING_COLUMN_NAMES = (
     "Platform Health Check - Agent Multicore Scaling Enabled",
     "Agent Multicore Scaling Enabled",
     "_BESClient_Resource_ScaleWorkTimeWithCPUCores",
-)
-AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES = (
-    "Platform Health Check - Agent Multicore Max Core Utilization",
-    "Agent Multicore Max Core Utilization",
-    "_BESClient_Resource_MaxCoreUtilization",
-)
-AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES = (
-    "Platform Health Check - Agent Multicore Work Type Scalar",
-    "Agent Multicore Work Type Scalar",
-    "_BESClient_Resource_WorkTypeScalar",
 )
 AGENT_CPU_WORK_IDLE_COLUMN_NAMES = (
     "Platform Health Check - Agent CPU Work Idle",
@@ -567,14 +555,12 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
         "Platform Health Check - FastHashVerify Work ms",
         "Platform Health Check - FastHashVerify Sleep ms",
         "Platform Health Check - Agent Multicore Scaling Enabled",
-        "Platform Health Check - Agent Multicore Max Core Utilization",
-        "Platform Health Check - Agent Multicore Work Type Scalar",
         "Platform Health Check - Agent CPU Work Idle",
         "Platform Health Check - Agent CPU Sleep Idle",
     ]
     if len(df.columns) != len(columns):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 15 collection fields."
+            "Headerless Agent Performance captures must contain all 13 collection fields."
         )
     df.columns = columns
     return df
@@ -595,9 +581,10 @@ def _looks_like_loop_csv_metric(value: str) -> bool:
     return bool(re.fullmatch(r"\d+:\d{1,2}(?::\d{1,2}(?:\.\d+)?)?", text))
 
 
-def _repair_loop_capture_row_with_commas(row: list[str]) -> list[str]:
-    tail = [value.strip() for value in row[-11:]]
-    middle = row[:-11]
+def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[str]:
+    tail_count = expected - 4
+    tail = [value.strip() for value in row[-tail_count:]]
+    middle = row[:-tail_count]
 
     for idx in range(1, len(middle) - 1):
         if _looks_like_loop_csv_metric(middle[idx]) and _looks_like_loop_csv_metric(
@@ -617,8 +604,8 @@ def _merge_extra_leading_csv_fields(row: list[str], expected: int) -> list[str]:
         return row
     if len(row) < expected:
         return []
-    if expected == 15:
-        repaired = _repair_loop_capture_row_with_commas(row)
+    if expected in {13, 15}:
+        repaired = _repair_loop_capture_row_with_commas(row, expected)
         if repaired:
             return repaired
     leading_count = len(row) - expected + 1
@@ -653,12 +640,10 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
             "Platform Health Check - FastHashVerify Work ms",
             "Platform Health Check - FastHashVerify Sleep ms",
             "Platform Health Check - Agent Multicore Scaling Enabled",
-            "Platform Health Check - Agent Multicore Max Core Utilization",
-            "Platform Health Check - Agent Multicore Work Type Scalar",
             "Platform Health Check - Agent CPU Work Idle",
             "Platform Health Check - Agent CPU Sleep Idle",
         ]
-        expected = 15
+        expected = 13
         data_rows = rows
 
     normalized = [
@@ -667,7 +652,7 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
     ]
     if any(len(row) != expected for row in normalized):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 15 collection fields."
+            "Headerless Agent Performance captures must contain all 13 collection fields."
         )
     return pd.DataFrame(normalized, columns=columns)
 
@@ -1752,15 +1737,9 @@ def auto_detect_fast_hash_verify_columns(
     )
 
 
-def auto_detect_agent_multicore_columns(
-    df: pd.DataFrame,
-) -> tuple[str | None, str | None, str | None]:
-    """Find 11.0.7 agent multicore client-setting columns."""
-    return (
-        _column_lookup_normalized(df, AGENT_MULTICORE_SCALING_COLUMN_NAMES),
-        _column_lookup_normalized(df, AGENT_MULTICORE_MAX_CORE_UTILIZATION_COLUMN_NAMES),
-        _column_lookup_normalized(df, AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES),
-    )
+def auto_detect_agent_multicore_scaling_column(df: pd.DataFrame) -> str | None:
+    """Find the 11.0.7 agent multicore switch column."""
+    return _column_lookup_normalized(df, AGENT_MULTICORE_SCALING_COLUMN_NAMES)
 
 
 def auto_detect_agent_cpu_idle_columns(
@@ -1867,6 +1846,18 @@ def display_client_setting(value: Any) -> str:
     if "does not exist" in folded or "duplicate" in folded or "error" in folded:
         return "Unknown"
     return text
+
+
+def parse_agent_multicore_scaling(value: Any) -> str:
+    """Normalize the supported multicore switch without inferring a default."""
+    setting = display_client_setting(value)
+    if setting in {"Not Set", "Not Applicable", "Unknown"}:
+        return setting
+    if setting.casefold() in {"1", "true", "yes", "on", "enabled", "enable"}:
+        return "On"
+    if setting.casefold() in {"0", "false", "no", "off", "disabled", "disable"}:
+        return "Off"
+    return "Unknown"
 
 
 def configured_cpu_duty_cycle(work: str, sleep: str) -> str:
@@ -2330,8 +2321,6 @@ def process_rows(
     fast_hash_verify_work_column: str | None = None,
     fast_hash_verify_sleep_column: str | None = None,
     agent_multicore_scaling_column: str | None = None,
-    agent_multicore_max_core_utilization_column: str | None = None,
-    agent_multicore_work_type_scalar_column: str | None = None,
     agent_cpu_work_idle_column: str | None = None,
     agent_cpu_sleep_idle_column: str | None = None,
 ) -> tuple[list[ProcessedRow], int, int]:
@@ -2355,18 +2344,8 @@ def process_rows(
             fast_hash_verify_work_column,
             fast_hash_verify_sleep_column,
         ) = auto_detect_fast_hash_verify_columns(df)
-    if not any(
-        (
-            agent_multicore_scaling_column,
-            agent_multicore_max_core_utilization_column,
-            agent_multicore_work_type_scalar_column,
-        )
-    ):
-        (
-            agent_multicore_scaling_column,
-            agent_multicore_max_core_utilization_column,
-            agent_multicore_work_type_scalar_column,
-        ) = auto_detect_agent_multicore_columns(df)
+    if not agent_multicore_scaling_column:
+        agent_multicore_scaling_column = auto_detect_agent_multicore_scaling_column(df)
     if not agent_cpu_work_idle_column and not agent_cpu_sleep_idle_column:
         agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
             auto_detect_agent_cpu_idle_columns(df)
@@ -2438,19 +2417,9 @@ def process_rows(
                 )
 
             multicore_scaling = ""
-            multicore_max_core_utilization = ""
-            multicore_work_type_scalar = ""
             if agent_multicore_scaling_column:
-                multicore_scaling = display_client_setting(
+                multicore_scaling = parse_agent_multicore_scaling(
                     row.get(agent_multicore_scaling_column)
-                )
-            if agent_multicore_max_core_utilization_column:
-                multicore_max_core_utilization = display_client_setting(
-                    row.get(agent_multicore_max_core_utilization_column)
-                )
-            if agent_multicore_work_type_scalar_column:
-                multicore_work_type_scalar = display_client_setting(
-                    row.get(agent_multicore_work_type_scalar_column)
                 )
 
             cpu_work_idle = ""
@@ -2481,8 +2450,6 @@ def process_rows(
                     fast_hash_verify_work=fast_hash_work,
                     fast_hash_verify_sleep=fast_hash_sleep,
                     agent_multicore_scaling_enabled=multicore_scaling,
-                    agent_multicore_max_core_utilization=multicore_max_core_utilization,
-                    agent_multicore_work_type_scalar=multicore_work_type_scalar,
                     agent_cpu_work_idle=cpu_work_idle,
                     agent_cpu_sleep_idle=cpu_sleep_idle,
                 )
@@ -2685,28 +2652,17 @@ def fast_hash_verify_coverage_rows(
 def analyze_agent_multicore(
     rows: list[ProcessedRow],
 ) -> AgentMulticoreSummary | None:
-    """Group reported 11.0.7 agent multicore setting values without assessing them."""
-    multicore_rows = [
-        row
-        for row in rows
-        if row.agent_multicore_scaling_enabled
-        or row.agent_multicore_max_core_utilization
-        or row.agent_multicore_work_type_scalar
-    ]
+    """Group the supported 11.0.7 agent multicore switch without assessing it."""
+    multicore_rows = [row for row in rows if row.agent_multicore_scaling_enabled]
     if not multicore_rows:
         return None
 
     settings = Counter(
-        (
-            row.agent_multicore_scaling_enabled or "Not Set",
-            row.agent_multicore_max_core_utilization or "Not Set",
-            row.agent_multicore_work_type_scalar or "Not Set",
-        )
-        for row in multicore_rows
+        row.agent_multicore_scaling_enabled or "Not Set" for row in multicore_rows
     )
     settings_rows = [
-        [scaling, utilization, scalar, f"{count:,}"]
-        for (scaling, utilization, scalar), count in sorted(
+        [scaling, f"{count:,}"]
+        for scaling, count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
         )
     ]
@@ -2872,12 +2828,7 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         r.fast_hash_verify_enabled or r.fast_hash_verify_work or r.fast_hash_verify_sleep
         for r in rows
     )
-    has_agent_multicore_data = any(
-        r.agent_multicore_scaling_enabled
-        or r.agent_multicore_max_core_utilization
-        or r.agent_multicore_work_type_scalar
-        for r in rows
-    )
+    has_agent_multicore_data = any(r.agent_multicore_scaling_enabled for r in rows)
     has_agent_cpu_idle_data = any(
         r.agent_cpu_work_idle or r.agent_cpu_sleep_idle for r in rows
     )
@@ -2915,12 +2866,6 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             )
         if has_agent_multicore_data:
             row_dict["Agent Multicore Scaling"] = r.agent_multicore_scaling_enabled
-            row_dict["Agent Multicore Max Core Utilization"] = (
-                r.agent_multicore_max_core_utilization
-            )
-            row_dict["Agent Multicore Work Type Scalar"] = (
-                r.agent_multicore_work_type_scalar
-            )
         if has_agent_cpu_idle_data:
             row_dict["Agent CPU Work Idle"] = r.agent_cpu_work_idle
             row_dict["Agent CPU Sleep Idle"] = r.agent_cpu_sleep_idle
@@ -3406,8 +3351,6 @@ def generate_excel(
                 agent_multicore_summary.settings_rows,
                 columns=[
                     "Scale Work Time With CPU Cores",
-                    "Max Core Utilization",
-                    "Work Type Scalar",
                     "Devices",
                 ],
             ).to_excel(writer, sheet_name="Agent Multicore Settings", index=False)
@@ -4039,7 +3982,7 @@ def generate_word(
     if agent_multicore_summary:
         document.add_heading("Agent Multicore Settings", level=3)
         document.add_paragraph(
-            "The following 11.0.7 client setting values were reported. They are "
+            "The following 11.0.7 client setting was reported. It is "
             "configuration context only; no assessment or finding is derived. "
             "Not Applicable means the client version is too old for this setting "
             "(earlier than BigFix 11.0.7)."
@@ -4048,12 +3991,10 @@ def generate_word(
             document,
             [
                 "Scale Work Time With CPU Cores",
-                "Max Core Utilization",
-                "Work Type Scalar",
                 "Devices",
             ],
             agent_multicore_summary.settings_rows,
-            {3},
+            {1},
         )
 
     document.save(str(word_output))
@@ -4211,23 +4152,9 @@ def main() -> int:
             log.detail("FastHashVerify Work", fast_hash_verify_work_column)
         if fast_hash_verify_sleep_column:
             log.detail("FastHashVerify Sleep", fast_hash_verify_sleep_column)
-        (
-            agent_multicore_scaling_column,
-            agent_multicore_max_core_utilization_column,
-            agent_multicore_work_type_scalar_column,
-        ) = auto_detect_agent_multicore_columns(df)
+        agent_multicore_scaling_column = auto_detect_agent_multicore_scaling_column(df)
         if agent_multicore_scaling_column:
             log.detail("Agent multicore scaling", agent_multicore_scaling_column)
-        if agent_multicore_max_core_utilization_column:
-            log.detail(
-                "Agent multicore max core utilization",
-                agent_multicore_max_core_utilization_column,
-            )
-        if agent_multicore_work_type_scalar_column:
-            log.detail(
-                "Agent multicore work type scalar",
-                agent_multicore_work_type_scalar_column,
-            )
         agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
             auto_detect_agent_cpu_idle_columns(df)
         )
@@ -4264,12 +4191,6 @@ def main() -> int:
             fast_hash_verify_work_column=fast_hash_verify_work_column,
             fast_hash_verify_sleep_column=fast_hash_verify_sleep_column,
             agent_multicore_scaling_column=agent_multicore_scaling_column,
-            agent_multicore_max_core_utilization_column=(
-                agent_multicore_max_core_utilization_column
-            ),
-            agent_multicore_work_type_scalar_column=(
-                agent_multicore_work_type_scalar_column
-            ),
             agent_cpu_work_idle_column=agent_cpu_work_idle_column,
             agent_cpu_sleep_idle_column=agent_cpu_sleep_idle_column,
         )

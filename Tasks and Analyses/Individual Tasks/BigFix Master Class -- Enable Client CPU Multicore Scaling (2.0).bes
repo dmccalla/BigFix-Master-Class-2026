@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Fixlet>
-		<Title>BigFix Master Class -- Enable Client CPU Core Scaling (2.0)</Title>
+		<Title>BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
@@ -23,40 +23,42 @@
 
 <DIV id=seed_2 class=hc-wrap>
 <DIV class=hc-eyebrow>&nbsp;</DIV>
-<DIV class=hc-h1>Enable Client CPU Core Scaling</DIV>
+<DIV class=hc-h1>Enable Client CPU Multicore Scaling</DIV>
 <DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
 <DIV class=hc-lead><FONT color=#000000>Enables the BigFix 11.0.7 client setting that scales client work time with the available CPU cores.</FONT></DIV>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
-<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed"><TBODY>
+<TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
+<TBODY>
 <TR>
-<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING: 3px 12px 4px 0px"><DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
-<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING: 3px 0px 4px 12px"><DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>BigFix 11.0.7 or later</B><SPAN>Earlier clients are not relevant because they do not provide this setting.</SPAN></DIV></TD>
-</TR>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>BigFix 11.0.7 or later</B><SPAN>Earlier clients are not relevant because they do not provide this setting.</SPAN></DIV></TD></TR>
 <TR>
-<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING: 3px 12px 4px 0px"><DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Only relevant where needed</B><SPAN>The Fixlet is relevant when the setting is missing, empty, or not set to 1.</SPAN></DIV></TD>
-<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING: 3px 0px 4px 12px"><DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>No script payload</B><SPAN>This action changes one client setting and does not run a platform-specific shell script.</SPAN></DIV></TD>
-</TR>
-</TBODY></TABLE></DIV>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Only relevant where needed</B><SPAN>The Fixlet is relevant when the setting is missing, empty, or not set to 1.</SPAN></DIV></TD>
+<TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>No script payload</B><SPAN>This action changes one client setting and does not run a platform-specific shell script.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
 <DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
 <DIV class=hc-sec>Description</DIV>
 <DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>This Fixlet sets <TT>_BESClient_Resource_ScaleWorkTimeWithCPUCores</TT> to <TT>1</TT>. In BigFix 11.0.7 and later, the client uses this setting when scaling its work time with the available CPU cores.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>The action does not change <TT>_BESClient_Resource_WorkIdle</TT> or <TT>_BESClient_Resource_SleepIdle</TT>. Those settings remain independently reported by the Agent Performance Counters analysis.</FONT></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
-<UL><LI><FONT color=#000000 size=2>This Fixlet can only be run by Master Operators.</FONT></LI><LI><FONT color=#000000 size=2>The action applies only where the 11.0.7 client setting is not already set to <TT>1</TT>.</FONT></LI></UL></DIV>
+<UL>
+<LI><FONT color=#000000 size=2>This Fixlet can only be run by Master Operators.</FONT>
+<LI><FONT color=#000000 size=2>The action applies only where the 11.0.7 client setting is not already set to <TT>1</TT>.</FONT></LI></UL></DIV>
 <DIV class=hc-sec>Supported Platforms</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>BigFix Client 11.0.7 and later.</FONT></DIV><BR>
 <DIV class=hc-sec>Version and Release Notes</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Initial Master Class version.</FONT></DIV>
-<script>document.body.ontakeaction = function(event) {
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Initial Master Class version.</FONT></DIV><script>document.body.ontakeaction = function(event) {
   if (event.contentID == 'Action1' && EvaluateRelevance('master flag of current console user') === "False") {
     alert('<?jxlat Only Master Operators can run this Fixlet.?>');
     return false;
   }
-}</script>
-</DIV>]]></Description>
+}</script> </DIV>]]></Description>
 		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
-		<Relevance>version of client >= "11.0.7.0" as version</Relevance>
+		<Relevance><![CDATA[version of client >= "11.0.7.0" as version]]></Relevance>
 		<Relevance>not exists values whose (it = "1") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client</Relevance>
 		<Category>BigFix Master Class</Category>
 		<DownloadSize>0</DownloadSize>
@@ -67,12 +69,16 @@
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Thu, 01 Oct 2026 18:00:00 +0000</Value>
+			<Value>Thu, 01 Oct 2026 15:33:42 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">
-			<Description><PreLink>Click </PreLink><Link>here</Link><PostLink> to enable client CPU core scaling.</PostLink></Description>
-			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell"><![CDATA[setting "_BESClient_Resource_ScaleWorkTimeWithCPUCores"="1" on "{parameter "action issue date" of action}" for client]]></ActionScript>
+			<Description>
+				<PreLink>Click </PreLink>
+				<Link>here</Link>
+				<PostLink> to enable client CPU core scaling.</PostLink>
+			</Description>
+			<ActionScript MIMEType="application/x-Fixlet-Windows-Shell">setting "_BESClient_Resource_ScaleWorkTimeWithCPUCores"="1" on "{parameter "action issue date" of action}" for client</ActionScript>
 		</DefaultAction>
 	</Fixlet>
 </BES>

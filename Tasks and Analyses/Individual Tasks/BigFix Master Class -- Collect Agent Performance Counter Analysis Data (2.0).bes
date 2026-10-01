@@ -377,14 +377,14 @@ function IsLoopMetricField($Value) {{
 
 function SplitLoopAnswerFields($Line) {{
     $parts = @("$Line".Split(","))
-    if ($parts.Count -eq 15) {{
+    if ($parts.Count -eq 13) {{
         return $parts
     }
 
-    if ($parts.Count -lt 15) {{ return @() }}
+    if ($parts.Count -lt 13) {{ return @() }}
 
-    $tailStart = $parts.Count - 11
-    $middleEnd = $parts.Count - 12
+    $tailStart = $parts.Count - 9
+    $middleEnd = $parts.Count - 10
     for ($i = 1; $i -lt $middleEnd; $i++) {{
         if ((IsLoopMetricField $parts[$i]) -and (IsLoopMetricField $parts[$i + 1])) {{
             return @(
@@ -400,14 +400,12 @@ function SplitLoopAnswerFields($Line) {{
                 "$($parts[$tailStart + 5])".Trim(),
                 "$($parts[$tailStart + 6])".Trim(),
                 "$($parts[$tailStart + 7])".Trim(),
-                "$($parts[$tailStart + 8])".Trim(),
-                "$($parts[$tailStart + 9])".Trim(),
-                "$($parts[$tailStart + 10])".Trim()
+                "$($parts[$tailStart + 8])".Trim()
             )
         }
     }
 
-    return @(SplitAnswerFields $Line 15)
+    return @(SplitAnswerFields $Line 13)
 }
 
 function BuildLoopFromAnswers($Answers, $OutputPath) {{
@@ -424,8 +422,6 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {{
         "Platform Health Check - FastHashVerify Work ms",
         "Platform Health Check - FastHashVerify Sleep ms",
         "Platform Health Check - Agent Multicore Scaling Enabled",
-        "Platform Health Check - Agent Multicore Max Core Utilization",
-        "Platform Health Check - Agent Multicore Work Type Scalar",
         "Platform Health Check - Agent CPU Work Idle",
         "Platform Health Check - Agent CPU Sleep Idle"
     )
@@ -434,7 +430,7 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {{
         if (-not $answer) {{ continue }
         if ($answer -match '^\s*Computer Name\s*,') {{ continue }
         $parts = @(SplitLoopAnswerFields $answer)
-        if ($parts.Count -ne 15) {{ continue }
+        if ($parts.Count -ne 13) {{ continue }
         $loopRows.Add([pscustomobject]@{{
             "Computer Name" = $parts[0].Trim()
             "Platform Health Check - Maximum Cycle Minutes" = $parts[1].Trim()
@@ -447,10 +443,8 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {{
             "Platform Health Check - FastHashVerify Work ms" = $parts[8].Trim()
             "Platform Health Check - FastHashVerify Sleep ms" = $parts[9].Trim()
             "Platform Health Check - Agent Multicore Scaling Enabled" = $parts[10].Trim()
-            "Platform Health Check - Agent Multicore Max Core Utilization" = $parts[11].Trim()
-            "Platform Health Check - Agent Multicore Work Type Scalar" = $parts[12].Trim()
-            "Platform Health Check - Agent CPU Work Idle" = $parts[13].Trim()
-            "Platform Health Check - Agent CPU Sleep Idle" = $parts[14].Trim()
+            "Platform Health Check - Agent CPU Work Idle" = $parts[11].Trim()
+            "Platform Health Check - Agent CPU Sleep Idle" = $parts[12].Trim()
         })
     }
     if ($loopRows.Count) {{
@@ -669,8 +663,8 @@ if ($QueryAttempts -lt 1) {{ $QueryAttempts = 1 }
 # computer set factored out so it can be sliced. COMPUTERSET is substituted per
 # batch.
 $LoopTemplate = @'
-(item 0 of it & "," & item 1 of it & "," & item 2 of it & "," & item 3 of it & "," & item 4 of it & "," & item 5 of it & "," & item 6 of it & "," & item 7 of it & "," & item 8 of it & "," & item 9 of it & "," & item 10 of it & "," & item 11 of it & "," & item 12 of it & "," & item 13 of it & "," & item 14 of it)
-of (item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it, item 13 of it, item 14 of it)
+(item 0 of it & "," & item 1 of it & "," & item 2 of it & "," & item 3 of it & "," & item 4 of it & "," & item 5 of it & "," & item 6 of it & "," & item 7 of it & "," & item 8 of it & "," & item 9 of it & "," & item 10 of it & "," & item 11 of it & "," & item 12 of it)
+of (item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it)
 of
 (
   (
@@ -685,12 +679,10 @@ of
     (if (size of item 8 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 8 of it)) else (if (size of item 8 of it > 1) then (("Platform Health Check - FastHashVerify Work ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 8 of it) as string) else ("Platform Health Check - FastHashVerify Work ms Property Does Not Exist"))),
     (if (size of item 9 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 9 of it)) else (if (size of item 9 of it > 1) then (("Platform Health Check - FastHashVerify Sleep ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 9 of it) as string) else ("Platform Health Check - FastHashVerify Sleep ms Property Does Not Exist"))),
     (if (size of item 10 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 10 of it)) else (if (size of item 10 of it > 1) then (("Platform Health Check - Agent Multicore Scaling Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 10 of it) as string) else ("Platform Health Check - Agent Multicore Scaling Enabled Property Does Not Exist"))),
-    (if (size of item 11 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 11 of it)) else (if (size of item 11 of it > 1) then (("Platform Health Check - Agent Multicore Max Core Utilization Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 11 of it) as string) else ("Platform Health Check - Agent Multicore Max Core Utilization Property Does Not Exist"))),
-    (if (size of item 12 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 12 of it)) else (if (size of item 12 of it > 1) then (("Platform Health Check - Agent Multicore Work Type Scalar Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 12 of it) as string) else ("Platform Health Check - Agent Multicore Work Type Scalar Property Does Not Exist"))),
-    (if (size of item 13 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 13 of it)) else (if (size of item 13 of it > 1) then (("Platform Health Check - Agent CPU Work Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 13 of it) as string) else ("Platform Health Check - Agent CPU Work Idle Property Does Not Exist"))),
-    (if (size of item 14 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 14 of it)) else (if (size of item 14 of it > 1) then (("Platform Health Check - Agent CPU Sleep Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 14 of it) as string) else ("Platform Health Check - Agent CPU Sleep Idle Property Does Not Exist")))
+    (if (size of item 11 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 11 of it)) else (if (size of item 11 of it > 1) then (("Platform Health Check - Agent CPU Work Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 11 of it) as string) else ("Platform Health Check - Agent CPU Work Idle Property Does Not Exist"))),
+    (if (size of item 12 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 12 of it)) else (if (size of item 12 of it > 1) then (("Platform Health Check - Agent CPU Sleep Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 12 of it) as string) else ("Platform Health Check - Agent CPU Sleep Idle Property Does Not Exist")))
   )
-  of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it, item 13 of it, item 14 of it)
+  of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it)
 )
 of
 (
@@ -705,8 +697,6 @@ of
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Work ms") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Sleep ms") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent Multicore Scaling Enabled") as lowercase),
-  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent Multicore Max Core Utilization") as lowercase),
-  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent Multicore Work Type Scalar") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent CPU Work Idle") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent CPU Sleep Idle") as lowercase)
 )

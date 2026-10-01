@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Duncan McCalla
 # SPDX-License-Identifier: MIT
 
-"""Contract checks for the Master Class client CPU core scaling Fixlet."""
+"""Contract checks for the Master Class client CPU multicore scaling Fixlet."""
 
 from __future__ import annotations
 
@@ -13,17 +13,17 @@ FIXLET = (
     Path(__file__).resolve().parents[1]
     / "Tasks and Analyses"
     / "Individual Tasks"
-    / "BigFix Master Class -- Enable Client CPU Core Scaling (2.0).bes"
+    / "BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0).bes"
 )
 
 
-def test_client_cpu_core_scaling_fixlet_is_a_reusable_1107_fixlet() -> None:
+def test_client_cpu_multicore_scaling_fixlet_is_a_reusable_1107_fixlet() -> None:
     root = ET.parse(FIXLET).getroot()
     fixlet = root.find("Fixlet")
 
     assert fixlet is not None
     assert fixlet.findtext("Title") == (
-        "BigFix Master Class -- Enable Client CPU Core Scaling (2.0)"
+        "BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0)"
     )
     assert fixlet.findtext("Category") == "BigFix Master Class"
     assert fixlet.findtext("Domain") == "BES "

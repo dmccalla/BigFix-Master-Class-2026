@@ -131,15 +131,15 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
     )
 
 
-def test_headerless_fifteen_field_loop_capture_maps_cpu_idle_columns(
+def test_headerless_thirteen_field_loop_capture_maps_cpu_idle_columns(
     tmp_path: Path,
 ) -> None:
     xml = tmp_path / "Client_Loop_10-01-2026_1200.xml"
     xml.write_text(
         """<?xml version="1.0" encoding="UTF-8"?>
 <BESAPI><Query><Result>
-<Answer type="string">CLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1,80,4,25,400</Answer>
-<Answer type="string">CLIENT2, Example Office,21,15.0,Mon, 28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60,Not Applicable,Not Applicable,Not Applicable,10,480</Answer>
+<Answer type="string">CLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1,25,400</Answer>
+<Answer type="string">CLIENT2, Example Office,21,15.0,Mon, 28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60,Not Applicable,10,480</Answer>
 </Result></Query></BESAPI>
 """,
         encoding="utf-8",
@@ -171,9 +171,7 @@ def test_headerless_fifteen_field_loop_capture_maps_cpu_idle_columns(
     assert errors == 0
     summary = loop.analyze_agent_multicore(processed)
     assert summary is not None
-    assert ["Not Applicable", "Not Applicable", "Not Applicable", "1"] in (
-        summary.settings_rows
-    )
+    assert ["Not Applicable", "1"] in summary.settings_rows
 
 
 def test_headerless_loop_capture_requires_all_collection_fields(tmp_path: Path) -> None:
@@ -181,11 +179,11 @@ def test_headerless_loop_capture_requires_all_collection_fields(tmp_path: Path) 
     xml.write_text(
         """<?xml version="1.0" encoding="UTF-8"?>
 <BESAPI><Query><Result>
-<Answer type="string">CLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1,80,4</Answer>
+<Answer type="string">CLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1</Answer>
 </Result></Query></BESAPI>
 """,
         encoding="utf-8",
     )
 
-    with pytest.raises(ValueError, match="all 15 collection fields"):
+    with pytest.raises(ValueError, match="all 13 collection fields"):
         loop.load_loop_input(xml)

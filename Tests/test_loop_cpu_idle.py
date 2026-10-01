@@ -116,7 +116,7 @@ def test_headerless_fifteen_field_loop_capture_maps_cpu_idle_columns(
         """<?xml version="1.0" encoding="UTF-8"?>
 <BESAPI><Query><Result>
 <Answer type="string">CLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1,80,4,25,400</Answer>
-<Answer type="string">CLIENT2, Example Office,21,15.0,Mon, 28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60,1,80,4,10,480</Answer>
+<Answer type="string">CLIENT2, Example Office,21,15.0,Mon, 28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60,Not Applicable,Not Applicable,Not Applicable,10,480</Answer>
 </Result></Query></BESAPI>
 """,
         encoding="utf-8",
@@ -128,8 +128,29 @@ def test_headerless_fifteen_field_loop_capture_maps_cpu_idle_columns(
         "Platform Health Check - Agent CPU Work Idle",
         "Platform Health Check - Agent CPU Sleep Idle",
     ]
+    assert (
+        str(df.iloc[1]["Platform Health Check - Agent Multicore Scaling Enabled"])
+        == "Not Applicable"
+    )
     assert str(df.iloc[1]["Platform Health Check - Agent CPU Work Idle"]) == "10"
     assert str(df.iloc[1]["Platform Health Check - Agent CPU Sleep Idle"]) == "480"
+
+    df = loop.normalize_loop_time_columns(
+        df, "Maximum Cycle Minutes", "Average Cycle Minutes"
+    )
+    processed, not_reported, errors = loop.process_rows(
+        df,
+        "Computer Name",
+        "Maximum Cycle Minutes",
+        "Average Cycle Minutes",
+    )
+    assert not_reported == 0
+    assert errors == 0
+    summary = loop.analyze_agent_multicore(processed)
+    assert summary is not None
+    assert ["Not Applicable", "Not Applicable", "Not Applicable", "1"] in (
+        summary.settings_rows
+    )
 
 
 def test_headerless_loop_capture_requires_all_collection_fields(tmp_path: Path) -> None:

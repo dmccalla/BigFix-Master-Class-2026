@@ -77,7 +77,7 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
     assert summary is not None
     assert summary.total_devices == 3
     assert summary.settings_rows == [
-        ["Enabled", "80", "4", "2"],
+        ["1", "80", "4", "2"],
         ["Not Set", "Not Set", "Not Set", "1"],
     ]
 
@@ -90,7 +90,7 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
                 "Agent Multicore Work Type Scalar",
             ]
         ].iloc[0]
-    ) == ["Enabled", "80", "4"]
+    ) == ["1", "80", "4"]
 
 
 def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) -> None:
@@ -116,7 +116,7 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
         "Work Type Scalar",
         "Devices",
     )
-    assert settings[1] == ("Enabled", "80", "4", "2")
+    assert settings[1] == ("1", "80", "4", "2")
 
     word_output = tmp_path / "loop.docx"
     loop.generate_word(

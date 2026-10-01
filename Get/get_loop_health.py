@@ -2420,7 +2420,7 @@ def process_rows(
             multicore_max_core_utilization = ""
             multicore_work_type_scalar = ""
             if agent_multicore_scaling_column:
-                multicore_scaling = parse_fast_hash_verify_enabled(
+                multicore_scaling = display_client_setting(
                     row.get(agent_multicore_scaling_column)
                 )
             if agent_multicore_max_core_utilization_column:

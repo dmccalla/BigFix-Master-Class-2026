@@ -104,33 +104,6 @@ def test_load_loop_input_from_capture_accepts_comma_in_computer_name(
     assert str(df.iloc[0]["Platform Health Check - Average Cycle Minutes"]) == "15.0"
 
 
-def test_load_loop_input_from_headerless_five_field_capture(tmp_path: Path) -> None:
-    xml = tmp_path / "Client_Loop_08-12-2026_1502.xml"
-    xml.write_text(
-        _doc(
-            [
-                "BFCLIENT1,42,17,2026-08-12 10:00:00,True",
-                "NEIE10N248RC45B, RRC's Air M4,21,15.0,Not Reported,False",
-            ]
-        ),
-        encoding="utf-8",
-    )
-
-    df = get_loop_health.load_loop_input(xml)
-
-    assert list(df.columns) == [
-        "Computer Name",
-        "Maximum Cycle Minutes",
-        "Average Cycle Minutes",
-        "Last UDP Ping",
-        "Receiving UDP Pings",
-    ]
-    assert df.iloc[1]["Computer Name"] == "NEIE10N248RC45B, RRC's Air M4"
-    assert str(df.iloc[1]["Maximum Cycle Minutes"]) == "21"
-    assert str(df.iloc[1]["Average Cycle Minutes"]) == "15.0"
-    assert str(df.iloc[1]["Receiving UDP Pings"]) == "False"
-
-
 @pytest.mark.skipif(_POWERSHELL is None, reason="PowerShell is not available")
 def test_query_properties_reads_xml_answers_and_preserves_timings(
     tmp_path: Path,

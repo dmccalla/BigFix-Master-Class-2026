@@ -121,6 +121,8 @@ class ProcessedRow:
     agent_multicore_scaling_enabled: str = ""
     agent_multicore_max_core_utilization: str = ""
     agent_multicore_work_type_scalar: str = ""
+    agent_cpu_work_idle: str = ""
+    agent_cpu_sleep_idle: str = ""
 
 
 @dataclass
@@ -240,6 +242,12 @@ class AgentMulticoreSummary:
     settings_rows: list[list[str]]
 
 
+@dataclass
+class AgentCpuIdleSummary:
+    total_devices: int
+    settings_rows: list[list[str]]
+
+
 # Accessible, colorblind-safer palette from the PowerShell version.
 TABLE_STYLE_ID = "BigFixContent"
 
@@ -293,6 +301,16 @@ AGENT_MULTICORE_WORK_TYPE_SCALAR_COLUMN_NAMES = (
     "Platform Health Check - Agent Multicore Work Type Scalar",
     "Agent Multicore Work Type Scalar",
     "_BESClient_Resource_WorkTypeScalar",
+)
+AGENT_CPU_WORK_IDLE_COLUMN_NAMES = (
+    "Platform Health Check - Agent CPU Work Idle",
+    "Agent CPU Work Idle",
+    "_BESClient_Resource_WorkIdle",
+)
+AGENT_CPU_SLEEP_IDLE_COLUMN_NAMES = (
+    "Platform Health Check - Agent CPU Sleep Idle",
+    "Agent CPU Sleep Idle",
+    "_BESClient_Resource_SleepIdle",
 )
 
 
@@ -537,45 +555,28 @@ def _has_descriptive_loop_headers(columns: pd.Index) -> bool:
 
 def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
     df = pd.read_csv(csv_source, header=None)
-    column_count = len(df.columns)
-    if column_count < 2:
-        return df
-
-    if column_count == 2:
-        df.columns = ["Maximum Cycle Minutes", "Average Cycle Minutes"]
-        return df
-
-    names = ["Computer Name", "Maximum Cycle Minutes", "Average Cycle Minutes"]
-    if column_count >= 5:
-        names.extend(["Last UDP Ping", "Receiving UDP Pings"])
-    if column_count >= 7:
-        names.extend(
-            [
-                "Platform Health Check - Command Polling Enabled",
-                "Platform Health Check - Command Polling Interval",
-            ]
+    columns = [
+        "Computer Name",
+        "Maximum Cycle Minutes",
+        "Average Cycle Minutes",
+        "Last UDP Ping",
+        "Receiving UDP Pings",
+        "Platform Health Check - Command Polling Enabled",
+        "Platform Health Check - Command Polling Interval",
+        "Platform Health Check - FastHashVerify Enabled",
+        "Platform Health Check - FastHashVerify Work ms",
+        "Platform Health Check - FastHashVerify Sleep ms",
+        "Platform Health Check - Agent Multicore Scaling Enabled",
+        "Platform Health Check - Agent Multicore Max Core Utilization",
+        "Platform Health Check - Agent Multicore Work Type Scalar",
+        "Platform Health Check - Agent CPU Work Idle",
+        "Platform Health Check - Agent CPU Sleep Idle",
+    ]
+    if len(df.columns) != len(columns):
+        raise ValueError(
+            "Headerless Agent Performance captures must contain all 15 collection fields."
         )
-    if column_count >= 10:
-        names.extend(
-            [
-                "Platform Health Check - FastHashVerify Enabled",
-                "Platform Health Check - FastHashVerify Work ms",
-                "Platform Health Check - FastHashVerify Sleep ms",
-            ]
-        )
-    if column_count >= 13:
-        names.extend(
-            [
-                "Platform Health Check - Agent Multicore Scaling Enabled",
-                "Platform Health Check - Agent Multicore Max Core Utilization",
-                "Platform Health Check - Agent Multicore Work Type Scalar",
-            ]
-        )
-    if column_count > len(names):
-        names.extend(
-            f"Extra Column {idx}" for idx in range(len(names) + 1, column_count + 1)
-        )
-    df.columns = names
+    df.columns = columns
     return df
 
 
@@ -594,21 +595,9 @@ def _looks_like_loop_csv_metric(value: str) -> bool:
     return bool(re.fullmatch(r"\d+:\d{1,2}(?::\d{1,2}(?:\.\d+)?)?", text))
 
 
-def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[str]:
-    if expected == 13:
-        tail = [value.strip() for value in row[-9:]]
-        middle = row[:-9]
-    elif expected == 10:
-        tail = [value.strip() for value in row[-6:]]
-        middle = row[:-6]
-    elif expected == 7:
-        tail = [value.strip() for value in row[-3:]]
-        middle = row[:-3]
-    elif expected == 5:
-        tail = [row[-1].strip()]
-        middle = row[:-1]
-    else:
-        return []
+def _repair_loop_capture_row_with_commas(row: list[str]) -> list[str]:
+    tail = [value.strip() for value in row[-11:]]
+    middle = row[:-11]
 
     for idx in range(1, len(middle) - 1):
         if _looks_like_loop_csv_metric(middle[idx]) and _looks_like_loop_csv_metric(
@@ -618,18 +607,18 @@ def _repair_loop_capture_row_with_commas(row: list[str], expected: int) -> list[
             max_cycle = middle[idx].strip()
             avg_cycle = middle[idx + 1].strip()
             last_udp = ",".join(middle[idx + 2 :]).strip()
-            if expected in {7, 10, 13}:
-                return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
-            return [computer_name, max_cycle, avg_cycle, last_udp, tail[0]]
+            return [computer_name, max_cycle, avg_cycle, last_udp, *tail]
 
     return []
 
 
 def _merge_extra_leading_csv_fields(row: list[str], expected: int) -> list[str]:
-    if len(row) <= expected:
-        return row + [""] * max(0, expected - len(row))
-    if expected in {5, 7, 10, 13}:
-        repaired = _repair_loop_capture_row_with_commas(row, expected)
+    if len(row) == expected:
+        return row
+    if len(row) < expected:
+        return []
+    if expected == 15:
+        repaired = _repair_loop_capture_row_with_commas(row)
         if repaired:
             return repaired
     leading_count = len(row) - expected + 1
@@ -652,74 +641,34 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
         data_rows = rows[1:]
         expected = len(columns)
     else:
-        first_len = len(rows[0])
-        if first_len <= 2:
-            columns = ["Maximum Cycle Minutes", "Average Cycle Minutes"]
-            expected = 2
-        elif first_len >= 13:
-            columns = [
-                "Computer Name",
-                "Maximum Cycle Minutes",
-                "Average Cycle Minutes",
-                "Last UDP Ping",
-                "Receiving UDP Pings",
-                "Platform Health Check - Command Polling Enabled",
-                "Platform Health Check - Command Polling Interval",
-                "Platform Health Check - FastHashVerify Enabled",
-                "Platform Health Check - FastHashVerify Work ms",
-                "Platform Health Check - FastHashVerify Sleep ms",
-                "Platform Health Check - Agent Multicore Scaling Enabled",
-                "Platform Health Check - Agent Multicore Max Core Utilization",
-                "Platform Health Check - Agent Multicore Work Type Scalar",
-            ]
-            expected = 13
-        elif first_len >= 10:
-            columns = [
-                "Computer Name",
-                "Maximum Cycle Minutes",
-                "Average Cycle Minutes",
-                "Last UDP Ping",
-                "Receiving UDP Pings",
-                "Platform Health Check - Command Polling Enabled",
-                "Platform Health Check - Command Polling Interval",
-                "Platform Health Check - FastHashVerify Enabled",
-                "Platform Health Check - FastHashVerify Work ms",
-                "Platform Health Check - FastHashVerify Sleep ms",
-            ]
-            expected = 10
-        elif first_len >= 7:
-            columns = [
-                "Computer Name",
-                "Maximum Cycle Minutes",
-                "Average Cycle Minutes",
-                "Last UDP Ping",
-                "Receiving UDP Pings",
-                "Platform Health Check - Command Polling Enabled",
-                "Platform Health Check - Command Polling Interval",
-            ]
-            expected = 7
-        elif first_len >= 5:
-            columns = [
-                "Computer Name",
-                "Maximum Cycle Minutes",
-                "Average Cycle Minutes",
-                "Last UDP Ping",
-                "Receiving UDP Pings",
-            ]
-            expected = 5
-        else:
-            columns = [
-                "Computer Name",
-                "Maximum Cycle Minutes",
-                "Average Cycle Minutes",
-            ]
-            expected = 3
+        columns = [
+            "Computer Name",
+            "Maximum Cycle Minutes",
+            "Average Cycle Minutes",
+            "Last UDP Ping",
+            "Receiving UDP Pings",
+            "Platform Health Check - Command Polling Enabled",
+            "Platform Health Check - Command Polling Interval",
+            "Platform Health Check - FastHashVerify Enabled",
+            "Platform Health Check - FastHashVerify Work ms",
+            "Platform Health Check - FastHashVerify Sleep ms",
+            "Platform Health Check - Agent Multicore Scaling Enabled",
+            "Platform Health Check - Agent Multicore Max Core Utilization",
+            "Platform Health Check - Agent Multicore Work Type Scalar",
+            "Platform Health Check - Agent CPU Work Idle",
+            "Platform Health Check - Agent CPU Sleep Idle",
+        ]
+        expected = 15
         data_rows = rows
 
     normalized = [
         _merge_extra_leading_csv_fields([str(value) for value in row], expected)
         for row in data_rows
     ]
+    if any(len(row) != expected for row in normalized):
+        raise ValueError(
+            "Headerless Agent Performance captures must contain all 15 collection fields."
+        )
     return pd.DataFrame(normalized, columns=columns)
 
 
@@ -1816,6 +1765,16 @@ def auto_detect_agent_multicore_columns(
     )
 
 
+def auto_detect_agent_cpu_idle_columns(
+    df: pd.DataFrame,
+) -> tuple[str | None, str | None]:
+    """Find the client CPU idle setting columns."""
+    return (
+        _column_lookup_normalized(df, AGENT_CPU_WORK_IDLE_COLUMN_NAMES),
+        _column_lookup_normalized(df, AGENT_CPU_SLEEP_IDLE_COLUMN_NAMES),
+    )
+
+
 def auto_detect_udp_receiving_column(df: pd.DataFrame) -> str | None:
     return _column_lookup_normalized(
         df,
@@ -2352,6 +2311,8 @@ def process_rows(
     agent_multicore_scaling_column: str | None = None,
     agent_multicore_max_core_utilization_column: str | None = None,
     agent_multicore_work_type_scalar_column: str | None = None,
+    agent_cpu_work_idle_column: str | None = None,
+    agent_cpu_sleep_idle_column: str | None = None,
 ) -> tuple[list[ProcessedRow], int, int]:
     processed: list[ProcessedRow] = []
     not_reported_count = 0
@@ -2385,6 +2346,10 @@ def process_rows(
             agent_multicore_max_core_utilization_column,
             agent_multicore_work_type_scalar_column,
         ) = auto_detect_agent_multicore_columns(df)
+    if not agent_cpu_work_idle_column and not agent_cpu_sleep_idle_column:
+        agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
+            auto_detect_agent_cpu_idle_columns(df)
+        )
 
     for _, row in df.iterrows():
         max_sec = convert_to_seconds(row.get(max_column), max_column)
@@ -2467,6 +2432,15 @@ def process_rows(
                     row.get(agent_multicore_work_type_scalar_column)
                 )
 
+            cpu_work_idle = ""
+            cpu_sleep_idle = ""
+            if agent_cpu_work_idle_column:
+                cpu_work_idle = display_client_setting(row.get(agent_cpu_work_idle_column))
+            if agent_cpu_sleep_idle_column:
+                cpu_sleep_idle = display_client_setting(
+                    row.get(agent_cpu_sleep_idle_column)
+                )
+
             processed.append(
                 ProcessedRow(
                     computer_name=computer_name,
@@ -2486,6 +2460,8 @@ def process_rows(
                     agent_multicore_scaling_enabled=multicore_scaling,
                     agent_multicore_max_core_utilization=multicore_max_core_utilization,
                     agent_multicore_work_type_scalar=multicore_work_type_scalar,
+                    agent_cpu_work_idle=cpu_work_idle,
+                    agent_cpu_sleep_idle=cpu_sleep_idle,
                 )
             )
         else:
@@ -2717,6 +2693,33 @@ def analyze_agent_multicore(
     )
 
 
+def analyze_agent_cpu_idle(rows: list[ProcessedRow]) -> AgentCpuIdleSummary | None:
+    """Group reported client CPU idle settings without assessing them."""
+    idle_rows = [
+        row for row in rows if row.agent_cpu_work_idle or row.agent_cpu_sleep_idle
+    ]
+    if not idle_rows:
+        return None
+
+    settings = Counter(
+        (
+            row.agent_cpu_work_idle or "Not Set",
+            row.agent_cpu_sleep_idle or "Not Set",
+        )
+        for row in idle_rows
+    )
+    settings_rows = [
+        [work_idle, sleep_idle, f"{count:,}"]
+        for (work_idle, sleep_idle), count in sorted(
+            settings.items(), key=lambda item: (-item[1], item[0])
+        )
+    ]
+    return AgentCpuIdleSummary(
+        total_devices=len(idle_rows),
+        settings_rows=settings_rows,
+    )
+
+
 def calculate_metrics(
     processed: list[ProcessedRow],
     total_source_rows: int,
@@ -2847,6 +2850,9 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         or r.agent_multicore_work_type_scalar
         for r in rows
     )
+    has_agent_cpu_idle_data = any(
+        r.agent_cpu_work_idle or r.agent_cpu_sleep_idle for r in rows
+    )
 
     data = []
     for r in rows:
@@ -2881,6 +2887,9 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             row_dict["Agent Multicore Work Type Scalar"] = (
                 r.agent_multicore_work_type_scalar
             )
+        if has_agent_cpu_idle_data:
+            row_dict["Agent CPU Work Idle"] = r.agent_cpu_work_idle
+            row_dict["Agent CPU Sleep Idle"] = r.agent_cpu_sleep_idle
         data.append(row_dict)
     return pd.DataFrame(data)
 
@@ -3123,6 +3132,7 @@ def generate_excel(
     command_polling_summary: CommandPollingSummary | None = None,
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
     agent_multicore_summary: AgentMulticoreSummary | None = None,
+    agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
     stamp: str = "",
 ) -> None:
     metrics_rows = [
@@ -3356,6 +3366,11 @@ def generate_excel(
                     "Devices",
                 ],
             ).to_excel(writer, sheet_name="Agent Multicore Settings", index=False)
+        if agent_cpu_idle_summary:
+            pd.DataFrame(
+                agent_cpu_idle_summary.settings_rows,
+                columns=["Work Idle (ms)", "Sleep Idle (ms)", "Devices"],
+            ).to_excel(writer, sheet_name="Agent CPU Idle Settings", index=False)
 
     autosize_excel_columns(excel_output)
     if actionsite_pressure:
@@ -3610,6 +3625,7 @@ def generate_word(
     command_polling_summary: CommandPollingSummary | None = None,
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
     agent_multicore_summary: AgentMulticoreSummary | None = None,
+    agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
     stamp: str = "",
     include_automated_findings: bool = False,
 ) -> None:
@@ -3949,11 +3965,26 @@ def generate_word(
             "configured balance between active hash calculation and sleep time."
         )
 
+    if agent_cpu_idle_summary:
+        document.add_heading("Agent CPU Idle Settings", level=3)
+        document.add_paragraph(
+            "The following client CPU idle setting values were reported. They are "
+            "configuration context only; no assessment or finding is derived."
+        )
+        build_word_table(
+            document,
+            ["Work Idle (ms)", "Sleep Idle (ms)", "Devices"],
+            agent_cpu_idle_summary.settings_rows,
+            {2},
+        )
+
     if agent_multicore_summary:
         document.add_heading("Agent Multicore Settings", level=3)
         document.add_paragraph(
             "The following 11.0.7 client setting values were reported. They are "
-            "configuration context only; no assessment or finding is derived."
+            "configuration context only; no assessment or finding is derived. "
+            "Not Applicable means the client version is too old for this setting "
+            "(earlier than BigFix 11.0.7)."
         )
         build_word_table(
             document,
@@ -4139,6 +4170,13 @@ def main() -> int:
                 "Agent multicore work type scalar",
                 agent_multicore_work_type_scalar_column,
             )
+        agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
+            auto_detect_agent_cpu_idle_columns(df)
+        )
+        if agent_cpu_work_idle_column:
+            log.detail("Agent CPU work idle", agent_cpu_work_idle_column)
+        if agent_cpu_sleep_idle_column:
+            log.detail("Agent CPU sleep idle", agent_cpu_sleep_idle_column)
 
         # Load UDP data early so it can be merged into the loop data
         udp_summary = load_udp_notification_summary(udp_notifications_file)
@@ -4174,6 +4212,8 @@ def main() -> int:
             agent_multicore_work_type_scalar_column=(
                 agent_multicore_work_type_scalar_column
             ),
+            agent_cpu_work_idle_column=agent_cpu_work_idle_column,
+            agent_cpu_sleep_idle_column=agent_cpu_sleep_idle_column,
         )
         if not processed:
             log.warn("No valid rows were parsed.")
@@ -4207,6 +4247,7 @@ def main() -> int:
         command_polling_summary = analyze_command_polling(processed)
         fast_hash_verify_summary = analyze_fast_hash_verify(processed)
         agent_multicore_summary = analyze_agent_multicore(processed)
+        agent_cpu_idle_summary = analyze_agent_cpu_idle(processed)
 
         log.step("Summary")
         log.detail("Devices", metrics.total_devices)
@@ -4276,6 +4317,11 @@ def main() -> int:
                 "Agent multicore settings reported",
                 agent_multicore_summary.total_devices,
             )
+        if agent_cpu_idle_summary:
+            log.detail(
+                "Agent CPU idle settings reported",
+                agent_cpu_idle_summary.total_devices,
+            )
 
         log.step("Generating Word-friendly accessible PNG health summary")
         generate_png(
@@ -4298,6 +4344,7 @@ def main() -> int:
             command_polling_summary=command_polling_summary,
             fast_hash_verify_summary=fast_hash_verify_summary,
             agent_multicore_summary=agent_multicore_summary,
+            agent_cpu_idle_summary=agent_cpu_idle_summary,
             stamp=stamp,
         )
 
@@ -4313,6 +4360,7 @@ def main() -> int:
                 command_polling_summary=command_polling_summary,
                 fast_hash_verify_summary=fast_hash_verify_summary,
                 agent_multicore_summary=agent_multicore_summary,
+                agent_cpu_idle_summary=agent_cpu_idle_summary,
                 stamp=stamp,
                 include_automated_findings=args.include_automated_findings,
             )

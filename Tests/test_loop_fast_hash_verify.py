@@ -136,35 +136,3 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
     assert not any(
         "Consider the customer's download workload" in p.text for p in doc.paragraphs
     )
-
-
-def test_headerless_ten_field_loop_capture_maps_fast_hash_columns(tmp_path: Path) -> None:
-    xml = tmp_path / "Client_Loop_09-28-2026_1030.xml"
-    xml.write_text(
-        _doc(
-            [
-                "BFCLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60",
-                "NEIE10N248RC45B, RRC's Air M4,21,15.0,Mon, "
-                "28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60",
-            ]
-        ),
-        encoding="utf-8",
-    )
-
-    df = loop.load_loop_input(xml)
-
-    assert list(df.columns) == [
-        "Computer Name",
-        "Maximum Cycle Minutes",
-        "Average Cycle Minutes",
-        "Last UDP Ping",
-        "Receiving UDP Pings",
-        "Platform Health Check - Command Polling Enabled",
-        "Platform Health Check - Command Polling Interval",
-        "Platform Health Check - FastHashVerify Enabled",
-        "Platform Health Check - FastHashVerify Work ms",
-        "Platform Health Check - FastHashVerify Sleep ms",
-    ]
-    assert str(df.iloc[1]["Platform Health Check - FastHashVerify Enabled"]) == "0"
-    assert str(df.iloc[1]["Platform Health Check - FastHashVerify Work ms"]) == "20"
-    assert str(df.iloc[1]["Platform Health Check - FastHashVerify Sleep ms"]) == "60"

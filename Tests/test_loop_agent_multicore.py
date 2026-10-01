@@ -129,33 +129,8 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     assert "Agent Multicore Settings" in headings
     assert any("configuration context only" in p.text for p in doc.paragraphs)
+    assert any("earlier than BigFix 11.0.7" in p.text for p in doc.paragraphs)
     assert any(
         table.rows[0].cells[0].text == "Scale Work Time With CPU Cores"
         for table in doc.tables
     )
-
-
-def test_headerless_thirteen_field_loop_capture_maps_agent_multicore_columns(
-    tmp_path: Path,
-) -> None:
-    xml = tmp_path / "Client_Loop_09-30-2026_1030.xml"
-    xml.write_text(
-        """<?xml version="1.0" encoding="UTF-8"?>
-<BESAPI><Query><Result>
-<Answer type="string">BFCLIENT1,42,17,Mon, 28 Sep 2026 10:00:00 -0400,True,1,3600,1,20,60,1,80,4</Answer>
-<Answer type="string">NEIE10N248RC45B, RRC's Air M4,21,15.0,Mon, 28 Sep 2026 10:00:00 -0400,False,0,Not Enabled,0,20,60,1,80,4</Answer>
-</Result></Query></BESAPI>
-""",
-        encoding="utf-8",
-    )
-
-    df = loop.load_loop_input(xml)
-
-    assert list(df.columns[-3:]) == [
-        "Platform Health Check - Agent Multicore Scaling Enabled",
-        "Platform Health Check - Agent Multicore Max Core Utilization",
-        "Platform Health Check - Agent Multicore Work Type Scalar",
-    ]
-    assert str(df.iloc[1]["Platform Health Check - Agent Multicore Scaling Enabled"]) == "1"
-    assert str(df.iloc[1]["Platform Health Check - Agent Multicore Max Core Utilization"]) == "80"
-    assert str(df.iloc[1]["Platform Health Check - Agent Multicore Work Type Scalar"]) == "4"

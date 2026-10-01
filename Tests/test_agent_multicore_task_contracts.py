@@ -34,6 +34,14 @@ PROPERTY_NAMES = (
     "Platform Health Check - Agent Multicore Max Core Utilization",
     "Platform Health Check - Agent Multicore Work Type Scalar",
 )
+IDLE_SETTING_NAMES = (
+    "_BESClient_Resource_WorkIdle",
+    "_BESClient_Resource_SleepIdle",
+)
+IDLE_PROPERTY_NAMES = (
+    "Platform Health Check - Agent CPU Work Idle",
+    "Platform Health Check - Agent CPU Sleep Idle",
+)
 
 
 def test_agent_multicore_analysis_is_valid_and_queries_each_setting() -> None:
@@ -43,14 +51,21 @@ def test_agent_multicore_analysis_is_valid_and_queries_each_setting() -> None:
     for setting_name, property_name in zip(SETTING_NAMES, PROPERTY_NAMES, strict=True):
         assert setting_name in content
         assert property_name in content
+    assert content.count('version of client >= "11.0.7.0" as version') == 3
+    assert content.count('else "Not Applicable"') == 3
+    for setting_name, property_name in zip(
+        IDLE_SETTING_NAMES, IDLE_PROPERTY_NAMES, strict=True
+    ):
+        assert setting_name in content
+        assert property_name in content
 
 
-def test_agent_multicore_collector_reads_all_thirteen_fields() -> None:
+def test_agent_cpu_settings_collector_reads_all_fifteen_fields() -> None:
     ElementTree.parse(COLLECTOR)
     content = COLLECTOR.read_text(encoding="utf-8")
 
-    for property_name in PROPERTY_NAMES:
+    for property_name in (*PROPERTY_NAMES, *IDLE_PROPERTY_NAMES):
         assert property_name in content
-    assert "item 12 of it" in content
-    assert "SplitAnswerFields $Line 13" in content
-    assert '$parts[12].Trim()' in content
+    assert "item 14 of it" in content
+    assert "SplitAnswerFields $Line 15" in content
+    assert '$parts[14].Trim()' in content

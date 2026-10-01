@@ -64,13 +64,32 @@ def test_cpu_idle_settings_are_reported_without_assessment() -> None:
 
     assert summary is not None
     assert summary.total_devices == 2
-    assert summary.settings_rows == [["25", "400", "1"], ["Not Set", "Not Set", "1"]]
+    assert summary.settings_rows == [
+        ["25", "400", "5.9%", "1"],
+        ["Not Set", "Not Set", "Not Set", "1"],
+    ]
 
     source = loop.processed_to_dataframe(processed)
-    assert list(source[["Agent CPU Work Idle", "Agent CPU Sleep Idle"]].iloc[0]) == [
-        "25",
-        "400",
-    ]
+    assert list(
+        source[
+            [
+                "Agent CPU Work Idle",
+                "Agent CPU Sleep Idle",
+                "Agent CPU Idle Configured Duty Cycle (%)",
+            ]
+        ].iloc[0]
+    ) == ["25", "400", "5.9%"]
+
+
+def test_configured_cpu_duty_cycle_preserves_unreported_states() -> None:
+    assert loop.configured_cpu_duty_cycle("20 ms", "60 ms") == "25.0%"
+    assert loop.configured_cpu_duty_cycle("25", "400") == "5.9%"
+    assert loop.configured_cpu_duty_cycle("Not Set", "Not Set") == "Not Set"
+    assert (
+        loop.configured_cpu_duty_cycle("Not Applicable", "Not Applicable")
+        == "Not Applicable"
+    )
+    assert loop.configured_cpu_duty_cycle("0", "0") == "Unknown"
 
 
 def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None:
@@ -92,6 +111,7 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
     assert list(wb["Agent CPU Idle Settings"].values)[0] == (
         "Work Idle (ms)",
         "Sleep Idle (ms)",
+        "Configured Duty Cycle (%)",
         "Devices",
     )
 
@@ -106,6 +126,9 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     assert "Agent CPU Idle Settings" in headings
     assert any("configuration context only" in p.text for p in doc.paragraphs)
+    assert any(
+        "not a measurement of observed CPU usage" in p.text for p in doc.paragraphs
+    )
 
 
 def test_headerless_fifteen_field_loop_capture_maps_cpu_idle_columns(

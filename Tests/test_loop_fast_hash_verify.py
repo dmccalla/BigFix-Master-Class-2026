@@ -84,15 +84,26 @@ def test_fast_hash_verify_analysis_and_source_data() -> None:
     assert summary.enabled_count == 1
     assert summary.disabled_count == 1
     assert summary.not_set_count == 1
-    assert summary.settings_rows == [["20 ms", "60 ms", "2"], ["Not Set", "Not Set", "1"]]
+    assert summary.settings_rows == [
+        ["20 ms", "60 ms", "25.0%", "2"],
+        ["Not Set", "Not Set", "Not Set", "1"],
+    ]
 
     source = loop.processed_to_dataframe(processed)
     assert list(
-        source[["FastHashVerify", "FastHashVerify Work", "FastHashVerify Sleep"]].iloc[0]
+        source[
+            [
+                "FastHashVerify",
+                "FastHashVerify Work",
+                "FastHashVerify Sleep",
+                "FastHashVerify Configured Duty Cycle (%)",
+            ]
+        ].iloc[0]
     ) == [
         "Enabled",
         "20 ms",
         "60 ms",
+        "25.0%",
     ]
 
 
@@ -117,6 +128,13 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
     assert "FastHashVerify" in source_headers
     assert "FastHashVerify Work" in source_headers
     assert "FastHashVerify Sleep" in source_headers
+    assert "FastHashVerify Configured Duty Cycle (%)" in source_headers
+    assert [cell.value for cell in wb["FastHashVerify Settings"][1]] == [
+        "Work (ms)",
+        "Sleep (ms)",
+        "Configured Duty Cycle (%)",
+        "Devices",
+    ]
 
     word_output = tmp_path / "loop.docx"
     loop.generate_word(
@@ -129,6 +147,9 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     assert "FastHashVerify Review" in headings
     assert any("large patch files" in p.text for p in doc.paragraphs)
+    assert any(
+        "not a measurement of observed CPU usage" in p.text for p in doc.paragraphs
+    )
     assert any(
         "Individual client FastHashVerify values include" in p.text
         for p in doc.paragraphs

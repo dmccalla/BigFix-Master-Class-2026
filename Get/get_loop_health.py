@@ -1869,6 +1869,29 @@ def display_client_setting(value: Any) -> str:
     return text
 
 
+def configured_cpu_duty_cycle(work: str, sleep: str) -> str:
+    """Return the configured work-time share without inferring client defaults."""
+    values = (work, sleep)
+    if values == ("Not Applicable", "Not Applicable"):
+        return "Not Applicable"
+    if any(value == "Unknown" for value in values):
+        return "Unknown"
+    if any(value in {"", "Not Set"} for value in values):
+        return "Not Set"
+
+    parsed: list[float] = []
+    for value in values:
+        match = re.fullmatch(r"(\d+(?:\.\d+)?)\s*(?:ms)?", value, re.IGNORECASE)
+        if not match:
+            return "Unknown"
+        parsed.append(float(match.group(1)))
+
+    total = sum(parsed)
+    if total <= 0:
+        return "Unknown"
+    return f"{parsed[0] / total * 100:.1f}%"
+
+
 def parse_command_polling_interval_seconds(value: Any) -> int | None:
     if value is None:
         return None
@@ -2627,7 +2650,7 @@ def analyze_fast_hash_verify(
         for row in fast_hash_rows
     )
     settings_rows = [
-        [work, sleep, f"{count:,}"]
+        [work, sleep, configured_cpu_duty_cycle(work, sleep), f"{count:,}"]
         for (work, sleep), count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
         )
@@ -2709,7 +2732,12 @@ def analyze_agent_cpu_idle(rows: list[ProcessedRow]) -> AgentCpuIdleSummary | No
         for row in idle_rows
     )
     settings_rows = [
-        [work_idle, sleep_idle, f"{count:,}"]
+        [
+            work_idle,
+            sleep_idle,
+            configured_cpu_duty_cycle(work_idle, sleep_idle),
+            f"{count:,}",
+        ]
         for (work_idle, sleep_idle), count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
         )
@@ -2879,6 +2907,12 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             row_dict["FastHashVerify"] = r.fast_hash_verify_enabled
             row_dict["FastHashVerify Work"] = r.fast_hash_verify_work
             row_dict["FastHashVerify Sleep"] = r.fast_hash_verify_sleep
+            row_dict["FastHashVerify Configured Duty Cycle (%)"] = (
+                configured_cpu_duty_cycle(
+                    r.fast_hash_verify_work,
+                    r.fast_hash_verify_sleep,
+                )
+            )
         if has_agent_multicore_data:
             row_dict["Agent Multicore Scaling"] = r.agent_multicore_scaling_enabled
             row_dict["Agent Multicore Max Core Utilization"] = (
@@ -2890,6 +2924,12 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
         if has_agent_cpu_idle_data:
             row_dict["Agent CPU Work Idle"] = r.agent_cpu_work_idle
             row_dict["Agent CPU Sleep Idle"] = r.agent_cpu_sleep_idle
+            row_dict["Agent CPU Idle Configured Duty Cycle (%)"] = (
+                configured_cpu_duty_cycle(
+                    r.agent_cpu_work_idle,
+                    r.agent_cpu_sleep_idle,
+                )
+            )
         data.append(row_dict)
     return pd.DataFrame(data)
 
@@ -3354,7 +3394,12 @@ def generate_excel(
             ).to_excel(writer, sheet_name="FastHashVerify Summary", index=False)
             pd.DataFrame(
                 fast_hash_verify_summary.settings_rows,
-                columns=["Work (ms)", "Sleep (ms)", "Devices"],
+                columns=[
+                    "Work (ms)",
+                    "Sleep (ms)",
+                    "Configured Duty Cycle (%)",
+                    "Devices",
+                ],
             ).to_excel(writer, sheet_name="FastHashVerify Settings", index=False)
         if agent_multicore_summary:
             pd.DataFrame(
@@ -3369,7 +3414,12 @@ def generate_excel(
         if agent_cpu_idle_summary:
             pd.DataFrame(
                 agent_cpu_idle_summary.settings_rows,
-                columns=["Work Idle (ms)", "Sleep Idle (ms)", "Devices"],
+                columns=[
+                    "Work Idle (ms)",
+                    "Sleep Idle (ms)",
+                    "Configured Duty Cycle (%)",
+                    "Devices",
+                ],
             ).to_excel(writer, sheet_name="Agent CPU Idle Settings", index=False)
 
     autosize_excel_columns(excel_output)
@@ -3941,9 +3991,10 @@ def generate_word(
             "especially when the client would otherwise throttle hashing. It is "
             "disabled by default. When enabled, the documented default work and "
             "sleep settings are 20 ms and 60 ms, which allows hashing to use about "
-            "25% of one CPU core while it is active. A missing value in the source "
-            "data means the client default is in effect. The effective impact "
-            "depends on endpoint workload and available CPU."
+            "25% of one CPU core while it is active. Configured duty cycle is the "
+            "work interval divided by the work and sleep intervals together; it is "
+            "not a measurement of observed CPU usage. Not Set means the collection "
+            "did not return a value, and no client default is inferred."
         )
         document.add_heading("FastHashVerify Status", level=4)
         build_word_table(
@@ -3955,9 +4006,9 @@ def generate_word(
         document.add_heading("Reported Work and Sleep Settings", level=4)
         build_word_table(
             document,
-            ["Work (ms)", "Sleep (ms)", "Devices"],
+            ["Work (ms)", "Sleep (ms)", "Configured Duty Cycle (%)", "Devices"],
             fast_hash_verify_summary.settings_rows,
-            {2},
+            {2, 3},
         )
         document.add_paragraph(
             "Individual client FastHashVerify values include the enabled state and "
@@ -3969,13 +4020,20 @@ def generate_word(
         document.add_heading("Agent CPU Idle Settings", level=3)
         document.add_paragraph(
             "The following client CPU idle setting values were reported. They are "
-            "configuration context only; no assessment or finding is derived."
+            "configuration context only; no assessment or finding is derived. The "
+            "configured duty cycle is work divided by the work and sleep intervals "
+            "together, not a measurement of observed CPU usage."
         )
         build_word_table(
             document,
-            ["Work Idle (ms)", "Sleep Idle (ms)", "Devices"],
+            [
+                "Work Idle (ms)",
+                "Sleep Idle (ms)",
+                "Configured Duty Cycle (%)",
+                "Devices",
+            ],
             agent_cpu_idle_summary.settings_rows,
-            {2},
+            {2, 3},
         )
 
     if agent_multicore_summary:

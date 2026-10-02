@@ -1156,7 +1156,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
     # A bare "limit 5%" / "limit 10%" leaves the reader asking "% of what?"; add a
     # short qualifier for the percentage counters where it is ambiguous.
     _LIMIT_OF = {
-        "Memory Health": " (page file)",
+        "Memory Health": " (physical memory)",
         "CPU Privileged Time": " (CPU time)",
         "CPU Utilization": " (CPU time)",
     }

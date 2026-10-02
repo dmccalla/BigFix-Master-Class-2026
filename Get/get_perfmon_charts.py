@@ -105,6 +105,9 @@ COUNTERS = [
     r"\Network Interface(*)\Packets Received Errors",
     # PRF-INF-09: Memory Health
     r"\Paging File(_Total)\% Usage Peak",
+    # PRF-INF-09 context, not charted. Commit Limit is physical memory plus the
+    # page file, so the page file size is Commit Limit minus physical memory.
+    r"\Memory\Commit Limit",
 ]
 
 # Chart palette
@@ -147,6 +150,43 @@ def counter_analysis_series(series: pd.Series, name: str) -> pd.Series:
     # A negative delta indicates a counter reset or wrap. It is not evidence of
     # packet errors, so leave that interval unscored instead of inventing a value.
     return delta.where(delta >= 0)
+
+
+MEMORY_NOT_SUPPLIED = "physical memory was not supplied"
+COMMIT_LIMIT_MISSING = "capture has no Memory Commit Limit counter"
+
+
+def commit_limit_column(df: pd.DataFrame, usage_col: str) -> str | None:
+    """Return the Commit Limit column from the same host as a page file column."""
+    prefix = usage_col.split("Paging_File")[0]
+    name = f"{prefix}Memory_Commit_Limit"
+    return name if name in df.columns else None
+
+
+def page_file_not_scored_reason(df: pd.DataFrame, usage_col: str, memory_gb: int) -> str:
+    """Return why PRF-INF-09 cannot be scored, or an empty string when it can."""
+    if memory_gb <= 0:
+        return MEMORY_NOT_SUPPLIED
+    if commit_limit_column(df, usage_col) is None:
+        return COMMIT_LIMIT_MISSING
+    return ""
+
+
+def page_file_percent_of_memory(
+    usage_pct: pd.Series, commit_limit_bytes: pd.Series, memory_gb: int
+) -> pd.Series:
+    """Return page file in use as a percent of physical memory (PRF-INF-09).
+
+    Paging File % Usage Peak is a percent of the page file. The NFR guide sets
+    the limit as a percent of physical memory. Commit Limit is physical memory
+    plus the page file, so the page file size is Commit Limit minus physical
+    memory.
+    """
+    ram_bytes = memory_gb * 1024**3
+    commit = pd.to_numeric(commit_limit_bytes, errors="coerce")
+    page_file_bytes = (commit - ram_bytes).clip(lower=0)
+    used_bytes = pd.to_numeric(usage_pct, errors="coerce") / 100 * page_file_bytes
+    return used_bytes / ram_bytes * 100
 
 
 def clean_counter_name(path: str, include_host: bool = False) -> str:
@@ -210,6 +250,8 @@ def perfmon_chart_title(
     metric_note = (
         " (non-negative increase between samples)"
         if is_packet_counter(counter_name)
+        else " (page file in use as a percent of physical memory)"
+        if "Usage_Peak" in counter_name
         else ""
     )
     return (
@@ -262,7 +304,9 @@ def get_threshold(
         Queue Length) scales the _Total instance with disk_count; per-drive
         instances stay at <= 1.
       - PRF-INF-04 % Processor Time becomes a 50-80% range on VMs.
-      - PRF-INF-09 Paging File % Usage Peak note surfaces memory_gb for context.
+      - PRF-INF-09 scores page file use as a percent of physical memory. It
+        needs memory_gb and the Commit Limit counter, and is not scored
+        without them.
       - logical_processors is accepted for compatibility with callers/tests;
         PRF-INF-05 remains a fixed <= 4 threshold in the current NFR guide.
     Other NFR thresholds are fixed values (latency 1ms, CPU queue 4, etc.).
@@ -368,15 +412,22 @@ def get_threshold(
 
     if "Usage_Peak" in name:
         note = (
-            f"Paging File % Usage Peak should be <= 5%. "
+            f"Page file in use should be <= 5% of physical memory. "
             f"Physical memory of the analyzed system: {memory_gb} GB "
             f"(the host the PerfMon capture is from, which may differ from the "
             f"root server)."
             if memory_gb > 0
-            else "Paging File % Usage Peak should be <= 5%. "
-            "Physical memory of the analyzed system was not supplied."
+            else "Page file in use should be <= 5% of physical memory. "
+            "Physical memory of the analyzed system was not supplied, so this "
+            "counter is not scored."
         )
-        return {"type": "max", "critical": 5, "warn": 4, "label": "<= 5%", "note": note}
+        return {
+            "type": "max",
+            "critical": 5,
+            "warn": 4,
+            "label": "<= 5% of physical memory",
+            "note": note,
+        }
 
     return None
 
@@ -473,7 +524,8 @@ def short_threshold_text(value: str) -> str:
         return text
     match = re.search(
         r"(?:<=|>=|<|>)\s*\d+(?:\.\d+)?\s*"
-        r"(?:%|ms|sec|seconds?|errors?|per\s+physical\s+device)?",
+        r"(?:%(?:\s+of\s+physical\s+memory)?|ms|sec|seconds?|errors?"
+        r"|per\s+physical\s+device)?",
         text,
         flags=re.IGNORECASE,
     )
@@ -533,7 +585,13 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
     confidence = worst.get("Confidence", "Unknown")
     threshold_src = worst.get("ThresholdSource", "")
 
-    if status == "Not Available":
+    if status == "Not Available" and worst.get("NotScoredReason"):
+        result = (
+            f"{worst.get('Counter', 'This counter')} was not scored because the "
+            f"{worst['NotScoredReason']}. PRF-INF-09 measures page file use against "
+            f"physical memory. Do not treat this area as validated."
+        )
+    elif status == "Not Available":
         result = (
             f"No samples were recorded for {worst.get('Counter', 'this counter')} "
             f"during this capture window, so it could not be verified against "
@@ -831,8 +889,12 @@ def time_window_phrase(times: pd.Series) -> str:
     return f"{hours:.1f} hr" if hours < 10 else f"{hours:.0f} hr"
 
 
-def zero_counter_strip_text(col: str, has_samples: bool) -> tuple[str, str, str]:
+def zero_counter_strip_text(
+    col: str, has_samples: bool, not_scored_reason: str = ""
+) -> tuple[str, str, str]:
     """Return the message, status label, and status color for a zero chart."""
+    if not_scored_reason:
+        return f"Not scored: {not_scored_reason}", "CANNOT VERIFY", "#595959"
     if not has_samples:
         return "No samples recorded", "CANNOT VERIFY", "#595959"
     if is_packet_counter(col):
@@ -900,13 +962,17 @@ def render_zero_counter_strip(
     sample_count: int = 0,
     true_max: float = 0,
     host_name: str = "",
+    not_scored_reason: str = "",
 ) -> None:
     fig = plt.figure(figsize=(14.3, 1.15), dpi=200)
     fig.patch.set_facecolor("white")
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
 
-    message, result_label, result_color = zero_counter_strip_text(col, has_samples)
+    message, result_label, result_color = zero_counter_strip_text(
+        col, has_samples, not_scored_reason
+    )
+    window_text = "" if not_scored_reason else f" over {time_window_phrase(times)}"
     standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
     max_display = f"{true_max:g}%" if "Usage_Peak" in col else f"{true_max:g}"
 
@@ -922,7 +988,7 @@ def render_zero_counter_strip(
     fig.text(
         0.025,
         0.38,
-        f"{message} over {time_window_phrase(times)} - {result_label}",
+        f"{message}{window_text} - {result_label}",
         fontsize=20,
         fontweight="bold",
         color=result_color,
@@ -940,7 +1006,9 @@ def render_zero_counter_strip(
     fig.text(
         0.025,
         0.12,
-        f"{perfmon_context_line(sample_window, host_name)}  |  "
+        perfmon_context_line(sample_window, host_name)
+        if not_scored_reason
+        else f"{perfmon_context_line(sample_window, host_name)}  |  "
         f"Recorded samples: {sample_count:,}  |  True Max: {max_display}",
         fontsize=11,
         color=THEME.text,
@@ -1087,6 +1155,8 @@ def load_and_normalize(csv_path: str) -> tuple[pd.DataFrame, list[str]]:
         if "Avg_Disk_ms_Transfer" in col:
             df[col] = df[col] * 1000
 
+    # Commit Limit is context for PRF-INF-09, not a counter to chart or score.
+    counter_cols = [col for col in counter_cols if "Commit_Limit" not in col]
     return df, counter_cols
 
 
@@ -1136,7 +1206,19 @@ def analyze(
     for col in counter_cols:
         if col not in df.columns:
             continue
-        analysis_df[col] = counter_analysis_series(df[col], col)
+        not_scored_reason = ""
+        # A blank page file counter keeps the "No samples" message. Only a
+        # counter with data can be not scored for missing context.
+        if "Usage_Peak" in col and pd.to_numeric(df[col], errors="coerce").notna().any():
+            not_scored_reason = page_file_not_scored_reason(df, col, memory_gb)
+            if not_scored_reason:
+                analysis_df[col] = pd.Series(float("nan"), index=df.index)
+            else:
+                analysis_df[col] = page_file_percent_of_memory(
+                    df[col], df[commit_limit_column(df, col)], memory_gb
+                )
+        else:
+            analysis_df[col] = counter_analysis_series(df[col], col)
         chart_df[col] = analysis_df[col]
         vals = analysis_df[col].dropna()
         thr = get_threshold(col, memory_gb, disk_count, vm)
@@ -1158,7 +1240,12 @@ def analyze(
                     "ThresholdSource": threshold_source(col, mem_src, cpu_src, disk_src),
                     "SampleStart": sample_start_str,
                     "SampleEnd": sample_end_str,
-                    "PeakViolationWindow": "No samples recorded",
+                    "PeakViolationWindow": (
+                        f"Not scored: {not_scored_reason}"
+                        if not_scored_reason
+                        else "No samples recorded"
+                    ),
+                    "NotScoredReason": not_scored_reason,
                 }
             )
             continue
@@ -1567,6 +1654,7 @@ def export_png_charts(
                 sample_count=int(raw_vals.count()),
                 true_max=max_raw,
                 host_name=analyzed_system,
+                not_scored_reason=finding.get("NotScoredReason", ""),
             )
             log.result("Graph (PNG)", png_path)
             continue

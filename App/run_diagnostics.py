@@ -11,7 +11,7 @@ run_diagnostics.py -- Master Class Diagnostics Workbench engine.
 Runs the three analysis modules from a JSON config written by the desktop UI
 and collects their outputs under one run folder:
 
-  - Client Performance Loop Analysis   (Get/get_loop_health.py)
+  - Client Performance Analysis   (Get/get_loop_health.py)
   - Perfmon Infrastructure Analysis    (Get/get_perfmon_charts.py)
   - FillDB Performance Analysis        (Get/get_filldb_performance.py)
 
@@ -288,7 +288,7 @@ def validate_loop_workbook(path: Path) -> SourceValidation:
         return SourceValidation(
             False,
             (
-                "Client Performance Loop Analysis requires the "
+                "Client Performance Analysis requires the "
                 "'Client Performance Counters - Basic' Excel/CSV export. "
                 "The Advanced export has extra data and is not supported."
             ),
@@ -315,7 +315,7 @@ def validate_loop_workbook(path: Path) -> SourceValidation:
             return SourceValidation(
                 False,
                 (
-                    "Client Performance Loop Analysis requires the client loop "
+                    "Client Performance Analysis requires the client loop "
                     "counter CSV or XML capture, not the Top 10 evaluation results."
                 ),
             )
@@ -1368,7 +1368,7 @@ def perfmon_done(inputs: dict, ts: str) -> list[str]:
 
 
 # ---------------------------------------------------------------------------
-# Module 2: Client Performance Loop Analysis
+# Module 2: Client Performance Analysis
 # ---------------------------------------------------------------------------
 
 LOOP_SCHEMA: list[InputField] = [
@@ -1417,7 +1417,7 @@ def run_loop_pipeline(
     ts: str,
     log: RunLog | None = None,
 ) -> None:
-    _print_step_header("Step: Client Performance Loop Analysis", log)
+    _print_step_header("Step: Client Performance Analysis", log)
 
     prefix = inputs.get("_file_prefix", f"Output_{ts}")
     output_dir = inputs["_out_folder"]
@@ -1583,7 +1583,7 @@ def filldb_done(inputs: dict, ts: str) -> list[str]:
 MODULES: list[Module] = [
     Module(
         key="loop",
-        label="Client Performance Loop Analysis",
+        label="Client Performance Analysis",
         inputs_schema=LOOP_SCHEMA,
         run=run_loop_pipeline,
         summary=loop_summary,

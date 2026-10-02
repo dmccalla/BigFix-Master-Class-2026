@@ -430,9 +430,9 @@ def drop_template_exercises(document) -> None:
 
 MODULE_TABLE = [
     [
-        "Agent Performance",
-        "BigFix Master Class -- Agent Performance Counters - Basic (2.0) analysis and "
-        "BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0) task",
+        "Client Performance",
+        "BigFix Master Class -- Client Performance Counters - Basic (2.0) analysis and "
+        "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0) task",
         "Client_Loop XML or CSV. Optional Top 10, UDP, and Deployment_Information captures.",
     ],
     [
@@ -469,13 +469,13 @@ def write_content(g: Guide) -> None:
     g.bullets(
         [
             "Connect a BigFix collection task to the data a Workbench module needs.",
-            "Run the Agent Performance and Perfmon exercises on their own.",
+            "Run the Client Performance and Perfmon exercises on their own.",
             "Run the optional FillDB exercise when the session schedule allows.",
             "Recognize the main evidence and measurements in a Mini Report.",
         ]
     )
     g.para(
-        "The three modules run one at a time. The core path is Agent Performance "
+        "The three modules run one at a time. The core path is Client Performance "
         "followed by Perfmon. FillDB is an optional third exercise. Each module "
         "writes a Mini Report, an Infographic, and for two of the modules an Excel "
         "workbook."
@@ -519,7 +519,7 @@ def write_content(g: Guide) -> None:
     g.code(
         [
             "<Data Folder>\\",
-            "    Client_Loop\\              Agent Performance export and optional captures",
+            "    Client_Loop\\              Client Performance export and optional captures",
             "    Deployment_Information\\   Optional root server information captures",
             "    Perfmon\\                  One or two Perfmon .blg captures",
             "    FillDB_Performance\\       FillDB performance logs or the analyzer CSV",
@@ -532,7 +532,7 @@ def write_content(g: Guide) -> None:
     )
 
     # Exercise 1 --------------------------------------------------------
-    g.heading2("Exercise 1: Client Performance Loop Analysis")
+    g.heading2("Exercise 1: Client Performance Analysis")
     g.para(
         "In this exercise, you collect client evaluation loop data and use the "
         "Workbench to review evaluation time, expensive evaluations, command polling, "
@@ -543,7 +543,7 @@ def write_content(g: Guide) -> None:
         restart=True,
         items=[
             f"In the BigFix console, open the {SITE} site.",
-            "Activate BigFix Master Class -- Agent Performance Counters - Basic (2.0). "
+            "Activate BigFix Master Class -- Client Performance Counters - Basic (2.0). "
             "If it is already active and reporting, continue. Allow 24 to 48 hours of "
             "reporting before you collect.",
         ],
@@ -551,7 +551,7 @@ def write_content(g: Guide) -> None:
     g.picture("lg-task-01-agent-performance-analysis.png", TASK_IMAGE_WIDTH)
     g.steps(
         [
-            "Run BigFix Master Class -- Collect Agent Performance Counter Analysis Data "
+            "Run BigFix Master Class -- Collect Client Performance Counter Analysis Data "
             "(2.0) against the root server. Use the instructor-provided account when the "
             "task asks for API credentials. Do not place credentials in this guide or in "
             "the collected files.",
@@ -783,7 +783,7 @@ def write_content(g: Guide) -> None:
     g.table(
         ["Exercise", "Collection complete", "Data retrieved", "Mini Report reviewed"],
         [
-            ["Agent Performance", "[ ]", "[ ]", "[ ]"],
+            ["Client Performance", "[ ]", "[ ]", "[ ]"],
             ["Perfmon", "[ ]", "[ ]", "[ ]"],
             ["FillDB (optional)", "[ ]", "[ ]", "[ ]"],
         ],
@@ -805,7 +805,7 @@ def write_content(g: Guide) -> None:
                 "in the dates or the RAM value.",
             ],
             [
-                "Agent Performance data is missing",
+                "Client Performance data is missing",
                 "Confirm the Basic analysis is active and reporting, then confirm the "
                 "collection task completed on the root server.",
             ],

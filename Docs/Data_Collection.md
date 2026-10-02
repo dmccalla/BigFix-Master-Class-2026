@@ -21,7 +21,7 @@ layout and is a good reference for the file names. A file that lives
 somewhere else, or under another name, can always be chosen by hand with
 **Change** on step 2.
 
-## Client Performance Loop Analysis
+## Client Performance Analysis
 
 Reviews how long clients take to evaluate their content, and why.
 
@@ -88,7 +88,7 @@ the collection task in a live lab.
 
 | Lab | BigFix collection task | Capture to retrieve | Workbench module |
 |---|---|---|---|
-| Client Performance | `BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)` | `Client_Loop_*.xml` or `Client_Loop_*.csv`; the task also produces the optional Top 10 and UDP captures | Client Performance Loop Analysis |
+| Client Performance | `BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)` | `Client_Loop_*.xml` or `Client_Loop_*.csv`; the task also produces the optional Top 10 and UDP captures | Client Performance Analysis |
 | PerfMon | `BigFix Master Class -- Setup and Run Perfmon Counters (2.0)` | The `.blg` file from each targeted server | Perfmon Infrastructure Analysis |
 | FillDB (time permitting) | `BigFix Master Class -- Enable FillDB Performance Logging (2.0)` | `FillDBPerf.log` and its rollover files after logging is disabled | FillDB Performance Analysis |
 

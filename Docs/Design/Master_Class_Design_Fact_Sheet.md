@@ -38,7 +38,7 @@ modules to be completed in one session.
 
 | Module | What attendees collect | What the Workbench produces | Priority |
 |---|---|---|---|
-| Client Performance Loop Analysis | Client Performance Counters analysis export. Optional Top 10 evaluation, UDP notification, and deployment captures add context. | Mini Report, Infographic, and supporting Excel workbook. | Core |
+| Client Performance Analysis | Client Performance Counters analysis export. Optional Top 10 evaluation, UDP notification, and deployment captures add context. | Mini Report, Infographic, and supporting Excel workbook. | Core |
 | Perfmon Infrastructure Analysis | A Windows PerfMon `.blg` capture from a BigFix server. | Mini Report, Infographic, and supporting Excel workbook. | Core |
 | FillDB Performance Analysis | FillDB performance logs or the analyzer CSV. | Mini Report and Infographic. | Time permitting |
 

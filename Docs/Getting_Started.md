@@ -54,7 +54,7 @@ Open **Details** on a row to see what the module does, which files it looks
 for and which it selected. **Change** replaces a selected file with one you
 choose.
 
-The Client Performance Loop Analysis needs the **Report Start Date** and
+The Client Performance Analysis needs the **Report Start Date** and
 **Report End Date**. They bound the period the report describes. For the
 sample data, any range that includes 14 June 2026 works.
 
@@ -83,7 +83,7 @@ manifest listing every file the build wrote.
 
 | Module | Files |
 |---|---|
-| Client Performance Loop Analysis | Mini Report (`.docx`), Infographic (`.png`), Excel workbook (`.xlsx`) |
+| Client Performance Analysis | Mini Report (`.docx`), Infographic (`.png`), Excel workbook (`.xlsx`) |
 | Perfmon Infrastructure Analysis | Mini Report (`.docx`), Excel workbook (`.xlsx`), and a `_Perfmon_Charts` folder holding the scorecard Infographic and one chart per counter |
 | FillDB Performance Analysis | Mini Report (`.docx`), Infographic (`.png`) |
 

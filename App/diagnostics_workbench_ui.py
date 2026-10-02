@@ -145,7 +145,10 @@ OUTPUT_TILE_FILLS = {
 # What each module does, for the row description and the Details expansion.
 MODULE_DETAILS = {
     "loop": {
-        "summary": "Reviews client evaluation loop performance and client resource settings.",
+        "summary": (
+            "Reviews client evaluation performance, notification coverage, and client "
+            "CPU and hashing settings."
+        ),
         "does": (
             "Creates an Infographic, Excel file, and Mini Report. Optional data adds "
             "expensive evaluations, UDP notification coverage, Command Polling Review, "
@@ -199,7 +202,7 @@ RAIL_LABELS = ["Folders", "Modules", "Build"]
 # The engine prints "Step: <label>" when a module starts. The labels here are
 # the ones App/run_diagnostics.py prints, so progress can follow the log.
 STEP_HEADERS = {
-    "loop": "Client Performance Loop Analysis",
+    "loop": "Client Performance Analysis",
     "perfmon": "Perfmon Infrastructure Analysis",
     "filldb": "FillDB Performance Analysis",
 }

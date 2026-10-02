@@ -79,7 +79,15 @@ current module.
 ## The Outputs
 
 The run folder holds one subfolder per module, plus the run log and a
-manifest listing every file the build wrote.
+manifest listing every file the build wrote. Each build also writes two
+performance diagnostics files:
+
+- `*_Run_Diagnostics.json` records engine, module, and child-script timings.
+- `*_UI_Diagnostics.json` records desktop UI responsiveness, process resources,
+  and log pressure.
+
+When reporting a slow or unresponsive build, include both files and the run
+log with the report.
 
 | Module | Files |
 |---|---|

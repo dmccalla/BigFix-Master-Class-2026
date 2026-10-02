@@ -42,6 +42,7 @@ import re
 import socket
 import subprocess
 import sys
+import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -63,6 +64,10 @@ from Lib.Core.input_utils import (
     clean_user_path,
     resolve_existing_file,
     resolve_existing_folder,
+)
+from Lib.Core.performance_diagnostics import (
+    PerformanceRecorder,
+    process_resource_metrics,
 )
 from Lib.Core.subprocess_window import hidden_subprocess_kwargs
 
@@ -86,11 +91,12 @@ class RunLog:
     SEP2 = "-" * 56
     MODULE_SEP = "=" * 72
 
-    def __init__(self):
+    def __init__(self, diagnostics: PerformanceRecorder | None = None):
         self._lines: list[str] = []
         self._started: datetime = datetime.now()
         self._module_total = 0
         self._module_index = 0
+        self.diagnostics = diagnostics
 
     def _emit(self, line: str) -> None:
         """Print to console and store for file output."""
@@ -783,24 +789,37 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
         print()
 
     # stdin=DEVNULL prevents child scripts from blocking on interactive prompts.
-    process = subprocess.Popen(
-        cmd,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.STDOUT,
-        stdin=subprocess.DEVNULL,
-        text=True,
-        encoding="utf-8",
-        errors="replace",
-        **_SUBPROCESS_KWARGS,
-    )
-    if process.stdout is None:
-        raise RuntimeError(f"{script.name} started without a readable stdout pipe.")
-    pending_child_line: str | None = None
-    for raw_line in process.stdout:
-        line = raw_line.rstrip("\r\n")
-        pending_child_line = _emit_normalized_child_output(line, pending_child_line, log)
-    _flush_child_output(pending_child_line, log)
-    returncode = process.wait()
+    started = time.perf_counter()
+    returncode: int | None = None
+    try:
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            stdin=subprocess.DEVNULL,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            **_SUBPROCESS_KWARGS,
+        )
+        if process.stdout is None:
+            raise RuntimeError(f"{script.name} started without a readable stdout pipe.")
+        pending_child_line: str | None = None
+        for raw_line in process.stdout:
+            line = raw_line.rstrip("\r\n")
+            pending_child_line = _emit_normalized_child_output(
+                line, pending_child_line, log
+            )
+        _flush_child_output(pending_child_line, log)
+        returncode = process.wait()
+    finally:
+        if log is not None and log.diagnostics is not None:
+            log.diagnostics.record(
+                "Child script",
+                elapsed_ms=(time.perf_counter() - started) * 1000,
+                detail=script.name,
+                return_code=returncode,
+            )
 
     if returncode != 0:
         raise RuntimeError(f"{script.name} exited with code {returncode}")
@@ -1840,6 +1859,27 @@ def _write_run_manifest(
         log.warning(f"Could not write the run manifest: {exc}")
 
 
+def _write_run_diagnostics(
+    run_folder: Path,
+    file_prefix: str,
+    diagnostics: PerformanceRecorder,
+    log: RunLog,
+    *,
+    result: str,
+) -> None:
+    """Persist compact engine evidence for test feedback and support review."""
+    path = run_folder / f"{file_prefix}_Run_Diagnostics.json"
+    try:
+        diagnostics.write_json(
+            path,
+            result=result,
+            process_resources=process_resource_metrics(),
+        )
+        log.info("Run diagnostics", str(path))
+    except OSError as exc:
+        log.warning(f"Could not write run diagnostics: {exc}")
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(
         description=f"{APP_TITLE}: run the selected analysis modules.",
@@ -1873,9 +1913,19 @@ def main() -> int:
     file_prefix = ""
     run_start = datetime.now()
     ts = run_start.strftime("%Y%m%d_%H%M%S")
+    diagnostics = PerformanceRecorder("engine")
 
     try:
+        started = time.perf_counter()
         context = build_run_context(args.config)
+        diagnostics.record(
+            "Build run context",
+            elapsed_ms=(time.perf_counter() - started) * 1000,
+        )
+        diagnostics.update_metadata(
+            selected_modules=[mod.key for mod in context.selected],
+            module_count=len(context.selected),
+        )
         run_folder, file_prefix = setup_run_folder(
             context.out_folder, context.run_name, ts
         )
@@ -1886,7 +1936,7 @@ def main() -> int:
         print(f"RUN_FOLDER: {run_folder}", flush=True)
         _print_run_summary(context, run_folder)
 
-        log = RunLog()
+        log = RunLog(diagnostics)
         log.header(APP_TITLE)
         log.info("Run name", context.run_name or "(none)")
         log.info("File prefix", file_prefix)
@@ -1901,13 +1951,32 @@ def main() -> int:
 
         log.set_module_total(len(context.selected))
         for mod in context.selected:
-            mod.run(context.module_inputs[mod.key], context.style_template, ts, log)
+            started = time.perf_counter()
+            try:
+                mod.run(context.module_inputs[mod.key], context.style_template, ts, log)
+            except Exception:
+                diagnostics.record(
+                    "Module pipeline",
+                    elapsed_ms=(time.perf_counter() - started) * 1000,
+                    detail=mod.key,
+                    result="failed",
+                )
+                raise
+            diagnostics.record(
+                "Module pipeline",
+                elapsed_ms=(time.perf_counter() - started) * 1000,
+                detail=mod.key,
+                result="completed",
+            )
 
         log.section("Outputs")
         for mod in context.selected:
             for line in mod.done(context.module_inputs[mod.key], ts):
                 log.info(line)
         _write_run_manifest(run_folder, file_prefix, context, log)
+        _write_run_diagnostics(
+            run_folder, file_prefix, diagnostics, log, result="completed"
+        )
 
         elapsed = (datetime.now() - run_start).total_seconds()
         log.footer(run_folder, elapsed)
@@ -1919,6 +1988,9 @@ def main() -> int:
         if log is not None:
             log.error(message)
             if run_folder is not None:
+                _write_run_diagnostics(
+                    run_folder, file_prefix, diagnostics, log, result="failed"
+                )
                 log.write(run_folder / f"{file_prefix}_RunLog.txt")
         else:
             print(f"\n  ERROR: {message}", file=sys.stderr)

@@ -36,6 +36,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+from collections import deque
 from datetime import date, datetime
 from functools import lru_cache
 from pathlib import Path
@@ -71,6 +72,10 @@ from Lib.Core.input_utils import (  # noqa: E402
     DEFAULT_WORK_DIR,
     clean_user_path,
     open_path,
+)
+from Lib.Core.performance_diagnostics import (  # noqa: E402
+    PerformanceRecorder,
+    process_resource_metrics,
 )
 from Lib.Core.subprocess_window import hidden_subprocess_kwargs  # noqa: E402
 from Lib.Design.design_system import DESIGN_SYSTEM as DS  # noqa: E402
@@ -226,6 +231,15 @@ def _app_data_dir() -> Path:
 CONFIG_PATH = _app_data_dir() / "last_build.config.json"
 DETECTING = "Detecting..."
 _LAYOUT_DEBOUNCE_MS = 40
+_MAX_CAPTURED_LOG_CHARS = 2_000_000
+_MAX_LOG_VIEWER_LINES = 8_000
+_UI_QUEUE_MAX_CALLBACKS = 48
+_UI_QUEUE_BUDGET_MS = 8.0
+_LOG_DRAIN_MAX_ITEMS = 160
+_LOG_DRAIN_BUDGET_MS = 10.0
+_DIAGNOSTIC_HEARTBEAT_MS = 250
+_DIAGNOSTIC_SLOW_TICK_MS = 250.0
+_DIAGNOSTIC_RESOURCE_SAMPLE_MS = 5_000
 
 _RUN_FOLDER_RE = re.compile(
     r"^(?:RUN_FOLDER:|\s*Run folder\s*:)\s*(.+?)\s*$", re.IGNORECASE
@@ -752,10 +766,18 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._field_widgets: dict[str, ctk.CTkEntry] = {}
         self._field_rest_borders: dict[str, str] = {}
         self._ui_queue: queue.Queue = queue.Queue()
+        self._diagnostics = PerformanceRecorder("desktop_ui")
+        self._heartbeat_expected_at = time.perf_counter()
+        self._heartbeat_samples: deque[float] = deque(maxlen=240)
+        self._max_heartbeat_lag_ms = 0.0
+        self._resource_after_id: str | None = None
+        self._resource_last_cpu_sample = (time.perf_counter(), time.process_time())
 
         self._process: subprocess.Popen | None = None
         self._log_queue: queue.Queue[str] = queue.Queue()
-        self._log_chunks: list[str] = []
+        self._log_chunks: deque[str] = deque()
+        self._log_chunk_chars = 0
+        self._log_truncated = False
         self._log_viewers: list[ctk.CTkTextbox] = []
         self._open_output_buttons: list[ctk.CTkButton] = []
         self._build_running = False
@@ -799,6 +821,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._show_step(1)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.after(100, self._drain_ui_queue)
+        self._start_performance_diagnostics()
 
     # ------------------------------------------------------------------
     # Threads hand work back through a queue the main thread drains.
@@ -807,8 +830,22 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _post(self, callback) -> None:
         self._ui_queue.put(callback)
 
+    def _record_diagnostic(self, name: str, **kwargs) -> None:
+        """Record evidence when the full desktop UI is present.
+
+        Focused tests exercise these methods with lightweight headless doubles;
+        diagnostics must never become a required part of their behavior.
+        """
+        recorder = self.__dict__.get("_diagnostics")
+        if recorder is not None:
+            recorder.record(name, **kwargs)
+
     def _drain_ui_queue(self) -> None:
-        while True:
+        started = time.perf_counter()
+        processed = 0
+        while processed < _UI_QUEUE_MAX_CALLBACKS:
+            if (time.perf_counter() - started) * 1000 >= _UI_QUEUE_BUDGET_MS:
+                break
             try:
                 callback = self._ui_queue.get_nowait()
             except queue.Empty:
@@ -817,10 +854,61 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 callback()
             except TclError:
                 pass
+            processed += 1
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        if processed or elapsed_ms >= _UI_QUEUE_BUDGET_MS:
+            self._record_diagnostic(
+                "UI callback drain",
+                elapsed_ms=elapsed_ms,
+                callbacks=processed,
+                queue_depth=self._ui_queue.qsize(),
+            )
         try:
-            self.after(100, self._drain_ui_queue)
+            delay = 5 if not self._ui_queue.empty() else 100
+            self.after(delay, self._drain_ui_queue)
         except TclError:
             pass
+
+    def _start_performance_diagnostics(self) -> None:
+        now = time.perf_counter()
+        self._heartbeat_expected_at = now + (_DIAGNOSTIC_HEARTBEAT_MS / 1000)
+        self.after(_DIAGNOSTIC_HEARTBEAT_MS, self._diagnostic_heartbeat)
+        self._resource_after_id = self.after(1_000, self._sample_process_resources)
+
+    def _diagnostic_heartbeat(self) -> None:
+        now = time.perf_counter()
+        lag_ms = max(0.0, (now - self._heartbeat_expected_at) * 1000)
+        self._heartbeat_samples.append(lag_ms)
+        self._max_heartbeat_lag_ms = max(self._max_heartbeat_lag_ms, lag_ms)
+        if lag_ms >= _DIAGNOSTIC_SLOW_TICK_MS:
+            self._record_diagnostic("UI heartbeat lag", elapsed_ms=lag_ms)
+        self._heartbeat_expected_at = now + (_DIAGNOSTIC_HEARTBEAT_MS / 1000)
+        try:
+            self.after(_DIAGNOSTIC_HEARTBEAT_MS, self._diagnostic_heartbeat)
+        except TclError:
+            pass
+
+    def _sample_process_resources(self) -> None:
+        now_wall = time.perf_counter()
+        now_cpu = time.process_time()
+        previous_wall, previous_cpu = self._resource_last_cpu_sample
+        elapsed_wall = max(now_wall - previous_wall, 0.001)
+        cpu_pct = max(0.0, ((now_cpu - previous_cpu) / elapsed_wall) * 100)
+        self._resource_last_cpu_sample = (now_wall, now_cpu)
+        self._record_diagnostic(
+            "UI process resources",
+            cpu_pct=round(cpu_pct, 2),
+            ui_queue_depth=self._ui_queue.qsize(),
+            captured_log_chars=self.__dict__.get("_log_chunk_chars", 0),
+            **process_resource_metrics(),
+        )
+        try:
+            self._resource_after_id = self.after(
+                _DIAGNOSTIC_RESOURCE_SAMPLE_MS,
+                self._sample_process_resources,
+            )
+        except TclError:
+            self._resource_after_id = None
 
     # ------------------------------------------------------------------
     # Shell: brand bar, step rail, hero, content, action bar, footer
@@ -1115,6 +1203,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._sync_nav()
 
     def _clear_content(self) -> None:
+        started = time.perf_counter()
+        child_count = len(self.content.winfo_children())
         self._field_widgets.clear()
         self._field_rest_borders.clear()
         self._module_card_controls.clear()
@@ -1123,6 +1213,13 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         HoverTip.dismiss_active()
         for child in self.content.winfo_children():
             child.destroy()
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        if child_count or elapsed_ms >= _UI_QUEUE_BUDGET_MS:
+            self._record_diagnostic(
+                "Clear step content",
+                elapsed_ms=elapsed_ms,
+                widgets=child_count,
+            )
 
     def _set_nav_state(self, step: int) -> None:
         rows = zip(self.step_badges, self.step_labels, self._step_indicators)
@@ -1233,7 +1330,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._expanded_module_key = None
         self._run_folder = None
         self._run_log_path = None
-        self._log_chunks.clear()
+        self._clear_captured_log()
         self._footer_run_label.configure(text="")
         self._show_step(1)
 
@@ -1581,9 +1678,15 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._sync_scan_confirmation_visibility()
 
         def worker() -> None:
+            started = time.perf_counter()
             try:
                 found = scan_input_folder(root)
                 ancillary = discover_loop_ancillary_inputs(root, found.get("loop"))
+                self._record_diagnostic(
+                    "Input scan",
+                    elapsed_ms=(time.perf_counter() - started) * 1000,
+                    found_modules=sum(value is not None for value in found.values()),
+                )
                 self._post(
                     lambda: self._scan_inputs_complete(root, found, ancillary, token)
                 )
@@ -3890,7 +3993,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         config = self._build_config()
         CONFIG_PATH.parent.mkdir(parents=True, exist_ok=True)
         CONFIG_PATH.write_text(json.dumps(config, indent=2), encoding="utf-8")
-        self._log_chunks.clear()
+        self._clear_captured_log()
+        self._diagnostics.update_metadata(
+            selected_modules=self._selected_keys(),
+            build_started=datetime.now().astimezone().isoformat(timespec="seconds"),
+        )
+        self._diagnostics.record("Build requested", modules=len(self._selected_keys()))
         self._run_folder = None
         self._run_log_path = None
         self._progress_completed = set()
@@ -3929,6 +4037,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             "--yes",
         ]
         code = 1
+        started = time.perf_counter()
         try:
             process = subprocess.Popen(
                 cmd,
@@ -3950,27 +4059,86 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             self._log_queue.put(f"\nERROR: could not run the engine: {exc}\n")
         finally:
             self._process = None
+            self._diagnostics.record(
+                "Build engine process",
+                elapsed_ms=(time.perf_counter() - started) * 1000,
+                return_code=code,
+            )
             self._log_queue.put(f"__EXIT__{code}")
 
     def _drain_log(self) -> None:
+        started = time.perf_counter()
         finished: int | None = None
-        while True:
+        chunks: list[str] = []
+        processed = 0
+        while processed < _LOG_DRAIN_MAX_ITEMS:
+            if (time.perf_counter() - started) * 1000 >= _LOG_DRAIN_BUDGET_MS:
+                break
             try:
                 item = self._log_queue.get_nowait()
             except queue.Empty:
                 break
             if item.startswith("__EXIT__"):
                 finished = int(item[len("__EXIT__") :] or 1)
-                continue
-            self._append_log(item)
+            else:
+                chunks.append(item)
+            processed += 1
+        if chunks:
+            self._append_log("".join(chunks))
+        elapsed_ms = (time.perf_counter() - started) * 1000
+        if processed or elapsed_ms >= _LOG_DRAIN_BUDGET_MS:
+            self._diagnostics.record(
+                "Build log drain",
+                elapsed_ms=elapsed_ms,
+                items=processed,
+                queue_depth=self._log_queue.qsize(),
+            )
         if finished is not None:
             self._set_done(finished == 0)
             return
         if self._build_running:
-            self.after(100, self._drain_log)
+            delay = 10 if not self._log_queue.empty() else 100
+            self.after(delay, self._drain_log)
+
+    def _clear_captured_log(self) -> None:
+        self._log_chunks.clear()
+        self._log_chunk_chars = 0
+        self._log_truncated = False
+
+    def _append_captured_log(self, text: str) -> None:
+        if not text:
+            return
+        self._log_chunks.append(text)
+        self._log_chunk_chars = self.__dict__.get("_log_chunk_chars", 0) + len(text)
+        while self._log_chunk_chars > _MAX_CAPTURED_LOG_CHARS and self._log_chunks:
+            if isinstance(self._log_chunks, deque):
+                removed = self._log_chunks.popleft()
+            else:
+                removed = self._log_chunks.pop(0)
+            self._log_chunk_chars -= len(removed)
+            self._log_truncated = True
+
+    def _captured_log_text(self) -> str:
+        text = "".join(self._log_chunks)
+        if not self.__dict__.get("_log_truncated", False):
+            return text
+        return (
+            "Earlier UI log output was omitted to keep the Workbench responsive. "
+            "Open the run log for the complete build log.\n" + text
+        )
+
+    @staticmethod
+    def _trim_log_viewer(viewer: ctk.CTkTextbox) -> None:
+        try:
+            line_count = int(str(viewer.index("end-1c")).split(".", 1)[0])
+            extra = line_count - _MAX_LOG_VIEWER_LINES
+            if extra > 0:
+                viewer.delete("1.0", f"{extra + 1}.0")
+        except (TclError, ValueError):
+            pass
 
     def _append_log(self, text: str) -> None:
-        self._log_chunks.append(text)
+        self._append_captured_log(text)
         for viewer in list(self._log_viewers):
             try:
                 if not viewer.winfo_exists():
@@ -3978,6 +4146,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     continue
                 viewer.configure(state="normal")
                 viewer.insert("end", text)
+                self._trim_log_viewer(viewer)
                 viewer.see("end")
                 viewer.configure(state="disabled")
             except TclError:
@@ -4007,6 +4176,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             self.progress_status_var.set("Build canceled.")
             if self._progress_current:
                 self._set_status_cell(self._progress_current, "failed", "Canceled")
+            self._write_ui_diagnostics("canceled")
             return
         if success:
             for key in self._progress_order:
@@ -4018,10 +4188,38 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 "Use Open Output to review the generated files."
             )
             self.progress_guidance_label.grid()
+            self._write_ui_diagnostics("completed")
         else:
             if self._progress_current:
                 self._set_status_cell(self._progress_current, "failed", "Failed")
             self.progress_status_var.set("Build finished with errors. See View Logs.")
+            self._write_ui_diagnostics("failed")
+
+    def _write_ui_diagnostics(self, result: str) -> None:
+        """Save UI responsiveness evidence beside a completed engine run."""
+        run_folder = self._run_folder
+        if run_folder is None:
+            return
+        build_elapsed_ms = 0.0
+        if self._build_started_at is not None:
+            build_elapsed_ms = (time.monotonic() - self._build_started_at) * 1000
+        self._diagnostics.record(
+            "Build completed",
+            elapsed_ms=build_elapsed_ms,
+            result=result,
+        )
+        path = run_folder / f"{run_folder.name}_UI_Diagnostics.json"
+        try:
+            self._diagnostics.write_json(
+                path,
+                result=result,
+                heartbeat_max_lag_ms=round(self._max_heartbeat_lag_ms, 2),
+                heartbeat_samples=len(self._heartbeat_samples),
+                process_resources=process_resource_metrics(),
+            )
+            self._append_log(f"UI diagnostics: {path}\n")
+        except OSError as exc:
+            self._append_log(f"WARNING: Could not write UI diagnostics: {exc}\n")
 
     def _cancel_run(self) -> None:
         process = self._process
@@ -4081,7 +4279,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         )
         log_box.grid(row=1, column=0, sticky="nsew", padx=18, pady=10)
         log_box.insert(
-            "1.0", "".join(self._log_chunks) or "No build log has been captured yet."
+            "1.0", self._captured_log_text() or "No build log has been captured yet."
         )
         log_box.see("end")
         log_box.configure(state="disabled")

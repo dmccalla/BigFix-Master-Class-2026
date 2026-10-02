@@ -3059,7 +3059,7 @@ def generate_png(
         slow_detail = "Top 10 data not provided"
 
     data = {
-        "title": "Client Loop Performance",
+        "title": "Client Performance",
         "meta": meta,
         "findingsLine": (f"Raises 1 {finding_impact} finding" if finding_impact else ""),
         "findings": (
@@ -3696,7 +3696,7 @@ def generate_word(
         create_styled_stub_document(script_file=__file__)
     )
 
-    add_stub_front_matter(document, "Client Loop Health")
+    add_stub_front_matter(document, "Client Performance Analysis")
     if stamp:
         stamp_docx_document(document, stamp)
 
@@ -3710,7 +3710,7 @@ def generate_word(
     add_note_paragraph(
         document,
         f"The raw data used to generate these {finding_scope} findings is available "
-        "in the Client Loop Workbook (Excel file) for further troubleshooting and "
+        "in the Client Performance Workbook (Excel file) for further troubleshooting and "
         "analysis.",
     )
 
@@ -3726,10 +3726,10 @@ def generate_word(
         picture = document.add_picture(str(png_output), width=Inches(7.5))
         set_picture_alt_text(
             picture,
-            "Client loop performance chart showing health score, loop "
+            "Client performance chart showing health score, loop "
             "distribution, reported devices, UDP notification context, and "
             "reporting issues.",
-            "Client Loop Performance Chart",
+            "Client Performance Chart",
         )
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
@@ -3754,7 +3754,7 @@ def generate_word(
                 {0},
             )
 
-    document.add_heading("BigFix Client Loop Performance Summary", level=3)
+    document.add_heading("BigFix Client Performance Summary", level=3)
     document.add_paragraph(
         f"Report Generated: {metrics.generated_at_text} | "
         f"Data Collection Range: {metrics.report_start_text} - {metrics.report_end_text}"
@@ -4340,7 +4340,7 @@ def main() -> int:
             )
             log.detail(
                 "Relay placement inference",
-                "not performed; use the Client Loop Workbook with customer "
+                "not performed; use the Client Performance Workbook with customer "
                 "network context",
             )
             log.detail(
@@ -4412,7 +4412,7 @@ def main() -> int:
                 include_automated_findings=args.include_automated_findings,
             )
 
-        log.ok("Client loop analysis built")
+        log.ok("Client performance analysis built")
         log.result("Excel", excel_output)
         log.result("Chart (PNG)", png_output)
         if not args.skip_word:

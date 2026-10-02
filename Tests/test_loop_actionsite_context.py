@@ -105,7 +105,7 @@ def test_loop_word_places_score_method_after_summary_without_context_table(
     )
     assert score_heading.style.name == "Heading 3"
     assert "Client Loop Context" not in paragraphs
-    assert paragraphs.index("BigFix Client Loop Performance Summary") < paragraphs.index(
+    assert paragraphs.index("BigFix Client Performance Summary") < paragraphs.index(
         "How This Score Is Calculated"
     )
     assert "Score Method: test driver" not in paragraphs
@@ -147,7 +147,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
     )
 
     assert headings.index("Automated Findings") < headings.index(
-        "BigFix Client Loop Performance Summary"
+        "BigFix Client Performance Summary"
     )
     assert [cell.text for cell in findings_table.rows[1].cells] == [
         "CLT-01",
@@ -365,7 +365,7 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
 
     assert "ActionSite Pressure" not in headings
     assert "Client Loop Penalties" not in headings
-    assert headings.index("BigFix Client Loop Performance Summary") < headings.index(
+    assert headings.index("BigFix Client Performance Summary") < headings.index(
         "How This Score Is Calculated"
     )
     assert headings.index("How This Score Is Calculated") < headings.index(

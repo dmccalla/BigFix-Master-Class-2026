@@ -27,7 +27,8 @@ def test_client_cpu_multicore_scaling_fixlet_is_a_reusable_1107_fixlet() -> None
     )
     assert fixlet.findtext("Category") == "BigFix Master Class"
     assert fixlet.findtext("Domain") == "BES "
-    assert fixlet.find("SourceSeverity") is None
+    # Console exports carry a blank SourceSeverity. Any real severity is an error.
+    assert not (fixlet.findtext("SourceSeverity") or "").strip()
 
     relevance = "\n".join(item.text or "" for item in fixlet.findall("Relevance"))
     assert 'version of client >= "11.0.7.0" as version' in relevance

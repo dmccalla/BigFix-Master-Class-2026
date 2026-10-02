@@ -264,7 +264,7 @@ def get_threshold(
       - PRF-INF-04 % Processor Time becomes a 50-80% range on VMs.
       - PRF-INF-09 Paging File % Usage Peak note surfaces memory_gb for context.
       - logical_processors is accepted for compatibility with callers/tests;
-        PRF-INF-03 remains a fixed <= 4 threshold in the current NFR guide.
+        PRF-INF-05 remains a fixed <= 4 threshold in the current NFR guide.
     Other NFR thresholds are fixed values (latency 1ms, CPU queue 4, etc.).
     Returns None for counters with no defined threshold (informational only).
     """

@@ -35,10 +35,10 @@ def _sample_polling_rows() -> list[loop.ProcessedRow]:
             "Maximum Cycle Minutes": [20, 80, 120],
             "Average Cycle Minutes": [10, 75, 90],
             "Platform Health Check - Command Polling Enabled": ["1", "0", "1"],
-            "Platform Health Check - Command Polling Interval": [
-                "1200",
+            "Platform Health Check - Command Polling Minutes": [
+                "20",
                 "Not Enabled",
-                "3600",
+                "60",
             ],
         }
     )
@@ -112,6 +112,9 @@ def test_command_polling_analysis_groups_by_relay_and_subnet() -> None:
     assert soho_row[7] == "1"
 
     slow_client = next(row for row in processed if row.computer_name == "soho-low")
+    internal_client = next(row for row in processed if row.computer_name == "internal-ok")
+    assert internal_client.command_polling_interval_seconds == 1200
+    assert slow_client.command_polling_interval_seconds == 3600
     assert slow_client.command_polling_review == (
         "Current polling interval is below the average loop time."
     )
@@ -153,14 +156,16 @@ def test_command_polling_workbook_tabs_are_written(tmp_path: Path) -> None:
     ]
     source_headers = [cell.value for cell in wb["Source Data"][1]]
     assert "Command Polling" in source_headers
-    assert "Command Polling Interval" in source_headers
+    assert "Command Polling Minutes" in source_headers
     assert "Suggested Command Polling Interval Seconds" in source_headers
     assert "Suggested Command Polling Interval" not in source_headers
     suggested_idx = source_headers.index("Suggested Command Polling Interval Seconds")
+    current_idx = source_headers.index("Command Polling Minutes")
     source_rows = {
         row[0]: row for row in wb["Source Data"].iter_rows(min_row=2, values_only=True)
     }
     assert source_rows["dmz-off"][suggested_idx] == 5100
+    assert source_rows["internal-ok"][current_idx] == "20 min"
 
 
 def test_command_polling_word_section_is_written(tmp_path: Path) -> None:

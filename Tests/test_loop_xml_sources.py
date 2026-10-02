@@ -159,7 +159,7 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
     loop_xml.write_text(
         _doc(
             [
-                "BFCLIENT1,42,17,Mon, 14 Sep 2026 10:00:00 -0400,True,1,3600",
+                "BFCLIENT1,42,17,Mon, 14 Sep 2026 10:00:00 -0400,True,1,60",
                 "NEIE10N248RC45B, RRC's Air M4,21,15.0,Mon, "
                 "14 Sep 2026 10:00:00 -0400,False,0,Not Enabled",
             ]
@@ -226,7 +226,7 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
         == "Mon, 14 Sep 2026 10:00:00 -0400"
     )
     assert loop_rows[0]["Platform Health Check - Command Polling Enabled"] == "1"
-    assert loop_rows[0]["Platform Health Check - Command Polling Interval"] == "3600"
+    assert loop_rows[0]["Platform Health Check - Command Polling Minutes"] == "60"
     assert loop_rows[1]["Computer Name"] == "NEIE10N248RC45B, RRC's Air M4"
     assert (
         loop_rows[1]["Platform Health Check - Last UDP Ping"]
@@ -234,7 +234,7 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
     )
     assert loop_rows[1]["Platform Health Check - Command Polling Enabled"] == "0"
     assert (
-        loop_rows[1]["Platform Health Check - Command Polling Interval"] == "Not Enabled"
+        loop_rows[1]["Platform Health Check - Command Polling Minutes"] == "Not Enabled"
     )
 
     with udp_csv.open(encoding="utf-8-sig", newline="") as handle:

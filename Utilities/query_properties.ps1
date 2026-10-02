@@ -174,7 +174,7 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {
         "Platform Health Check - Last UDP Ping",
         "Platform Health Check - Receiving UDP Pings",
         "Platform Health Check - Command Polling Enabled",
-        "Platform Health Check - Command Polling Interval"
+        "Platform Health Check - Command Polling Minutes"
     )
     $loopRows = New-Object System.Collections.Generic.List[object]
     foreach ($answer in $Answers) {
@@ -189,7 +189,7 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {
             "Platform Health Check - Last UDP Ping" = $parts[3].Trim()
             "Platform Health Check - Receiving UDP Pings" = $parts[4].Trim()
             "Platform Health Check - Command Polling Enabled" = $parts[5].Trim()
-            "Platform Health Check - Command Polling Interval" = $parts[6].Trim()
+            "Platform Health Check - Command Polling Minutes" = $parts[6].Trim()
         })
     }
     if ($loopRows.Count) {
@@ -419,7 +419,7 @@ of
     (if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Last UDP Ping Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Last UDP Ping Property Does Not Exist"))),
     (if (size of item 4 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 4 of it)) else (if (size of item 4 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 4 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist"))),
     (if (size of item 5 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 5 of it)) else (if (size of item 5 of it > 1) then (("Platform Health Check - Command Polling Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 5 of it) as string) else ("Platform Health Check - Command Polling Enabled Property Does Not Exist"))),
-    (if (size of item 6 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 6 of it)) else (if (size of item 6 of it > 1) then (("Platform Health Check - Command Polling Interval Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 6 of it) as string) else ("Platform Health Check - Command Polling Interval Property Does Not Exist")))
+    (if (size of item 6 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 6 of it)) else (if (size of item 6 of it > 1) then (("Platform Health Check - Command Polling Minutes Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 6 of it) as string) else ("Platform Health Check - Command Polling Minutes Property Does Not Exist")))
   )
   of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it)
 )
@@ -431,7 +431,7 @@ of
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Last UDP Ping") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase),
   set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Enabled") as lowercase or name of it as lowercase = ("Platform Health Check - Command Polling Enbaled") as lowercase),
-  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Interval") as lowercase)
+  set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase)
 )
 '@
 $LoopTemplate = ($LoopTemplate -replace '\s+', ' ').Trim()

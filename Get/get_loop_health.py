@@ -262,6 +262,8 @@ COMMAND_POLLING_ENABLED_COLUMN_NAMES = (
     "_BESClient_Comm_CommandPollEnable",
 )
 COMMAND_POLLING_INTERVAL_COLUMN_NAMES = (
+    "Platform Health Check - Command Polling Minutes",
+    "Command Polling Minutes",
     "Platform Health Check - Command Polling Interval",
     "Platform Health Check - Command Polling Seconds",
     "Command Polling Interval",
@@ -555,7 +557,7 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
         "Last UDP Ping",
         "Receiving UDP Pings",
         "Platform Health Check - Command Polling Enabled",
-        "Platform Health Check - Command Polling Interval",
+        "Platform Health Check - Command Polling Minutes",
         "Platform Health Check - FastHashVerify Enabled",
         "Platform Health Check - FastHashVerify Work ms",
         "Platform Health Check - FastHashVerify Sleep ms",
@@ -641,7 +643,7 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
             "Last UDP Ping",
             "Receiving UDP Pings",
             "Platform Health Check - Command Polling Enabled",
-            "Platform Health Check - Command Polling Interval",
+            "Platform Health Check - Command Polling Minutes",
             "Platform Health Check - FastHashVerify Enabled",
             "Platform Health Check - FastHashVerify Work ms",
             "Platform Health Check - FastHashVerify Sleep ms",
@@ -1897,7 +1899,14 @@ def configured_cpu_duty_cycle(work: str, sleep: str) -> str:
     return f"{parsed[0] / total * 100:.1f}%"
 
 
-def parse_command_polling_interval_seconds(value: Any) -> int | None:
+def is_command_polling_minutes_column(column_name: str | None) -> bool:
+    """Return whether the collected command-polling value is expressed in minutes."""
+    return "minute" in str(column_name or "").casefold()
+
+
+def parse_command_polling_interval_seconds(
+    value: Any, column_name: str | None = None
+) -> int | None:
     if value is None:
         return None
     try:
@@ -1918,6 +1927,13 @@ def parse_command_polling_interval_seconds(value: Any) -> int | None:
         "disabled",
     }:
         return None
+
+    if is_command_polling_minutes_column(column_name):
+        try:
+            minutes = float(text)
+        except ValueError:
+            return None
+        return max(0, int(round(minutes * 60)))
 
     seconds = convert_to_seconds(text, "Command Polling Interval Seconds")
     if seconds is None:
@@ -1943,7 +1959,7 @@ def format_command_polling_interval(seconds: int | float | None) -> str:
 
 
 def display_command_polling_interval(
-    raw_value: Any, seconds: int | None, status: str
+    raw_value: Any, seconds: int | None, status: str, column_name: str | None = None
 ) -> str:
     if status == "Disabled":
         return "Not Enabled"
@@ -1951,6 +1967,8 @@ def display_command_polling_interval(
     if not text or text.casefold() in {"nan", "none"}:
         return "Not Set" if status == "Enabled" else ""
     if seconds is not None:
+        if is_command_polling_minutes_column(column_name):
+            return f"{seconds / 60:g} min"
         return format_command_polling_interval(seconds)
     return text
 
@@ -2406,7 +2424,7 @@ def process_rows(
             if command_polling_interval_column:
                 raw_interval = row.get(command_polling_interval_column)
                 polling_interval_seconds = parse_command_polling_interval_seconds(
-                    raw_interval
+                    raw_interval, command_polling_interval_column
                 )
                 if not polling_status and str(raw_interval or "").strip():
                     if str(raw_interval).strip().casefold() == "not enabled":
@@ -2416,7 +2434,10 @@ def process_rows(
                     else:
                         polling_status = "Unknown"
                 polling_interval = display_command_polling_interval(
-                    raw_interval, polling_interval_seconds, polling_status
+                    raw_interval,
+                    polling_interval_seconds,
+                    polling_status,
+                    command_polling_interval_column,
                 )
 
             fast_hash_enabled = ""
@@ -2882,7 +2903,7 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
             row_dict["Subnet"] = r.subnet
         if has_command_polling_data:
             row_dict["Command Polling"] = r.command_polling_enabled
-            row_dict["Command Polling Interval"] = r.command_polling_interval
+            row_dict["Command Polling Minutes"] = r.command_polling_interval
             row_dict["Suggested Command Polling Interval Seconds"] = (
                 suggested_command_polling_seconds(r.avg_seconds)
             )

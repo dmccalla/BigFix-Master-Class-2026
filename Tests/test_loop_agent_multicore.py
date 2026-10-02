@@ -14,6 +14,7 @@ from pathlib import Path
 import get_loop_health as loop
 import pandas as pd
 from docx import Document
+from docx.enum.text import WD_ALIGN_PARAGRAPH
 from openpyxl import load_workbook
 
 
@@ -72,13 +73,15 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
     assert summary is not None
     assert summary.total_devices == 3
     assert summary.settings_rows == [
-        ["On", "8", "2"],
-        ["Not Set", "4", "1"],
+        ["On", "16", "2 / 3"],
+        ["Not Set", "4", "1 / 3"],
     ]
 
     source = loop.processed_to_dataframe(processed)
     assert list(
-        source[["Client Multicore Scaling", "Client Total Physical CPU Core Count"]].iloc[0]
+        source[["Client Multicore Scaling", "Client Total Physical CPU Core Count"]].iloc[
+            0
+        ]
     ) == ["On", "8"]
 
 
@@ -102,9 +105,9 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     assert settings[0] == (
         "Scale Work Time With CPU Cores",
         "Total Physical CPU Cores",
-        "Devices",
+        "Devices / Total",
     )
-    assert settings[1] == ("On", "8", "2")
+    assert settings[1] == ("On", "16", "2 / 3")
 
     word_output = tmp_path / "loop.docx"
     loop.generate_word(
@@ -118,7 +121,12 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     assert "Client Multicore Settings" in headings
     assert any("configuration context only" in p.text for p in doc.paragraphs)
     assert any("earlier than BigFix 11.0.7" in p.text for p in doc.paragraphs)
-    assert any(
-        table.rows[0].cells[0].text == "Scale Work Time With CPU Cores"
+    multicore_table = next(
+        table
         for table in doc.tables
+        if table.rows[0].cells[0].text == "Scale Work Time With CPU Cores"
+    )
+    assert (
+        multicore_table.rows[1].cells[2].paragraphs[0].alignment
+        == WD_ALIGN_PARAGRAPH.CENTER
     )

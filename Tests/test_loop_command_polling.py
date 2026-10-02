@@ -145,7 +145,7 @@ def test_command_polling_workbook_tabs_are_written(tmp_path: Path) -> None:
     relay_headers = [cell.value for cell in wb["Polling by Relay"][1]]
     assert relay_headers == [
         "Relay",
-        "Devices",
+        "Total Devices",
         "Enabled",
         "Disabled",
         "NotSet",
@@ -154,6 +154,8 @@ def test_command_polling_workbook_tabs_are_written(tmp_path: Path) -> None:
         "IntervalBelowLoop",
         "NoUdpAndPollingOff",
     ]
+    subnet_headers = [cell.value for cell in wb["Polling by Subnet"][1]]
+    assert subnet_headers[1] == "Total Devices"
     source_headers = [cell.value for cell in wb["Source Data"][1]]
     assert "Command Polling" in source_headers
     assert "Command Polling Minutes" in source_headers
@@ -188,7 +190,7 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
     assert "Command Polling Review" in headings
     assert any(
         [cell.text for cell in table.rows[0].cells]
-        == ["Status", "Devices / Source", "% of Source"]
+        == ["Status", "Devices / Total", "% of Total"]
         for table in doc.tables
     )
     assert any(

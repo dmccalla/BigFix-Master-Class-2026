@@ -85,8 +85,8 @@ def test_fast_hash_verify_analysis_and_source_data() -> None:
     assert summary.disabled_count == 1
     assert summary.not_set_count == 1
     assert summary.settings_rows == [
-        ["20 ms", "60 ms", "25.0%", "2"],
-        ["Not Set", "Not Set", "Not Set", "1"],
+        ["20 ms", "60 ms", "25.0%", "2 / 3"],
+        ["Not Set", "Not Set", "Not Set", "1 / 3"],
     ]
 
     source = loop.processed_to_dataframe(processed)
@@ -133,7 +133,7 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
         "Work (ms)",
         "Sleep (ms)",
         "Configured Duty Cycle (%)",
-        "Devices",
+        "Devices / Total",
     ]
 
     word_output = tmp_path / "loop.docx"

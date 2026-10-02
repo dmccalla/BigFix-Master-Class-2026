@@ -2664,7 +2664,12 @@ def analyze_fast_hash_verify(
         for row in fast_hash_rows
     )
     settings_rows = [
-        [work, sleep, configured_cpu_duty_cycle(work, sleep), f"{count:,}"]
+        [
+            work,
+            sleep,
+            configured_cpu_duty_cycle(work, sleep),
+            count_with_denominator(count, len(fast_hash_rows)),
+        ]
         for (work, sleep), count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
         )
@@ -2689,10 +2694,26 @@ def fast_hash_verify_coverage_rows(
         return f"{count / denominator * 100:.1f}%"
 
     return [
-        ["Enabled", f"{summary.enabled_count:,}", percent(summary.enabled_count)],
-        ["Disabled", f"{summary.disabled_count:,}", percent(summary.disabled_count)],
-        ["Not Set", f"{summary.not_set_count:,}", percent(summary.not_set_count)],
-        ["Unknown", f"{summary.unknown_count:,}", percent(summary.unknown_count)],
+        [
+            "Enabled",
+            count_with_denominator(summary.enabled_count, total),
+            percent(summary.enabled_count),
+        ],
+        [
+            "Disabled",
+            count_with_denominator(summary.disabled_count, total),
+            percent(summary.disabled_count),
+        ],
+        [
+            "Not Set",
+            count_with_denominator(summary.not_set_count, total),
+            percent(summary.not_set_count),
+        ],
+        [
+            "Unknown",
+            count_with_denominator(summary.unknown_count, total),
+            percent(summary.unknown_count),
+        ],
     ]
 
 
@@ -2704,17 +2725,27 @@ def analyze_agent_multicore(
     if not multicore_rows:
         return None
 
-    settings = Counter(
-        (
-            row.agent_multicore_scaling_enabled or "Not Set",
-            row.agent_total_physical_cpu_core_count or "Not Reported",
+    settings: dict[str, list[str]] = {}
+    for row in multicore_rows:
+        setting = row.agent_multicore_scaling_enabled or "Not Set"
+        settings.setdefault(setting, []).append(
+            row.agent_total_physical_cpu_core_count or "Not Reported"
         )
-        for row in multicore_rows
-    )
+
+    def total_cores(core_counts: list[str]) -> str:
+        normalized = [value.replace(",", "").strip() for value in core_counts]
+        if not normalized or not all(value.isdigit() for value in normalized):
+            return "Not Reported"
+        return f"{sum(int(value) for value in normalized):,}"
+
     settings_rows = [
-        [scaling, physical_core_count, f"{count:,}"]
-        for (scaling, physical_core_count), count in sorted(
-            settings.items(), key=lambda item: (-item[1], item[0])
+        [
+            scaling,
+            total_cores(core_counts),
+            count_with_denominator(len(core_counts), len(multicore_rows)),
+        ]
+        for scaling, core_counts in sorted(
+            settings.items(), key=lambda item: (-len(item[1]), item[0])
         )
     ]
     return AgentMulticoreSummary(
@@ -2743,7 +2774,7 @@ def analyze_agent_cpu_idle(rows: list[ProcessedRow]) -> AgentCpuIdleSummary | No
             work_idle,
             sleep_idle,
             configured_cpu_duty_cycle(work_idle, sleep_idle),
-            f"{count:,}",
+            count_with_denominator(count, len(idle_rows)),
         ]
         for (work_idle, sleep_idle), count in sorted(
             settings.items(), key=lambda item: (-item[1], item[0])
@@ -3329,7 +3360,7 @@ def generate_excel(
         if udp_summary:
             pd.DataFrame(
                 udp_coverage_rows(udp_summary),
-                columns=["Status", "Devices / Source", "Percent"],
+                columns=["Status", "Devices / Total", "% of Total"],
             ).to_excel(writer, sheet_name="UDP Coverage", index=False)
             udp_notes = udp_notification_data_notes(udp_summary)
             if udp_notes:
@@ -3357,14 +3388,14 @@ def generate_excel(
         if command_polling_summary:
             pd.DataFrame(
                 command_polling_coverage_rows(command_polling_summary),
-                columns=["Status", "Devices / Source", "Percent"],
+                columns=["Status", "Devices / Total", "% of Total"],
             ).to_excel(writer, sheet_name="Polling Summary", index=False)
             if command_polling_summary.relay_rows:
                 pd.DataFrame(
                     command_polling_summary.relay_rows,
                     columns=[
                         "Relay",
-                        "Devices",
+                        "Total Devices",
                         "Enabled",
                         "Disabled",
                         "NotSet",
@@ -3379,7 +3410,7 @@ def generate_excel(
                     command_polling_summary.subnet_rows,
                     columns=[
                         "Subnet",
-                        "Devices",
+                        "Total Devices",
                         "Enabled",
                         "Disabled",
                         "NotSet",
@@ -3392,7 +3423,7 @@ def generate_excel(
         if fast_hash_verify_summary:
             pd.DataFrame(
                 fast_hash_verify_coverage_rows(fast_hash_verify_summary),
-                columns=["Status", "Devices / Source", "Percent"],
+                columns=["Status", "Devices / Total", "% of Total"],
             ).to_excel(writer, sheet_name="FastHashVerify Summary", index=False)
             pd.DataFrame(
                 fast_hash_verify_summary.settings_rows,
@@ -3400,7 +3431,7 @@ def generate_excel(
                     "Work (ms)",
                     "Sleep (ms)",
                     "Configured Duty Cycle (%)",
-                    "Devices",
+                    "Devices / Total",
                 ],
             ).to_excel(writer, sheet_name="FastHashVerify Settings", index=False)
         if agent_multicore_summary:
@@ -3409,7 +3440,7 @@ def generate_excel(
                 columns=[
                     "Scale Work Time With CPU Cores",
                     "Total Physical CPU Cores",
-                    "Devices",
+                    "Devices / Total",
                 ],
             ).to_excel(writer, sheet_name="Client Multicore Settings", index=False)
         if agent_cpu_idle_summary:
@@ -3419,7 +3450,7 @@ def generate_excel(
                     "Work Idle (ms)",
                     "Sleep Idle (ms)",
                     "Configured Duty Cycle (%)",
-                    "Devices",
+                    "Devices / Total",
                 ],
             ).to_excel(writer, sheet_name="Client CPU Idle Settings", index=False)
 
@@ -3776,23 +3807,23 @@ def generate_word(
     document.add_heading("Average Loop Health", level=3)
     build_word_table(
         document,
-        ["Band", "Devices", "Percent", "Rule"],
+        ["Band", "Devices / Total", "% of Total", "Rule"],
         [
             [
                 "Healthy",
-                f"{metrics.avg_healthy:,}",
+                count_with_denominator(metrics.avg_healthy, metrics.score_total_devices),
                 pct(metrics.avg_healthy_pct),
                 "< 30 minutes",
             ],
             [
                 "Warning",
-                f"{metrics.avg_warning:,}",
+                count_with_denominator(metrics.avg_warning, metrics.score_total_devices),
                 pct(metrics.avg_warning_pct),
                 "30-60 minutes",
             ],
             [
                 "Critical",
-                f"{metrics.avg_critical:,}",
+                count_with_denominator(metrics.avg_critical, metrics.score_total_devices),
                 pct(metrics.avg_critical_pct),
                 "> 60 minutes or no usable data",
             ],
@@ -3803,17 +3834,25 @@ def generate_word(
     document.add_heading("Reporting Issues", level=3)
     build_word_table(
         document,
-        ["Status", "Devices", "% of Source"],
+        ["Status", "Devices / Total", "% of Total"],
         [
             [
                 "Not Reported",
-                f"{metrics.not_reported_count:,}",
+                count_with_denominator(
+                    metrics.not_reported_count, metrics.score_total_devices
+                ),
                 pct(metrics.not_reported_pct),
             ],
-            ["Error", f"{metrics.error_count:,}", pct(metrics.error_pct)],
+            [
+                "Error",
+                count_with_denominator(metrics.error_count, metrics.score_total_devices),
+                pct(metrics.error_pct),
+            ],
             [
                 "Total Issues",
-                f"{metrics.total_issue_count:,}",
+                count_with_denominator(
+                    metrics.total_issue_count, metrics.score_total_devices
+                ),
                 pct(metrics.total_issue_pct),
             ],
         ],
@@ -3887,7 +3926,7 @@ def generate_word(
         document.add_heading("UDP Notification Coverage", level=4)
         build_word_table(
             document,
-            ["Status", "Devices / Source", "% of Source"],
+            ["Status", "Devices / Total", "% of Total"],
             udp_coverage_rows(udp_summary),
             {1, 2},
         )
@@ -3934,7 +3973,7 @@ def generate_word(
         )
         build_word_table(
             document,
-            ["Status", "Devices / Source", "% of Source"],
+            ["Status", "Devices / Total", "% of Total"],
             command_polling_coverage_rows(command_polling_summary),
             {1, 2},
         )
@@ -3951,7 +3990,7 @@ def generate_word(
                 document,
                 [
                     "Relay",
-                    "Devices",
+                    "Total Devices",
                     "Enabled",
                     "Disabled",
                     "Not Set",
@@ -3970,7 +4009,7 @@ def generate_word(
                 document,
                 [
                     "Subnet",
-                    "Devices",
+                    "Total Devices",
                     "Enabled",
                     "Disabled",
                     "Not Set",
@@ -4000,14 +4039,19 @@ def generate_word(
         document.add_heading("FastHashVerify Status", level=4)
         build_word_table(
             document,
-            ["Status", "Devices / Source", "% of Source"],
+            ["Status", "Devices / Total", "% of Total"],
             fast_hash_verify_coverage_rows(fast_hash_verify_summary),
             {1, 2},
         )
         document.add_heading("Reported Work and Sleep Settings", level=4)
         build_word_table(
             document,
-            ["Work (ms)", "Sleep (ms)", "Configured Duty Cycle (%)", "Devices"],
+            [
+                "Work (ms)",
+                "Sleep (ms)",
+                "Configured Duty Cycle (%)",
+                "Devices / Total",
+            ],
             fast_hash_verify_summary.settings_rows,
             {2, 3},
         )
@@ -4031,7 +4075,7 @@ def generate_word(
                 "Work Idle (ms)",
                 "Sleep Idle (ms)",
                 "Configured Duty Cycle (%)",
-                "Devices",
+                "Devices / Total",
             ],
             agent_cpu_idle_summary.settings_rows,
             {2, 3},
@@ -4050,10 +4094,10 @@ def generate_word(
             [
                 "Scale Work Time With CPU Cores",
                 "Total Physical CPU Cores",
-                "Devices",
+                "Devices / Total",
             ],
             agent_multicore_summary.settings_rows,
-            {1},
+            {1, 2},
         )
 
     document.save(str(word_output))

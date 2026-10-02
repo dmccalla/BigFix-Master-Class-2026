@@ -65,8 +65,8 @@ def test_cpu_idle_settings_are_reported_without_assessment() -> None:
     assert summary is not None
     assert summary.total_devices == 2
     assert summary.settings_rows == [
-        ["25", "400", "5.9%", "1"],
-        ["Not Set", "Not Set", "Not Set", "1"],
+        ["25", "400", "5.9%", "1 / 2"],
+        ["Not Set", "Not Set", "Not Set", "1 / 2"],
     ]
 
     source = loop.processed_to_dataframe(processed)
@@ -112,7 +112,7 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
         "Work Idle (ms)",
         "Sleep Idle (ms)",
         "Configured Duty Cycle (%)",
-        "Devices",
+        "Devices / Total",
     )
 
     word_output = tmp_path / "loop.docx"
@@ -176,7 +176,7 @@ def test_headerless_fourteen_field_loop_capture_maps_cpu_idle_columns(
     assert errors == 0
     summary = loop.analyze_agent_multicore(processed)
     assert summary is not None
-    assert ["Not Applicable", "4", "1"] in summary.settings_rows
+    assert ["Not Applicable", "4", "1 / 2"] in summary.settings_rows
 
 
 def test_headerless_loop_capture_requires_all_collection_fields(tmp_path: Path) -> None:

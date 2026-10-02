@@ -39,7 +39,7 @@ optional: leave it blank to pick each module's input by hand on step 2.
 folder there, named after the run and the time of the build.
 
 **Run Name** is required. It names the run folder and prefixes every output
-file, so use something you will recognise later, such as the customer or
+file, so use something you will recognize later, such as the customer or
 server name.
 
 ## Step 2: Modules

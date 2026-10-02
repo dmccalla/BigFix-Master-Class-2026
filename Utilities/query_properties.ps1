@@ -7,7 +7,7 @@
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 # query_properties.ps1
-# Reads the Agent Performance Counter XML captures and writes CSVs for loop
+# Reads the Client Performance Counter XML captures and writes CSVs for loop
 # data, the Top 10 slowest evaluations, and UDP notification results.
 # Fast on big estates. Rows fold into per-lookup totals in one pass.
 # The API is queried once per analysis, not once per property.

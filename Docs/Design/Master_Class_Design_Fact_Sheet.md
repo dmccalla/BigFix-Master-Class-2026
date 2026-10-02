@@ -26,7 +26,7 @@ BigFix deployment -> collection task -> captured data -> Workbench module -> Min
 | Session length | 90 minutes |
 | Audience | BigFix practitioners attending the Master Class |
 | Experience | Guided demonstration followed by individual lab modules |
-| Core lab path | Agent Performance and Perfmon Infrastructure |
+| Core lab path | Client Performance and Perfmon Infrastructure |
 | Optional lab | FillDB Performance, if time remains |
 | Primary artifact | Mini Report |
 | Lab site | `Performance and Config Analysis` |
@@ -38,7 +38,7 @@ modules to be completed in one session.
 
 | Module | What attendees collect | What the Workbench produces | Priority |
 |---|---|---|---|
-| Client Performance Loop Analysis | Agent Performance Counters analysis export. Optional Top 10 evaluation, UDP notification, and deployment captures add context. | Mini Report, Infographic, and supporting Excel workbook. | Core |
+| Client Performance Loop Analysis | Client Performance Counters analysis export. Optional Top 10 evaluation, UDP notification, and deployment captures add context. | Mini Report, Infographic, and supporting Excel workbook. | Core |
 | Perfmon Infrastructure Analysis | A Windows PerfMon `.blg` capture from a BigFix server. | Mini Report, Infographic, and supporting Excel workbook. | Core |
 | FillDB Performance Analysis | FillDB performance logs or the analyzer CSV. | Mini Report and Infographic. | Time permitting |
 
@@ -53,8 +53,8 @@ resulting files are retrieved and supplied to the matching Workbench module.
 The current content is published to the custom site **Performance and Config
 Analysis**:
 
-1. Activate `BigFix Master Class -- Agent Performance Counters - Basic (2.0)`.
-2. Run `BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0)`.
+1. Activate `BigFix Master Class -- Client Performance Counters - Basic (2.0)`.
+2. Run `BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)`.
 3. Run `BigFix Master Class -- Setup and Run Perfmon Counters (2.0)` for the
    server in scope and retrieve the `.blg` file directly from that machine.
 4. If time permits, run `BigFix Master Class -- Enable FillDB Performance
@@ -85,7 +85,7 @@ The deck should support these beats without becoming a product tour:
    capacity?
 2. The collection-to-analysis workflow.
 3. The three modules and when each is useful.
-4. A short walkthrough of the Agent Performance lab.
+4. A short walkthrough of the Client Performance lab.
 5. A short walkthrough of the Perfmon lab.
 6. The optional FillDB path.
 7. A Mini Report example and how to read it.

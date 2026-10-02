@@ -16,13 +16,13 @@ ANALYSIS = (
     ROOT
     / "Tasks and Analyses"
     / "Analyses"
-    / "BigFix Master Class -- Agent Performance Counters - Basic (2.0).bes"
+    / "BigFix Master Class -- Client Performance Counters - Basic (2.0).bes"
 )
 COLLECTOR = (
     ROOT
     / "Tasks and Analyses"
     / "Individual Tasks"
-    / "BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0).bes"
+    / "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes"
 )
 SETTING_NAMES = ("_BESClient_Resource_ScaleWorkTimeWithCPUCores",)
 PROPERTY_NAMES = ("Platform Health Check - Agent Multicore Scaling Enabled",)

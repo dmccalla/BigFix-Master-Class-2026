@@ -19,7 +19,7 @@ from defusedxml import ElementTree as ET
 ROOT = Path(__file__).resolve().parents[1]
 TASKS = ROOT / "Tasks and Analyses" / "Individual Tasks"
 FILES = {
-    "agent": "BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0).bes",
+    "agent": "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes",
     "filldb": "BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
 }
 STUBS = """() => {

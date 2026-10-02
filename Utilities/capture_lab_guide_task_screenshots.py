@@ -30,14 +30,14 @@ CAPTURES = (
     (
         TASK_ROOT
         / "Analyses"
-        / "BigFix Master Class -- Agent Performance Counters - Basic (2.0).bes",
+        / "BigFix Master Class -- Client Performance Counters - Basic (2.0).bes",
         "lg-task-01-agent-performance-analysis.png",
         700,
     ),
     (
         TASK_ROOT
         / "Individual Tasks"
-        / "BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0).bes",
+        / "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes",
         "lg-task-02-collect-agent-performance.png",
         1200,
     ),

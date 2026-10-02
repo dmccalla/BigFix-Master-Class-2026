@@ -149,15 +149,15 @@ MODULE_DETAILS = {
         "does": (
             "Creates an Infographic, Excel file, and Mini Report. Optional data adds "
             "expensive evaluations, UDP notification coverage, Command Polling Review, "
-            "relay details, subnet details, FastHashVerify settings, and agent multicore settings."
+            "relay details, subnet details, FastHashVerify settings, and client multicore settings."
         ),
         "use": (
-            "Use this with a Client Loop XML or CSV capture. The Agent Performance "
+            "Use this with a Client Loop XML or CSV capture. The Client Performance "
             "Counters Basic export is also supported."
         ),
         "consultant": (
             "Confirm the collection period, slow client counts, UDP results, command "
-            "polling settings, expensive evaluations, FastHashVerify settings, and agent multicore settings."
+            "polling settings, expensive evaluations, FastHashVerify settings, and client multicore settings."
         ),
     },
     "perfmon": {

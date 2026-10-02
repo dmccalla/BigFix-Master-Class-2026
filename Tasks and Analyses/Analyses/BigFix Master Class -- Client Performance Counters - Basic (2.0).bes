@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Analysis>
-		<Title>BigFix Master Class -- Agent Performance Counters - Basic (2.0)</Title>
+		<Title>BigFix Master Class -- Client Performance Counters - Basic (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
@@ -24,7 +24,7 @@
 
 <DIV id=seed_2 class=hc-wrap>
 <DIV class=hc-eyebrow>BIGFIX MASTER CLASS</DIV>
-<DIV class=hc-h1>Agent Performance Counters - Basic</DIV>
+<DIV class=hc-h1>Client Performance Counters - Basic</DIV>
 <DIV class=hc-rule>&nbsp;</DIV>
 <DIV class=hc-lead><FONT color=#000000>This analysis collects the client evaluation-loop counters used by the BigFix Master Class. Activate it before running the associated collection task so clients have time to report useful data.&nbsp; </FONT></DIV>
 <DIV class=hc-banner>
@@ -35,7 +35,7 @@
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Activate before collection</B><SPAN>Allow at least 24-48 hours of reporting before collecting the data.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
-<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Used by the collection task</B><SPAN>The Collect Agent Performance Counter Data task reads these analysis results.</SPAN></DIV></TD></TR>
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Used by the collection task</B><SPAN>The Collect Client Performance Counter Data task reads these analysis results.</SPAN></DIV></TD></TR>
 <TR>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Deactivate when finished</B><SPAN>Leave inactive when not actively collecting health check data.</SPAN></DIV></TD>
@@ -60,7 +60,7 @@
 <LI><FONT color=#000000>Command Polling Minutes</FONT>&nbsp;</LI></UL></FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000>FastHashVerify client settings are also collected when available: enablement, work ms, and sleep ms. A missing setting means the BigFix client default is in effect.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000>Client CPU idle settings are also collected when available: work idle and sleep idle.</FONT></DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000>Total physical CPU core count is collected along with the BigFix 11.0.7 agent multicore setting when available. The multicore setting is Not Applicable on clients earlier than BigFix 11.0.7.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000>Total physical CPU core count is collected along with the BigFix 11.0.7 client multicore setting when available. The multicore setting is Not Applicable on clients earlier than BigFix 11.0.7.</FONT></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2>
 <UL>
@@ -73,7 +73,7 @@
 <DIV class=hc-sec><FONT color=#000000 size=2></FONT>&nbsp;</DIV></DIV>
 <P><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}</script> </P>
 <DIV class=hc-sec>Version and Release Notes</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, total physical CPU core count, CPU idle, and the BigFix 11.0.7 agent multicore client setting.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, total physical CPU core count, CPU idle, and the BigFix 11.0.7 client multicore setting.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>
 		<Relevance>true</Relevance>
 		<Source>Internal</Source>

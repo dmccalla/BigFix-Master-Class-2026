@@ -78,7 +78,7 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
 
     source = loop.processed_to_dataframe(processed)
     assert list(
-        source[["Agent Multicore Scaling", "Agent Total Physical CPU Core Count"]].iloc[0]
+        source[["Client Multicore Scaling", "Client Total Physical CPU Core Count"]].iloc[0]
     ) == ["On", "8"]
 
 
@@ -97,8 +97,8 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
         agent_multicore_summary=summary,
     )
     wb = load_workbook(workbook)
-    assert "Agent Multicore Settings" in wb.sheetnames
-    settings = list(wb["Agent Multicore Settings"].values)
+    assert "Client Multicore Settings" in wb.sheetnames
+    settings = list(wb["Client Multicore Settings"].values)
     assert settings[0] == (
         "Scale Work Time With CPU Cores",
         "Total Physical CPU Cores",
@@ -115,7 +115,7 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     )
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Agent Multicore Settings" in headings
+    assert "Client Multicore Settings" in headings
     assert any("configuration context only" in p.text for p in doc.paragraphs)
     assert any("earlier than BigFix 11.0.7" in p.text for p in doc.paragraphs)
     assert any(

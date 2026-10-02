@@ -283,13 +283,13 @@ class SourceValidation:
 
 
 def validate_loop_workbook(path: Path) -> SourceValidation:
-    """Reject obvious non-Basic Agent Performance Counters exports."""
+    """Reject obvious non-Basic Client Performance Counters exports."""
     if "advanced" in path.name.casefold():
         return SourceValidation(
             False,
             (
                 "Client Performance Loop Analysis requires the "
-                "'Agent Performance Counters - Basic' Excel/CSV export. "
+                "'Client Performance Counters - Basic' Excel/CSV export. "
                 "The Advanced export has extra data and is not supported."
             ),
         )
@@ -1604,10 +1604,10 @@ MODULES: list[Module] = [
         recursive_discovery=True,
         module_subfolder="Client_Loop",
         note=(
-            "Use the Client_Loop_*.csv export or the Agent Performance Counters "
+            "Use the Client_Loop_*.csv export or the Client Performance Counters "
             "- Basic Excel/CSV export. The Advanced export includes additional "
-            "data and is not supported. FastHashVerify, CPU idle, and agent multicore "
-            "client settings are included when supplied by the Agent Performance Counters export."
+            "data and is not supported. FastHashVerify, CPU idle, and client multicore "
+            "client settings are included when supplied by the Client Performance Counters export."
         ),
     ),
     Module(

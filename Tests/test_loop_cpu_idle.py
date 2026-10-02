@@ -73,9 +73,9 @@ def test_cpu_idle_settings_are_reported_without_assessment() -> None:
     assert list(
         source[
             [
-                "Agent CPU Work Idle",
-                "Agent CPU Sleep Idle",
-                "Agent CPU Idle Configured Duty Cycle (%)",
+                "Client CPU Work Idle",
+                "Client CPU Sleep Idle",
+                "Client CPU Idle Configured Duty Cycle (%)",
             ]
         ].iloc[0]
     ) == ["25", "400", "5.9%"]
@@ -107,8 +107,8 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
         agent_cpu_idle_summary=summary,
     )
     wb = load_workbook(workbook)
-    assert "Agent CPU Idle Settings" in wb.sheetnames
-    assert list(wb["Agent CPU Idle Settings"].values)[0] == (
+    assert "Client CPU Idle Settings" in wb.sheetnames
+    assert list(wb["Client CPU Idle Settings"].values)[0] == (
         "Work Idle (ms)",
         "Sleep Idle (ms)",
         "Configured Duty Cycle (%)",
@@ -124,7 +124,7 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
     )
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Agent CPU Idle Settings" in headings
+    assert "Client CPU Idle Settings" in headings
     assert any("configuration context only" in p.text for p in doc.paragraphs)
     assert any(
         "not a measurement of observed CPU usage" in p.text for p in doc.paragraphs

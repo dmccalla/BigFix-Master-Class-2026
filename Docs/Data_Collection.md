@@ -10,7 +10,7 @@ Folder at it. The Workbench looks in these subfolders:
 
 ```
 <Data Folder>\
-    Client_Loop\              Agent Performance Counters export, Top 10 and UDP captures
+    Client_Loop\              Client Performance Counters export, Top 10 and UDP captures
     Deployment_Information\   The *_Info_*.log captures from the root server
     Perfmon\                  One or two PerfMon .blg captures
     FillDB_Performance\       FillDB performance .log files, or the analyzer CSV
@@ -27,7 +27,7 @@ Reviews how long clients take to evaluate their content, and why.
 
 | Input | Required | Looks for | Source |
 |---|---|---|---|
-| Agent Performance Counters export | Yes | `Client_Loop_*.xml`, `Client_Loop_*.csv`, `*Basic*` | The analysis export from the BigFix console, or the XML written by `Utilities\query_properties.ps1`. Use the **Basic** export. The Advanced export carries extra columns and is not supported. |
+| Client Performance Counters export | Yes | `Client_Loop_*.xml`, `Client_Loop_*.csv`, `*Basic*` | The analysis export from the BigFix console, or the XML written by `Utilities\query_properties.ps1`. Use the **Basic** export. The Advanced export carries extra columns and is not supported. |
 | Report Start Date and End Date | Yes | Entered on step 2 | The period the collection covers. |
 | Top 10 slowest evaluations | No | `*top10-query-results*.csv`, `*top10*.csv`, `*top10*.txt`, `*top10*.xml`, and evaluation-time exports | The session relevance query in `Utilities\query_properties.ps1`, or its console export. Adds the Top 10 Most Expensive Evaluations table. |
 | UDP notifications | No | `*udp-notification*.csv`, `*udp_notification*.csv`, the `.xml` forms, `*udp-ping*.csv`, `*receiving*udp*.csv` | The same script. Adds UDP coverage by relay and by subnet, and the Command Polling Review. |
@@ -66,7 +66,7 @@ runs for you.
 
 The captures above come from three places:
 
-1. **The BigFix console.** Export the Agent Performance Counters analysis
+1. **The BigFix console.** Export the Client Performance Counters analysis
    (Basic) to XML or CSV.
 2. **The root server.** Run the PerfMon data collector set for the collection
    period and save the `.blg`. Enable FillDB performance logging for the same
@@ -88,12 +88,12 @@ the collection task in a live lab.
 
 | Lab | BigFix collection task | Capture to retrieve | Workbench module |
 |---|---|---|---|
-| Agent Performance | `BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0)` | `Client_Loop_*.xml` or `Client_Loop_*.csv`; the task also produces the optional Top 10 and UDP captures | Client Performance Loop Analysis |
+| Client Performance | `BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)` | `Client_Loop_*.xml` or `Client_Loop_*.csv`; the task also produces the optional Top 10 and UDP captures | Client Performance Loop Analysis |
 | PerfMon | `BigFix Master Class -- Setup and Run Perfmon Counters (2.0)` | The `.blg` file from each targeted server | Perfmon Infrastructure Analysis |
 | FillDB (time permitting) | `BigFix Master Class -- Enable FillDB Performance Logging (2.0)` | `FillDBPerf.log` and its rollover files after logging is disabled | FillDB Performance Analysis |
 
-For the Agent Performance lab, confirm that the `BigFix Master Class
--- Agent Performance Counters - Basic (2.0)` analysis is active before running
+For the Client Performance lab, confirm that the `BigFix Master Class
+-- Client Performance Counters - Basic (2.0)` analysis is active before running
 the collection task. The collection task runs as a one-time action from the
 root server.
 

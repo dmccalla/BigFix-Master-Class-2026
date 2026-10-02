@@ -568,7 +568,7 @@ def _load_headerless_basic_counter_csv(csv_source) -> pd.DataFrame:
     ]
     if len(df.columns) != len(columns):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 14 collection fields."
+            "Headerless Client Performance captures must contain all 14 collection fields."
         )
     df.columns = columns
     return df
@@ -661,7 +661,7 @@ def _load_loose_loop_csv_text(csv_text: str) -> pd.DataFrame:
     ]
     if any(len(row) != expected for row in normalized):
         raise ValueError(
-            "Headerless Agent Performance captures must contain all 14 collection fields."
+            "Headerless Client Performance captures must contain all 14 collection fields."
         )
     return pd.DataFrame(normalized, columns=columns)
 
@@ -681,7 +681,7 @@ def _load_loop_csv_text(csv_text: str) -> pd.DataFrame:
 
 
 def load_loop_input(input_file: Path) -> pd.DataFrame:
-    """Load the Agent Performance Counters - Basic export.
+    """Load the Client Performance Counters - Basic export.
 
     Accepts the raw BESAPI .xml capture (whose answer lines are the CSV
     rows), a formatted CSV, or an Excel workbook.
@@ -2919,14 +2919,14 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
                 )
             )
         if has_agent_multicore_data:
-            row_dict["Agent Multicore Scaling"] = r.agent_multicore_scaling_enabled
-            row_dict["Agent Total Physical CPU Core Count"] = (
+            row_dict["Client Multicore Scaling"] = r.agent_multicore_scaling_enabled
+            row_dict["Client Total Physical CPU Core Count"] = (
                 r.agent_total_physical_cpu_core_count
             )
         if has_agent_cpu_idle_data:
-            row_dict["Agent CPU Work Idle"] = r.agent_cpu_work_idle
-            row_dict["Agent CPU Sleep Idle"] = r.agent_cpu_sleep_idle
-            row_dict["Agent CPU Idle Configured Duty Cycle (%)"] = (
+            row_dict["Client CPU Work Idle"] = r.agent_cpu_work_idle
+            row_dict["Client CPU Sleep Idle"] = r.agent_cpu_sleep_idle
+            row_dict["Client CPU Idle Configured Duty Cycle (%)"] = (
                 configured_cpu_duty_cycle(
                     r.agent_cpu_work_idle,
                     r.agent_cpu_sleep_idle,
@@ -3411,7 +3411,7 @@ def generate_excel(
                     "Total Physical CPU Cores",
                     "Devices",
                 ],
-            ).to_excel(writer, sheet_name="Agent Multicore Settings", index=False)
+            ).to_excel(writer, sheet_name="Client Multicore Settings", index=False)
         if agent_cpu_idle_summary:
             pd.DataFrame(
                 agent_cpu_idle_summary.settings_rows,
@@ -3421,7 +3421,7 @@ def generate_excel(
                     "Configured Duty Cycle (%)",
                     "Devices",
                 ],
-            ).to_excel(writer, sheet_name="Agent CPU Idle Settings", index=False)
+            ).to_excel(writer, sheet_name="Client CPU Idle Settings", index=False)
 
     autosize_excel_columns(excel_output)
     if actionsite_pressure:
@@ -4018,7 +4018,7 @@ def generate_word(
         )
 
     if agent_cpu_idle_summary:
-        document.add_heading("Agent CPU Idle Settings", level=3)
+        document.add_heading("Client CPU Idle Settings", level=3)
         document.add_paragraph(
             "The following client CPU idle setting values were reported. They are "
             "configuration context only; no assessment or finding is derived. The "
@@ -4038,7 +4038,7 @@ def generate_word(
         )
 
     if agent_multicore_summary:
-        document.add_heading("Agent Multicore Settings", level=3)
+        document.add_heading("Client Multicore Settings", level=3)
         document.add_paragraph(
             "The following 11.0.7 client setting was reported. It is "
             "configuration context only; no assessment or finding is derived. "
@@ -4213,22 +4213,22 @@ def main() -> int:
             log.detail("FastHashVerify Sleep", fast_hash_verify_sleep_column)
         agent_multicore_scaling_column = auto_detect_agent_multicore_scaling_column(df)
         if agent_multicore_scaling_column:
-            log.detail("Agent multicore scaling", agent_multicore_scaling_column)
+            log.detail("Client multicore scaling", agent_multicore_scaling_column)
         agent_total_physical_cpu_core_count_column = (
             auto_detect_agent_total_physical_cpu_core_count_column(df)
         )
         if agent_total_physical_cpu_core_count_column:
             log.detail(
-                "Agent total physical CPU core count",
+                "Client total physical CPU core count",
                 agent_total_physical_cpu_core_count_column,
             )
         agent_cpu_work_idle_column, agent_cpu_sleep_idle_column = (
             auto_detect_agent_cpu_idle_columns(df)
         )
         if agent_cpu_work_idle_column:
-            log.detail("Agent CPU work idle", agent_cpu_work_idle_column)
+            log.detail("Client CPU work idle", agent_cpu_work_idle_column)
         if agent_cpu_sleep_idle_column:
-            log.detail("Agent CPU sleep idle", agent_cpu_sleep_idle_column)
+            log.detail("Client CPU sleep idle", agent_cpu_sleep_idle_column)
 
         # Load UDP data early so it can be merged into the loop data
         udp_summary = load_udp_notification_summary(udp_notifications_file)
@@ -4361,12 +4361,12 @@ def main() -> int:
             log.detail("FastHashVerify not set", fast_hash_verify_summary.not_set_count)
         if agent_multicore_summary:
             log.detail(
-                "Agent multicore settings reported",
+                "Client multicore settings reported",
                 agent_multicore_summary.total_devices,
             )
         if agent_cpu_idle_summary:
             log.detail(
-                "Agent CPU idle settings reported",
+                "Client CPU idle settings reported",
                 agent_cpu_idle_summary.total_devices,
             )
 

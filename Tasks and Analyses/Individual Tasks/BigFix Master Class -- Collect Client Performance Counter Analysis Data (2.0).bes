@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Task>
-		<Title>BigFix Master Class -- Collect Agent Performance Counter Analysis Data (2.0)</Title>
+		<Title>BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
@@ -32,9 +32,9 @@
 
 <DIV id=seed_2 class=hc-wrap>
 <DIV class=hc-eyebrow>&nbsp;</DIV>
-<DIV class=hc-h1>Collect Agent Performance Counter Analysis Data</DIV>
+<DIV class=hc-h1>Collect Client Performance Counter Analysis Data</DIV>
 <DIV class=hc-lead><FONT color=#000000>
-<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Agent Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing.</FONT></DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing.</FONT></DIV>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -52,15 +52,15 @@
 <DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
 <DIV id=hcNotes class=hc-body style="DISPLAY: none">
 <DIV class=hc-sec>Description</DIV><FONT size=2>
-<P style="FONT-SIZE: 14px"><STRONG><FONT color=#000000>The "BigFix Master Class -- Agent Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. Its suggested that the analysis be activated for at least 24 hours before collecting the data.</FONT></STRONG></P>
-<P style="FONT-SIZE: 14px"><FONT color=#000000>This task automates the Agent Performance lab collection for the BigFix Master Class.&nbsp; This task will perform the following steps: </FONT></P>
+<P style="FONT-SIZE: 14px"><STRONG><FONT color=#000000>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. Its suggested that the analysis be activated for at least 24 hours before collecting the data.</FONT></STRONG></P>
+<P style="FONT-SIZE: 14px"><FONT color=#000000>This task automates the Client Performance lab collection for the BigFix Master Class.&nbsp; This task will perform the following steps: </FONT></P>
 <DIV style="FONT-SIZE: 14px">
 <UL>
 <LI><FONT color=#000000>Backup any existing health check deployment information results.&nbsp; </FONT>
 <LI><FONT color=#000000>Create the existing collection directory structure on the C: drive.&nbsp; </FONT>
 <UL>
 <LI><FONT color=#000000><STRONG>Note:</STRONG> Edit the actionscript if you want something different.</FONT></LI></UL>
-<LI><FONT color=#000000>This will query the REST API to gather, on a per-machine basis: average and maximum loop times, UDP notification information, command polling settings, FastHashVerify, total physical CPU core count, client CPU idle, the BigFix 11.0.7 agent multicore setting, and the Top 10 slowest evaluating pieces of content. </FONT>
+<LI><FONT color=#000000>This will query the REST API to gather, on a per-machine basis: average and maximum loop times, UDP notification information, command polling settings, FastHashVerify, total physical CPU core count, client CPU idle, the BigFix 11.0.7 client multicore setting, and the Top 10 slowest evaluating pieces of content. </FONT>
 <LI><FONT color=#000000>The data sets are saved as XML captures and then processed to output aggregated data points. </FONT></LI></UL></DIV>
 <UL>
 <LI><FONT color=#000000>The Workbench reads these files directly. Enable the option in the User Input and Parameters section to also generate the human readable CSV version.</FONT> 
@@ -112,7 +112,7 @@
    
 var isHCAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Health Checks Analysis" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
 var isBCVAnalysisActive = EvaluateRelevance( 'exists fixlets whose (analysis flag of it and name of it = "BES Component Versions" and active flag of best activation of it) of bes sites whose (name of it = "BES Support")' );
-var isAgentPerformanceBasicActive = EvaluateRelevance( 'exists activations whose (active flag of it) of bes fixlets whose (name of it contains "BigFix Master Class -- Agent Performance Counters - Basic")' );
+var isAgentPerformanceBasicActive = EvaluateRelevance( 'exists activations whose (active flag of it) of bes fixlets whose (name of it contains "BigFix Master Class -- Client Performance Counters - Basic")' );
 
 if ( isHCAnalysisActive == "False" )
 {alert("The BES Health Checks analysis in the BES Support site must be enabled."); return false;}
@@ -121,7 +121,7 @@ if ( isBCVAnalysisActive == "False" )
 {alert("The BES Component Versions analysis in the BES Support site must be enabled."); return false;}
 
 if ( isAgentPerformanceBasicActive == "False" )
-{alert("Warning: The task could not confirm that the BigFix Master Class -- Agent Performance Counters - Basic analysis is active. If it was renamed, verify the correct analysis is imported, activated, and returning data before continuing.");}
+{alert("Warning: The task could not confirm that the BigFix Master Class -- Client Performance Counters - Basic analysis is active. If it was renamed, verify the correct analysis is imported, activated, and returning data before continuing.");}
 
 if (apiUsername == null || apiUsername == "")  {
         alert("API Username field must not be blank.");
@@ -146,7 +146,7 @@ else
 <DIV class=hc-sec>Action log note</DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2>An action log line showing <TT>Exit Code=1</TT> is not automatically a failure in this task. Windows <TT>xcopy</TT> returns 0 for a successful copy and 1 when no matching files were found; 1 is acceptable only when those files are optional. <TT>mkdir</TT> uses 1 when the folder already exists. Verify the command and the expected output before treating the action as failed. Nonzero results from other commands generally indicate a problem.</FONT></DIV>
 <DIV class=hc-sec>Version and Release Notes</DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, total physical CPU core count, CPU idle, the BigFix 11.0.7 agent multicore setting, actionable BigFix API errors, and adaptive batch retries for large deployments.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Added command polling, FastHashVerify, total physical CPU core count, CPU idle, the BigFix 11.0.7 client multicore setting, actionable BigFix API errors, and adaptive batch retries for large deployments.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT size=2></FONT>&nbsp;</DIV><script>function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getElementById('hcTog');var o=n.style.display!=='none';n.style.display=o?'none':'block';g.innerHTML=(o?'[+]':'[-]')+' Full description &amp; deployment notes';}
 function hcSync(){var els=document.getElementsByTagName('INPUT');for(var i=0;i<els.length;i++){var el=els[i];if(el.className&&el.className.indexOf('hc-in')!==-1){el.style.backgroundColor=el.disabled?'#eef1f5':'#ffffff';el.style.color=el.disabled?'#98a2b0':'#000032';}}}
@@ -176,7 +176,7 @@ hcSync();</script> </DIV>]]></Description>
 //*
 //*     DESCRIPTION AND NOTES
 //*
-//*     - This will capture the agent performance counters basic 2.0 analysis data.
+//*     - This will capture the client performance counters basic 2.0 analysis data.
 //*
 //* ====================================================================================================>
 
@@ -243,7 +243,7 @@ createfile until __END__
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 # query_properties.ps1
-# Reads Agent Performance XML and writes loop, Top 10, and UDP CSV files.
+# Reads Client Performance XML and writes loop, Top 10, and UDP CSV files.
 # Queries each analysis once and summarizes Top 10 rows in one pass.
 param(
     [Alias("LoopInputXml")]

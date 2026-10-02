@@ -1054,9 +1054,62 @@ def perfmon_section_source_id(section_name: object) -> str:
     return ""
 
 
-def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str]]:
-    """Return the non-OK NFR findings already counted by the scorecard."""
-    findings: dict[str, str] = {}
+def _perfmon_finding_number(value: object) -> str:
+    """Format a captured counter value without adding presentation-only rounding."""
+    if value is None or str(value).strip() == "":
+        return ""
+    try:
+        numeric = float(value)
+    except (TypeError, ValueError):
+        return str(value)
+    if numeric.is_integer():
+        return f"{int(numeric):,}"
+    return f"{numeric:,.2f}".rstrip("0").rstrip(".")
+
+
+def perfmon_finding_context(section_data: dict) -> str:
+    """Return the compact observed evidence behind one automated finding."""
+    status = str(section_data.get("status", "")).strip()
+    label = status_label(status)
+    threshold = str(section_data.get("threshold", "")).strip()
+    average = _perfmon_finding_number(section_data.get("average"))
+    maximum = _perfmon_finding_number(section_data.get("maximum"))
+    violations = int(section_data.get("violations", 0) or 0)
+    warnings = int(section_data.get("warnings", 0) or 0)
+    samples = int(section_data.get("samples", 0) or 0)
+
+    details: list[str] = []
+    if average:
+        details.append(
+            f"average {average}" + (f" against {threshold}" if threshold else "")
+        )
+    elif threshold:
+        details.append(f"standard {threshold}")
+    if maximum:
+        details.append(f"peak {maximum}")
+    if status == "Critical" and violations:
+        reading_text = f"{violations:,} reading(s) above the standard"
+        if samples:
+            reading_text = f"{violations:,} of {samples:,} readings above the standard"
+        details.append(reading_text)
+    if status == "Warning" and warnings:
+        reading_text = f"{warnings:,} reading(s) in the warning range"
+        if samples:
+            reading_text = f"{warnings:,} of {samples:,} readings in the warning range"
+        details.append(reading_text)
+
+    if details:
+        return f"{label}: {'; '.join(details)}."
+
+    observation = str(section_data.get("observation", "")).strip()
+    if observation:
+        return f"{label}: {observation}"
+    return f"{label}: no observed values were available for this assessment."
+
+
+def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str, str]]:
+    """Return the non-OK NFR findings and their captured evidence."""
+    findings: dict[str, tuple[str, str]] = {}
     for section_data in observations.get("sections", {}).values():
         section_name = re.sub(r"\s+", " ", str(section_data.get("section", ""))).strip()
         status = str(section_data.get("status", "")).strip()
@@ -1065,10 +1118,13 @@ def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str]]:
         source_id = perfmon_section_source_id(section_name)
         if source_id and source_id not in findings:
             findings[source_id] = (
-                f"{section_name} automated NFR infrastructure assessment: "
-                f"{status_label(status)}."
+                section_name,
+                perfmon_finding_context(section_data),
             )
-    return [(source_id, findings[source_id]) for source_id in sorted(findings)]
+    return [
+        (source_id, findings[source_id][0], findings[source_id][1])
+        for source_id in sorted(findings)
+    ]
 
 
 def build_perfmon_automated_findings_table_xml(observations: dict) -> str:
@@ -1077,7 +1133,7 @@ def build_perfmon_automated_findings_table_xml(observations: dict) -> str:
     if not rows:
         return ""
 
-    widths = [2200, 7800]
+    widths = [1600, 2300, 6100]
     xml = heading_paragraph_xml("Automated Findings", level=3)
     xml += (
         "<w:tbl><w:tblPr>"
@@ -1091,14 +1147,16 @@ def build_perfmon_automated_findings_table_xml(observations: dict) -> str:
     xml += (
         "<w:tr>"
         + table_cell_xml("Finding ID", widths[0], bold=True)
-        + table_cell_xml("Automated Finding", widths[1], bold=True)
+        + table_cell_xml("Area", widths[1], bold=True)
+        + table_cell_xml("Review Context", widths[2], bold=True)
         + "</w:tr>"
     )
-    for source_id, finding in rows:
+    for source_id, area, context in rows:
         xml += (
             "<w:tr>"
             + table_cell_xml(source_id, widths[0])
-            + table_cell_xml(finding, widths[1])
+            + table_cell_xml(area, widths[1])
+            + table_cell_xml(context, widths[2])
             + "</w:tr>"
         )
     return xml + "</w:tbl><w:p/>"
@@ -1329,11 +1387,20 @@ def build_summary_xml(observations: dict) -> str:
     if not lines and not xml:
         return ""
     priority_items = [str(item) for item in summary.get("priority_items", []) if item]
+    if lines:
+        xml += heading_paragraph_xml("PerfMon Review Summary", level=3)
     for line in lines:
-        xml += text_paragraph_xml(str(line))
-        if str(line).strip().rstrip(":").casefold() == "highest-priority review items":
+        line_text = str(line)
+        if line_text.strip().casefold().startswith("highest-priority review items"):
+            xml += heading_paragraph_xml("Priority Review Items", level=4)
             for item in priority_items:
                 xml += bullet_paragraph_xml(item)
+            if not priority_items:
+                xml += text_paragraph_xml("No priority review items were identified.")
+        else:
+            xml += text_paragraph_xml(line_text)
+    if observations.get("sections"):
+        xml += heading_paragraph_xml("Assessment by Area", level=4)
     xml += build_perfmon_summary_table_xml(observations)
     return xml
 

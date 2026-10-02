@@ -764,7 +764,9 @@ def test_perfmon_summary_renders_priority_items_as_bullets() -> None:
 
     xml = inject_perfmon_charts.build_summary_xml(observations)
 
-    assert "Highest-priority review items:" in xml
+    assert "PerfMon Review Summary" in xml
+    assert "Priority Review Items" in xml
+    assert "Highest-priority review items:" not in xml
     assert "• " in xml
     assert "PhysicalDisk_Total_Avg_Disk_ms_Transfer - Critical; peak 75.2" in xml
     assert "Paging_File_Total_Usage_Peak - Critical; peak 88.2" in xml
@@ -1148,10 +1150,20 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
             "Network Health": {
                 "section": "Network Health",
                 "status": "Critical",
+                "average": 3.2,
+                "maximum": 11.5,
+                "violations": 12,
+                "samples": 60,
+                "threshold": "<= 1 ms",
             },
             "Memory Health": {
                 "section": "Memory Health",
                 "status": "Warning",
+                "average": 6.1,
+                "maximum": 8.4,
+                "warnings": 7,
+                "samples": 60,
+                "threshold": "<= 5%",
             },
         }
     }
@@ -1159,18 +1171,25 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
     assert inject_perfmon_charts.perfmon_automated_finding_rows(observations) == [
         (
             "PRF-INF-07",
-            "Network Health automated NFR infrastructure assessment: Fail.",
+            "Network Health",
+            "Fail: average 3.2 against <= 1 ms; peak 11.5; "
+            "12 of 60 readings above the standard.",
         ),
         (
             "PRF-INF-09",
-            "Memory Health automated NFR infrastructure assessment: Advisory.",
+            "Memory Health",
+            "Advisory: average 6.1 against <= 5%; peak 8.4; "
+            "7 of 60 readings in the warning range.",
         ),
     ]
     xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(observations)
     assert "Automated Findings" in xml
     assert "Finding ID" in xml
+    assert "Area" in xml
+    assert "Review Context" in xml
     assert "PRF-INF-07" in xml
     assert "PRF-INF-09" in xml
+    assert "12 of 60 readings above the standard" in xml
     assert "CPU Utilization" not in xml
     assert (
         inject_perfmon_charts.build_perfmon_automated_findings_table_xml(

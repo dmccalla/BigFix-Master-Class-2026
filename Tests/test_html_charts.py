@@ -500,7 +500,7 @@ def test_filldb_workload_bars_encode_health_without_dots() -> None:
     assert "width: 640px; font-size: 38px; flex: 0 0 auto" in section
     assert "width: 320px; white-space: nowrap; font-size: 38px" in section
     assert "font-size: 38px" in section
-    assert "Bar length is minutes. Colour is health." in section
+    assert "Bar length is minutes. Color is health." in section
     assert "Findings raised" in section
     assert "None raised." in section
     assert "filldbDisplayLabel(b.label) !== 'Batch Rate'" in section

@@ -82,6 +82,31 @@ function BigFixQueryErrorMessage($Xml) {
     $message.Trim()
 }
 
+function TestBigFixDatabaseCompatibilityError($Message) {
+    if ([string]::IsNullOrWhiteSpace($Message)) { return $false }
+    $Message -match '(?is)database connection error:\s*database error:.*database version.*requires a database version'
+}
+
+function ClearIncompleteApiCapture() {
+    foreach ($path in @(
+        $CaptureLoopXml,
+        $CaptureUdpXml,
+        $CaptureTop10Xml,
+        $OutputLoopCsv,
+        $OutputUdpCsv,
+        $OutputTop10Csv
+    )) {
+        if (-not [string]::IsNullOrWhiteSpace($path)) {
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+function StopForBigFixDatabaseCompatibility($Purpose, $Message) {
+    ClearIncompleteApiCapture
+    Fail "BigFix server-side database compatibility error during $Purpose. No capture files were retained. This is not a client data or collector error. Confirm that every server-side BigFix component connected to the Enterprise database is compatible with the current platform level. Server response: $Message"
+}
+
 # Matches one answer element. Capture files can hold several concatenated XML
 # documents, so answers are scanned instead of DOM parsed.
 $AnswerRegex = [regex]::new('<Answer\b[^>]*>(.*?)</Answer>', 'Singleline, Compiled')
@@ -273,7 +298,12 @@ function InvokeBigFixQueryRaw($Relevance, $Purpose = "BigFix API query") {
             $content = $response.Content
             [xml]$xml = $content
             $queryError = BigFixQueryErrorMessage $xml
-            if ($queryError) { throw "BigFix query error: $queryError" }
+            if ($queryError) {
+                if (TestBigFixDatabaseCompatibilityError $queryError) {
+                    StopForBigFixDatabaseCompatibility $Purpose $queryError
+                }
+                throw "BigFix query error: $queryError"
+            }
             return [pscustomobject]@{
                 Content = $content
                 Count   = @($xml.BESAPI.Query.Result.Answer | Where-Object { $null -ne $_ }).Count
@@ -441,7 +471,7 @@ $UdpTemplate = '(item 0 of it & ", " & item 1 of it & ", " & item 2 of it & ", "
 # The original Top 10 query had no computer set at all, so it could not be
 # sliced and had no expected count to check against. Scoping it by computer
 # gives it both.
-$Top10Template = 'values of results (elements of COMPUTERSET, bes property whose (name of it = "Platform Health Check - Top 10 Slow Evaluations"))'
+$Top10Template = 'values of results (elements of COMPUTERSET, elements of set of bes properties whose (name of it = "Platform Health Check - Top 10 Slow Evaluations" and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"))'
 
 if (-not [string]::IsNullOrWhiteSpace($CaptureLoopXml)) {
     [void](CaptureBatched $LoopTemplate $CaptureLoopXml "Loop times" $ComputerFilter $BatchSize)

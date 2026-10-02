@@ -312,6 +312,31 @@ function BigFixQueryErrorMessage($Xml) {{
     $message.Trim()
 }
 
+function TestBigFixDatabaseCompatibilityError($Message) {{
+    if ([string]::IsNullOrWhiteSpace($Message)) {{ return $false }
+    $Message -match '(?is)database connection error:\s*database error:.*database version.*requires a database version'
+}
+
+function ClearIncompleteApiCapture() {{
+    foreach ($path in @(
+        $CaptureLoopXml,
+        $CaptureUdpXml,
+        $CaptureTop10Xml,
+        $OutputLoopCsv,
+        $OutputUdpCsv,
+        $OutputTop10Csv
+    )) {{
+        if (-not [string]::IsNullOrWhiteSpace($path)) {{
+            Remove-Item -LiteralPath $path -Force -ErrorAction SilentlyContinue
+        }
+    }
+}
+
+function StopForBigFixDatabaseCompatibility($Purpose, $Message) {{
+    ClearIncompleteApiCapture
+    Fail "BigFix server-side database compatibility error during $Purpose. No capture files were retained. This is not a client data or collector error. Confirm that every server-side BigFix component connected to the Enterprise database is compatible with the current platform level. Server response: $Message"
+}
+
 # Capture files may contain multiple XML documents, so scan answer elements.
 $AnswerRegex = [regex]::new('<Answer\b[^>]*>(.*?)</Answer>', 'Singleline, Compiled')
 # Parses one Top 10 row.
@@ -374,7 +399,7 @@ function SplitLoopAnswerFields($Line) {{
         return $parts
     }
 
-    if ($parts.Count -lt 14) {{ return @() }}
+    if ($parts.Count -lt 14) {{ return @() }
 
     $tailStart = $parts.Count - 10
     $middleEnd = $parts.Count - 11
@@ -521,7 +546,12 @@ function InvokeBigFixQueryRaw($Relevance, $Purpose = "BigFix API query") {{
             $content = $response.Content
             [xml]$xml = $content
             $queryError = BigFixQueryErrorMessage $xml
-            if ($queryError) {{ throw "BigFix query error: $queryError" }
+            if ($queryError) {{
+                if (TestBigFixDatabaseCompatibilityError $queryError) {{
+                    StopForBigFixDatabaseCompatibility $Purpose $queryError
+                }
+                throw "BigFix query error: $queryError"
+            }
             return [pscustomobject]@{{
                 Content = $content
                 Count   = @($xml.BESAPI.Query.Result.Answer | Where-Object {{ $null -ne $_ }).Count
@@ -692,7 +722,7 @@ $LoopTemplate = ($LoopTemplate -replace '\s+', ' ').Trim()
 $UdpTemplate = '(item 0 of it & ", " & item 1 of it & ", " & item 2 of it & ", " & item 3 of it) of (item 0 of it, item 1 of it, item 2 of it, item 3 of it) of (((if exists name of item 0 of it then name of item 0 of it else "Computer ID " & (id of item 0 of it as string)),(if (size of item 1 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 1 of it)) else (if (size of item 1 of it > 1) then (("IP Address Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 1 of it) as string) else ("IP Address Property Does Not Exist"))),(if (size of item 2 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 2 of it)) else (if (size of item 2 of it > 1) then (("Relay Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 2 of it) as string) else ("Relay Property Does Not Exist"))),(if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist")))) of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it)) of (COMPUTERSET, set of bes properties whose (reserved flag of it AND name of it as lowercase = ("IP Address") as lowercase), set of bes properties whose (name of it as lowercase = ("Relay") as lowercase), set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase))'
 
 # Scope the Top 10 query by computer so it can be batched and checked.
-$Top10Template = 'values of results (elements of COMPUTERSET, bes property whose (name of it = "Platform Health Check - Top 10 Slow Evaluations"))'
+$Top10Template = 'values of results (elements of COMPUTERSET, elements of set of bes properties whose (name of it = "Platform Health Check - Top 10 Slow Evaluations" and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"))'
 
 if (-not [string]::IsNullOrWhiteSpace($CaptureLoopXml)) {{
     [void](CaptureBatched $LoopTemplate $CaptureLoopXml "Loop times" $ComputerFilter $BatchSize)

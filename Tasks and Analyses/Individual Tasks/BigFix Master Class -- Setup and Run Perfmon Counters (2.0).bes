@@ -38,7 +38,7 @@
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Master Operators only</B><SPAN>If SAML is enabled, use a local BigFix MO account.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
-<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Target server roles only</B><SPAN>Run on root, Web Reports, WebUI, Plugin Portal, Explorer, Server Automation Plan Engine, MCP Server, and supporting SQL Server hosts.</SPAN></DIV></TD></TR>
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Target server roles only</B><SPAN>Run, as needed,&nbsp;on the&nbsp; Root, Web Reports, etc. and supporting SQL Server hosts.</SPAN></DIV></TD></TR>
 <TR>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>24-hour capture</B><SPAN>Samples every 60 seconds for 1440 samples.</SPAN></DIV></TD>
@@ -57,9 +57,9 @@
 <LI><FONT color=#000000 size=2>Writes a short README beside the logs with the stop, start, and delete commands for the counter set.</FONT></LI></UL>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <UL>
-<LI><FONT color=#000000 size=2><STRONG><FONT size=2><STRONG>Retrieve the Perfmon log directly from every targeted machine after the capture stops. These files are expected to be 256 MB or larger and are not uploaded by the collection tasks.</STRONG>&nbsp;</FONT></STRONG></FONT>
+<LI><FONT color=#000000 size=2><STRONG><FONT size=2><STRONG>Retrieve the Perfmon log directly from every targeted machine after the capture stops. These files are expected to be 256 MB or larger and are not uploaded by the collection tasks.</STRONG>&nbsp;</FONT></STRONG></FONT> 
 <LI><FONT color=#000000 size=2>This task can only be run by Master Operators.</FONT> 
-<LI><FONT color=#000000 size=2>Run as a one-time action on supported BigFix role servers and supporting SQL Servers.</FONT>
+<LI><FONT color=#000000 size=2>Run as a one-time action on supported BigFix role servers and supporting SQL Servers.</FONT> 
 <LI><FONT color=#000000 size=2>If the SQL Server is remote, run this task against that SQL Server too.</FONT> 
 <LI><FONT color=#000000 size=2>The monitor is named BFPerf.</FONT> 
 <LI><FONT color=#000000 size=2>The SQL counters only apply to SQL Servers. Inspect the SQL Server counter names first if the customer uses named instances or non-standard counter names.</FONT></LI></UL>
@@ -92,17 +92,18 @@ function hcToggle(){var n=document.getElementById('hcNotes'),g=document.getEleme
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>2.0 - Expanded Perfmon targeting to all supported BigFix role servers and SQL Server hosts.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>1.0 - Initial version.</FONT></DIV></DIV>]]></Description>
 		<Relevance>(if exists property "in proxy agent context" then (not in proxy agent context) else true)</Relevance>
-		<Relevance>/* IS A WINDOWS BIGFIX ROLE SERVER OR SQL SERVER; PLAIN RELAYS ARE EXCLUDED */ (windows of operating system) AND ((exists main gather service) OR (exists service "BESWebReportsServer") OR (exists webui service) OR (exists plugin portal service) OR (exists explorer service) OR (exists folder (value "EnterpriseClientFolder" of key "HKEY_LOCAL_MACHINE\Software\Bigfix\EnterpriseClient" of registry as string &amp; "Applications\PlanEngine")) OR (exists service "bes-mcp-server") OR (exists it whose (it as lowercase starts with "sql server (") of display names of services))</Relevance>
+		<Relevance><![CDATA[/* IS A WINDOWS BIGFIX ROLE SERVER OR SQL SERVER; PLAIN RELAYS ARE EXCLUDED */ (windows of operating system) AND ((exists main gather service) OR (exists service "BESWebReportsServer") OR (exists webui service) OR (exists plugin portal service) OR (exists explorer service) OR (exists folder (value "EnterpriseClientFolder" of key "HKEY_LOCAL_MACHINE\Software\Bigfix\EnterpriseClient" of registry as string & "Applications\PlanEngine")) OR (exists service "bes-mcp-server") OR (exists it whose (it as lowercase starts with "sql server (") of display names of services))]]></Relevance>
 		<Category>BigFix Master Class</Category>
 		<DownloadSize>0</DownloadSize>
 		<Source>HCL BigFix AVP and Professional Services</Source>
 		<SourceID></SourceID>
 		<SourceReleaseDate>2026-09-24</SourceReleaseDate>
+		<SourceSeverity></SourceSeverity>
 		<CVENames></CVENames>
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Thu, 24 Sep 2026 23:15:00 +0000</Value>
+			<Value>Thu, 01 Oct 2026 23:50:14 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">

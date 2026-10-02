@@ -81,7 +81,7 @@
 		<SourceReleaseDate>2026-09-30</SourceReleaseDate>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Wed, 30 Sep 2026 21:30:00 +0000</Value>
+			<Value>Fri, 02 Oct 2026 01:27:46 +0000</Value>
 		</MIMEField>
 		<Domain>BESC</Domain>
 		<Property Name="Platform Health Check - Client Version" ID="1" EvaluationPeriod="P1D">version of client</Property>
@@ -97,7 +97,7 @@
 		<Property Name="Platform Health Check - FastHashVerify Enabled" ID="37" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Download_FastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Download_FastHashVerify" of client) else "Not Set"</Property>
 		<Property Name="Platform Health Check - FastHashVerify Work ms" ID="38" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_WorkFastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_WorkFastHashVerify" of client) else "Not Set"</Property>
 		<Property Name="Platform Health Check - FastHashVerify Sleep ms" ID="39" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_SleepFastHashVerify" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_SleepFastHashVerify" of client) else "Not Set"</Property>
-		<Property Name="Platform Health Check - Agent Multicore Scaling Enabled" ID="40" EvaluationPeriod="P1D">if (version of client >= "11.0.7.0" as version) then (if (exists values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) then (if ((concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "1" OR (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "true") then "On" else "Off") else "Not Set") else "Not Applicable"</Property>
+		<Property Name="Platform Health Check - Agent Multicore Scaling Enabled" ID="40" EvaluationPeriod="P1D"><![CDATA[if (version of client >= "11.0.7.0" as version) then (if (exists values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) then (if ((concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "1" OR (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_ScaleWorkTimeWithCPUCores" of client) as lowercase = "true") then "On" else "Off") else "Not Set") else "Not Applicable"]]></Property>
 		<Property Name="Platform Health Check - Agent CPU Work Idle" ID="43" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_WorkIdle" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_WorkIdle" of client) else "Not Set"</Property>
 		<Property Name="Platform Health Check - Agent CPU Sleep Idle" ID="44" EvaluationPeriod="P1D">if (exists values whose (it != "") of settings "_BESClient_Resource_SleepIdle" of client) then (concatenation "" of values whose (it != "") of settings "_BESClient_Resource_SleepIdle" of client) else "Not Set"</Property>
 		<Property Name="Platform Health Check - Agent Total Physical CPU Core Count" ID="45" EvaluationPeriod="P1D">((count of cpupackages) * (core of cpupackage)) as string</Property>

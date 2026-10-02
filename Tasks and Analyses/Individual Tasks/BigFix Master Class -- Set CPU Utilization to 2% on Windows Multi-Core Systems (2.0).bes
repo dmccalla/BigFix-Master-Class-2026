@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <BES xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BES.xsd">
 	<Fixlet>
-		<Title>BigFix Master Class -- Set CPU Utilization to 2% on Windows Multi-Core Systems - Pre 11.0.7 (2.0)</Title>
+		<Title>BigFix Master Class -- Set CPU Utilization to 2% on Windows Multi-Core Systems (2.0)</Title>
 		<Description><![CDATA[
 <STYLE>
 .hc-wrap{font-family:'Segoe UI',sans-serif;width:860px;padding:2px 2px 20px;color:#000032}
@@ -23,9 +23,10 @@
 
 <DIV id=seed_2 class=hc-wrap>
 <DIV class=hc-eyebrow>&nbsp;</DIV>
-<DIV class=hc-h1>Set CPU Utilization to 2% on Windows Multi-Core Systems - Pre 11.0.7</DIV>
+<DIV class=hc-h1>Set CPU Utilization to 2% on Windows Multi-Core Systems</DIV>
 <DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
-<DIV class=hc-lead><FONT color=#000000>Sets WorkIdle and SleepIdle on multi-core computers so the BigFix client uses about 2 percent of total CPU across all cores. <FONT color=#000000 size=2><STRONG>BigFix 11.0.7 added a setting for CPU use on multi-core systems. This task mimics what that will do without the need for 11.0.7 BUT it only works on Window systems.&nbsp; You need 11.0.7 for cross-OS support.</STRONG></FONT></DIV></FONT>
+<DIV class=hc-lead><FONT color=#000000>Sets WorkIdle and SleepIdle on multi-core computers so the BigFix client uses about 2 percent of total CPU across all cores. </FONT></DIV>
+<DIV class=hc-lead><FONT color=#000000><FONT color=#000000 size=2><STRONG>BigFix 11.0.7 added a setting for CPU use on multi-core systems (including non-Windows). See the "BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0)" fixlet.</STRONG></FONT></DIV></FONT>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -42,7 +43,7 @@
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>WorkIdle capped at 100</B><SPAN>Above 10 cores WorkIdle stays at 100 so one core is not over allocated.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
 <DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
 <DIV class=hc-sec>Description</DIV>
-<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>The client works for WorkIdle milliseconds and then sleeps for SleepIdle milliseconds. The defaults of 10 and 480 target a single core. On one core the maximum client CPU is 10 / (10 + 480), which is 2 percent. On four cores the same settings give 10 / ((10 + 480) * 4), which is 0.5 percent.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>The client works for WorkIdle milliseconds and then sleeps for SleepIdle milliseconds. The defaults of 10 and 480 target a single core. On one core the maximum agent CPU is 10 / (10 + 480), which is 2 percent. On four cores the same settings give 10 / ((10 + 480) * 4), which is 0.5 percent.</FONT></DIV>
 <DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>This task sets <TT>_BESClient_Resource_SleepIdle</TT> to 480 and <TT>_BESClient_Resource_WorkIdle</TT> to 10 times the number of cores. Above 10 cores WorkIdle is limited to 100. See <A href="https://help.hcl-software.com/bigfix/11.0/platform/Platform/Config/r_client_set.html">List of settings and Detailed Descriptions</A> for reference.</FONT></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <UL>
@@ -75,7 +76,7 @@
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Wed, 30 Sep 2026 14:56:10 +0000</Value>
+			<Value>Thu, 01 Oct 2026 19:32:14 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">

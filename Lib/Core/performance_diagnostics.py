@@ -1,3 +1,9 @@
+# Copyright (c) 2026 Duncan McCalla
+# SPDX-License-Identifier: MIT
+#
+# Master Class Diagnostics Workbench
+# See the LICENSE and NOTICE files in the project root for license text and attribution.
+
 """Low-overhead performance evidence for the Master Class Workbench.
 
 The recorder is deliberately dependency-free and safe to use from worker

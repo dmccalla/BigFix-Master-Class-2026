@@ -240,6 +240,13 @@ _LOG_DRAIN_BUDGET_MS = 10.0
 _DIAGNOSTIC_HEARTBEAT_MS = 250
 _DIAGNOSTIC_SLOW_TICK_MS = 250.0
 _DIAGNOSTIC_RESOURCE_SAMPLE_MS = 5_000
+_DIAGNOSTIC_EVENT_LIMIT = 160
+_DIAGNOSTIC_RESOURCE_SAMPLE_LIMIT = 720
+_DIAGNOSTIC_BASELINE_SAMPLE_COUNT = 6
+_DIAGNOSTIC_TREND_POINT_LIMIT = 120
+_DIAGNOSTIC_LOG_TAIL_CHARS = 100_000
+DIAGNOSTIC_CARD_BG = "#F8FAFD"
+DIAGNOSTIC_GAUGE_TRACK = "#DDE5EE"
 
 _RUN_FOLDER_RE = re.compile(
     r"^(?:RUN_FOLDER:|\s*Run folder\s*:)\s*(.+?)\s*$", re.IGNORECASE
@@ -767,11 +774,33 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self._field_rest_borders: dict[str, str] = {}
         self._ui_queue: queue.Queue = queue.Queue()
         self._diagnostics = PerformanceRecorder("desktop_ui")
+        self._app_started_at = time.monotonic()
         self._heartbeat_expected_at = time.perf_counter()
         self._heartbeat_samples: deque[float] = deque(maxlen=240)
+        self._last_heartbeat_lag_ms = 0.0
         self._max_heartbeat_lag_ms = 0.0
+        self._slow_heartbeat_count = 0
         self._resource_after_id: str | None = None
         self._resource_last_cpu_sample = (time.perf_counter(), time.process_time())
+        self._resource_samples: deque[dict[str, object]] = deque(
+            maxlen=_DIAGNOSTIC_RESOURCE_SAMPLE_LIMIT
+        )
+        self._resource_latest: dict[str, object] = {}
+        self._resource_baseline: dict[str, object] | None = None
+        self._last_resource_warning_at = 0.0
+        self._perf_events: deque[dict[str, object]] = deque(
+            maxlen=_DIAGNOSTIC_EVENT_LIMIT
+        )
+        self._perf_counters: dict[str, int] = {}
+        self._perf_last_ms: dict[str, float] = {}
+        self._perf_max_ms: dict[str, float] = {}
+        self._widget_count_cache: tuple[int, float] | None = None
+        self._diagnostics_window: ctk.CTkToplevel | None = None
+        self._diagnostics_textbox: ctk.CTkTextbox | None = None
+        self._diagnostics_refresh_after_id: str | None = None
+        self._diagnostics_visual_widgets: dict[str, dict[str, object]] = {}
+        self._diagnostics_trend_widgets: dict[str, dict[str, object]] = {}
+        self._diagnostics_summary_labels: dict[str, ctk.CTkLabel] = {}
 
         self._process: subprocess.Popen | None = None
         self._log_queue: queue.Queue[str] = queue.Queue()
@@ -818,6 +847,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             )
 
         self._build_shell()
+        self._install_diagnostics_shortcuts()
         self._show_step(1)
         self.protocol("WM_DELETE_WINDOW", self._on_close)
         self.after(100, self._drain_ui_queue)
@@ -839,6 +869,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         recorder = self.__dict__.get("_diagnostics")
         if recorder is not None:
             recorder.record(name, **kwargs)
+        self._record_perf_event(
+            name,
+            elapsed_ms=kwargs.get("elapsed_ms"),
+            detail=str(kwargs.get("detail", "")),
+        )
 
     def _drain_ui_queue(self) -> None:
         started = time.perf_counter()
@@ -879,8 +914,10 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         now = time.perf_counter()
         lag_ms = max(0.0, (now - self._heartbeat_expected_at) * 1000)
         self._heartbeat_samples.append(lag_ms)
+        self._last_heartbeat_lag_ms = lag_ms
         self._max_heartbeat_lag_ms = max(self._max_heartbeat_lag_ms, lag_ms)
         if lag_ms >= _DIAGNOSTIC_SLOW_TICK_MS:
+            self._slow_heartbeat_count += 1
             self._record_diagnostic("UI heartbeat lag", elapsed_ms=lag_ms)
         self._heartbeat_expected_at = now + (_DIAGNOSTIC_HEARTBEAT_MS / 1000)
         try:
@@ -895,12 +932,35 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         elapsed_wall = max(now_wall - previous_wall, 0.001)
         cpu_pct = max(0.0, ((now_cpu - previous_cpu) / elapsed_wall) * 100)
         self._resource_last_cpu_sample = (now_wall, now_cpu)
+        sample: dict[str, object] = {
+            "time": datetime.now().strftime("%H:%M:%S"),
+            "uptime_s": int(time.monotonic() - self._app_started_at),
+            "cpu_pct": cpu_pct,
+            "python_threads": threading.active_count(),
+            "widget_count": self._count_widgets_cached(),
+            "ui_queue_depth": self._ui_queue.qsize(),
+        }
+        sample.update(process_resource_metrics())
+        self._resource_samples.append(sample)
+        self._resource_latest = sample
+        self._set_resource_baseline_if_ready()
+        resource_health, resource_notes = self._resource_health(
+            sample, self._resource_baseline
+        )
+        now_monotonic = time.monotonic()
+        if (
+            resource_health != "Healthy"
+            and now_monotonic - self._last_resource_warning_at >= 60
+        ):
+            self._last_resource_warning_at = now_monotonic
+            self._record_diagnostic(
+                "Resource pressure",
+                detail=resource_notes[0] if resource_notes else resource_health,
+            )
         self._record_diagnostic(
             "UI process resources",
-            cpu_pct=round(cpu_pct, 2),
-            ui_queue_depth=self._ui_queue.qsize(),
             captured_log_chars=self.__dict__.get("_log_chunk_chars", 0),
-            **process_resource_metrics(),
+            **sample,
         )
         try:
             self._resource_after_id = self.after(
@@ -909,6 +969,1126 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             )
         except TclError:
             self._resource_after_id = None
+
+    # ------------------------------------------------------------------
+    # Hidden application diagnostics
+    # ------------------------------------------------------------------
+
+    def _install_diagnostics_shortcuts(self) -> None:
+        for sequence in ("<Control-Shift-D>", "<Control-Shift-d>"):
+            self.bind_all(
+                sequence,
+                lambda _event: self._toggle_diagnostics_window(),
+                add="+",
+            )
+
+    def _record_perf_event(
+        self,
+        name: str,
+        *,
+        elapsed_ms: object = None,
+        detail: str = "",
+    ) -> None:
+        """Maintain the compact, human-readable event view in the popup."""
+        state = self.__dict__
+        counters = state.setdefault("_perf_counters", {})
+        counters[name] = counters.get(name, 0) + 1
+        if isinstance(elapsed_ms, int | float):
+            last = state.setdefault("_perf_last_ms", {})
+            maximum = state.setdefault("_perf_max_ms", {})
+            last[name] = float(elapsed_ms)
+            maximum[name] = max(maximum.get(name, 0.0), float(elapsed_ms))
+        events = state.setdefault("_perf_events", deque(maxlen=_DIAGNOSTIC_EVENT_LIMIT))
+        events.append(
+            {
+                "time": datetime.now().strftime("%H:%M:%S"),
+                "step": state.get("step", 0),
+                "name": name,
+                "elapsed_ms": elapsed_ms if isinstance(elapsed_ms, int | float) else None,
+                "detail": detail,
+            }
+        )
+
+    def _count_widgets(self, widget) -> int:
+        try:
+            children = widget.winfo_children()
+        except TclError:
+            return 0
+        return 1 + sum(self._count_widgets(child) for child in children)
+
+    def _count_widgets_cached(self) -> int:
+        now = time.perf_counter()
+        cached = self.__dict__.get("_widget_count_cache")
+        if cached is not None and now - cached[1] < 5.0:
+            return cached[0]
+        count = self._count_widgets(self)
+        self.__dict__["_widget_count_cache"] = (count, now)
+        return count
+
+    @staticmethod
+    def _resource_average(samples: list[dict[str, object]], key: str) -> float | None:
+        values = [
+            float(sample[key])
+            for sample in samples
+            if isinstance(sample.get(key), int | float)
+        ]
+        return (sum(values) / len(values)) if values else None
+
+    def _set_resource_baseline_if_ready(self) -> None:
+        if self._resource_baseline is not None:
+            return
+        samples = list(self._resource_samples)
+        if len(samples) < _DIAGNOSTIC_BASELINE_SAMPLE_COUNT:
+            return
+        baseline: dict[str, object] = {
+            "samples": _DIAGNOSTIC_BASELINE_SAMPLE_COUNT,
+            "uptime_s": int(time.monotonic() - self._app_started_at),
+        }
+        for key in (
+            "cpu_pct",
+            "rss_mb",
+            "private_mb",
+            "python_threads",
+            "widget_count",
+            "ui_queue_depth",
+            "gdi_objects",
+            "user_objects",
+        ):
+            value = self._resource_average(
+                samples[:_DIAGNOSTIC_BASELINE_SAMPLE_COUNT], key
+            )
+            if value is not None:
+                baseline[key] = value
+        self._resource_baseline = baseline
+        self._record_perf_event(
+            "Resource baseline established",
+            detail=f"{_DIAGNOSTIC_BASELINE_SAMPLE_COUNT} samples",
+        )
+
+    @staticmethod
+    def _diagnostic_worst_health(*healths: str) -> str:
+        order = {"Healthy": 0, "Watch": 1, "Lagging": 2, "Blocked": 3}
+        return max(healths, key=lambda health: order.get(health, 0))
+
+    @staticmethod
+    def _diagnostic_percentile(samples: list[float], percentile: float) -> float:
+        if not samples:
+            return 0.0
+        ordered = sorted(samples)
+        index = int(round((len(ordered) - 1) * percentile))
+        return ordered[max(0, min(index, len(ordered) - 1))]
+
+    @staticmethod
+    def _diagnostic_health(last_ms: float, p95_ms: float, max_ms: float) -> str:
+        if last_ms >= 1000 or p95_ms >= 500 or max_ms >= 2000:
+            return "Blocked"
+        if last_ms >= 250 or p95_ms >= 150 or max_ms >= 750:
+            return "Lagging"
+        if last_ms >= 80 or p95_ms >= 80 or max_ms >= 250:
+            return "Watch"
+        return "Healthy"
+
+    @staticmethod
+    def _diagnostic_health_color(health: str) -> str:
+        return {
+            "Healthy": MOSS,
+            "Watch": OCHRE,
+            "Lagging": CLAY,
+            "Blocked": CLAY,
+        }.get(health, OCHRE)
+
+    @staticmethod
+    def _fmt_metric(value: object, suffix: str = "") -> str:
+        if isinstance(value, float):
+            return f"{value:.1f}{suffix}"
+        if isinstance(value, int):
+            return f"{value}{suffix}"
+        return "Not available"
+
+    def _resource_health(
+        self,
+        latest: dict[str, object] | None,
+        baseline: dict[str, object] | None,
+    ) -> tuple[str, list[str]]:
+        if not latest:
+            return "Healthy", ["Resource monitor is collecting its first sample."]
+        health = "Healthy"
+        notes: list[str] = []
+
+        def mark(level: str, note: str) -> None:
+            nonlocal health
+            health = self._diagnostic_worst_health(health, level)
+            notes.append(note)
+
+        cpu_pct = latest.get("cpu_pct")
+        if isinstance(cpu_pct, int | float):
+            if cpu_pct >= 90:
+                mark("Lagging", f"CPU is very high at {cpu_pct:.0f}% of one core.")
+            elif cpu_pct >= 50:
+                mark("Watch", f"CPU is elevated at {cpu_pct:.0f}% of one core.")
+
+        queue_depth = latest.get("ui_queue_depth")
+        if isinstance(queue_depth, int | float):
+            if queue_depth >= 500:
+                mark("Lagging", f"{int(queue_depth)} UI callbacks are waiting.")
+            elif queue_depth >= 100:
+                mark("Watch", f"{int(queue_depth)} UI callbacks are waiting.")
+
+        widgets = latest.get("widget_count")
+        if isinstance(widgets, int | float):
+            if widgets >= 6000:
+                mark("Lagging", f"Widget count is very high at {int(widgets)}.")
+            elif widgets >= 3000:
+                mark("Watch", f"Widget count is high at {int(widgets)}.")
+
+        for key, label in (
+            ("gdi_objects", "GDI objects"),
+            ("user_objects", "USER objects"),
+        ):
+            count = latest.get(key)
+            if isinstance(count, int | float):
+                if count >= 8000:
+                    mark(
+                        "Lagging", f"{label} are near the Windows limit at {int(count)}."
+                    )
+                elif count >= 5000:
+                    mark("Watch", f"{label} are elevated at {int(count)}.")
+
+        rss_mb = latest.get("rss_mb")
+        baseline_rss = baseline.get("rss_mb") if baseline else None
+        if isinstance(rss_mb, int | float) and isinstance(baseline_rss, int | float):
+            delta = float(rss_mb) - float(baseline_rss)
+            ratio = delta / max(float(baseline_rss), 1.0)
+            if delta >= 500 or ratio >= 0.75:
+                mark("Lagging", f"Memory is {delta:.0f} MB above baseline.")
+            elif delta >= 200 or ratio >= 0.35:
+                mark("Watch", f"Memory is {delta:.0f} MB above baseline.")
+        if not notes:
+            notes.append("Resources are inside the current thresholds.")
+        return health, notes
+
+    def _background_activity(self) -> list[str]:
+        active = []
+        if self._scan_thread is not None and self._scan_thread.is_alive():
+            active.append("Input scan")
+        if self._build_running:
+            active.append("Report build")
+        if self._process is not None:
+            active.append("Build engine process")
+        return active
+
+    def _diagnostics_snapshot(self) -> dict[str, object]:
+        samples = list(self._heartbeat_samples)
+        p95_lag = self._diagnostic_percentile(samples, 0.95)
+        resource_latest = dict(self._resource_latest)
+        resource_health, resource_notes = self._resource_health(
+            resource_latest, self._resource_baseline
+        )
+        loop_health = self._diagnostic_health(
+            self._last_heartbeat_lag_ms, p95_lag, self._max_heartbeat_lag_ms
+        )
+        return {
+            "health": self._diagnostic_worst_health(loop_health, resource_health),
+            "loop_health": loop_health,
+            "resource_health": resource_health,
+            "resource_notes": resource_notes,
+            "uptime_s": int(time.monotonic() - self._app_started_at),
+            "step": self.step,
+            "last_lag_ms": self._last_heartbeat_lag_ms,
+            "avg_lag_ms": sum(samples) / len(samples) if samples else 0.0,
+            "p95_lag_ms": p95_lag,
+            "max_lag_ms": self._max_heartbeat_lag_ms,
+            "slow_tick_count": self._slow_heartbeat_count,
+            "widget_count": self._count_widgets_cached(),
+            "background_activity": self._background_activity(),
+            "captured_log_chars": self._log_chunk_chars,
+            "captured_log_truncated": self._log_truncated,
+            "open_log_viewers": len(self._log_viewers),
+            "perf_counters": dict(self._perf_counters),
+            "perf_last_ms": dict(self._perf_last_ms),
+            "perf_max_ms": dict(self._perf_max_ms),
+            "recent_events": list(self._perf_events)[-24:],
+            "resource_latest": resource_latest,
+            "resource_baseline": self._resource_baseline,
+            "resource_sample_count": len(self._resource_samples),
+        }
+
+    def _format_diagnostics_report(self) -> str:
+        snapshot = self._diagnostics_snapshot()
+        resources = snapshot["resource_latest"]
+        baseline = snapshot["resource_baseline"]
+        active = snapshot["background_activity"] or ["None"]
+        baseline_status = (
+            f"ready at {baseline.get('uptime_s')} seconds"
+            if isinstance(baseline, dict)
+            else (
+                f"collecting {snapshot['resource_sample_count']}/"
+                f"{_DIAGNOSTIC_BASELINE_SAMPLE_COUNT} samples"
+            )
+        )
+        lines = [
+            "Master Class Diagnostics Workbench diagnostics.",
+            "",
+            f"Health: {snapshot['health']}.",
+            f"UI responsiveness: {snapshot['loop_health']}.",
+            f"Resource pressure: {snapshot['resource_health']}.",
+            f"Current step: {snapshot['step']}.",
+            f"Uptime: {snapshot['uptime_s']} seconds.",
+            "",
+            "Performance summary.",
+            *[f"- {note}" for note in snapshot["resource_notes"]],
+            "",
+            "UI event loop.",
+            f"Last lag: {snapshot['last_lag_ms']:.1f} ms.",
+            f"Average lag: {snapshot['avg_lag_ms']:.1f} ms.",
+            f"P95 lag: {snapshot['p95_lag_ms']:.1f} ms.",
+            f"Maximum lag: {snapshot['max_lag_ms']:.1f} ms.",
+            f"Slow ticks: {snapshot['slow_tick_count']}.",
+            "",
+            "Process resources.",
+            f"Resource baseline: {baseline_status}.",
+            f"CPU: {self._fmt_metric(resources.get('cpu_pct'), '% of one core')}.",
+            f"Memory working set: {self._fmt_metric(resources.get('rss_mb'), ' MB')}.",
+            f"Memory private bytes: {self._fmt_metric(resources.get('private_mb'), ' MB')}.",
+            f"Python threads: {self._fmt_metric(resources.get('python_threads'))}.",
+            f"GDI objects: {self._fmt_metric(resources.get('gdi_objects'))}.",
+            f"USER objects: {self._fmt_metric(resources.get('user_objects'))}.",
+            "",
+            "Live state.",
+            f"Widget count: {snapshot['widget_count']}.",
+            f"Background activity: {', '.join(active)}.",
+            f"UI callback queue: {self._fmt_metric(resources.get('ui_queue_depth'))}.",
+            f"Captured UI log chars: {snapshot['captured_log_chars']}.",
+            f"Captured UI log truncated: {snapshot['captured_log_truncated']}.",
+            f"Open log viewers: {snapshot['open_log_viewers']}.",
+            "",
+            "Render and action counters.",
+        ]
+        counters = snapshot["perf_counters"]
+        if counters:
+            for name in sorted(counters):
+                last = snapshot["perf_last_ms"].get(name)
+                maximum = snapshot["perf_max_ms"].get(name)
+                timing = (
+                    f" Last {last:.1f} ms. Maximum {maximum:.1f} ms."
+                    if last is not None and maximum is not None
+                    else ""
+                )
+                lines.append(f"{name}: {counters[name]}.{timing}")
+        else:
+            lines.append("No recorded UI actions yet.")
+        lines.extend(["", "Recent events."])
+        events = snapshot["recent_events"]
+        if events:
+            for event in events:
+                elapsed = event.get("elapsed_ms")
+                timing = f" {elapsed:.1f} ms." if elapsed is not None else ""
+                detail = f" {event.get('detail')}." if event.get("detail") else ""
+                lines.append(
+                    f"{event.get('time')} step {event.get('step')}: "
+                    f"{event.get('name')}.{timing}{detail}"
+                )
+        else:
+            lines.append("No recent events.")
+        return "\n".join(lines)
+
+    @staticmethod
+    def _diagnostic_metric_ratio(value: object, limit: float) -> float:
+        if not isinstance(value, int | float) or limit <= 0:
+            return 0.0
+        return max(0.0, min(1.0, float(value) / limit))
+
+    @staticmethod
+    def _diagnostic_metric_health(value: object, watch_at: float, lag_at: float) -> str:
+        if not isinstance(value, int | float):
+            return "Healthy"
+        if float(value) >= lag_at:
+            return "Lagging"
+        if float(value) >= watch_at:
+            return "Watch"
+        return "Healthy"
+
+    def _diagnostic_visual_specs(
+        self, snapshot: dict[str, object]
+    ) -> list[dict[str, object]]:
+        resources = snapshot["resource_latest"]
+        baseline = snapshot["resource_baseline"]
+
+        def number(value: object) -> float | None:
+            return float(value) if isinstance(value, int | float) else None
+
+        def spec(
+            key: str,
+            title: str,
+            value: object,
+            value_text: str,
+            detail: str,
+            *,
+            watch_at: float,
+            lag_at: float,
+        ) -> dict[str, object]:
+            health = self._diagnostic_metric_health(value, watch_at, lag_at)
+            return {
+                "key": key,
+                "title": title,
+                "value": value_text,
+                "detail": detail,
+                "ratio": self._diagnostic_metric_ratio(value, lag_at),
+                "health": health,
+                "color": self._diagnostic_health_color(health),
+            }
+
+        p95_lag = number(snapshot.get("p95_lag_ms"))
+        cpu_pct = number(resources.get("cpu_pct"))
+        widget_count = number(snapshot.get("widget_count"))
+        queue_depth = number(resources.get("ui_queue_depth"))
+        gdi_objects = number(resources.get("gdi_objects"))
+        user_objects = number(resources.get("user_objects"))
+        handle_pressure = max(gdi_objects or 0.0, user_objects or 0.0)
+
+        memory_value = 0.0
+        memory_text = "Baseline pending"
+        memory_detail = "Waiting for enough resource samples."
+        memory_watch_at, memory_lag_at = 200.0, 500.0
+        rss_mb = number(resources.get("rss_mb"))
+        baseline_rss = (
+            number(baseline.get("rss_mb")) if isinstance(baseline, dict) else None
+        )
+        if rss_mb is not None and baseline_rss is not None:
+            memory_value = max(0.0, rss_mb - baseline_rss)
+            memory_watch_at = min(200.0, baseline_rss * 0.35)
+            memory_lag_at = min(500.0, baseline_rss * 0.75)
+            memory_text = f"{memory_value:.0f} MB over"
+            memory_detail = (
+                f"{rss_mb:.0f} MB working set, {baseline_rss:.0f} MB baseline."
+            )
+        elif rss_mb is not None:
+            memory_text = f"{rss_mb:.0f} MB"
+            memory_detail = "Working set measured; baseline still collecting."
+
+        return [
+            spec(
+                "ui_p95",
+                "UI Lag P95",
+                p95_lag,
+                f"{p95_lag:.1f} ms" if p95_lag is not None else "Not available",
+                "95% of recent UI heartbeat samples were at or below this.",
+                watch_at=80.0,
+                lag_at=150.0,
+            ),
+            spec(
+                "cpu",
+                "CPU",
+                cpu_pct,
+                f"{cpu_pct:.1f}%" if cpu_pct is not None else "Not available",
+                "Measured as percent of one CPU core.",
+                watch_at=50.0,
+                lag_at=90.0,
+            ),
+            spec(
+                "memory",
+                "Memory Drift",
+                memory_value,
+                memory_text,
+                memory_detail,
+                watch_at=memory_watch_at,
+                lag_at=memory_lag_at,
+            ),
+            spec(
+                "widgets",
+                "Widget Count",
+                widget_count,
+                f"{int(widget_count)}" if widget_count is not None else "Not available",
+                "Large widget trees make screen changes more expensive.",
+                watch_at=3000.0,
+                lag_at=6000.0,
+            ),
+            spec(
+                "queue",
+                "UI Queue",
+                queue_depth,
+                f"{int(queue_depth)}" if queue_depth is not None else "Not available",
+                "Callbacks waiting for the UI thread.",
+                watch_at=100.0,
+                lag_at=500.0,
+            ),
+            spec(
+                "handles",
+                "Windows UI Handles",
+                handle_pressure,
+                (
+                    f"GDI {int(gdi_objects or 0)}, USER {int(user_objects or 0)}"
+                    if gdi_objects is not None or user_objects is not None
+                    else "Not available"
+                ),
+                "Windows object counters for the Workbench process.",
+                watch_at=5000.0,
+                lag_at=8000.0,
+            ),
+        ]
+
+    @staticmethod
+    def _diagnostic_numeric_series(
+        samples: list[dict[str, object]], key: str, *, offset: float = 0.0
+    ) -> list[float]:
+        return [
+            max(0.0, float(sample[key]) - offset)
+            for sample in samples[-_DIAGNOSTIC_TREND_POINT_LIMIT:]
+            if isinstance(sample.get(key), int | float)
+        ]
+
+    @staticmethod
+    def _diagnostic_trend_direction(values: list[float], scale: float) -> str:
+        if len(values) < 4:
+            return "Collecting"
+        window = max(2, min(8, len(values) // 3))
+        delta = sum(values[-window:]) / window - sum(values[:window]) / window
+        tolerance = max(scale * 0.05, 1.0)
+        if delta > tolerance:
+            return "Rising"
+        if delta < -tolerance:
+            return "Falling"
+        return "Stable"
+
+    def _diagnostic_trend_specs(
+        self, snapshot: dict[str, object]
+    ) -> list[dict[str, object]]:
+        samples = list(self._resource_samples)
+        baseline = snapshot["resource_baseline"]
+
+        def build_spec(
+            key: str,
+            title: str,
+            values: list[float],
+            suffix: str,
+            detail: str,
+            *,
+            watch_at: float,
+            lag_at: float,
+        ) -> dict[str, object]:
+            current = values[-1] if values else None
+            health = self._diagnostic_metric_health(current, watch_at, lag_at)
+            return {
+                "key": key,
+                "title": title,
+                "values": values,
+                "value": f"{current:.1f}{suffix}"
+                if current is not None
+                else "Collecting",
+                "direction": self._diagnostic_trend_direction(values, lag_at),
+                "detail": detail,
+                "watch_at": watch_at,
+                "lag_at": lag_at,
+                "health": health,
+                "color": self._diagnostic_health_color(health),
+            }
+
+        ui_values = [
+            float(value)
+            for value in list(self._heartbeat_samples)[-_DIAGNOSTIC_TREND_POINT_LIMIT:]
+        ]
+        memory_offset = (
+            float(baseline.get("rss_mb", 0.0)) if isinstance(baseline, dict) else 0.0
+        )
+        return [
+            build_spec(
+                "ui",
+                "UI heartbeat lag",
+                ui_values,
+                " ms",
+                "Timer delay in the desktop UI.",
+                watch_at=80.0,
+                lag_at=150.0,
+            ),
+            build_spec(
+                "cpu",
+                "Process CPU",
+                self._diagnostic_numeric_series(samples, "cpu_pct"),
+                "%",
+                "Percent of one CPU core.",
+                watch_at=50.0,
+                lag_at=90.0,
+            ),
+            build_spec(
+                "memory",
+                "Memory drift",
+                self._diagnostic_numeric_series(samples, "rss_mb", offset=memory_offset),
+                " MB",
+                "Working-set growth above the startup baseline.",
+                watch_at=200.0,
+                lag_at=500.0,
+            ),
+            build_spec(
+                "queue",
+                "UI callback queue",
+                self._diagnostic_numeric_series(samples, "ui_queue_depth"),
+                "",
+                "Callbacks waiting for the UI thread.",
+                watch_at=100.0,
+                lag_at=500.0,
+            ),
+        ]
+
+    def _reset_diagnostics_metrics(self) -> None:
+        self._heartbeat_samples.clear()
+        self._last_heartbeat_lag_ms = 0.0
+        self._max_heartbeat_lag_ms = 0.0
+        self._slow_heartbeat_count = 0
+        self._resource_samples.clear()
+        self._resource_latest = {}
+        self._resource_baseline = None
+        self._last_resource_warning_at = 0.0
+        self._resource_last_cpu_sample = (time.perf_counter(), time.process_time())
+        self._perf_events.clear()
+        self._perf_counters.clear()
+        self._perf_last_ms.clear()
+        self._perf_max_ms.clear()
+        self._diagnostics.reset()
+        self._record_perf_event("Diagnostics reset")
+        self._set_diagnostics_snapshot_text()
+        self._refresh_diagnostics_window()
+
+    def _diagnostics_log_text(self) -> str:
+        captured_log = self._captured_log_text()
+        if len(captured_log) > _DIAGNOSTIC_LOG_TAIL_CHARS:
+            captured_log = (
+                "Earlier captured UI log text was omitted from this diagnostic log.\n"
+                + captured_log[-_DIAGNOSTIC_LOG_TAIL_CHARS:]
+            )
+        selected = ", ".join(self._selected_keys()) or "None"
+        lines = [
+            "Master Class Diagnostics Workbench diagnostic log.",
+            f"Created: {datetime.now().strftime('%m-%d-%Y %H:%M:%S')}.",
+            f"App version: {app_version.version()}.",
+            f"Python: {sys.version.split()[0]}.",
+            f"Project root: {PROJECT_ROOT}.",
+            "",
+            self._format_diagnostics_report(),
+            "",
+            "Build state.",
+            f"Build running: {self._build_running}.",
+            f"Cancel requested: {self._cancel_requested}.",
+            f"Run folder: {self._run_folder or 'Not created'}.",
+            f"Selected modules: {selected}.",
+            "",
+            "Captured UI log tail.",
+            captured_log.strip() or "No captured UI log text.",
+        ]
+        return "\n".join(lines) + "\n"
+
+    def _diagnostics_log_folder(self) -> Path:
+        candidates = [self._run_folder]
+        output_folder = _display_path(self.output_folder_var.get())
+        if output_folder:
+            candidates.append(Path(output_folder))
+        candidates.append(_app_data_dir())
+        for folder in candidates:
+            if folder is None:
+                continue
+            try:
+                folder.mkdir(parents=True, exist_ok=True)
+                return folder
+            except OSError:
+                continue
+        return PROJECT_ROOT
+
+    def _save_diagnostics_log(self) -> None:
+        folder = self._diagnostics_log_folder()
+        initial_name = (
+            f"MasterClass_DiagnosticLog_{datetime.now().strftime('%Y%m%d_%H%M%S')}.txt"
+        )
+        selected = filedialog.asksaveasfilename(
+            title="Save Diagnostic Log",
+            initialdir=str(folder),
+            initialfile=initial_name,
+            defaultextension=".txt",
+            filetypes=[
+                ("Text files", "*.txt"),
+                ("Log files", "*.log"),
+                ("All files", "*.*"),
+            ],
+        )
+        if not selected:
+            return
+        path = Path(selected).with_suffix(Path(selected).suffix or ".txt")
+        try:
+            path.write_text(self._diagnostics_log_text(), encoding="utf-8")
+        except OSError as exc:
+            messagebox.showerror("Could not save diagnostic log", str(exc))
+            return
+        self._record_perf_event("Diagnostics log saved", detail=str(path))
+        self._refresh_diagnostics_window()
+        messagebox.showinfo("Diagnostic log saved", f"Saved diagnostic log.\n\n{path}")
+
+    def _toggle_diagnostics_window(self) -> None:
+        window = self._diagnostics_window
+        try:
+            if window is not None and window.winfo_exists():
+                self._close_diagnostics_window()
+                return
+        except TclError:
+            pass
+        self._show_diagnostics_window()
+
+    def _set_diagnostics_snapshot_text(self) -> None:
+        text = self._diagnostics_textbox
+        if text is None:
+            return
+        try:
+            text.configure(state="normal")
+            text.delete("1.0", "end")
+            text.insert("1.0", self._format_diagnostics_report())
+            text.configure(state="disabled")
+        except TclError:
+            pass
+
+    def _create_diagnostics_visual_panel(self, parent) -> None:
+        panel = ctk.CTkFrame(
+            parent,
+            fg_color=PAPER,
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        panel.grid(row=0, column=0, sticky="ew", pady=(0, 10))
+        panel.grid_columnconfigure((0, 1, 2), weight=1, uniform="diagnostic_metric")
+        summary = ctk.CTkFrame(panel, fg_color="transparent")
+        summary.grid(row=0, column=0, columnspan=3, sticky="ew", padx=16, pady=(14, 8))
+        summary.grid_columnconfigure((0, 1, 2), weight=1, uniform="diagnostic_summary")
+        for column, key, title in (
+            (0, "health", "Health"),
+            (1, "loop", "UI responsiveness"),
+            (2, "resources", "Resource pressure"),
+        ):
+            label = ctk.CTkLabel(
+                summary,
+                text=f"{title}: collecting",
+                text_color=INK,
+                font=(UI_FONT, 13, "bold"),
+                anchor="w",
+            )
+            label.grid(
+                row=0, column=column, sticky="ew", padx=(0 if column == 0 else 10, 0)
+            )
+            self._diagnostics_summary_labels[key] = label
+        for index, spec in enumerate(
+            self._diagnostic_visual_specs(self._diagnostics_snapshot())
+        ):
+            card = self._create_diagnostic_metric_card(panel, spec)
+            card.grid(
+                row=1 + index // 3,
+                column=index % 3,
+                sticky="ew",
+                padx=(16 if index % 3 == 0 else 8, 16 if index % 3 == 2 else 8),
+                pady=(4, 14 if index >= 3 else 8),
+            )
+        self._create_diagnostics_guidance_panel(panel, 3)
+        self._create_diagnostics_trend_panel(panel, 4)
+
+    def _create_diagnostic_metric_card(self, parent, spec: dict[str, object]):
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=DIAGNOSTIC_CARD_BG,
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        card.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            card,
+            text=str(spec["title"]),
+            text_color=INK,
+            font=(UI_FONT, 12, "bold"),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 0))
+        value = ctk.CTkLabel(
+            card,
+            text=str(spec["value"]),
+            text_color=str(spec["color"]),
+            font=(UI_FONT, 18, "bold"),
+            anchor="w",
+        )
+        value.grid(row=1, column=0, sticky="ew", padx=12, pady=(2, 0))
+        bar = ctk.CTkProgressBar(
+            card,
+            height=8,
+            corner_radius=4,
+            fg_color=DIAGNOSTIC_GAUGE_TRACK,
+            progress_color=str(spec["color"]),
+        )
+        bar.grid(row=2, column=0, sticky="ew", padx=12, pady=(8, 0))
+        bar.set(float(spec["ratio"]))
+        detail = ctk.CTkLabel(
+            card,
+            text=str(spec["detail"]),
+            text_color=MUTED,
+            font=(UI_FONT, 10),
+            anchor="w",
+            justify="left",
+            wraplength=270,
+        )
+        detail.grid(row=3, column=0, sticky="ew", padx=12, pady=(6, 10))
+        self._diagnostics_visual_widgets[str(spec["key"])] = {
+            "value": value,
+            "bar": bar,
+            "detail": detail,
+        }
+        return card
+
+    def _create_diagnostics_guidance_panel(self, parent, row: int) -> None:
+        guide = ctk.CTkFrame(
+            parent,
+            fg_color="#F8FBFE",
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        guide.grid(row=row, column=0, columnspan=3, sticky="ew", padx=16, pady=(0, 12))
+        guide.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            guide,
+            text="When to report an issue",
+            text_color=INK,
+            font=(UI_FONT, 13, "bold"),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 0))
+        ctk.CTkLabel(
+            guide,
+            text=(
+                "Brief spikes are expected while scanning folders and building outputs. "
+                "Capture the snapshot when red persists, memory rises steadily, or "
+                "the same action repeatedly delays or freezes the Workbench."
+            ),
+            text_color=MUTED,
+            font=(UI_FONT, 11),
+            anchor="w",
+            justify="left",
+            wraplength=940,
+        ).grid(row=1, column=0, sticky="ew", padx=12, pady=(4, 10))
+
+    def _create_diagnostics_trend_panel(self, parent, row: int) -> None:
+        ctk.CTkLabel(
+            parent,
+            text="Performance trends",
+            text_color=INK,
+            font=(UI_FONT, 14, "bold"),
+            anchor="w",
+        ).grid(row=row, column=0, columnspan=3, sticky="ew", padx=16, pady=(4, 6))
+        ctk.CTkLabel(
+            parent,
+            text="Amber marks the Watch threshold. Red marks the sustained issue threshold.",
+            text_color=MUTED,
+            font=(UI_FONT, 11),
+            anchor="w",
+        ).grid(row=row + 1, column=0, columnspan=3, sticky="ew", padx=16)
+        trend_frame = ctk.CTkFrame(parent, fg_color="transparent")
+        trend_frame.grid(
+            row=row + 2, column=0, columnspan=3, sticky="ew", padx=16, pady=(6, 14)
+        )
+        trend_frame.grid_columnconfigure((0, 1), weight=1, uniform="diagnostic_trend")
+        for index, spec in enumerate(
+            self._diagnostic_trend_specs(self._diagnostics_snapshot())
+        ):
+            card = self._create_diagnostic_trend_card(trend_frame, spec)
+            card.grid(
+                row=index // 2,
+                column=index % 2,
+                sticky="ew",
+                padx=(0 if index % 2 == 0 else 8, 8 if index % 2 == 0 else 0),
+                pady=(0, 8 if index < 2 else 0),
+            )
+
+    def _create_diagnostic_trend_card(self, parent, spec: dict[str, object]):
+        card = ctk.CTkFrame(
+            parent,
+            fg_color=DIAGNOSTIC_CARD_BG,
+            corner_radius=8,
+            border_width=1,
+            border_color=HAIRLINE,
+        )
+        card.grid_columnconfigure(0, weight=1)
+        head = ctk.CTkFrame(card, fg_color="transparent")
+        head.grid(row=0, column=0, sticky="ew", padx=12, pady=(10, 0))
+        head.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            head,
+            text=str(spec["title"]),
+            text_color=INK,
+            font=(UI_FONT, 12, "bold"),
+            anchor="w",
+        ).grid(row=0, column=0, sticky="ew")
+        value = ctk.CTkLabel(
+            head,
+            text=f"{spec['value']} - {spec['direction']}",
+            text_color=str(spec["color"]),
+            font=(UI_FONT, 12, "bold"),
+            anchor="e",
+        )
+        value.grid(row=0, column=1, sticky="e", padx=(8, 0))
+        canvas = tk.Canvas(
+            card, height=78, bg=DIAGNOSTIC_CARD_BG, highlightthickness=0, bd=0
+        )
+        canvas.grid(row=1, column=0, sticky="ew", padx=12, pady=(8, 0))
+        detail = ctk.CTkLabel(
+            card,
+            text=str(spec["detail"]),
+            text_color=MUTED,
+            font=(UI_FONT, 10),
+            anchor="w",
+            justify="left",
+            wraplength=430,
+        )
+        detail.grid(row=2, column=0, sticky="ew", padx=12, pady=(6, 10))
+        self._diagnostics_trend_widgets[str(spec["key"])] = {
+            "value": value,
+            "canvas": canvas,
+            "detail": detail,
+        }
+        self._draw_diagnostic_trend(canvas, spec)
+        return card
+
+    def _draw_diagnostic_trend(self, canvas: tk.Canvas, spec: dict[str, object]) -> None:
+        try:
+            if not canvas.winfo_exists():
+                return
+        except TclError:
+            return
+        canvas.configure(bg=DIAGNOSTIC_CARD_BG)
+        canvas.delete("all")
+        width, height = max(canvas.winfo_width(), 260), max(canvas.winfo_height(), 72)
+        top, right, bottom, left = 8, 4, 10, 4
+        plot_width, plot_height = (
+            max(width - left - right, 1),
+            max(height - top - bottom, 1),
+        )
+        values = [
+            float(value)
+            for value in spec.get("values", [])
+            if isinstance(value, int | float)
+        ]
+        watch_at = float(spec.get("watch_at") or 0.0)
+        lag_at = max(float(spec.get("lag_at") or 1.0), 1.0)
+        canvas.create_rectangle(
+            left,
+            top,
+            left + plot_width,
+            top + plot_height,
+            outline=DIAGNOSTIC_GAUGE_TRACK,
+        )
+        watch_y = top + plot_height * (1 - max(0.0, min(1.0, watch_at / lag_at)))
+        canvas.create_line(
+            left, watch_y, left + plot_width, watch_y, fill=OCHRE, dash=(3, 4)
+        )
+        canvas.create_text(
+            left + 5,
+            watch_y - 6,
+            text="Watch",
+            fill=OCHRE,
+            font=(UI_FONT, 8, "bold"),
+            anchor="w",
+        )
+        canvas.create_line(left, top, left + plot_width, top, fill=CLAY, dash=(3, 4))
+        canvas.create_text(
+            left + 5,
+            top + 8,
+            text="Sustained issue",
+            fill=CLAY,
+            font=(UI_FONT, 8, "bold"),
+            anchor="w",
+        )
+        if not values:
+            canvas.create_text(
+                left + plot_width / 2,
+                top + plot_height / 2,
+                text="Collecting",
+                fill=MUTED,
+                font=(UI_FONT, 10),
+            )
+            return
+        if len(values) == 1:
+            x, y = (
+                left + plot_width,
+                top + plot_height * (1 - min(1.0, values[0] / lag_at)),
+            )
+            canvas.create_oval(
+                x - 3, y - 3, x + 3, y + 3, fill=str(spec["color"]), outline=""
+            )
+            return
+        step = plot_width / (len(values) - 1)
+        points: list[float] = []
+        for index, value in enumerate(values):
+            ratio = max(0.0, min(1.0, value / lag_at))
+            points.extend([left + index * step, top + plot_height * (1 - ratio)])
+        canvas.create_line(points, fill=str(spec["color"]), width=2, smooth=True)
+
+    def _update_diagnostics_visuals(self, snapshot: dict[str, object]) -> None:
+        for key, text in (
+            ("health", f"Health: {snapshot['health']}"),
+            ("loop", f"UI responsiveness: {snapshot['loop_health']}"),
+            ("resources", f"Resource pressure: {snapshot['resource_health']}"),
+        ):
+            label = self._diagnostics_summary_labels.get(key)
+            if label is not None:
+                try:
+                    if label.winfo_exists():
+                        label.configure(text=text)
+                except TclError:
+                    pass
+        for spec in self._diagnostic_visual_specs(snapshot):
+            widgets = self._diagnostics_visual_widgets.get(str(spec["key"]))
+            if not widgets:
+                continue
+            value, bar, detail = widgets["value"], widgets["bar"], widgets["detail"]
+            try:
+                value.configure(text=str(spec["value"]), text_color=str(spec["color"]))
+                bar.configure(progress_color=str(spec["color"]))
+                bar.set(float(spec["ratio"]))
+                detail.configure(text=str(spec["detail"]))
+            except TclError:
+                pass
+        for spec in self._diagnostic_trend_specs(snapshot):
+            widgets = self._diagnostics_trend_widgets.get(str(spec["key"]))
+            if not widgets:
+                continue
+            value, canvas, detail = widgets["value"], widgets["canvas"], widgets["detail"]
+            try:
+                value.configure(
+                    text=f"{spec['value']} - {spec['direction']}",
+                    text_color=str(spec["color"]),
+                )
+                detail.configure(text=str(spec["detail"]))
+            except TclError:
+                continue
+            self._draw_diagnostic_trend(canvas, spec)
+
+    def _show_diagnostics_window(self) -> None:
+        screen_width = max(760, self.winfo_screenwidth())
+        screen_height = max(640, self.winfo_screenheight())
+        window = ctk.CTkToplevel(self)
+        window.title("Workbench Diagnostics")
+        window.geometry(
+            f"{min(1120, max(760, screen_width - 80))}x"
+            f"{min(980, max(760, screen_height - 100))}"
+        )
+        window.minsize(760, 680)
+        window.configure(fg_color=CANVAS)
+        self._diagnostics_window = window
+        window.grid_columnconfigure(0, weight=1)
+        window.grid_rowconfigure(1, weight=1)
+
+        header = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=8)
+        header.grid(row=0, column=0, sticky="ew", padx=18, pady=(18, 10))
+        header.grid_columnconfigure(0, weight=1)
+        ctk.CTkLabel(
+            header,
+            text="Workbench diagnostics",
+            text_color=INK,
+            font=(UI_FONT, 24, "bold"),
+        ).grid(row=0, column=0, sticky="w", padx=20, pady=(16, 0))
+        ctk.CTkLabel(
+            header,
+            text="Press Ctrl+Shift+D to close this panel.",
+            text_color=MUTED,
+            font=(UI_FONT, 13),
+            anchor="w",
+        ).grid(row=1, column=0, sticky="w", padx=20, pady=(2, 14))
+        actions = ctk.CTkFrame(header, fg_color="transparent")
+        actions.grid(row=0, column=1, rowspan=2, sticky="e", padx=16)
+        for text, command in (
+            ("Copy Snapshot", self._copy_diagnostics_snapshot),
+            ("Save Log", self._save_diagnostics_log),
+            ("Refresh", self._set_diagnostics_snapshot_text),
+            ("Reset", self._reset_diagnostics_metrics),
+        ):
+            self._secondary_toolbar_button(actions, text, command).pack(
+                side="left", padx=(0, 8)
+            )
+
+        self._diagnostics_visual_widgets = {}
+        self._diagnostics_trend_widgets = {}
+        self._diagnostics_summary_labels = {}
+        body = ctk.CTkScrollableFrame(
+            window,
+            fg_color="transparent",
+            corner_radius=0,
+            scrollbar_button_color=PLUM,
+            scrollbar_button_hover_color="#0B4FC0",
+        )
+        body.grid(row=1, column=0, sticky="nsew", padx=18, pady=(0, 10))
+        body.grid_columnconfigure(0, weight=1)
+        self._wire_scrollable_inner_width(body)
+        self._create_diagnostics_visual_panel(body)
+        text = ctk.CTkTextbox(
+            body,
+            fg_color=DIAGNOSTIC_CARD_BG,
+            text_color=INK,
+            border_width=1,
+            border_color=HAIRLINE,
+            corner_radius=8,
+            font=("Consolas", 12),
+            height=260,
+            wrap="none",
+        )
+        text.grid(row=1, column=0, sticky="ew", pady=(0, 10))
+        self._diagnostics_textbox = text
+        footer = ctk.CTkFrame(window, fg_color=PAPER, corner_radius=8)
+        footer.grid(row=2, column=0, sticky="ew", padx=18, pady=(6, 18))
+        footer.grid_columnconfigure(0, weight=1)
+        self._pill_button(footer, "Close", self._close_diagnostics_window, FOG, INK).grid(
+            row=0, column=1, padx=(8, 14), pady=12
+        )
+        window.protocol("WM_DELETE_WINDOW", self._close_diagnostics_window)
+        self._record_perf_event("Diagnostics opened")
+        self._set_diagnostics_snapshot_text()
+        self._refresh_diagnostics_window()
+        window.lift()
+        window.focus_force()
+
+    def _refresh_diagnostics_window(self) -> None:
+        window = self._diagnostics_window
+        try:
+            if window is None or not window.winfo_exists():
+                return
+            if self._diagnostics_refresh_after_id is not None:
+                try:
+                    window.after_cancel(self._diagnostics_refresh_after_id)
+                except TclError:
+                    pass
+                self._diagnostics_refresh_after_id = None
+            self._update_diagnostics_visuals(self._diagnostics_snapshot())
+            self._diagnostics_refresh_after_id = window.after(
+                1000, self._refresh_diagnostics_window
+            )
+        except TclError:
+            self._diagnostics_window = None
+            self._diagnostics_textbox = None
+            self._diagnostics_refresh_after_id = None
+
+    def _copy_diagnostics_snapshot(self) -> None:
+        self.clipboard_clear()
+        self.clipboard_append(self._format_diagnostics_report())
+        self.update_idletasks()
+        self._record_perf_event("Diagnostics copied")
+        self._refresh_diagnostics_window()
+
+    def _close_diagnostics_window(self) -> None:
+        window = self._diagnostics_window
+        if window is not None and self._diagnostics_refresh_after_id is not None:
+            try:
+                window.after_cancel(self._diagnostics_refresh_after_id)
+            except TclError:
+                pass
+        self._diagnostics_window = None
+        self._diagnostics_textbox = None
+        self._diagnostics_refresh_after_id = None
+        self._diagnostics_visual_widgets = {}
+        self._diagnostics_trend_widgets = {}
+        self._diagnostics_summary_labels = {}
+        try:
+            if window is not None and window.winfo_exists():
+                window.destroy()
+        except TclError:
+            pass
 
     # ------------------------------------------------------------------
     # Shell: brand bar, step rail, hero, content, action bar, footer

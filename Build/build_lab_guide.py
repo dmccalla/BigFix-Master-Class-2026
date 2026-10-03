@@ -49,9 +49,13 @@ _W = f'xmlns:w="{W}"'
 SITE = "Performance and Config Analysis"
 GUIDE_VERSION = "1.0"
 GUIDE_DATE = "October 2, 2026"
-WORKBENCH_DIR = r"Documents\Master Class Diagnostics Workbench"
+# Paths on the lab's BigFix Server virtual machine. The Output Folder default
+# is the logged-in user's Documents folder, which is Administrator on the lab.
+WORKBENCH_DIR = (
+    r"C:\Users\Administrator\Desktop\BigFixSrc\Master Class Diagnostics Workbench"
+)
 SAMPLE_DIR = WORKBENCH_DIR + r"\SampleData\BigFix Master Class 2026\Results"
-OUTPUT_DIR = r"Documents\Master Class Diagnostics"
+OUTPUT_DIR = r"C:\Users\Administrator\Documents\Master Class Diagnostics"
 NFR_TITLE = "BigFix Non-Functional Requirements: A Checklist Approach v11.x.4"
 NFR_URL = (
     "https://help.hcl-software.com/bigfix/landing/Technical+Documents/"
@@ -687,18 +691,10 @@ def write_content(g: Guide) -> None:
         "is now running.",
     )
     g.picture("lg-task-03-setup-perfmon.png", TASK_IMAGE_WIDTH)
-    g.steps(
-        [
-            "The capture runs for 24 hours. Stop it for the lab. Open a Command Prompt "
-            "as administrator on the BigFix Server and run these two commands:",
-        ]
-    )
-    g.code(["logman stop BFPerf", "logman delete BFPerf"])
-    g.para("")
-    g.steps(["Each command reports The command completed successfully."])
-    g.shot(
-        "lg-console-03-logman-stop.png",
-        "The Command Prompt after logman stop and logman delete",
+    g.note(
+        "The capture takes a sample every 60 seconds and stops on its own after "
+        "24 hours. You do not need to stop it. The Workbench uses the sample capture "
+        "in Exercise 3."
     )
     g.done(2)
 

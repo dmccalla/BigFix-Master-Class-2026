@@ -1870,7 +1870,7 @@ def main() -> None:
     add_stamp_arguments(parser)
     args = parser.parse_args()
 
-    log.title("PerfMon Infrastructure Analysis")
+    log.title("Perfmon Infrastructure Analysis")
 
     if not clean_user_path(args.input):
         print("PerfMon input file is required. Pass it with --input.", file=sys.stderr)

@@ -1280,7 +1280,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         score_color, cls, label = "#1F8A5B", "st-healthy", "Healthy"
 
     data = {
-        "title": "PerfMon Infrastructure Analysis",
+        "title": "Perfmon Infrastructure Analysis",
         "sub": f"{len(counters)} checks vs. thresholds · value = average · bar vs. limit marker",
         "score": score,
         "scoreColor": score_color,

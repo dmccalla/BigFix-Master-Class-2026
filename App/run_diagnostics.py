@@ -1183,7 +1183,7 @@ def _write_perfmon_mini_report(
             from docx import Document
 
             document = apply_standalone_narrow_margins(Document())
-        add_stub_front_matter(document, "PerfMon Infrastructure Analysis")
+        add_stub_front_matter(document, "Perfmon Infrastructure Analysis")
         document.save(str(base_path))
 
         run_python(

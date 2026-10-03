@@ -176,7 +176,7 @@ def test_headerless_fourteen_field_loop_capture_maps_cpu_idle_columns(
     assert errors == 0
     summary = loop.analyze_agent_multicore(processed)
     assert summary is not None
-    assert ["Not Applicable", "4", "1 / 2"] in summary.settings_rows
+    assert ["Not Applicable", "1 / 2"] in summary.settings_rows
 
 
 def test_headerless_loop_capture_requires_all_collection_fields(tmp_path: Path) -> None:

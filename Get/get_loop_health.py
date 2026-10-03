@@ -2725,27 +2725,13 @@ def analyze_agent_multicore(
     if not multicore_rows:
         return None
 
-    settings: dict[str, list[str]] = {}
-    for row in multicore_rows:
-        setting = row.agent_multicore_scaling_enabled or "Not Set"
-        settings.setdefault(setting, []).append(
-            row.agent_total_physical_cpu_core_count or "Not Reported"
-        )
-
-    def total_cores(core_counts: list[str]) -> str:
-        normalized = [value.replace(",", "").strip() for value in core_counts]
-        if not normalized or not all(value.isdigit() for value in normalized):
-            return "Not Reported"
-        return f"{sum(int(value) for value in normalized):,}"
-
+    settings = Counter(
+        row.agent_multicore_scaling_enabled or "Not Set" for row in multicore_rows
+    )
     settings_rows = [
-        [
-            scaling,
-            total_cores(core_counts),
-            count_with_denominator(len(core_counts), len(multicore_rows)),
-        ]
-        for scaling, core_counts in sorted(
-            settings.items(), key=lambda item: (-len(item[1]), item[0])
+        [scaling, count_with_denominator(count, len(multicore_rows))]
+        for scaling, count in sorted(
+            settings.items(), key=lambda item: (-item[1], item[0])
         )
     ]
     return AgentMulticoreSummary(
@@ -3439,7 +3425,6 @@ def generate_excel(
                 agent_multicore_summary.settings_rows,
                 columns=[
                     "Scale Work Time With CPU Cores",
-                    "Total Physical CPU Cores",
                     "Devices / Total",
                 ],
             ).to_excel(writer, sheet_name="Client Multicore Settings", index=False)
@@ -4093,11 +4078,10 @@ def generate_word(
             document,
             [
                 "Scale Work Time With CPU Cores",
-                "Total Physical CPU Cores",
                 "Devices / Total",
             ],
             agent_multicore_summary.settings_rows,
-            {1, 2},
+            {1},
         )
 
     document.save(str(word_output))

@@ -73,8 +73,8 @@ def test_agent_multicore_settings_are_reported_without_assessment() -> None:
     assert summary is not None
     assert summary.total_devices == 3
     assert summary.settings_rows == [
-        ["On", "16", "2 / 3"],
-        ["Not Set", "4", "1 / 3"],
+        ["On", "2 / 3"],
+        ["Not Set", "1 / 3"],
     ]
 
     source = loop.processed_to_dataframe(processed)
@@ -104,10 +104,9 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     settings = list(wb["Client Multicore Settings"].values)
     assert settings[0] == (
         "Scale Work Time With CPU Cores",
-        "Total Physical CPU Cores",
         "Devices / Total",
     )
-    assert settings[1] == ("On", "16", "2 / 3")
+    assert settings[1] == ("On", "2 / 3")
 
     word_output = tmp_path / "loop.docx"
     loop.generate_word(
@@ -127,6 +126,6 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
         if table.rows[0].cells[0].text == "Scale Work Time With CPU Cores"
     )
     assert (
-        multicore_table.rows[1].cells[2].paragraphs[0].alignment
+        multicore_table.rows[1].cells[1].paragraphs[0].alignment
         == WD_ALIGN_PARAGRAPH.CENTER
     )

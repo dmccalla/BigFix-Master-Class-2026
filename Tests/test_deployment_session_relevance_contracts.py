@@ -137,7 +137,7 @@ def test_external_site_timestamp_keeps_a_nonblank_fourth_column(path: Path) -> N
 LITERAL_CAPTURE_CONTRACTS = {
     "Individual Tasks": (
         110,
-        "99ae5313cfcafde87a21a733d6558d03e73d749bde460a19bcb7cfaf60179216",
+        "fb354a3f291ccd7e6afece9fc3a30a8631a515111448df560655ac7963c30063",
     ),
 }
 DEPLOYMENT_CAPTURE_TARGETS = {

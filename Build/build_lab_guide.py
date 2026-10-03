@@ -8,12 +8,16 @@
 """Build Docs/Master_Class_Lab_Guide.docx from the Master Class lab guide template.
 
 The template (Templates/Master_Class_LabGuide_Template.docx) supplies the
-cover, the information page, the Contents field, the revision table, and the
-paragraph and table formatting. This script keeps that front matter, drops the
-template's example exercises, and writes the Workbench exercises with the
-screenshots under Docs/Lab_Guide_Assets.
+cover, the information page, the Contents field, the revision table, the lab
+environment and login sections, Exercise 1, and the paragraph and table
+formatting. This script keeps everything up to the end of the template's
+Exercise 1, so attendees still have the login details. It drops the
+template's example exercises after that and writes the Workbench lab as
+Exercise 2 onward, with the screenshots under Docs/Lab_Guide_Assets.
+Screenshots that cannot be captured from the repo, such as console views,
+are marked placeholders for the instructor to replace. The Workbench
+screenshots come from the instructor's own lab run.
 
-    uv run python Utilities/capture_lab_guide_screenshots.py
     uv run python Utilities/capture_lab_guide_task_screenshots.py
     uv run python Build/build_lab_guide.py
 
@@ -43,8 +47,27 @@ CONTENTS_SCRIPT = PROJECT_ROOT / "Build" / "update_lab_guide_contents.ps1"
 W = "http://schemas.openxmlformats.org/wordprocessingml/2006/main"
 _W = f'xmlns:w="{W}"'
 SITE = "Performance and Config Analysis"
-GUIDE_VERSION = "0.2"
-GUIDE_DATE = "September 29, 2026"
+GUIDE_VERSION = "1.0"
+GUIDE_DATE = "October 2, 2026"
+WORKBENCH_DIR = r"Documents\Master Class Diagnostics Workbench"
+SAMPLE_DIR = WORKBENCH_DIR + r"\SampleData\BigFix Master Class 2026\Results"
+OUTPUT_DIR = r"Documents\Master Class Diagnostics"
+NFR_TITLE = "BigFix Non-Functional Requirements: A Checklist Approach v11.x.4"
+NFR_URL = (
+    "https://help.hcl-software.com/bigfix/landing/Technical+Documents/"
+    "Landing_page_shared/Technical_Documents.html"
+)
+LAB_RAM_GB = "12"
+TASK_DEPLOYMENT = "BigFix Master Class -- Collect Deployment Information (2.0)"
+TASK_CLIENT_PERF = (
+    "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0)"
+)
+ANALYSIS_CLIENT_PERF = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"
+TASK_PERFMON = "BigFix Master Class -- Setup and Run Perfmon Counters (2.0)"
+TASK_FILLDB_ENABLE = "BigFix Master Class -- Enable FillDB Performance Logging (2.0)"
+TASK_FILLDB_DISABLE = (
+    "WARNING: BigFix Master Class -- FillDB Performance Logging is Enabled (2.0)"
+)
 IMAGE_WIDTH = Inches(6.6)
 TASK_IMAGE_WIDTH = Inches(6.0)
 
@@ -193,10 +216,12 @@ class Guide:
         self.sect_pr.addprevious(element)
         return element
 
-    def heading1(self, text: str) -> None:
+    def heading1(self, text: str, *, new_page: bool = False) -> None:
         p = copy.deepcopy(self.ex.h1)
         strip_bookmarks(p)
         set_paragraph_text(p, text)
+        if new_page:
+            p.find(qn("w:pPr")).append(parse_xml(f"<w:pageBreakBefore {_W}/>"))
         self._append(p)
 
     def heading2(self, text: str) -> None:
@@ -296,6 +321,43 @@ class Guide:
 
         Paragraph(p, self.document._body).add_run().add_picture(str(path), width=width)
 
+    def placeholder(self, what: str) -> None:
+        """A highlighted marker where the instructor adds a screenshot."""
+        p = self.para(f"[SCREENSHOT: {what}]", indent=720)
+        run = next(r for r in p.iter(qn("w:r")) if r.find(qn("w:t")) is not None)
+        rpr = run.find(qn("w:rPr"))
+        rpr.append(parse_xml(f'<w:highlight {_W} w:val="yellow"/>'))
+        for tag in ("w:b", "w:bCs"):
+            node = rpr.find(qn(tag))
+            if node is None:
+                rpr.insert(1, parse_xml(f"<{tag} {_W}/>"))
+
+    def shot(self, name: str, what: str, width=IMAGE_WIDTH) -> None:
+        """An instructor screenshot when the file exists, else its placeholder."""
+        if (ASSETS / name).is_file():
+            self.picture(name, width)
+        else:
+            self.placeholder(f"{what}. Save it as Docs/Lab_Guide_Assets/{name}")
+
+    def link(self, lead: str, text: str, url: str) -> None:
+        """A body paragraph that ends in a real hyperlink."""
+        from docx.opc.constants import RELATIONSHIP_TYPE as RT
+
+        p = self.para(lead)
+        run = next(r for r in p.iter(qn("w:r")) if r.find(qn("w:t")) is not None)
+        rel_id = self.document.part.relate_to(url, RT.HYPERLINK, is_external=True)
+        link_run = copy.deepcopy(run)
+        link_run.find(qn("w:t")).text = text
+        rpr = link_run.find(qn("w:rPr"))
+        rpr.append(parse_xml(f'<w:color {_W} w:val="0563C1"/>'))
+        rpr.append(parse_xml(f'<w:u {_W} w:val="single"/>'))
+        hyperlink = parse_xml(
+            f'<w:hyperlink {_W} xmlns:r="http://schemas.openxmlformats.org/'
+            f'officeDocument/2006/relationships" r:id="{rel_id}" w:history="1"/>'
+        )
+        hyperlink.append(link_run)
+        run.addnext(hyperlink)
+
     def code(self, lines: list[str]) -> None:
         for line in lines:
             p = self.para(line, indent=720)
@@ -378,15 +440,7 @@ def update_front_matter(document) -> None:
 
     revisions = find_block(document, "Release Date", "w:tbl")
     rows = revisions.findall(qn("w:tr"))
-    entries = [
-        ("September 28, 2026", "0.1", "Master Class team", "Initial lab guide draft."),
-        (
-            GUIDE_DATE,
-            GUIDE_VERSION,
-            "Master Class team",
-            "Screenshots and the current Workbench workflow.",
-        ),
-    ]
+    entries = [(GUIDE_DATE, GUIDE_VERSION, "Master Class team", "First version.")]
     for row, values in zip(rows[1:], entries):
         for cell, value in zip(row.findall(qn("w:tc")), values):
             set_paragraph_text(cell.find(qn("w:p")), value)
@@ -395,11 +449,25 @@ def update_front_matter(document) -> None:
             set_paragraph_text(cell.find(qn("w:p")), "")
 
 
+PROTECTED_END = "You have now successfully completed Exercise 1."
+EXAMPLE_HEADING = "EXAMPLE: BigFix Foundation"
+
+
 def drop_template_exercises(document) -> None:
-    # The cover paragraph also starts with "BigFix Master Class", so anchor
-    # on the first Heading 1 with exactly that text.
+    """Drop the template's example exercises after Exercise 1.
+
+    Everything before the EXAMPLE heading stays: the cover, the Contents, the
+    revision table, the Overview, the Lab Environment table with the logins,
+    Accessing Lab Environment, and Exercise 1. Attendees need those to log in.
+    """
+    blocks = body_blocks(document)
+    protected = next(
+        (i for i, b in enumerate(blocks) if block_text(b) == PROTECTED_END), None
+    )
+    if protected is None:
+        raise LookupError(f"template paragraph not found: {PROTECTED_END!r}")
     start = None
-    for block in body_blocks(document):
+    for block in blocks[protected + 1 :]:
         if block.tag != qn("w:p"):
             continue
         ppr = block.find(qn("w:pPr"))
@@ -407,12 +475,12 @@ def drop_template_exercises(document) -> None:
         if (
             style is not None
             and style.get(qn("w:val")) == "Heading1"
-            and block_text(block) == "BigFix Master Class"
+            and block_text(block).startswith(EXAMPLE_HEADING)
         ):
             start = block
             break
     if start is None:
-        raise LookupError("template Heading 1 'BigFix Master Class' not found")
+        raise LookupError(f"template Heading 1 {EXAMPLE_HEADING!r} not found")
     body = document.element.body
     removing = False
     for child in list(body):
@@ -428,409 +496,444 @@ def drop_template_exercises(document) -> None:
 # Content
 # ---------------------------------------------------------------------------
 
-MODULE_TABLE = [
+TIME_BUDGET = [
+    ["Before You Start", "2 minutes"],
+    ["Exercise 2: Collect the Data", "5 minutes"],
+    ["Exercise 3: Run the Workbench", "5 minutes"],
+    ["Exercise 4: Read the Client Performance Outputs", "4 minutes"],
+    ["Exercise 5: Read the Perfmon Outputs", "4 minutes"],
+]
+
+CLIENT_AREAS = [
+    ["1", "Client Loop Time", "Average Loop Health", "Health Summary"],
     [
-        "Client Performance",
-        "BigFix Master Class -- Client Performance Counters - Basic (2.0) analysis and "
-        "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0) task",
-        "Client_Loop XML or CSV. Optional Top 10, UDP, and Deployment_Information captures.",
+        "2",
+        "Expensive Properties (Top 10)",
+        "Top 10 Most Expensive Evaluations",
+        "Evaluation Offenders",
+    ],
+    ["3", "UDP Notification Reach", "UDP Notification Coverage", "UDP Coverage"],
+    ["4", "Command Polling", "Command Polling Review", "Polling Summary"],
+    [
+        "5",
+        "CPU Usage Settings",
+        "Client CPU Idle Settings",
+        "Client CPU Idle Settings",
+    ],
+    ["6", "FastHashVerify", "FastHashVerify Review", "FastHashVerify Summary"],
+]
+
+PERFMON_COUNTERS = [
+    [
+        "PRF-INF-01",
+        "Storage Queue Depth",
+        "Physical Disk: Current Disk Queue Length",
+        "≤ 1 per physical device",
     ],
     [
-        "Perfmon",
-        "BigFix Master Class -- Setup and Run Perfmon Counters (2.0)",
-        "The Perfmon .blg file from every targeted server.",
+        "PRF-INF-02",
+        "Storage Latency",
+        "Physical Disk: Avg. Disk sec/Transfer",
+        "≤ 1 ms per physical device",
     ],
     [
-        "FillDB",
-        "BigFix Master Class -- Enable FillDB Performance Logging (2.0)",
-        "FillDBPerf.log and its rollover files after logging is disabled.",
+        "PRF-INF-03",
+        "Storage Operations",
+        "Physical Disk: Disk Transfers/sec",
+        "No saturation under load. DBMS storage supports 5,000 transfers per second.",
+    ],
+    [
+        "PRF-INF-04",
+        "CPU Utilization",
+        "Processor: % Processor Time",
+        "Virtual: 50% to 80%. Physical: ≤ 80%.",
+    ],
+    [
+        "PRF-INF-05",
+        "CPU Latency",
+        "System: Processor Queue Length",
+        "≤ 4",
+    ],
+    [
+        "PRF-INF-06",
+        "CPU Privileged Time",
+        "Processor: % Privileged Time",
+        "≤ 10% of aggregate CPU",
+    ],
+    [
+        "PRF-INF-07",
+        "Network Health",
+        "Network Interface: packets discarded and packet errors",
+        "All counters approach zero per interface",
+    ],
+    [
+        "PRF-INF-09",
+        "Memory Health",
+        "Paging File: % Usage Peak",
+        "≤ 5% of aggregate physical memory",
     ],
 ]
 
-CLIENT_SETTING_TASKS = [
-    "BigFix Master Class -- Enable Client FastHashVerify Setting (Default - 25% Single Core) (1.0)",
-    "BigFix Master Class -- Set CPU Utilization to 2% on Multi-Core Systems (1.0)",
-    "BigFix Master Class -- Set CPU Utilization to 20% (Single Core) (1.0)",
-    "BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (1.0)",
-]
+
+def take_action(g: Guide, task: str, inputs: list[str], result: str) -> None:
+    """Steps to run one task from the site against the BigFix Server."""
+    g.steps([f"Select {task}. The task description opens in the work area."])
+    g.steps(inputs)
+    g.steps(
+        [
+            "Click Take Action. On the Target tab select the BigFix Server. Click OK.",
+            result,
+        ]
+    )
 
 
 def write_content(g: Guide) -> None:
-    g.heading1("BigFix Master Class")
-    g.heading1("Student exercises")
+    g.heading1("Diagnostics Workbench Lab")
 
     g.heading2("Overview")
     g.para(
-        "This lab introduces the BigFix Master Class Diagnostics Workbench. You collect "
-        "operational data from a BigFix deployment with a collection task, run the "
-        "matching Workbench module, and read the Mini Report it produces."
+        "In this lab you run the Master Class Diagnostics Workbench. You cover the two "
+        "modules from the session. Client Performance Analysis reviews how the BigFix "
+        "clients evaluate content. Perfmon Infrastructure Analysis reviews the Windows "
+        "performance of a BigFix server."
     )
-    g.para("In this lab you will learn how to:")
-    g.bullets(
-        [
-            "Connect a BigFix collection task to the data a Workbench module needs.",
-            "Run the Client Performance and Perfmon exercises on their own.",
-            "Run the optional FillDB exercise when the session schedule allows.",
-            "Recognize the main evidence and measurements in a Mini Report.",
-        ]
+    g.para("The lab takes 20 minutes:")
+    g.table(["Part", "Time"], TIME_BUDGET, [7000, 3000])
+
+    g.heading2("Before You Start")
+    g.para(
+        "The collection tasks need hours of client reporting and a 24-hour Perfmon "
+        "capture. In this lab you run them only to see how they work. The Workbench "
+        "then builds from the sample data that ships with it."
+    )
+    g.para("Every module follows the same path:")
+    g.para(
+        "BigFix deployment › Collection task › Captured data › Workbench module › "
+        "Mini Report",
+        indent=720,
     )
     g.para(
-        "The three modules run one at a time. The core path is Client Performance "
-        "followed by Perfmon. FillDB is an optional third exercise. Each module "
-        "writes a Mini Report, an Infographic, and for two of the modules an Excel "
-        "workbook."
+        f"The Workbench is on the BigFix Server virtual machine in {WORKBENCH_DIR}. "
+        f"The sample data is in {SAMPLE_DIR}."
     )
     g.note(
-        "The Mini Report is the primary artifact of this class. The Workbench has no "
-        "full report mode and no scoring workbook."
+        "The Workbench is provided as-is to BigFix Master Class attendees only. It has "
+        "no warranty or support. Do not redistribute it without approval."
     )
 
-    g.heading2("Before you begin")
-    g.para("You need the following:")
-    g.bullets(
-        [
-            f"Access to the lab BigFix console and the custom site {SITE}.",
-            "An instructor-provided BigFix account for actions that need operator permissions.",
-            "The Diagnostics Workbench project folder and a writable output folder.",
-            "A Windows 10 or 11 workstation with Python 3.12 or newer, Microsoft Edge or "
-            "Google Chrome, and Microsoft Word and Excel.",
-            "A folder for collected data. Use the instructor-provided sanitized capture "
-            "when live collection takes longer than the class session.",
-        ]
-    )
-    g.note(
-        "Microsoft Word and Excel are the preferred and tested applications for the "
-        "Mini Reports and workbooks. LibreOffice and other compatible applications may "
-        "work, but they have not been fully vetted."
-    )
-
-    g.heading2("Shared collection workflow")
+    # Exercise 2 --------------------------------------------------------
+    g.heading2("Exercise 2: Collect the Data")
     g.para(
-        f"The collection tasks are in the {SITE} site. Each exercise follows the same "
-        "pattern. Prepare the required analysis or service, run the collection task, "
-        "retrieve the files, and place them in the Workbench data folder."
+        "In this exercise, you run the collection content for both modules from the "
+        "BigFix Console. You do not wait for the Deployment Information task to finish."
     )
-    g.table(
-        ["Module", "BigFix content", "Data to retrieve"],
-        MODULE_TABLE,
-        [1700, 4600, 3700],
-    )
-    g.para("Put the files for one deployment under one data folder:")
-    g.code(
-        [
-            "<Data Folder>\\",
-            "    Client_Loop\\              Client Performance export and optional captures",
-            "    Deployment_Information\\   Optional root server information captures",
-            "    Perfmon\\                  One or two Perfmon .blg captures",
-            "    FillDB_Performance\\       FillDB performance logs or the analyzer CSV",
-        ]
-    )
-    g.para("")
-    g.important(
-        "Perfmon logs are large and are retrieved directly from the target machines. "
-        "They are not uploaded by the collection task."
-    )
-
-    # Exercise 1 --------------------------------------------------------
-    g.heading2("Exercise 1: Client Performance Analysis")
-    g.para(
-        "In this exercise, you collect client evaluation loop data and use the "
-        "Workbench to review evaluation time, expensive evaluations, command polling, "
-        "UDP coverage, and FastHashVerify settings."
-    )
-    g.label("BigFix collection")
+    g.label("Client Performance")
     g.steps(
         restart=True,
         items=[
-            f"In the BigFix console, open the {SITE} site.",
-            "Activate BigFix Master Class -- Client Performance Counters - Basic (2.0). "
-            "If it is already active and reporting, continue. Allow 24 to 48 hours of "
-            "reporting before you collect.",
+            "Switch to the BigFix Server virtual machine. Log in to the BigFix Console "
+            "with the console credentials in the Lab Environment table.",
+            f"Select the All Content domain. Expand Sites and Custom Sites. Select the "
+            f"{SITE} site.",
         ],
+    )
+    g.shot(
+        "lg-console-01-site-selected.png",
+        f"The {SITE} site selected in the All Content domain",
+    )
+    g.steps(
+        [
+            f"Select Analyses. Right-click {ANALYSIS_CLIENT_PERF} and choose Activate. "
+            "The status changes to Activated Globally.",
+        ]
     )
     g.picture("lg-task-01-agent-performance-analysis.png", TASK_IMAGE_WIDTH)
-    g.steps(
+    g.note(
+        "In a real health check the analysis reports for 24 to 48 hours before you "
+        "collect. In the lab you collect right away to see how the task works."
+    )
+    g.steps(["Select Fixlets and Tasks in the site."])
+    take_action(
+        g,
+        TASK_DEPLOYMENT,
         [
-            "Run BigFix Master Class -- Collect Client Performance Counter Analysis Data "
-            "(2.0) against the root server. Use the instructor-provided account when the "
-            "task asks for API credentials. Do not place credentials in this guide or in "
-            "the collected files.",
-        ]
+            "Enter the console user name in API Username. Enter the console password "
+            "in API Password and Confirm Password. Leave Root Server Hostname as it is.",
+        ],
+        "The action starts. Do not wait for it. Continue with the next step.",
+    )
+    g.picture("lg-task-05-collect-deployment-info.png", TASK_IMAGE_WIDTH)
+    take_action(
+        g,
+        TASK_CLIENT_PERF,
+        [
+            "Enter the console user name in API Username. Enter the console password "
+            "in API Password and Confirm Password. Leave Root Server Hostname as it is.",
+            "Leave Also generate the human readable loop CSV file cleared.",
+        ],
+        "Wait for the action status to change to Completed.",
     )
     g.picture("lg-task-02-collect-agent-performance.png", TASK_IMAGE_WIDTH)
+    g.shot(
+        "lg-console-02-client-perf-completed.png",
+        "The Collect Client Performance Counter Analysis Data action at Completed",
+    )
+    g.label("Perfmon")
+    take_action(
+        g,
+        TASK_PERFMON,
+        [],
+        "Wait for the action status to change to Completed. The BFPerf counter set "
+        "is now running.",
+    )
+    g.picture("lg-task-03-setup-perfmon.png", TASK_IMAGE_WIDTH)
     g.steps(
         [
-            "Wait for the action to complete and retrieve the Client_Loop XML or CSV. "
-            "Retrieve the optional Top 10, UDP, and Deployment_Information captures when "
-            "they are present.",
-            "Place the files under Client_Loop and Deployment_Information in your data folder.",
+            "The capture runs for 24 hours. Stop it for the lab. Open a Command Prompt "
+            "as administrator on the BigFix Server and run these two commands:",
         ]
     )
-    g.note(
-        "The primary file is named Client_Loop_<date>_<time>.xml or .csv. The task can "
-        "also produce top10-query-results.csv and udp-notification-results.csv."
+    g.code(["logman stop BFPerf", "logman delete BFPerf"])
+    g.para("")
+    g.steps(["Each command reports The command completed successfully."])
+    g.shot(
+        "lg-console-03-logman-stop.png",
+        "The Command Prompt after logman stop and logman delete",
     )
-    g.label("Run the Workbench")
+    g.done(2)
+
+    # Exercise 3 --------------------------------------------------------
+    g.heading2("Exercise 3: Run the Workbench")
+    g.para(
+        "In this exercise, you run the two lab modules against the sample data. You "
+        "build once."
+    )
+    g.label("Step 1: Folders and Run Details")
     g.steps(
         restart=True,
         items=[
-            "Open Launchers and run Run Diagnostics Workbench.cmd. The first run creates "
-            "the private Python environment, which takes about a minute.",
-            "On Folders, set Data Folder to your data folder. The Workbench scans it and "
-            "reports how many modules found their input.",
+            f"On the BigFix Server open {WORKBENCH_DIR}\\Launchers. Double-click Run "
+            "Diagnostics Workbench.cmd. The Workbench opens on step 1.",
+            f"Click Browse next to Data Folder. Select {SAMPLE_DIR}. The Workbench "
+            "reports Data found for 3 of 3 modules.",
+            f"Leave Output Folder at {OUTPUT_DIR}. A timestamped run folder is created "
+            "there.",
+            "Enter a Run Name such as MC Lab Exercise. Any name works. The run folder "
+            "and every output file use it.",
         ],
     )
-    g.picture("lg-02-step-1-folders-scanned.png")
+    g.picture("lg-01-step-1-folders.png")
+    g.steps(["Click Next. The Choose the Modules to Run page opens."])
+    g.label("Step 2: Choose the Modules")
     g.steps(
         [
-            "Set Output Folder and enter a Run Name that identifies your lab run. The "
-            "run name prefixes every output file.",
-            "Click Next. On Modules, click Clear and then tick Client Performance Loop "
-            "Analysis only.",
+            "The page opens with every module selected. Click Clear. Select Client "
+            "Performance Analysis and Perfmon Infrastructure Analysis. Both rows show "
+            "Needs Review until you fill in their details.",
         ]
     )
     g.picture("lg-03-step-2-modules.png")
     g.steps(
         [
-            "Click Details. Confirm the loop export and the optional captures. Enter the "
-            "Report Start Date and Report End Date for the collection period.",
+            "Click Details on the Client Performance Analysis row. Enter a Report Start "
+            "Date and a Report End Date. Any dates work. The report shows this range. "
+            "The row changes to Found.",
         ]
     )
     g.picture("lg-04-step-2-loop-details.png")
     g.steps(
         [
-            "Click Next. Check the Run Details strip and click Build. The module status "
-            "moves from Queued to Running to Done.",
+            "Click Details on the Perfmon Infrastructure Analysis row. In Capture 1 "
+            f"enter {LAB_RAM_GB} in RAM. Select Virtual machine. CPUs and Disks are "
+            "read from the capture. The row changes to Found.",
         ]
-    )
-    g.picture("lg-05-step-3-build.png")
-    g.steps(
-        [
-            "When the status is Done, click Open Output and open the Mini Report in the "
-            "Client_Loop folder.",
-        ]
-    )
-    g.label("Review the result")
-    g.picture("lg-out-loop-mini-report-p1.png", TASK_IMAGE_WIDTH)
-    g.bullets(
-        [
-            "Compare the maximum and average evaluation cycle times.",
-            "Review the Top 10 evaluation table when the optional capture was collected.",
-            "Review command polling and UDP coverage when the optional UDP capture was collected.",
-            "Review the FastHashVerify enabled, work, and sleep values. These settings "
-            "matter when large patch or software update files are common.",
-            "Record one observation from the Mini Report that you would investigate next.",
-        ]
-    )
-    g.para(
-        f"The {SITE} site also holds four client setting tasks that act on what this "
-        "Mini Report shows. They are not part of this exercise. Use them only when the "
-        "review points to a setting change:"
-    )
-    g.bullets(CLIENT_SETTING_TASKS)
-    g.done(1)
-
-    # Exercise 2 --------------------------------------------------------
-    g.heading2("Exercise 2: Perfmon Infrastructure Analysis")
-    g.para(
-        "In this exercise, you capture Windows performance counters from the BigFix "
-        "role servers in scope and use the Workbench to review processor, memory, "
-        "disk, and network behavior against the platform requirements."
-    )
-    g.label("BigFix collection")
-    g.steps(
-        restart=True,
-        items=[
-            f"In the BigFix console, open the {SITE} site.",
-            "Run BigFix Master Class -- Setup and Run Perfmon Counters (2.0) separately "
-            "against each Windows role server in scope. Include the SQL Server host when "
-            "the instructor has selected it.",
-        ],
-    )
-    g.picture("lg-task-03-setup-perfmon.png", TASK_IMAGE_WIDTH)
-    g.steps(
-        [
-            "Allow the counter set to run for the collection window. The task starts the "
-            "BFPerf counter set and writes a README beside the results.",
-            "When the capture is complete, stop BFPerf with the command in the generated "
-            "README, or use the approved disable procedure for the lab environment.",
-            "Retrieve the .blg file directly from every targeted machine. Keep the files "
-            "separate and identify each server clearly.",
-            "Place one or two .blg files under Perfmon in your data folder.",
-        ]
-    )
-    g.note(
-        "Perfmon logs are expected to be 256 MB or larger. The task does not upload "
-        "them. Copy them by hand."
-    )
-    g.label("Run the Workbench")
-    g.steps(
-        restart=True,
-        items=[
-            "Open the Workbench and set Data Folder, Output Folder, and Run Name as in "
-            "Exercise 1.",
-            "On Modules, click Clear and then tick Perfmon Infrastructure Analysis only.",
-            "Click Details. Confirm Capture 1. The CPUs and Disks values are detected from "
-            "the capture. Enter RAM in GB and tick Virtual machine when the server is a "
-            "VM. Add Capture 2 when a comparison is part of the exercise.",
-        ],
     )
     g.picture("lg-04-step-2-perfmon-details.png")
+    g.note(
+        "RAM is not in the Perfmon capture. Without it the Memory Health counter "
+        "(PRF-INF-09) is not scored."
+    )
+    g.steps(["Click Next. The Build the Outputs page opens."])
+    g.label("Step 3: Build the Outputs")
+    g.steps(["Check the Run Details. Click Build."])
+    g.picture("lg-05-step-3-build.png")
+    g.steps(["Optional: click View Logs to watch the build."])
+    g.picture("lg-06-step-3-running.png")
     g.steps(
         [
-            "Click Next and click Build. Parsing a large capture can take several minutes.",
-            "When the status is Done, click Open Output. The Perfmon folder holds the Mini "
-            "Report, the Excel workbook, and a _Perfmon_Charts folder with the scorecard "
-            "Infographic and one chart per counter.",
+            "Wait for the Build Status of each module to change from Not started to "
+            "Running to Done.",
         ]
     )
-    g.label("Review the result")
-    g.picture("lg-out-perfmon-mini-report-p1.png", TASK_IMAGE_WIDTH)
+    g.picture("lg-07-step-3-done.png")
+    g.steps(
+        [
+            "Click Open Output. The run folder opens. It holds a folder for each module "
+            "and the run log.",
+        ]
+    )
+    g.picture("lg-08-run-folder.png")
+    g.done(3)
+
+    # Exercise 4 --------------------------------------------------------
+    g.heading2("Exercise 4: Read the Client Performance Outputs")
+    g.para(
+        "In this exercise, you read the Client Performance outputs. Each module writes "
+        "a Mini Report, an Infographic, and an Excel workbook."
+    )
+    g.steps(
+        restart=True,
+        items=["Open the Client_Loop folder."],
+    )
+    g.picture("lg-09-client-loop-folder.png")
+    g.steps(["Open the Mini Report (.docx)."])
+    g.shot(
+        "lg-11-client-mini-report.png",
+        "Page 1 of the Client Performance Mini Report",
+        TASK_IMAGE_WIDTH,
+    )
+    g.steps(
+        [
+            "Find the six review areas from the session in the Mini Report. The numbers "
+            "are for reference only. They are not a priority order.",
+        ]
+    )
+    g.table(
+        ["#", "Area", "Mini Report section", "Excel sheet"],
+        CLIENT_AREAS,
+        [600, 3200, 3400, 2800],
+    )
+    g.steps(
+        [
+            "Open the Excel workbook. Each sheet holds the data behind a finding. Filter "
+            "or pivot it to answer your own questions.",
+        ]
+    )
+    g.label("Discussion")
     g.bullets(
         [
-            "Review the overall infrastructure result and the supporting counter observations.",
-            "Identify one resource pattern that deserves a closer look.",
-            "Compare two captures when a second server or a before and after capture is available.",
+            "Where is the client loop spending its time?",
+            "Which properties show up in the Top 10?",
+            "Are notifications reaching the clients?",
         ]
     )
-    g.done(2)
+    g.done(4)
 
-    # Exercise 3 --------------------------------------------------------
-    g.heading2("Exercise 3: FillDB Performance Analysis (optional)")
+    # Exercise 5 --------------------------------------------------------
+    g.heading2("Exercise 5: Read the Perfmon Outputs")
     g.para(
-        "In this exercise, you collect FillDB performance logging from the root server "
-        "and use the Workbench to review how quickly client reports are processed."
+        "In this exercise, you read the Perfmon outputs. Each counter is scored "
+        "against its target in the NFR guide."
     )
-    g.label("BigFix collection")
+    g.steps(
+        restart=True,
+        items=["Open the Perfmon folder."],
+    )
+    g.shot("lg-10-perfmon-folder.png", "The Perfmon folder in the run folder")
+    g.steps(["Open the Mini Report (.docx)."])
+    g.shot(
+        "lg-12-perfmon-mini-report.png",
+        "Page 1 of the Perfmon Mini Report",
+        TASK_IMAGE_WIDTH,
+    )
+    g.steps(["Find each counter in the Mini Report. Compare it with its target."])
+    g.table(
+        ["ID", "Mini Report section", "Counter", "NFR target"],
+        PERFMON_COUNTERS,
+        [1400, 2200, 3300, 3100],
+    )
+    g.link(f"The targets come from {NFR_TITLE}. Find it here: ", NFR_URL, NFR_URL)
+    g.steps(
+        [
+            "Open the Excel workbook. Raw Data holds every sample. Findings holds the "
+            "result for each counter.",
+        ]
+    )
+    g.label("Discussion")
+    g.bullets(
+        [
+            "Which server resources stand out?",
+            "How does the capture window affect what you see?",
+            "What would you change first?",
+            "How would you measure it?",
+        ]
+    )
+    g.done(5)
+
+    g.heading2("Take Home")
+    g.para(
+        "Rerun the Workbench on your own schedule. Run it now as a Day 0 baseline. "
+        "Rerun it after each change and compare the results."
+    )
+
+    # Appendix ------------------------------------------------------------
+    g.heading1("Appendix: FillDB Performance (Bonus Round)", new_page=True)
+    g.para(
+        "FillDB is not part of the live lab. Run it if time permits, or after the "
+        "session. The sample data includes a FillDB analyzer CSV, so you can run the "
+        "module without collecting logs. "
+        "FillDB Performance Analysis reviews how quickly the root server processes "
+        "client reports."
+    )
+    g.label("Collect the logs")
     g.steps(
         restart=True,
         items=[
-            f"In the BigFix console, open the {SITE} site.",
-            "Run BigFix Master Class -- Enable FillDB Performance Logging (2.0) against "
-            "the root server. Use the default automatic disable window unless the "
-            "instructor specifies another duration.",
+            f"In the {SITE} site select {TASK_FILLDB_ENABLE}.",
+            "Enter the console user name in API Username. Enter the console password "
+            "in API Password and Confirm Password. Keep the default duration.",
+            "Click Take Action. On the Target tab select the BigFix Server. Click OK.",
         ],
     )
     g.picture("lg-task-04-enable-filldb-logging.png", TASK_IMAGE_WIDTH)
     g.steps(
         [
-            "After the collection window, wait for logging to be disabled and retrieve "
-            "FillDBPerf.log plus any rollover files from the root server.",
-            "If automatic disabling was not selected, run the companion warning task or "
-            "the approved disable procedure before you retrieve the log set.",
-            "Place the logs, or the instructor-provided analyzer CSV, under "
-            "FillDB_Performance in your data folder.",
+            "Logging stops on its own after the duration. If you selected Do Not "
+            f"Automatically Disable Logging, run {TASK_FILLDB_DISABLE} to stop it.",
+            "Copy FillDBPerf.log and its rollover files from the root server. Put them "
+            "in a FillDB_Performance folder under your data folder.",
         ]
     )
-    g.important(
-        "The log set must be complete and no longer active before analysis. Keep the "
-        "rollover files together with FillDBPerf.log."
-    )
-    g.label("Run the Workbench")
+    g.label("Run the module")
     g.steps(
-        restart=True,
-        items=[
-            "Open the Workbench and set Data Folder, Output Folder, and Run Name as in "
-            "Exercise 1.",
-            "On Modules, click Clear and then tick FillDB Performance Analysis only.",
-            "Click Details and confirm the log. The collection dates are optional. The "
-            "log span is used when they are left blank.",
-        ],
+        [
+            "Run the Workbench. On step 2 click Clear and select FillDB Performance "
+            "Analysis. Click Details to check the log. The collection dates are "
+            "optional.",
+        ]
     )
     g.picture("lg-04-step-2-filldb-details.png")
     g.steps(
         [
             "Click Next and click Build.",
-            "When the status is Done, click Open Output and open the Mini Report and the "
-            "Infographic in the FillDB_Performance folder.",
+            "Open the FillDB_Performance folder in the run folder. Open the Mini Report.",
         ]
     )
-    g.label("Review the result")
-    g.picture("lg-out-filldb-mini-report-p1.png", TASK_IMAGE_WIDTH)
-    g.bullets(
-        [
-            "Review the processing time summary and any objects that stand out.",
-            "Connect the result to the collection window and the deployment activity at that time.",
-        ]
+    g.shot(
+        "lg-13-filldb-mini-report.png",
+        "Page 1 of the FillDB Mini Report",
+        TASK_IMAGE_WIDTH,
     )
-    g.done(3)
-
-    # Reading the Mini Report --------------------------------------------
-    g.heading2("Reading the Mini Report")
     g.para(
-        "Each Mini Report is the narrative result for one module. Start with the score "
-        "at the top, then use the supporting tables and charts to understand the "
-        "evidence behind it."
+        "The module runs MXFillDBPerf against the logs. The NFR guide (PRF-BIG-30) "
+        "expects a health check of Good or Great for these values:"
     )
     g.bullets(
         [
-            "Confirm the report identifies the intended run and data window.",
-            "Read the score or status together with the supporting measurements.",
-            "Use the detailed tables to trace an observation back to the collected data.",
-            "Write down one evidence-based next question. The lab is about interpreting "
-            "operational data, not about making an untested configuration change.",
+            "Parallel DB Update (Short Batch)",
+            "Parallel DB Update",
+            "Batch Rate",
+            "Parallel Parsing",
         ]
     )
-    g.picture("lg-out-loop-mini-report-p2.png", TASK_IMAGE_WIDTH)
-    g.para(
-        "The Infographic is the one page visual of the same result. The Excel "
-        "workbook, where a module writes one, carries the source data and the per "
-        "item detail."
-    )
-    g.picture("lg-out-loop-infographic.png", TASK_IMAGE_WIDTH)
-
-    g.heading2("Completion checklist")
-    g.table(
-        ["Exercise", "Collection complete", "Data retrieved", "Mini Report reviewed"],
+    g.para("The analyzer CSV holds the data. Open it in Excel to filter or pivot it.")
+    g.label("Discussion")
+    g.bullets(
         [
-            ["Client Performance", "[ ]", "[ ]", "[ ]"],
-            ["Perfmon", "[ ]", "[ ]", "[ ]"],
-            ["FillDB (optional)", "[ ]", "[ ]", "[ ]"],
-        ],
-        [3000, 2300, 2300, 2400],
+            "How quickly are client reports being processed?",
+            "Does the rate change over the capture window?",
+        ]
     )
-
-    g.heading2("Troubleshooting")
-    g.table(
-        ["Symptom", "What to check"],
-        [
-            [
-                "The Workbench shows Needs A File",
-                "Confirm the folder layout and the file names. Open Details and choose the "
-                "file with Change.",
-            ],
-            [
-                "The Workbench shows Needs Review",
-                "The input was found but a required value is blank. Open Details and fill "
-                "in the dates or the RAM value.",
-            ],
-            [
-                "Client Performance data is missing",
-                "Confirm the Basic analysis is active and reporting, then confirm the "
-                "collection task completed on the root server.",
-            ],
-            [
-                "Perfmon data is missing",
-                "Confirm the .blg was copied from the target machine and is under the "
-                "Perfmon folder. The counter set must be stopped first.",
-            ],
-            [
-                "The build reports a failed module",
-                "Open View Logs. The log names the input and the reason.",
-            ],
-            [
-                "No Infographic was written",
-                "The Workbench needs Edge or Chrome installed to render it. The Mini "
-                "Report is still produced.",
-            ],
-            [
-                "The app does not start after a Python upgrade",
-                "Delete the .venv folder and run the launcher again.",
-            ],
-        ],
-        [3400, 6600],
-    )
-    g.para("End of lab guide")
 
 
 # ---------------------------------------------------------------------------

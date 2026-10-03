@@ -55,6 +55,13 @@ CAPTURES = (
         "lg-task-04-enable-filldb-logging.png",
         1200,
     ),
+    (
+        TASK_ROOT
+        / "Individual Tasks"
+        / "BigFix Master Class -- Collect Deployment Information (2.0).bes",
+        "lg-task-05-collect-deployment-info.png",
+        1200,
+    ),
 )
 
 

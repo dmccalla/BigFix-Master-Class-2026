@@ -3424,7 +3424,7 @@ def generate_excel(
             pd.DataFrame(
                 agent_multicore_summary.settings_rows,
                 columns=[
-                    "Scale Work Time With CPU Cores",
+                    "Multicore CPU Scaling Enabled",
                     "Devices / Total",
                 ],
             ).to_excel(writer, sheet_name="Client Multicore Settings", index=False)
@@ -4077,7 +4077,7 @@ def generate_word(
         build_word_table(
             document,
             [
-                "Scale Work Time With CPU Cores",
+                "Multicore CPU Scaling Enabled",
                 "Devices / Total",
             ],
             agent_multicore_summary.settings_rows,

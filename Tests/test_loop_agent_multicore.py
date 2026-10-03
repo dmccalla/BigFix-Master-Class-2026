@@ -103,7 +103,7 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     assert "Client Multicore Settings" in wb.sheetnames
     settings = list(wb["Client Multicore Settings"].values)
     assert settings[0] == (
-        "Scale Work Time With CPU Cores",
+        "Multicore CPU Scaling Enabled",
         "Devices / Total",
     )
     assert settings[1] == ("On", "2 / 3")
@@ -123,7 +123,7 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     multicore_table = next(
         table
         for table in doc.tables
-        if table.rows[0].cells[0].text == "Scale Work Time With CPU Cores"
+        if table.rows[0].cells[0].text == "Multicore CPU Scaling Enabled"
     )
     assert (
         multicore_table.rows[1].cells[1].paragraphs[0].alignment

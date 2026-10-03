@@ -2191,7 +2191,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         right.grid(row=0, column=3, sticky="e", padx=(0, 30))
         ctk.CTkLabel(
             right,
-            text=app_version.display_version(),
+            text="2.0",
             text_color="#FFFFFF",
             font=(UI_FONT, 13),
         ).grid(row=0, column=0)

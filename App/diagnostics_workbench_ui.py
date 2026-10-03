@@ -2285,6 +2285,13 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             font=(UI_FONT, 12),
             anchor="w",
         ).grid(row=0, column=0, sticky="w", padx=(30, 0), pady=8)
+        ctk.CTkLabel(
+            rail,
+            text="Press Ctrl+Shift+D to show diagnostics.",
+            text_color=MUTED,
+            font=(UI_FONT, 11),
+            anchor="center",
+        ).grid(row=0, column=1, sticky="ew", padx=16, pady=8)
         self._footer_run_label = ctk.CTkLabel(
             rail, text="", text_color=LINK_BLUE, font=(UI_FONT, 12), cursor="hand2"
         )

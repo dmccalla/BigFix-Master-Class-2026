@@ -48,20 +48,22 @@ corresponding BigFix collection tasks first.
 | `Lib/` | Shared code: input handling, analysis helpers, chart and workbook themes |
 | `Assets/` | The Infographic chart template and the app icon |
 | `Fonts/` | Bundled open-source fonts (Inter, Roboto) |
-| `Build/` | The release and template builders, including `build_lab_guide.py` for the Student Lab Guide |
-| `Templates/` | The Word style template the Mini Reports take their styles from, and the lab guide template |
+| `Build/` | The release and template builders |
+| `Templates/` | The Word style template the Mini Reports take their styles from |
 | `SampleData/` | The fictional sample capture |
-| `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1`. The lab guide screenshot capture scripts |
+| `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1` |
 | `Launchers/` | The Windows launcher |
-| `Docs/` | Guides for attendees and the live lab collection workflow. `Lab_Guide_Assets/` holds the lab guide screenshots |
+| `Docs/` | Guides for attendees, the Student Lab Guide, and the live lab collection workflow |
 
 ## Class Materials
 
 - [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
 - [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
   and the files each module reads.
-- [Student Lab Guide](Docs/Master_Class_Lab_Guide.docx) contains the three
-  standalone exercises for the Master Class.
+- [Student Lab Guide](Docs/MC_Denver_2026_Performance_Configuration_Analysis_Lab_Guide_1032026.docx)
+  walks through the 20 minute lab: collect the data in the BigFix console, run
+  the Workbench, and read the Client Performance and Perfmon outputs. FillDB is
+  a bonus round in the appendix.
 
 ## License
 

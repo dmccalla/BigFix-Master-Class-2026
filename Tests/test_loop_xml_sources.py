@@ -117,8 +117,8 @@ def test_shipped_loop_samples_match_current_agent_performance_contract() -> None
 
     multicore = get_loop_health.analyze_agent_multicore(xml_rows)
     assert multicore is not None
-    assert ["On", "4", "2"] in multicore.settings_rows
-    assert ["Not Applicable", "4", "6"] in multicore.settings_rows
+    assert ["On", "2 / 12"] in multicore.settings_rows
+    assert ["Not Applicable", "6 / 12"] in multicore.settings_rows
 
 
 def test_load_loop_input_from_capture_accepts_comma_in_computer_name(

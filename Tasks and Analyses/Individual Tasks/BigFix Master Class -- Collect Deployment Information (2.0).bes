@@ -191,7 +191,7 @@ hcSync();</script> </DIV>]]></Description>
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Wed, 30 Sep 2026 01:33:31 +0000</Value>
+			<Value>Sat, 03 Oct 2026 00:07:34 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">
@@ -975,6 +975,14 @@ waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1
 waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Custom%20Properties%3A%20%22%20%26%20number%20of%20bes%20properties%20whose%20%28custom%20flag%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
 waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
 waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Activated%20Analyses%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20AND%20exists%20activation%20of%20it%20AND%20exists%20active%20flags%20of%20activations%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Master%20Operator%20Fixlets%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28fixlet%20flag%20of%20it%20and%20master%20flag%20of%20issuer%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Master%20Operator%20Tasks%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28task%20flag%20of%20it%20and%20master%20flag%20of%20issuer%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Total%20Number%20of%20Master%20Operator%20Fixlets%20and%20Tasks%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28%28fixlet%20flag%20of%20it%20OR%20task%20flag%20of%20it%29%20AND%20master%20flag%20of%20issuer%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
+waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
+waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Total%20Number%20of%20Master%20Operator%20Analyses%3A%20%22%20%26%20number%20of%20bes%20fixlets%20whose%20%28analysis%20flag%20of%20it%20AND%20master%20flag%20of%20issuer%20of%20it%29%20as%20string >> {parameter "contentInfoFileXML"}
 waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
 waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" GET query --relevance=%22Number%20of%20Automatic%20Computer%20Groups%3A%20%22%20%26%20number%20of%20bes%20computer%20groups%20whose%20(Automatic%20flag%20of%20it)%20as%20string >> {parameter "contentInfoFileXML"}
 waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1

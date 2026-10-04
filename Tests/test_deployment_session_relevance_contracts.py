@@ -62,6 +62,22 @@ EXPECTED = {
         "contentInfoFileXML",
         '"Maximum Number of Components per Baseline: " & ((if (exists bes fixlets whose (baseline flag of it)) then (maximum of (number of components of component groups of it) of bes fixlets whose (baseline flag of it)) else 0) as string)',
     ),
+    "Number of Master Operator Fixlets": (
+        "contentInfoFileXML",
+        '"Number of Master Operator Fixlets: " & number of bes fixlets whose (fixlet flag of it and master flag of issuer of it) as string',
+    ),
+    "Number of Master Operator Tasks": (
+        "contentInfoFileXML",
+        '"Number of Master Operator Tasks: " & number of bes fixlets whose (task flag of it and master flag of issuer of it) as string',
+    ),
+    "Total Number of Master Operator Fixlets and Tasks": (
+        "contentInfoFileXML",
+        '"Total Number of Master Operator Fixlets and Tasks: " & number of bes fixlets whose ((fixlet flag of it OR task flag of it) AND master flag of issuer of it) as string',
+    ),
+    "Total Number of Master Operator Analyses": (
+        "contentInfoFileXML",
+        '"Total Number of Master Operator Analyses: " & number of bes fixlets whose (analysis flag of it AND master flag of issuer of it) as string',
+    ),
     "external_sites": (
         "contentInfoFileXML",
         '(display name of it,version of it as string,number of subscribed computers of it as string,(if exists modification times of fixlets whose (exist modification time of it) of it then (maximum of modification times of fixlets whose (exist modification time of it) of it) as string else "Not Reported"),url of it) of unique values of  sites of bes fixlets whose (NOT (Custom Flag of it) AND (NOT (custom site flag of it)) AND (NOT (operator site flag of it)))',
@@ -95,6 +111,10 @@ def _selected(path: Path, key: str) -> list[tuple[str, str]]:
     marker = {
         "external_sites": "(display name of it,version of it as string,",
         "property_heading": "Custom BES Properties with frequent evaluations",
+        "Number of Master Operator Fixlets": '"Number of Master Operator Fixlets: "',
+        "Number of Master Operator Tasks": '"Number of Master Operator Tasks: "',
+        "Total Number of Master Operator Fixlets and Tasks": '"Total Number of Master Operator Fixlets and Tasks: "',
+        "Total Number of Master Operator Analyses": '"Total Number of Master Operator Analyses: "',
     }.get(key, key)
     return [
         (query, encoded)

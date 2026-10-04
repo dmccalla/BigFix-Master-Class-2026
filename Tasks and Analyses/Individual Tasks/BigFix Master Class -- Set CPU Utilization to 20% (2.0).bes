@@ -25,7 +25,9 @@
 <DIV class=hc-eyebrow>&nbsp;</DIV>
 <DIV class=hc-h1>Set CPU Utilization to 20%</DIV>
 <DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>
-<DIV class=hc-lead><FONT color=#000000>Sets the BigFix client to use up to 20 percent of one CPU core so it works faster. WorkIdle becomes 100 and SleepIdle becomes 400.</FONT></DIV>
+<DIV class=hc-lead><FONT color=#000000>Sets the BigFix client to use up to 20 percent of one CPU core so it works faster. WorkIdle becomes 100 and SleepIdle becomes 400. This is an older method of increasing CPU utilization and is included for those already familiar with it.</FONT></DIV>
+<DIV class=hc-lead>
+<DIV class=hc-lead><FONT color=#000000><FONT color=#000000 size=2><STRONG>BigFix 11.0.7 added a setting for CPU use on multi-core systems (including non-Windows). See the "BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0)" fixlet.</STRONG></FONT></DIV></FONT></DIV>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -37,7 +39,7 @@
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B></B><SPAN><STRONG>Only relevant where needed</STRONG></SPAN><SPAN>Relevance is TRUE when settings are not correct.</SPAN></DIV></TD></TR>
 <TR>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 0px; PADDING-RIGHT: 12px">
-<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B></B><SPAN><STRONG>11.0.7 has better options</STRONG></SPAN><SPAN>A setting to take better advantage of CPU time&nbsp;on multi-core systems was introduced. BUT you have to be on 11.0.7 to use it cross platform.</SPAN></DIV></TD>
+<DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B></B><SPAN><STRONG>11.0.7 has&nbsp;new options</STRONG></SPAN><SPAN>A setting to take better advantage of CPU time&nbsp;on multi-core systems was introduced. BUT you have to be on 11.0.7 to use it cross platform.</SPAN></DIV></TD>
 <TD style="WIDTH: 50%; VERTICAL-ALIGN: top; PADDING-BOTTOM: 4px; PADDING-TOP: 3px; PADDING-LEFT: 12px; PADDING-RIGHT: 0px">
 <DIV class=hc-bcell style="BORDER-LEFT: #17707f 3px solid"><B>Per core figures shift the math</B><SPAN>Ex. On four cores the total impact is about 5 percent. On eight cores it is about 2.5 percent.&nbsp; Either way it still an improvement over the default.</SPAN></DIV></TD></TR></TBODY></TABLE></DIV>
 <DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
@@ -80,7 +82,7 @@
 		</MIMEField>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Wed, 30 Sep 2026 14:55:27 +0000</Value>
+			<Value>Thu, 01 Oct 2026 23:48:09 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<Delay>PT1S</Delay>

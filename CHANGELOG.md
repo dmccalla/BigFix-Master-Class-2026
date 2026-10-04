@@ -13,7 +13,7 @@ the project release process for the steps to cut a release.
 
 ### Added
 
-- Client Performance Loop Analysis, Perfmon Infrastructure Analysis and
+- Client Performance Analysis, Perfmon Infrastructure Analysis and
   FillDB Performance Analysis modules, each producing its Mini Report,
   Infographic and Excel outputs under one run folder.
 - Desktop app with three steps: Folders, Modules and Build. A data folder scan

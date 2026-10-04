@@ -4,8 +4,11 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
-    # Same seven-day cooldown the lockfile enforces through [tool.uv]
-    # exclude-newer. Dependabot must not propose a version younger than that.
+    # Version updates cannot safely resolve against uv's fixed seven-day
+    # cutoff. Refresh them through Build/refresh-lockfile.ps1 instead.
+    # Dependabot security updates remain enabled.
+    open-pull-requests-limit: 0
+    # The reviewed lockfile refresh enforces the same seven-day cooldown
+    # through [tool.uv].exclude-newer.
     cooldown:
       default-days: 7

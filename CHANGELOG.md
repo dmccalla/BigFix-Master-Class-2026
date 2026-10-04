@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+## [2.0]
+
 ### Added
 
 - Client Performance Analysis, Perfmon Infrastructure Analysis and

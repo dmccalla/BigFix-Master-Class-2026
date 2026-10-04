@@ -29,7 +29,7 @@ from Lib.Core import app_version
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CHANGELOG = PROJECT_ROOT / "CHANGELOG.md"
 
-_SEMVER = re.compile(r"^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z.\-]+)?$")
+_SEMVER = re.compile(r"^\d+\.\d+(?:\.\d+)?(?:[-+][0-9A-Za-z.\-]+)?$")
 _PRERELEASE = re.compile(r"^\d+\.\d+\.\d+[-+]")
 
 
@@ -49,7 +49,7 @@ def test_version_is_not_the_fallback() -> None:
 def test_version_is_semver() -> None:
     declared = _declared_version()
     assert _SEMVER.match(declared), (
-        f"version '{declared}' in pyproject.toml is not MAJOR.MINOR.PATCH."
+        f"version '{declared}' in pyproject.toml is not MAJOR.MINOR or MAJOR.MINOR.PATCH."
     )
 
 

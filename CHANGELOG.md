@@ -1,57 +1,37 @@
 # Changelog
 
 All notable changes to the Master Class Diagnostics Workbench are recorded
-here. The application, the collection tasks, the sample data and the guide
-ship together and carry one version number.
+here. The application, collection tasks, and sample data carry one version
+number. Class guides are delivered separately.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
-`Docs/Release_Process.md` for the steps to cut a release.
+Every released version is tagged in git as `vMAJOR.MINOR.PATCH`.
 
 ## [Unreleased]
 
-### Added
+## [2.0.0] - 2026-10-04
 
-- Client Performance Loop Analysis, Perfmon Infrastructure Analysis and
-  FillDB Performance Analysis modules, each producing its Mini Report,
-  Infographic and Excel outputs under one run folder.
+### Initial distribution
+
+- Initial distribution of the Master Class Diagnostics Workbench for the
+  classroom and practice lab.
+
+### Included analysis modules
+
+- Client Performance Analysis, Perfmon Infrastructure Analysis, and FillDB
+  Performance Analysis, each producing Mini Report, Infographic, and Excel
+  outputs under one run folder as applicable.
 - Desktop app with three steps: Folders, Modules and Build. A data folder scan
   fills the module inputs, every input can be chosen by hand, and the run
   streams the engine log with per-module progress.
 - Sample data set "BigFix Master Class 2026" so the Workbench runs without a
   deployment.
 - Windows launcher that creates a private Python environment on first run.
-- Code sweep, packaging script, SBOM and checksum for releases.
-- Getting Started and Data Collection guides.
-- Continuous integration that lints and runs the suite on every push.
+- Master Class collection tasks and analyses, plus a fictional sample data set
+  that lets attendees run the application before collecting deployment data.
 
-### Changed
+### Release assurance
 
-- Label the four classroom client-setting examples as 2.0, matching the other
-  collection content. These examples remain Master Class-only; action logic
-  is unchanged.
-
-### Fixed
-
-- Explain the FillDB `Not Assessed` state when no captured object has a
-  recognized health result, so the Mini Report makes clear that there was not
-  enough data to calculate a health score.
-- Enable Open Output after a completed build when the engine reports its
-  human-readable run-folder summary, including an already-open Build Logs window.
-- Keep FillDB Mini Report header and body rows aligned by centering both
-  tables consistently. Preserve the existing table widths and shared style.
-- Correct ten Deployment Information queries and 110 collection section-header
-  queries. Add regression coverage confirming the repaired responses preserve
-  Agent Performance context and loop workbook/Word output content.
-- Include the `xlrd` runtime reader for legacy `.xls` loop inputs.
-- Stage release packages in a short, unique temporary folder to avoid Windows
-  path-length failures while preserving the archive layout and guarded cleanup.
-- Correct collection-task descriptions: `xcopy` returns 0 for successful copies
-  and 1 when no matching files are found. Action scripts are unchanged.
-- Fail diagnostics runs when a generator fails or a required output is missing
-  or empty, including both Perfmon captures and the Mini Report, while
-  preserving the run log and avoiding false success messages.
-- Retry an interrupted chart browser once. Check Windows chart and sidecar path
-  lengths before rendering, and preserve counter matching when shortening
-  Perfmon filenames. Unsupported paths request a shorter output folder or name.
+- A complete test suite, package manifest, SHA-256 checksum, CycloneDX SBOM,
+  third-party notices, and continuous-integration checks.

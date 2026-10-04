@@ -125,6 +125,7 @@ def package_fixture():
         (root / "Build").mkdir()
         files = [
             "README.md",
+            "RELEASE_NOTES.md",
             "CHANGELOG.md",
             "LICENSE",
             "NOTICE",
@@ -135,6 +136,7 @@ def package_fixture():
             "Utilities/MXFillDBPerf.exe",
             "Templates/Diagnostics_Style_Template.docx",
             "pyproject.toml",
+            "Docs/Getting_Started.md",
             "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- "
             "POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
         ]
@@ -144,7 +146,10 @@ def package_fixture():
             path.write_bytes(b"fixture\n")
         (root / "pyproject.toml").write_text('[project]\nversion = "1.0.0-dev"\n')
         (root / "files.json").write_text(json.dumps(files))
-        yield root, files
+        included_files = [
+            relative for relative in files if not relative.startswith("Docs/")
+        ]
+        yield root, files, included_files
 
 
 def test_windows_powershell_uses_native_modules(tmp_path, monkeypatch):
@@ -169,7 +174,7 @@ def test_windows_powershell_uses_native_modules(tmp_path, monkeypatch):
 
 @pytest.mark.parametrize("keep", [False, True])
 def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
-    root, files = package_fixture
+    root, files, included_files = package_fixture
     output = "output-" + "x" * 70
     legacy = root / output / PACKAGE / "keep.txt"
     legacy.parent.mkdir(parents=True)
@@ -204,13 +209,15 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
                 if not entry.is_dir()
             }
             assert all(name.startswith(f"{PACKAGE}/") for name in zipped.namelist())
-        assert set(contents) == set(files) | {
+        assert set(contents) == set(included_files) | {
             "START_HERE.txt",
             "sbom.cyclonedx.json",
             "THIRD_PARTY_NOTICES.md",
             "release-manifest.json",
         }
-        for relative in files:
+        assert "Docs/Getting_Started.md" not in contents
+        assert b"Docs\\" not in contents["START_HERE.txt"]
+        for relative in included_files:
             expected = (root / relative).read_bytes()
             if relative.endswith(".cmd"):
                 expected = expected.replace(b"\n", b"\r\n")
@@ -236,7 +243,7 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
 
 
 def test_failed_build_cleans_owned_workspace(package_fixture):
-    root, _ = package_fixture
+    root, _, _ = package_fixture
     result = _powershell(
         BUILD_FIXTURE,
         FIXTURE_ROOT=str(root),
@@ -251,7 +258,7 @@ def test_failed_build_cleans_owned_workspace(package_fixture):
 
 
 def test_validate_only_does_not_stage_or_call_python(package_fixture):
-    root, _ = package_fixture
+    root, _, _ = package_fixture
     result = _powershell(
         BUILD_FIXTURE,
         FIXTURE_ROOT=str(root),
@@ -264,7 +271,7 @@ def test_validate_only_does_not_stage_or_call_python(package_fixture):
 
 
 def test_long_temp_path_fails_before_staging_or_python(package_fixture):
-    root, _ = package_fixture
+    root, _, _ = package_fixture
     temporary = root / ("long-temp-" + "x" * 50)
     temporary.mkdir()
     result = _powershell(
@@ -282,7 +289,7 @@ def test_long_temp_path_fails_before_staging_or_python(package_fixture):
 
 @pytest.mark.parametrize("suffix", [".zip", ".zip.sha256"])
 def test_output_directory_is_not_recursively_replaced(package_fixture, suffix):
-    root, _ = package_fixture
+    root, _, _ = package_fixture
     sentinel = root / "output" / f"{PACKAGE}{suffix}" / "keep.txt"
     sentinel.parent.mkdir(parents=True)
     sentinel.write_text("keep")

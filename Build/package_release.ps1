@@ -68,10 +68,10 @@ function Test-IncludedTrackedFile {
     param([string]$RelativePath)
 
     $path = $RelativePath.Replace("\", "/")
-    $rootFiles = @("README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "AUTHORS.md", "SECURITY.md", "pyproject.toml", "requirements.txt")
+    $rootFiles = @("README.md", "RELEASE_NOTES.md", "CHANGELOG.md", "LICENSE", "NOTICE", "AUTHORS.md", "SECURITY.md", "pyproject.toml", "requirements.txt")
     if ($rootFiles -contains $path) { return $true }
 
-    $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/", "Docs/")
+    $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/")
     if (-not ($prefixes | Where-Object { $path.StartsWith($_) })) { return $false }
     if ($path -match '(^|/)sitecustomize\.py$') { return $true }
     if ($path -match '(^|/)__pycache__/') { return $false }
@@ -115,7 +115,7 @@ function Remove-PackageDirectory {
 
 $version = Get-DeclaredVersion
 if ($version -match '[-+]' -and -not $ValidateOnly -and -not $AllowDevVersion) {
-    throw "Refusing to package development version '$version'. Cut the release first (see Docs/Release_Process.md)."
+    throw "Refusing to package development version '$version'. Update pyproject.toml and CHANGELOG.md before cutting a release."
 }
 
 $status = & git -C $repoRoot status --porcelain
@@ -128,6 +128,7 @@ $includedFiles = @($trackedFiles | Where-Object { Test-IncludedTrackedFile $_ })
 
 $required = @(
     "README.md",
+    "RELEASE_NOTES.md",
     "CHANGELOG.md",
     "LICENSE",
     "NOTICE",
@@ -230,8 +231,9 @@ $productName $version
    a private Python environment for the tool. Python 3.12 or newer is required.
 2. On the Folders step, choose the sample data at SampleData\BigFix Master Class 2026
    to try the Workbench without a deployment, or your own collected data.
-3. Read Docs\Getting_Started.md before class. Docs\Data_Collection.md describes
-   the files each module needs.
+3. Read RELEASE_NOTES.md, then follow the class instructions and data
+   collection steps supplied separately. Each module shows its required inputs
+   in the Workbench.
 
 Release notes are in CHANGELOG.md. The software bill of materials is
 sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.

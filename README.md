@@ -2,6 +2,10 @@
 
 Automated performance and configuration analysis for BigFix.
 
+This package is the initial distribution of the Master Class Diagnostics
+Workbench. See [RELEASE_NOTES.md](RELEASE_NOTES.md) for the included modules,
+system requirements, and release integrity artifacts.
+
 The Workbench takes data collected from a BigFix deployment, runs the three
 Master Class analysis modules against it, and writes each module's Mini Report,
 Infographic and Excel workbook into one run folder.
@@ -28,15 +32,14 @@ end to end before any data is collected.
 
 The Workbench installs its own packages into a private `.venv` folder next
 to the code. Your Python installation is not changed. Every package version
-is pinned and at least seven days old. See Dependency Cooldown in
-[Security](Docs/Security.md).
+is pinned and at least seven days old. The dependency cooldown policy is
+maintained with the project source.
 
 ## Using The Workbench
 
-See [Getting Started](Docs/Getting_Started.md) for the application workflow
-and outputs. [Data Collection](Docs/Data_Collection.md) describes the files
-each module needs, where they come from, and how the live labs run the
-corresponding BigFix collection tasks first.
+Launch `Launchers\Run Diagnostics Workbench.cmd`, then select the requested
+module inputs. The class instructions, collection steps, and lab exercises
+are supplied separately.
 
 ## Layout
 
@@ -48,20 +51,14 @@ corresponding BigFix collection tasks first.
 | `Lib/` | Shared code: input handling, analysis helpers, chart and workbook themes |
 | `Assets/` | The Infographic chart template and the app icon |
 | `Fonts/` | Bundled open-source fonts (Inter, Roboto) |
-| `Build/` | The release and template builders, including `build_lab_guide.py` for the Student Lab Guide |
 | `Templates/` | The Word style template the Mini Reports take their styles from, and the lab guide template |
 | `SampleData/` | The fictional sample capture |
-| `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1`. The lab guide screenshot capture scripts |
+| `Tasks and Analyses/` | BigFix collection content used with the Master Class |
+| `Utilities/` | Helpers used by the collection content: `MXFillDBPerf.exe` and `query_properties.ps1` |
 | `Launchers/` | The Windows launcher |
-| `Docs/` | Guides for attendees and the live lab collection workflow. `Lab_Guide_Assets/` holds the lab guide screenshots |
 
-## Class Materials
-
-- [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
-- [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
-  and the files each module reads.
-- [Student Lab Guide](Docs/Master_Class_Lab_Guide.docx) contains the three
-  standalone exercises for the Master Class.
+The class instructions, collection steps, and lab exercises are delivered
+separately from this application package.
 
 ## License
 

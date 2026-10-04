@@ -753,8 +753,6 @@ def write_content(g: Guide) -> None:
     g.label("Step 3: Build the Outputs")
     g.steps(["Check the Run Details. Click Build."])
     g.picture("lg-05-step-3-build.png")
-    g.steps(["Optional: click View Logs to watch the build."])
-    g.picture("lg-06-step-3-running.png")
     g.steps(
         [
             "Wait for the Build Status of each module to change from Not started to "

@@ -9,7 +9,7 @@
 Three things have to agree for a release to be traceable: the version declared
 in pyproject.toml, a matching section in CHANGELOG.md, and a git tag on the
 commit that shipped. The first two are checked here. The tag is created by hand
-at release time (see Docs/Release_Process.md).
+at release time.
 
 A suffixed version ("1.0.0-dev") is in development, not released. Its notes
 accumulate under [Unreleased] and the suffix comes off when the release is cut,

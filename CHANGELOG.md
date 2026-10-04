@@ -7,7 +7,7 @@ ship together and carry one version number.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
-`Docs/Release_Process.md` for the steps to cut a release.
+the project release process for the steps to cut a release.
 
 ## [Unreleased]
 

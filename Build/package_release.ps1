@@ -115,7 +115,7 @@ function Remove-PackageDirectory {
 
 $version = Get-DeclaredVersion
 if ($version -match '[-+]' -and -not $ValidateOnly -and -not $AllowDevVersion) {
-    throw "Refusing to package development version '$version'. Cut the release first (see Docs/Release_Process.md)."
+    throw "Refusing to package development version '$version'. Cut the release first."
 }
 
 $status = & git -C $repoRoot status --porcelain

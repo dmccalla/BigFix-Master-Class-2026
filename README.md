@@ -22,14 +22,14 @@ end to end before any data is collected.
 - Python 3.12 or newer, installed with "Add Python to PATH".
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
-- Microsoft Word and Excel are the preferred and tested applications for
-  opening the Mini Reports and Excel workbooks. LibreOffice and other
-  compatible applications may work, but they have not been fully vetted.
+- Microsoft Word and Excel are the preferred and most extensively tested
+  applications for opening the Mini Reports and Excel workbooks. LibreOffice
+  has been tested successfully as an alternative, but it has received less
+  compatibility coverage than Word and Excel.
 
 The Workbench installs its own packages into a private `.venv` folder next
 to the code. Your Python installation is not changed. Every package version
-is pinned and at least seven days old. See Dependency Cooldown in
-[Security](Docs/Security.md).
+is pinned and at least seven days old.
 
 ## Using The Workbench
 

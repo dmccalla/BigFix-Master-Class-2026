@@ -40,3 +40,7 @@ Thumbs.db
 Temp/
 Output/
 Dist/
+
+# Lab sample data. Its Perfmon capture is over GitHub's 100 MB file limit, so it
+# ships in the release zip and as Sample-Data-Results.zip on the release.
+SampleData/BigFix Master Class 2026/Results/

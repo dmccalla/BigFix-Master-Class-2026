@@ -15,6 +15,12 @@ Infographic and Excel workbook into one run folder.
 A fictional sample capture ships under `SampleData`, so the Workbench runs
 end to end before any data is collected.
 
+The lab sample data the Student Lab Guide uses,
+`SampleData\BigFix Master Class 2026\Results`, is too large for the
+repository. It ships inside the release zip and as `Sample-Data-Results.zip`
+on the repository's v2.0 release. To add it to a clone, extract
+`Sample-Data-Results.zip` into the Workbench folder.
+
 ## Requirements
 
 - Windows 10 or 11. PerfMon analysis uses `relog.exe`, which ships with

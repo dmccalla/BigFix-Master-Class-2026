@@ -23,8 +23,10 @@ on the repository's v2.0 release. To add it to a clone, extract
 
 ## Requirements
 
-- Windows 10 or 11. PerfMon analysis uses `relog.exe`, which ships with
-  Windows.
+- Windows 11. PerfMon analysis uses `relog.exe`, which ships with Windows.
+  FillDB analysis of raw FillDB performance logs runs `MXFillDBPerf.exe` from
+  the BigFix Performance Toolkit, which ships in `Utilities`. An analyzer CSV
+  needs no extra tool.
 - Python 3.12 or newer, installed with "Add Python to PATH".
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.

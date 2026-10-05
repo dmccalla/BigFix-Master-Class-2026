@@ -6,7 +6,7 @@ deployment is needed to follow it.
 
 ## Before You Start
 
-- Windows 10 or 11.
+- Windows 11.
 - Python 3.12 or newer. Install it from python.org and tick **Add Python to
   PATH** during setup.
 - Microsoft Edge or Google Chrome. Edge is already on Windows.

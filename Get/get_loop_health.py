@@ -3793,7 +3793,7 @@ def generate_word(
         stamp_docx_document(document, stamp)
 
     document.add_paragraph(
-        f"This report covers {metrics.score_total_devices:,} BigFix Clients from "
+        f"This analysis covers {metrics.score_total_devices:,} BigFix Clients from "
         f"{metrics.report_start_text} to {metrics.report_end_text}. It was generated "
         f"on {metrics.generated_at_text}. The Client Performance workbook (Excel file) "
         "holds the per-device data behind every table."

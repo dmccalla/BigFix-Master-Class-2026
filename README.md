@@ -57,20 +57,25 @@ corresponding BigFix collection tasks first.
 | `Fonts/` | Bundled open-source fonts (Inter, Roboto) |
 | `Build/` | The release and template builders |
 | `Templates/` | The Word style template the Mini Reports take their styles from |
-| `SampleData/` | The fictional sample capture |
+| `SampleData/` | Small FillDB and Perfmon samples, and the lab sample data in the release |
 | `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1` |
 | `Launchers/` | The Windows launcher |
-| `Docs/` | Guides for attendees, the Student Lab Guide, and the live lab collection workflow |
+| `Docs/` | Guides for attendees and the live lab collection workflow |
 
 ## Class Materials
 
 - [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
 - [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
   and the files each module reads.
-- [Student Lab Guide](Docs/MC_Denver_2026_Performance_Configuration_Analysis_Lab_Guide_1032026.docx)
-  walks through the 20 minute lab: collect the data in the BigFix console, run
-  the Workbench, and read the Client Performance and Perfmon outputs. FillDB is
-  a bonus round in the appendix.
+
+Attendees take home a package with three parts: the Workbench with its lab
+sample data, the class presentation, and the Student Lab Guide, "Session 3 -
+Duncan McCalla - Automated Performance and Configuration Analysis FINAL.docx".
+The guide walks through the 20 minute lab: collect the data in the BigFix
+console, run the Workbench, and read the Client Performance and Perfmon
+outputs. FillDB is a bonus round in the appendix. The guide and the
+presentation are provided separately from the Workbench because they are
+updated between classes.
 
 ## License
 

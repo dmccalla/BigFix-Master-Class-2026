@@ -56,7 +56,7 @@ choose.
 
 The Client Performance Analysis needs the **Report Start Date** and
 **Report End Date**. They bound the period the report describes. For the
-sample data, any range that includes 14 June 2026 works.
+sample data, use 5 October 2026 to 6 October 2026.
 
 The Perfmon Infrastructure Analysis reads the processor and disk counts from
 the capture. Physical memory cannot be read from a capture, so enter it when

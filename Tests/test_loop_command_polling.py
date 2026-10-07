@@ -186,16 +186,15 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
 
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Client Notification Context" in headings
-    assert "Command Polling Review" in headings
+    assert "Notification and Polling" in headings
+    assert "Command Polling" in headings
     assert any(
         [cell.text for cell in table.rows[0].cells]
         == ["Status", "Devices / Total", "% of Total"]
         for table in doc.tables
     )
     assert any(
-        "Command polling data includes client loop timing" in p.text
-        for p in doc.paragraphs
+        "The first four rows add up to all devices." in p.text for p in doc.paragraphs
     )
     assert not any("generated with this module" in p.text for p in doc.paragraphs)
     assert not any(

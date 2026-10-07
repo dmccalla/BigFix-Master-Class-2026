@@ -117,9 +117,9 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     )
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Client Multicore Settings" in headings
-    assert any("configuration context only" in p.text for p in doc.paragraphs)
-    assert any("earlier than BigFix 11.0.7" in p.text for p in doc.paragraphs)
+    assert "Multicore CPU Scaling" in headings
+    assert any("are not scored" in p.text for p in doc.paragraphs)
+    assert any("older than 11.0.7" in p.text for p in doc.paragraphs)
     multicore_table = next(
         table
         for table in doc.tables

@@ -1628,6 +1628,16 @@ def format_loop_offender_seconds(seconds: float | None) -> str:
     return f"{seconds_float:,.3f}".rstrip("0").rstrip(".")
 
 
+def format_minutes_seconds(seconds: float) -> str:
+    """Format a duration the way the Infographic shows it, such as 6m 21s."""
+    total = int(round(seconds))
+    minutes, secs = divmod(total, 60)
+    if minutes >= 60:
+        hours, minutes = divmod(minutes, 60)
+        return f"{hours}h {minutes:02d}m"
+    return f"{minutes}m {secs:02d}s"
+
+
 def format_loop_offender_strip_seconds(seconds: float | None) -> str:
     try:
         seconds_float = float(seconds)
@@ -3001,13 +3011,7 @@ def generate_png(
         ),
     )
 
-    def m_s(seconds: float) -> str:
-        total = int(round(seconds))
-        minutes, secs = divmod(total, 60)
-        if minutes >= 60:
-            hours, minutes = divmod(minutes, 60)
-            return f"{hours}h {minutes:02d}m"
-        return f"{minutes}m {secs:02d}s"
+    m_s = format_minutes_seconds
 
     # Distribution: only the non-zero buckets become labelled segments; thin
     # segments get a min width + smaller number (matches the design).
@@ -3635,81 +3639,83 @@ def context_strip_tiles(
     ]
 
 
-def client_loop_chart_breakdown_rows(
+def client_loop_infographic_key_rows(
     metrics: ReportMetrics,
+    loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
 ) -> list[list[str]]:
-    """Return the source calculations for the Client Loop infographic."""
-    score_total = metrics.score_total_devices
-    rows = [
+    """Return one row per Infographic tile: the value shown and what it means."""
+    context = context_strip_tiles(metrics, loop_offenders, udp_summary)
+    tiles = {tile["label"]: str(tile["value"]) for tile in context}
+    # The relay tile shows the affected count large and the relay name beneath
+    # it. The key names the relay, because that is what the tile identifies.
+    relay_tile = next(t for t in context if t["label"] == "Relay w/ Most UDP Issues")
+    relay_name = (
+        str(relay_tile["caption"])
+        if udp_summary and udp_summary.relay_rows
+        else str(relay_tile["value"])
+    )
+    slowest = (
+        format_loop_offender_strip_seconds(
+            loop_offenders[0].avg_client_processing_seconds
+        )
+        if loop_offenders
+        else "Not available"
+    )
+    raised = str(metrics.overall_status or "").upper() in ("WARNING", "CRITICAL")
+    return [
         [
             "Health score",
             f"{metrics.environment_score} / 100",
-            "Healthy machines contribute 100 points, Warning machines 67, and "
-            "Critical machines 34; the score is the weighted average.",
+            "Average of each device's band points. See Loop Health.",
         ],
         [
-            "Healthy",
-            count_with_denominator(metrics.avg_healthy, score_total),
-            "Machines with average loop time under 30 minutes.",
+            "Loop distribution",
+            f"{metrics.avg_healthy:,} · {metrics.avg_warning:,} · {metrics.avg_critical:,}",
+            "Devices averaging under 30, 30 to 60, and over 60 minutes per loop.",
         ],
         [
-            "Warning",
-            count_with_denominator(metrics.avg_warning, score_total),
-            "Machines with average loop time from 30 through 60 minutes.",
+            "Average loop time",
+            format_minutes_seconds(metrics.avg_mean_seconds),
+            "Mean of every device's average loop time.",
         ],
         [
-            "Critical",
-            count_with_denominator(metrics.avg_critical, score_total),
-            "Machines with average loop time over 60 minutes, including machines "
-            "without usable loop data.",
+            "Slowest evaluation",
+            slowest,
+            "Top entry in Top 10 Most Expensive Evaluations.",
         ],
         [
-            "No usable loop data",
-            count_with_denominator(metrics.total_issue_count, score_total),
-            "Machines without a usable average loop-time result; included in the "
-            "score as Critical.",
+            "Severe loops over 120 min",
+            f"{metrics.avg_over_120:,}",
+            "Devices with an average loop time over 120 minutes.",
         ],
         [
             "Devices reporting",
-            count_with_denominator(metrics.total_devices, score_total),
-            "Machines with usable loop data divided by total machines.",
+            tiles["Devices reporting"],
+            "Devices that reported usable loop data.",
+        ],
+        [
+            "No UDP pings received",
+            tiles["No UDP pings received"],
+            "Devices that receive no UDP notifications from their relay.",
+        ],
+        [
+            "Relay w/ Most UDP Issues",
+            relay_name,
+            "Relay with the most devices that receive no UDP notifications.",
+        ],
+        [
+            "Findings raised",
+            "CLT-01" if raised else "None raised",
+            "CLT-01 is raised when loop health is below the healthy threshold.",
         ],
     ]
 
-    if udp_summary:
-        rows.append(
-            [
-                "No UDP pings received",
-                count_with_denominator(udp_summary.not_receiving_count, score_total),
-                "Machines with no UDP pings received divided by total machines.",
-            ]
-        )
-        if udp_summary.relay_rows:
-            relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
-            affected_count = str(relay_count).split("/", 1)[0].strip()
-            relay_value = f"{affected_count} - {relay_name}"
-            relay_detail = (
-                "Machines with no UDP pings are grouped by reported relay. The "
-                "relay with the highest affected-machine count is shown; ties use "
-                "affected percentage, then relay name."
-            )
-        else:
-            relay_value = "None"
-            relay_detail = "No machines with no UDP pings received reported a relay."
-    else:
-        rows.append(
-            [
-                "No UDP pings received",
-                "Not collected",
-                "UDP notification data was not collected.",
-            ]
-        )
-        relay_value = "Not collected"
-        relay_detail = "UDP notification data was not collected."
 
-    rows.append(["Relay w/ Most UDP Issues", relay_value, relay_detail])
-    return rows
+def keep_with_next(paragraph):
+    """Keep a heading or lead-in sentence on the same page as what follows it."""
+    paragraph.paragraph_format.keep_with_next = True
+    return paragraph
 
 
 def add_note_paragraph(document, text: str) -> None:
@@ -3723,7 +3729,7 @@ def add_note_paragraph(document, text: str) -> None:
 
 # Rollup tables in the Mini Report stop at this many rows so a large deployment
 # cannot run the report to dozens of pages. The workbook always keeps every row.
-MINI_REPORT_ROLLUP_LIMIT = 20
+MINI_REPORT_ROLLUP_LIMIT = 10
 
 
 def add_capped_rollup_table(
@@ -3750,41 +3756,6 @@ def add_capped_rollup_table(
             f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {len(rows):,} {noun}. "
             "The full list is in the workbook.",
         )
-
-
-def add_score_method_note(document) -> None:
-    heading = document.add_heading("How This Score Is Calculated", level=3)
-    heading.paragraph_format.space_before = Pt(0)
-    heading.paragraph_format.space_after = Pt(3)
-
-    intro = document.add_paragraph(
-        "The Client Loop Health Score is based on the percentage of devices in "
-        "each average-loop-time band:"
-    )
-    intro.paragraph_format.space_after = Pt(3)
-
-    for text in (
-        "Healthy, under 30 minutes: 100 points",
-        "Needs Attention, 30 to 60 minutes: 67 points",
-        "Critical, over 60 minutes, or no usable data reported: 34 points",
-    ):
-        bullet = document.add_paragraph(f"- {text}")
-        bullet.paragraph_format.space_after = Pt(1)
-
-    for text in (
-        "Formula: Healthy% x 100 + Needs Attention% x 67 + Critical% x 34",
-        "Average loop time is used when available because it represents "
-        "sustained client performance across the capture window; devices with "
-        "no usable loop data are scored Critical.",
-        "Score bands: 85-100 Healthy, 60-84 Needs Attention, 0-59 Critical.",
-        "This score is separate from the Summary Scorecard category scores in "
-        "Section 04; they use different inputs and are not expected to match.",
-    ):
-        para = document.add_paragraph(text)
-        para.paragraph_format.space_after = Pt(3)
-
-    spacer = document.add_paragraph()
-    spacer.paragraph_format.space_after = Pt(8)
 
 
 def generate_word(
@@ -3821,18 +3792,11 @@ def generate_word(
     if stamp:
         stamp_docx_document(document, stamp)
 
-    finding_scope = "loop time, expensive evaluations, and UDP notification"
-    if command_polling_summary:
-        finding_scope = (
-            "loop time, expensive evaluations, UDP notification, and command polling"
-        )
-    if fast_hash_verify_summary:
-        finding_scope += ", and FastHashVerify client settings"
-    add_note_paragraph(
-        document,
-        f"The raw data used to generate these {finding_scope} findings is available "
-        "in the Client Performance Workbook (Excel file) for further troubleshooting and "
-        "analysis.",
+    document.add_paragraph(
+        f"This report covers {metrics.score_total_devices:,} BigFix Clients from "
+        f"{metrics.report_start_text} to {metrics.report_end_text}. It was generated "
+        f"on {metrics.generated_at_text}. The Client Performance workbook (Excel file) "
+        "holds the per-device data behind every table."
     )
 
     # Keep the executive-style PNG first so injected reports and slide decks lead
@@ -3855,11 +3819,11 @@ def generate_word(
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
 
-    document.add_heading("Client Loop Chart Breakdown", level=3)
+    keep_with_next(document.add_heading("Reading the Infographic", level=3))
     build_word_table(
         document,
-        ["Chart element", "Displayed value", "How it is determined"],
-        client_loop_chart_breakdown_rows(metrics, udp_summary),
+        ["Infographic tile", "Value", "What it means"],
+        client_loop_infographic_key_rows(metrics, loop_offenders, udp_summary),
         {1},
     )
 
@@ -3883,26 +3847,13 @@ def generate_word(
                 {0},
             )
 
-    document.add_heading("BigFix Client Performance Summary", level=3)
-    document.add_paragraph(
-        f"Report Generated: {metrics.generated_at_text} | "
-        f"Data Collection Range: {metrics.report_start_text} - {metrics.report_end_text}"
+    document.add_heading("Loop Health", level=3)
+    keep_with_next(
+        document.add_paragraph(
+            "Each device is placed in a band by its average loop time across the "
+            "collection period."
+        )
     )
-
-    for line in [
-        f"Overall Status: {metrics.overall_status}",
-        f"Average Loop Health Score: {metrics.environment_score} / 100",
-        f"Average Loop Mean: {format_duration_for_report(metrics.avg_mean_seconds)}",
-        f"Slowest Average Loop: {format_duration_for_report(metrics.slowest_avg_seconds)}",
-        f"Peak Observed: {format_duration_for_report(metrics.peak_max_seconds)}",
-    ]:
-        document.add_paragraph(line)
-
-    add_score_method_note(document)
-
-    # Spacer before the first table so it doesn't cram against the summary above.
-    document.add_paragraph()
-    document.add_heading("Average Loop Health", level=3)
     build_word_table(
         document,
         ["Band", "Devices / Total", "% of Total", "Rule"],
@@ -3928,8 +3879,28 @@ def generate_word(
         ],
         {1, 2, 3},
     )
+    document.add_paragraph(
+        "The slowest device averages "
+        f"{format_duration_for_report(metrics.slowest_avg_seconds)} per loop. The "
+        "longest single loop any device reported is "
+        f"{format_duration_for_report(metrics.peak_max_seconds)}."
+    )
 
-    document.add_heading("Reporting Issues", level=3)
+    document.add_heading("How the Score Is Calculated", level=4)
+    document.add_paragraph(
+        "Each device earns points for its band: 100 for Healthy, 67 for Warning and "
+        "34 for Critical. The score is the average across all devices."
+    )
+    document.add_paragraph(
+        "A score of 85 to 100 is Healthy, 60 to 84 is Warning, and 0 to 59 is Critical."
+    )
+
+    document.add_heading("Reporting Issues", level=4)
+    keep_with_next(
+        document.add_paragraph(
+            "Devices that did not report usable loop data count as Critical."
+        )
+    )
     build_word_table(
         document,
         ["Status", "Devices / Total", "% of Total"],
@@ -3957,30 +3928,25 @@ def generate_word(
         {1, 2},
     )
     document.add_paragraph(
-        "Devices that did not report usable loop data are scored Critical. "
-        "When this row is large, the score reflects a visibility problem at "
-        "least as much as a performance problem."
+        "A high count here points to a visibility problem as much as a performance "
+        "problem."
     )
 
     if loop_offenders or actionsite_pressure:
-        document.add_heading("Loop Cost Diagnostics", level=3)
+        document.add_heading("Loop Cost", level=3)
         document.add_paragraph(
-            "The tables below explain where loop time is being spent: the "
-            "specific evaluations that cost the most, and the platform-level "
-            "factors that add pressure to every evaluation cycle. These "
-            "indicators provide context; they do not add to or subtract from "
-            "the score."
+            "These tables show where loop time goes. They add context and do not "
+            "change the score."
         )
 
     if loop_offenders:
         document.add_heading("Top 10 Most Expensive Evaluations", level=4)
-        document.add_paragraph(
-            "This table starts with each client's Top 10 slowest recorded "
-            "evaluations, aggregates those samples across the deployment, then "
-            "shows the 10 unique evaluations with the highest average "
-            "evaluation time. Occurrences are kept as supporting context "
-            "because repeated slow evaluations can still add meaningful loop "
-            "cost across many endpoints."
+        keep_with_next(
+            document.add_paragraph(
+                "The slowest evaluations each device reported, averaged across the "
+                "deployment. Occurrences is how many times an evaluation appeared in "
+                "a device's Top 10."
+            )
         )
         build_word_table(
             document,
@@ -4004,6 +3970,11 @@ def generate_word(
 
     if actionsite_pressure:
         document.add_heading("Contributing Factors", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                "Deployment-wide counts that add work to every Client loop."
+            )
+        )
         build_word_table(
             document,
             ["Metric", "Value", "Status", "Basis"],
@@ -4012,15 +3983,14 @@ def generate_word(
             status_col=2,
         )
 
-    if udp_summary:
-        document.add_heading("Client Notification Context", level=3)
+    if udp_summary or command_polling_summary:
+        document.add_heading("Notification and Polling", level=3)
         document.add_paragraph(
-            "UDP notification data helps explain whether slow client response "
-            "may be caused by clients not receiving BigFix notification traffic. "
-            "Clients that do not receive UDP pings may still process work, but "
-            "they may not wake up promptly when new content or actions are "
-            "available."
+            "Relays send UDP notifications so Clients act on new content right away. "
+            "Command polling is the fallback when those notifications do not arrive."
         )
+
+    if udp_summary:
         document.add_heading("UDP Notification Coverage", level=4)
         build_word_table(
             document,
@@ -4058,32 +4028,18 @@ def generate_word(
             )
 
     if command_polling_summary:
-        if not udp_summary:
-            document.add_heading("Client Notification Context", level=3)
+        document.add_heading("Command Polling", level=4)
+        keep_with_next(
             document.add_paragraph(
-                "Client notification data helps explain whether delayed response "
-                "is related to UDP notification reachability, command polling "
-                "configuration, or both."
+                "The first four rows add up to all devices. The last three are "
+                "checks, and a device can appear in more than one."
             )
-
-        document.add_heading("Command Polling Review", level=4)
-        document.add_paragraph(
-            "Command polling can reduce delayed response when UDP notifications "
-            "do not reach a client. The report does not determine whether a relay "
-            "is internal, DMZ, or externally facing because that requires customer "
-            "network context."
         )
         build_word_table(
             document,
             ["Status", "Devices / Total", "% of Total"],
             command_polling_coverage_rows(command_polling_summary),
             {1, 2},
-        )
-        document.add_paragraph(
-            "Command polling data includes client loop timing, relay and subnet "
-            "context, UDP notification status, the command polling enabled state, "
-            "and the reported polling interval. These fields describe command "
-            "polling coverage and its relationship to client evaluation timing."
         )
 
         if command_polling_summary.relay_rows:
@@ -4128,28 +4084,35 @@ def generate_word(
                 "subnets",
             )
 
-    if fast_hash_verify_summary:
-        document.add_heading("FastHashVerify Review", level=3)
+    if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:
+        document.add_heading("Client Settings", level=3)
         document.add_paragraph(
-            "FastHashVerify temporarily allows the BigFix Client to use more "
-            "CPU while calculating downloaded file hashes. This can shorten "
-            "verification time for large patch files and large software updates, "
-            "especially when the client would otherwise throttle hashing. It is "
-            "disabled by default. When enabled, the documented default work and "
-            "sleep settings are 20 ms and 60 ms, which allows hashing to use about "
-            "25% of one CPU core while it is active. Configured duty cycle is the "
-            "work interval divided by the work and sleep intervals together; it is "
-            "not a measurement of observed CPU usage. Not Set means the collection "
-            "did not return a value, and no client default is inferred."
+            "These settings control how much CPU the Client uses. They are reported "
+            "for context and are not scored. Duty cycle is the work interval divided "
+            "by the work and sleep intervals together. It is the configured share of "
+            "time, not measured CPU use. Not Set means the collection returned no "
+            "value."
         )
-        document.add_heading("FastHashVerify Status", level=4)
+
+    if fast_hash_verify_summary:
+        document.add_heading("FastHashVerify", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                "FastHashVerify lets the Client use more CPU while it checks the hash "
+                "of a downloaded file, which shortens verification for large patches. "
+                "It is off by default. When it is on, the documented defaults are "
+                "20 ms work and 60 ms sleep, about 25% of one CPU core while hashing."
+            )
+        )
         build_word_table(
             document,
             ["Status", "Devices / Total", "% of Total"],
             fast_hash_verify_coverage_rows(fast_hash_verify_summary),
             {1, 2},
         )
-        document.add_heading("Reported Work and Sleep Settings", level=4)
+        keep_with_next(
+            document.add_paragraph("Reported FastHashVerify work and sleep settings:")
+        )
         build_word_table(
             document,
             [
@@ -4161,19 +4124,14 @@ def generate_word(
             fast_hash_verify_summary.settings_rows,
             {2, 3},
         )
-        document.add_paragraph(
-            "Individual client FastHashVerify values include the enabled state and "
-            "the reported work and sleep intervals. These intervals show the "
-            "configured balance between active hash calculation and sleep time."
-        )
 
     if agent_cpu_idle_summary:
-        document.add_heading("Client CPU Idle Settings", level=3)
-        document.add_paragraph(
-            "The following client CPU idle setting values were reported. They are "
-            "configuration context only; no assessment or finding is derived. The "
-            "configured duty cycle is work divided by the work and sleep intervals "
-            "together, not a measurement of observed CPU usage."
+        document.add_heading("CPU Idle Settings", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                "Work Idle and Sleep Idle set how long the Client works and rests "
+                "during normal evaluation."
+            )
         )
         build_word_table(
             document,
@@ -4188,12 +4146,12 @@ def generate_word(
         )
 
     if agent_multicore_summary:
-        document.add_heading("Client Multicore Settings", level=3)
-        document.add_paragraph(
-            "The following 11.0.7 client setting was reported. It is "
-            "configuration context only; no assessment or finding is derived. "
-            "Not Applicable means the client version is too old for this setting "
-            "(earlier than BigFix 11.0.7)."
+        document.add_heading("Multicore CPU Scaling", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                "Available on BigFix 11.0.7 and later Clients. Not Applicable means "
+                "the Client is older than 11.0.7."
+            )
         )
         build_word_table(
             document,

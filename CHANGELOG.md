@@ -30,6 +30,17 @@ the project release process for the steps to cut a release.
 
 ### Changed
 
+- Reorganize the Client Performance Mini Report. A key under the Infographic
+  explains every tile, followed by Loop Health, Loop Cost, Notification and
+  Polling, and Client Settings, in shorter, plainer prose. The tables are
+  unchanged.
+- Show the top 10 rows in the Client Performance relay and subnet tables, with
+  a note when more exist. The workbook keeps every row, including the UDP
+  relay and subnet sheets that were previously cut to 10.
+- Name the relay with the most UDP issues on the Client Performance
+  Infographic.
+- Replace the lab sample data with a smaller 10-06-2026 client capture of
+  2,537 devices so the lab exercises run faster.
 - Label the four classroom client-setting examples as 2.0, matching the other
   collection content. These examples remain Master Class-only; action logic
   is unchanged.

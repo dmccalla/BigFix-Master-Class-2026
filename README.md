@@ -12,12 +12,11 @@ Infographic and Excel workbook into one run folder.
 | Perfmon Infrastructure Analysis | A PerfMon `.blg` capture from a BigFix server, with a second capture optional. | Mini Report, Infographic, Excel |
 | FillDB Performance Analysis | The FillDB performance logs, or the analyzer's CSV. | Mini Report, Infographic |
 
-A fictional sample capture ships under `SampleData`, so the Workbench runs
-end to end before any data is collected.
+The repository ships small FillDB and Perfmon samples under `SampleData`.
 
-The lab sample data the Student Lab Guide uses,
-`SampleData\BigFix Master Class 2026\Results`, is too large for the
-repository. It ships inside the release zip and as `Sample-Data-Results.zip`
+The lab sample data the Student Lab Guide uses, including the Client
+Performance capture, is in `SampleData\BigFix Master Class 2026\Results`.
+It is too large for the repository. It ships inside the release zip and as `Sample-Data-Results.zip`
 on the repository's v2.0 release. To add it to a clone, extract
 `Sample-Data-Results.zip` into the Workbench folder.
 

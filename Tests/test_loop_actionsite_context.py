@@ -89,7 +89,7 @@ def test_loop_chart_names_the_source_id_for_its_raised_finding(
     ]
 
 
-def test_loop_word_places_score_method_after_summary_without_context_table(
+def test_loop_word_explains_the_score_under_loop_health(
     tmp_path: Path,
 ) -> None:
     word_output = tmp_path / "loop.docx"
@@ -100,23 +100,21 @@ def test_loop_word_places_score_method_after_summary_without_context_table(
     doc = Document(str(word_output))
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
 
-    assert "How This Score Is Calculated" in paragraphs
     score_heading = next(
-        p for p in doc.paragraphs if p.text.strip() == "How This Score Is Calculated"
+        p for p in doc.paragraphs if p.text.strip() == "How the Score Is Calculated"
     )
-    assert score_heading.style.name == "Heading 3"
+    assert score_heading.style.name == "Heading 4"
     assert "Client Loop Context" not in paragraphs
-    assert paragraphs.index("BigFix Client Performance Summary") < paragraphs.index(
-        "How This Score Is Calculated"
+    assert paragraphs.index("Loop Health") < paragraphs.index(
+        "How the Score Is Calculated"
     )
     assert "Score Method: test driver" not in paragraphs
     assert "Score Breakdown: test breakdown" not in paragraphs
     assert (
-        "Formula: Healthy% x 100 + Needs Attention% x 67 + Critical% x 34" in paragraphs
+        "Each device earns points for its band: 100 for Healthy, 67 for Warning and "
+        "34 for Critical. The score is the average across all devices." in paragraphs
     )
-    assert (
-        "- Critical, over 60 minutes, or no usable data reported: 34 points" in paragraphs
-    )
+    assert not any("Section 04" in text for text in paragraphs)
     assert not any(
         table.cell(0, 0).text.startswith("SLOWEST EVALUATION, AVG")
         for table in doc.tables
@@ -147,9 +145,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
         table for table in doc.tables if table.cell(0, 0).text == "Finding ID"
     )
 
-    assert headings.index("Automated Findings") < headings.index(
-        "BigFix Client Performance Summary"
-    )
+    assert headings.index("Automated Findings") < headings.index("Loop Health")
     assert [cell.text for cell in findings_table.rows[1].cells] == [
         "CLT-01",
         "High, client evaluation loop health below the healthy threshold.",
@@ -366,39 +362,27 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
 
     assert "ActionSite Pressure" not in headings
     assert "Client Loop Penalties" not in headings
-    assert headings.index("BigFix Client Performance Summary") < headings.index(
-        "How This Score Is Calculated"
-    )
-    assert headings.index("How This Score Is Calculated") < headings.index(
-        "Average Loop Health"
-    )
-    assert headings.index("Average Loop Health") < headings.index("Reporting Issues")
-    assert headings.index("Reporting Issues") < headings.index("Loop Cost Diagnostics")
-    assert headings.index("Loop Cost Diagnostics") < headings.index(
-        "Top 10 Most Expensive Evaluations"
-    )
-    assert headings.index("Top 10 Most Expensive Evaluations") < headings.index(
-        "Contributing Factors"
-    )
-    assert headings.index("Contributing Factors") < headings.index(
-        "Client Notification Context"
-    )
-    assert headings.index("Client Notification Context") < headings.index(
-        "UDP Notification Coverage"
-    )
-    assert headings.index("UDP Notification Coverage") < headings.index(
-        "UDP Notification Issues by Relay"
-    )
-    assert headings.index("UDP Notification Issues by Relay") < headings.index(
-        "Top Subnets Not Receiving UDP Pings"
-    )
+    order = [
+        "Reading the Infographic",
+        "Loop Health",
+        "How the Score Is Calculated",
+        "Reporting Issues",
+        "Loop Cost",
+        "Top 10 Most Expensive Evaluations",
+        "Contributing Factors",
+        "Notification and Polling",
+        "UDP Notification Coverage",
+        "UDP Notification Issues by Relay",
+        "Top Subnets Not Receiving UDP Pings",
+    ]
+    assert [h for h in headings if h in order] == order
 
     doc = Document(str(word_output))
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+    assert "Devices that did not report usable loop data count as Critical." in paragraphs
     assert (
-        "Devices that did not report usable loop data are scored Critical. "
-        "When this row is large, the score reflects a visibility problem at "
-        "least as much as a performance problem."
+        "A high count here points to a visibility problem as much as a performance "
+        "problem."
     ) in paragraphs
 
     offender_tables = [
@@ -473,9 +457,8 @@ def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> Non
     assert tiles[2]["caption"] == "relay-a"
 
 
-def test_client_loop_chart_breakdown_uses_infographic_values() -> None:
-    metrics = _sample_loop_metrics()
-    udp_summary = loop.UdpNotificationSummary(
+def _udp_two_missing() -> loop.UdpNotificationSummary:
+    return loop.UdpNotificationSummary(
         source_file=Path("udp.csv"),
         total_devices=4,
         receiving_count=1,
@@ -485,37 +468,71 @@ def test_client_loop_chart_breakdown_uses_infographic_values() -> None:
         subnet_rows=[],
     )
 
-    rows = loop.client_loop_chart_breakdown_rows(metrics, udp_summary)
 
-    assert rows[0][1] == "95 / 100"
-    assert rows[5][1] == "10 / 10"
-    assert rows[6] == [
-        "No UDP pings received",
-        "2 / 10",
-        "Machines with no UDP pings received divided by total machines.",
+def test_infographic_key_uses_infographic_values() -> None:
+    offenders = [
+        loop.LoopOffenderSummary(
+            rank=1,
+            occurrences=15,
+            total_client_processing_seconds=630,
+            max_client_processing_seconds=0,
+            avg_client_processing_seconds=42,
+            result="Background Evaluation of Custom Site: Resolve",
+        )
     ]
-    assert rows[7][1] == "2 - relay-a"
+
+    rows = loop.client_loop_infographic_key_rows(
+        _sample_loop_metrics(), offenders, _udp_two_missing()
+    )
+
+    assert [row[0] for row in rows] == [
+        "Health score",
+        "Loop distribution",
+        "Average loop time",
+        "Slowest evaluation",
+        "Severe loops over 120 min",
+        "Devices reporting",
+        "No UDP pings received",
+        "Relay w/ Most UDP Issues",
+        "Findings raised",
+    ]
+    values = {row[0]: row[1] for row in rows}
+    assert values["Health score"] == "95 / 100"
+    assert values["Loop distribution"] == "8 · 2 · 0"
+    assert values["Average loop time"] == "5m 00s"
+    assert values["Slowest evaluation"] == loop.format_loop_offender_strip_seconds(42)
+    assert values["Severe loops over 120 min"] == "0"
+    assert values["Devices reporting"] == "10 / 10"
+    assert values["No UDP pings received"] == "2 / 10"
+    assert values["Relay w/ Most UDP Issues"] == "relay-a"
+    assert values["Findings raised"] == "None raised"
 
 
-def test_loop_word_places_chart_breakdown_directly_after_infographic(
+def test_infographic_key_names_clt_01_when_loop_health_is_low() -> None:
+    metrics = _sample_loop_metrics()
+    metrics.overall_status = "WARNING"
+
+    rows = loop.client_loop_infographic_key_rows(metrics)
+
+    assert rows[-1][1] == "CLT-01"
+    assert dict((row[0], row[1]) for row in rows)["Slowest evaluation"] == (
+        "Not available"
+    )
+    assert dict((row[0], row[1]) for row in rows)["No UDP pings received"] == (
+        "Not collected"
+    )
+
+
+def test_loop_word_places_infographic_key_directly_after_infographic(
     tmp_path: Path,
 ) -> None:
-    udp_summary = loop.UdpNotificationSummary(
-        source_file=Path("udp.csv"),
-        total_devices=4,
-        receiving_count=1,
-        not_receiving_count=2,
-        unknown_count=1,
-        relay_rows=[["relay-a", "2 / 3", "66.7%"]],
-        subnet_rows=[],
-    )
     word_output = tmp_path / "loop.docx"
 
     loop.generate_word(
         _sample_loop_metrics(),
         _write_png(tmp_path / "loop.png"),
         word_output,
-        udp_summary=udp_summary,
+        udp_summary=_udp_two_missing(),
     )
 
     doc = Document(str(word_output))
@@ -529,31 +546,27 @@ def test_loop_word_places_chart_breakdown_directly_after_infographic(
         for index, element in enumerate(body_elements)
         if element.find(f".//{qn('w:drawing')}") is not None
     )
-    breakdown_heading_index = next(
+    key_heading_index = next(
         index
         for index, element in enumerate(body_elements)
-        if element_text(element) == "Client Loop Chart Breakdown"
+        if element_text(element) == "Reading the Infographic"
     )
-    breakdown_table_index = next(
+    key_table_index = next(
         index
         for index, element in enumerate(body_elements)
-        if element_text(element).startswith(
-            "Chart elementDisplayed valueHow it is determined"
-        )
+        if element_text(element).startswith("Infographic tileValueWhat it means")
     )
-    summary_heading_index = next(
+    loop_health_index = next(
         index
         for index, element in enumerate(body_elements)
-        if element_text(element).startswith("BigFix Client ")
-        and element_text(element).endswith("Performance Summary")
+        if element_text(element) == "Loop Health"
     )
 
-    assert infographic_index < breakdown_heading_index < breakdown_table_index
-    assert breakdown_table_index < summary_heading_index
+    assert infographic_index < key_heading_index < key_table_index < loop_health_index
     assert [cell.text for cell in doc.tables[0].rows[0].cells] == [
-        "Chart element",
-        "Displayed value",
-        "How it is determined",
+        "Infographic tile",
+        "Value",
+        "What it means",
     ]
 
 

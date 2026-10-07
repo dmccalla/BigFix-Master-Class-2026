@@ -145,15 +145,9 @@ def test_fast_hash_verify_workbook_and_word_sections_are_written(tmp_path: Path)
     )
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "FastHashVerify Review" in headings
-    assert any("large patch files" in p.text for p in doc.paragraphs)
-    assert any(
-        "not a measurement of observed CPU usage" in p.text for p in doc.paragraphs
-    )
-    assert any(
-        "Individual client FastHashVerify values include" in p.text
-        for p in doc.paragraphs
-    )
+    assert "FastHashVerify" in headings
+    assert any("large patches" in p.text for p in doc.paragraphs)
+    assert any("not measured CPU use" in p.text for p in doc.paragraphs)
     assert not any(
         "Consider the customer's download workload" in p.text for p in doc.paragraphs
     )

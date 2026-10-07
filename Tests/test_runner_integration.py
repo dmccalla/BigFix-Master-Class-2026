@@ -55,8 +55,11 @@ def test_modules_with_real_generators(
         # Copy inputs away from the data root to exercise explicit manual choices.
         manual = tmp_path / "manual"
         manual.mkdir()
+        # The client capture lives wherever the scan found it (the lab set
+        # keeps it under Results), with its companion files beside it.
+        loop_dir = Path(discovered["loop"]).parent
         sources = {
-            "loop": next((SAMPLES / "Client_Loop").glob("Client_Loop_*.csv")),
+            "loop": next(loop_dir.glob("Client_Loop_*.csv")),
             "filldb": SAMPLES / "FillDB_Performance" / "FillDBPerf_analysis.csv",
             "perfmon": SAMPLES / "Perfmon" / "server.blg",
         }
@@ -68,10 +71,8 @@ def test_modules_with_real_generators(
             inputs[key][field] = str(path)
             manual_inputs[key] = {field: str(path)}
         for field, source in {
-            "top_offenders_file": SAMPLES / "Client_Loop" / "top10-query-results.csv",
-            "udp_notifications_file": SAMPLES
-            / "Client_Loop"
-            / "udp-notification-results.csv",
+            "top_offenders_file": loop_dir / "top10-query-results.csv",
+            "udp_notifications_file": loop_dir / "udp-notification-results.csv",
         }.items():
             if module_key != "loop":
                 continue

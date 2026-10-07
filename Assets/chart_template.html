@@ -363,8 +363,8 @@ function normalizedLoopContext(d){
   if(!context.some(c=>/no udp pings/i.test(c.label || ''))){
     context.push({label:'No UDP Pings Received', value:'Not available', caption:'No UDP rollup recorded'});
   }
-  if(!context.some(c=>/relays with udp issues/i.test(c.label || ''))){
-    context.push({label:'Relays With UDP Issues', value:'Not available', caption:'No relay rollup recorded'});
+  if(!context.some(c=>/relay(?:s)?\s+(?:w\/\s+most|with)\s+udp issues/i.test(c.label || ''))){
+    context.push({label:'Relay w/ Most UDP Issues', value:'Not available', caption:'No relay rollup recorded'});
   }
   return context.slice(0,3);
 }
@@ -386,7 +386,7 @@ function buildLoop(d){
   const contextColor = c => {
     const label = String(c.label || '');
     const value = String(c.value || '');
-    if(/relays with udp issues/i.test(label) && /^none$/i.test(value.trim())) return '#187A43';
+    if(/relay(?:s)?\s+(?:w\/\s+most|with)\s+udp issues/i.test(label) && /^none$/i.test(value.trim())) return '#187A43';
     if(/devices reporting/i.test(label)){
       const m = value.match(/([\d,]+)\s*\/\s*([\d,]+)/);
       if(m && Number(m[1].replace(/,/g,'')) < Number(m[2].replace(/,/g,''))) return '#C2410C';

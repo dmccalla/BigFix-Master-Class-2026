@@ -2078,7 +2078,6 @@ def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary |
             row[0].casefold(),
         )
     )
-    relay_rows = relay_rows[:10]
 
     subnet_reported_groups: dict[str, list[dict[str, Any]]] = {}
     for row in rows:
@@ -2105,7 +2104,6 @@ def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary |
             row[0].casefold(),
         )
     )
-    subnet_rows = subnet_rows[:10]
 
     return UdpNotificationSummary(
         source_file=path,
@@ -3582,18 +3580,18 @@ def context_strip_tiles(
     loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
 ) -> list[dict[str, object]]:
+    score_total = metrics.score_total_devices
     if udp_summary:
-        udp_total = udp_summary.total_devices
-        udp_value = count_with_denominator(udp_summary.not_receiving_count, udp_total)
+        udp_value = count_with_denominator(udp_summary.not_receiving_count, score_total)
         udp_detail = (
-            "All reporting clients received pings"
+            "No machines with no UDP pings received"
             if udp_summary.not_receiving_count == 0
-            else "Clients without received pings"
+            else "Machines with no UDP pings received"
         )
 
         if udp_summary.relay_rows:
             relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
-            relay_value = str(relay_count)
+            relay_value = str(relay_count).split("/", 1)[0].strip()
             relay_detail = relay_name
         else:
             relay_value = "None"
@@ -3608,7 +3606,6 @@ def context_strip_tiles(
         udp_muted = True
         relay_muted = True
 
-    score_total = metrics.score_total_devices
     reporting_value = count_with_denominator(metrics.total_devices, score_total)
     reporting_detail = (
         f"{metrics.total_issue_count:,} have no usable loop data"
@@ -3630,12 +3627,89 @@ def context_strip_tiles(
             "muted": udp_muted,
         },
         {
-            "label": "Relays with UDP issues",
+            "label": "Relay w/ Most UDP Issues",
             "value": relay_value,
             "caption": relay_detail,
             "muted": relay_muted,
         },
     ]
+
+
+def client_loop_chart_breakdown_rows(
+    metrics: ReportMetrics,
+    udp_summary: UdpNotificationSummary | None = None,
+) -> list[list[str]]:
+    """Return the source calculations for the Client Loop infographic."""
+    score_total = metrics.score_total_devices
+    rows = [
+        [
+            "Health score",
+            f"{metrics.environment_score} / 100",
+            "Healthy machines contribute 100 points, Warning machines 67, and "
+            "Critical machines 34; the score is the weighted average.",
+        ],
+        [
+            "Healthy",
+            count_with_denominator(metrics.avg_healthy, score_total),
+            "Machines with average loop time under 30 minutes.",
+        ],
+        [
+            "Warning",
+            count_with_denominator(metrics.avg_warning, score_total),
+            "Machines with average loop time from 30 through 60 minutes.",
+        ],
+        [
+            "Critical",
+            count_with_denominator(metrics.avg_critical, score_total),
+            "Machines with average loop time over 60 minutes, including machines "
+            "without usable loop data.",
+        ],
+        [
+            "No usable loop data",
+            count_with_denominator(metrics.total_issue_count, score_total),
+            "Machines without a usable average loop-time result; included in the "
+            "score as Critical.",
+        ],
+        [
+            "Devices reporting",
+            count_with_denominator(metrics.total_devices, score_total),
+            "Machines with usable loop data divided by total machines.",
+        ],
+    ]
+
+    if udp_summary:
+        rows.append(
+            [
+                "No UDP pings received",
+                count_with_denominator(udp_summary.not_receiving_count, score_total),
+                "Machines with no UDP pings received divided by total machines.",
+            ]
+        )
+        if udp_summary.relay_rows:
+            relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
+            affected_count = str(relay_count).split("/", 1)[0].strip()
+            relay_value = f"{affected_count} - {relay_name}"
+            relay_detail = (
+                "Machines with no UDP pings are grouped by reported relay. The "
+                "relay with the highest affected-machine count is shown; ties use "
+                "affected percentage, then relay name."
+            )
+        else:
+            relay_value = "None"
+            relay_detail = "No machines with no UDP pings received reported a relay."
+    else:
+        rows.append(
+            [
+                "No UDP pings received",
+                "Not collected",
+                "UDP notification data was not collected.",
+            ]
+        )
+        relay_value = "Not collected"
+        relay_detail = "UDP notification data was not collected."
+
+    rows.append(["Relay w/ Most UDP Issues", relay_value, relay_detail])
+    return rows
 
 
 def add_note_paragraph(document, text: str) -> None:
@@ -3645,6 +3719,37 @@ def add_note_paragraph(document, text: str) -> None:
     prefix = paragraph.add_run("NOTE: ")
     prefix.bold = True
     paragraph.add_run(text)
+
+
+# Rollup tables in the Mini Report stop at this many rows so a large deployment
+# cannot run the report to dozens of pages. The workbook always keeps every row.
+MINI_REPORT_ROLLUP_LIMIT = 20
+
+
+def add_capped_rollup_table(
+    document,
+    heading: str,
+    capped_heading: str,
+    headers: list[str],
+    rows: list[list[str]],
+    centered_columns: set[int],
+    noun: str,
+) -> None:
+    """Write a worst-first rollup table, keeping only the top rows in the report."""
+    capped = len(rows) > MINI_REPORT_ROLLUP_LIMIT
+    document.add_heading(capped_heading if capped else heading, level=4)
+    build_word_table(
+        document,
+        headers,
+        rows[:MINI_REPORT_ROLLUP_LIMIT],
+        centered_columns,
+    )
+    if capped:
+        add_note_paragraph(
+            document,
+            f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {len(rows):,} {noun}. "
+            "The full list is in the workbook.",
+        )
 
 
 def add_score_method_note(document) -> None:
@@ -3749,6 +3854,14 @@ def generate_word(
         )
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
+
+    document.add_heading("Client Loop Chart Breakdown", level=3)
+    build_word_table(
+        document,
+        ["Chart element", "Displayed value", "How it is determined"],
+        client_loop_chart_breakdown_rows(metrics, udp_summary),
+        {1},
+    )
 
     if include_automated_findings:
         finding_impact = {
@@ -3919,9 +4032,10 @@ def generate_word(
             add_note_paragraph(document, note)
 
         if udp_summary.relay_rows:
-            document.add_heading("UDP Notification Issues by Relay", level=4)
-            build_word_table(
+            add_capped_rollup_table(
                 document,
+                "UDP Notification Issues by Relay",
+                f"UDP Notification Issues by Relay (Top {MINI_REPORT_ROLLUP_LIMIT})",
                 [
                     "Relay",
                     "Not Receiving / Reported",
@@ -3929,15 +4043,18 @@ def generate_word(
                 ],
                 udp_summary.relay_rows,
                 {1, 2},
+                "relays",
             )
 
         if udp_summary.subnet_rows:
-            document.add_heading("Top Subnets Not Receiving UDP Pings", level=4)
-            build_word_table(
+            add_capped_rollup_table(
                 document,
+                "Top Subnets Not Receiving UDP Pings",
+                f"Top {MINI_REPORT_ROLLUP_LIMIT} Subnets Not Receiving UDP Pings",
                 ["Subnet", "Not Receiving / Reported", "Serving Relays"],
                 udp_summary.subnet_rows,
                 {1},
+                "subnets",
             )
 
     if command_polling_summary:
@@ -3970,9 +4087,10 @@ def generate_word(
         )
 
         if command_polling_summary.relay_rows:
-            document.add_heading("Command Polling by Relay", level=4)
-            build_word_table(
+            add_capped_rollup_table(
                 document,
+                "Command Polling by Relay",
+                f"Command Polling by Relay (Top {MINI_REPORT_ROLLUP_LIMIT})",
                 [
                     "Relay",
                     "Total Devices",
@@ -3984,14 +4102,16 @@ def generate_word(
                     "Interval Below Loop",
                     "No UDP + Polling Off",
                 ],
-                command_polling_summary.relay_rows[:10],
+                command_polling_summary.relay_rows,
                 {1, 2, 3, 4, 5, 6, 7, 8},
+                "relays",
             )
 
         if command_polling_summary.subnet_rows:
-            document.add_heading("Command Polling by Subnet", level=4)
-            build_word_table(
+            add_capped_rollup_table(
                 document,
+                "Command Polling by Subnet",
+                f"Command Polling by Subnet (Top {MINI_REPORT_ROLLUP_LIMIT})",
                 [
                     "Subnet",
                     "Total Devices",
@@ -4003,8 +4123,9 @@ def generate_word(
                     "Interval Below Loop",
                     "No UDP + Polling Off",
                 ],
-                command_polling_summary.subnet_rows[:10],
+                command_polling_summary.subnet_rows,
                 {1, 2, 3, 4, 5, 6, 7, 8},
+                "subnets",
             )
 
     if fast_hash_verify_summary:

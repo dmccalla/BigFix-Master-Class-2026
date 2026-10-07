@@ -9,6 +9,7 @@ from pathlib import Path
 import get_loop_health as loop
 import pandas as pd
 from docx import Document
+from docx.oxml.ns import qn
 
 PNG_1X1 = (
     b"\x89PNG\r\n\x1a\n"
@@ -444,11 +445,115 @@ def test_context_strip_tiles_feed_chart_data_with_missing_udp_fallback() -> None
             "muted": True,
         },
         {
-            "label": "Relays with UDP issues",
+            "label": "Relay w/ Most UDP Issues",
             "value": "Not collected",
             "caption": "",
             "muted": True,
         },
+    ]
+
+
+def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> None:
+    metrics = _sample_loop_metrics()
+    udp_summary = loop.UdpNotificationSummary(
+        source_file=Path("udp.csv"),
+        total_devices=4,
+        receiving_count=1,
+        not_receiving_count=2,
+        unknown_count=1,
+        relay_rows=[["relay-a", "2 / 3", "66.7%"]],
+        subnet_rows=[],
+    )
+
+    tiles = loop.context_strip_tiles(metrics, udp_summary=udp_summary)
+
+    assert tiles[1]["value"] == "2 / 10"
+    assert tiles[1]["caption"] == "Machines with no UDP pings received"
+    assert tiles[2]["value"] == "2"
+    assert tiles[2]["caption"] == "relay-a"
+
+
+def test_client_loop_chart_breakdown_uses_infographic_values() -> None:
+    metrics = _sample_loop_metrics()
+    udp_summary = loop.UdpNotificationSummary(
+        source_file=Path("udp.csv"),
+        total_devices=4,
+        receiving_count=1,
+        not_receiving_count=2,
+        unknown_count=1,
+        relay_rows=[["relay-a", "2 / 3", "66.7%"]],
+        subnet_rows=[],
+    )
+
+    rows = loop.client_loop_chart_breakdown_rows(metrics, udp_summary)
+
+    assert rows[0][1] == "95 / 100"
+    assert rows[5][1] == "10 / 10"
+    assert rows[6] == [
+        "No UDP pings received",
+        "2 / 10",
+        "Machines with no UDP pings received divided by total machines.",
+    ]
+    assert rows[7][1] == "2 - relay-a"
+
+
+def test_loop_word_places_chart_breakdown_directly_after_infographic(
+    tmp_path: Path,
+) -> None:
+    udp_summary = loop.UdpNotificationSummary(
+        source_file=Path("udp.csv"),
+        total_devices=4,
+        receiving_count=1,
+        not_receiving_count=2,
+        unknown_count=1,
+        relay_rows=[["relay-a", "2 / 3", "66.7%"]],
+        subnet_rows=[],
+    )
+    word_output = tmp_path / "loop.docx"
+
+    loop.generate_word(
+        _sample_loop_metrics(),
+        _write_png(tmp_path / "loop.png"),
+        word_output,
+        udp_summary=udp_summary,
+    )
+
+    doc = Document(str(word_output))
+    body_elements = list(doc.element.body)
+
+    def element_text(element) -> str:
+        return "".join(node.text or "" for node in element.iter(qn("w:t")))
+
+    infographic_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element.find(f".//{qn('w:drawing')}") is not None
+    )
+    breakdown_heading_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element_text(element) == "Client Loop Chart Breakdown"
+    )
+    breakdown_table_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element_text(element).startswith(
+            "Chart elementDisplayed valueHow it is determined"
+        )
+    )
+    summary_heading_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element_text(element).startswith("BigFix Client ")
+        and element_text(element).endswith("Performance Summary")
+    )
+
+    assert infographic_index < breakdown_heading_index < breakdown_table_index
+    assert breakdown_table_index < summary_heading_index
+    assert [cell.text for cell in doc.tables[0].rows[0].cells] == [
+        "Chart element",
+        "Displayed value",
+        "How it is determined",
     ]
 
 

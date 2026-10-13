@@ -3892,7 +3892,7 @@ def generate_word(
         "34 for Critical. The score is the average across all devices."
     )
     document.add_paragraph(
-        "A score of 85 to 100 is Healthy, 60 to 84 is Warning, and 0 to 59 is Critical."
+        "A score of 90 to 100 is Healthy, 70 to 89 is Warning, and 0 to 69 is Critical."
     )
 
     document.add_heading("Reporting Issues", level=4)

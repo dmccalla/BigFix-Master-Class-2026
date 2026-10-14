@@ -69,7 +69,7 @@ def test_grid_shows_the_month_and_blanks_the_other_days(root, anchor) -> None:
     # February 2026 starts on a Sunday, so six blanks lead the Monday-first grid.
     assert shown[:7] == ["", "", "", "", "", "", "1"]
     assert shown.count("") == 42 - 28
-    assert _cell_for(popup, date(2026, 2, 10)).cget("bg") == ui.PLUM
+    assert _cell_for(popup, date(2026, 2, 10)).cget("bg") == ui._mode_color(ui.PLUM)
     popup._close()
 
 

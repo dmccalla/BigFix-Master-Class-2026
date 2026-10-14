@@ -86,42 +86,48 @@ ctk.set_default_color_theme("blue")
 IS_WINDOWS = sys.platform == "win32"
 
 # ---------------------------------------------------------------------------
-# Design tokens. The same values the full Workbench draws with, light mode.
+# Design tokens. Light and dark values mirror the full Workbench palette.
 # ---------------------------------------------------------------------------
 
-CANVAS = DS.tech_grey.hex_value
-PAPER = DS.white.hex_value
-INK = DS.midnight.hex_value
-MUTED = DS.text_muted.hex_value
-MOSS = "#1a7f4e"
-PLUM = DS.accent_blue.hex_value
-CLAY = DS.critical.hex_value
-OCHRE = "#946200"
-FOG = "#DCE6F0"
-RAIL = "#FFFFFF"
+CANVAS = (DS.tech_grey.hex_value, "#0B1022")
+PAPER = (DS.white.hex_value, "#121A2E")
+INK = (DS.midnight.hex_value, "#EAF1F8")
+MUTED = (DS.text_muted.hex_value, "#9AA7B8")
+MOSS = ("#1A7F4E", "#4ADE80")
+PLUM = (DS.accent_blue.hex_value, "#3C91FF")
+CLAY = (DS.critical.hex_value, "#F87171")
+OCHRE = ("#946200", "#FBBF24")
+FOG = ("#DCE6F0", "#27304A")
+RAIL = ("#FFFFFF", "#0B1022")
 BRAND_NAVY = "#000032"
 BRAND_EYEBROW = "#6FA3F0"
-LINK_BLUE = "#0F5FDC"
-FOOTER_RAIL = "#EEF1F8"
-CARD_HEADER = "#EEF1F8"
-PLUM_SOFT = "#E6EFFD"
-PANEL = "#F4F7FB"
-HAIRLINE = "#E3E9F1"
-FIELD_BORDER = "#CFD9E5"
-LOG_BG = DS.midnight.hex_value
-LOG_TEXT = "#EAF1F8"
-ROW_RULE = "#F0F3F8"
-RUN_DETAIL_RULE = "#EDF1F7"
-EXPANSION_TINT = "#F7FAFD"
+BRAND_TRACK = "#404065"
+LINK_BLUE = ("#0F5FDC", "#6FA8FF")
+FOOTER_RAIL = ("#EEF1F8", "#121A2E")
+CARD_HEADER = ("#EEF1F8", "#16233A")
+PLUM_SOFT = ("#E6EFFD", "#13233E")
+PANEL = ("#F4F7FB", "#16233A")
+HAIRLINE = ("#E3E9F1", "#243049")
+FIELD_BORDER = ("#CFD9E5", "#243049")
+LOG_BG = (DS.midnight.hex_value, "#00071C")
+LOG_TEXT = ("#EAF1F8", "#EAF1F8")
+ROW_RULE = ("#F0F3F8", "#243049")
+RUN_DETAIL_RULE = ("#EDF1F7", "#243049")
+EXPANSION_TINT = ("#F7FAFD", "#16233A")
+DIAGNOSTIC_CARD_BG = ("#F8FAFD", "#0E1729")
+DIAGNOSTIC_GAUGE_TRACK = ("#DDE5EE", "#1B2438")
+DIAGNOSTIC_GUIDE_BG = ("#F8FBFE", "#16233A")
+SURFACE_HOVER = ("#F4F7FB", "#1B2940")
+PRIMARY_HOVER = ("#0A48A8", "#2C7FE9")
 UI_FONT = "Segoe UI"
 
 NEEDS_REVIEW_PILL = "Needs Review"
 S2_PILL_STYLES = {
-    "Found": ("#1a7f4e", "#e7f4ec"),
-    NEEDS_REVIEW_PILL: ("#946200", "#FDF6E7"),
-    "Missing": ("#b3372c", "#fdecea"),
+    "Found": (("#1A7F4E", "#4ADE80"), ("#E7F4EC", "#123828")),
+    NEEDS_REVIEW_PILL: (("#946200", "#FBBF24"), ("#FDF6E7", "#3C2D12")),
+    "Missing": (("#B3372C", "#F87171"), ("#FDECEA", "#3A1A14")),
 }
-S2_PILL_NEUTRAL = ("#000032", "#F0F3F8")
+S2_PILL_NEUTRAL = (("#000032", "#EAF1F8"), ("#F0F3F8", "#243049"))
 STATUS_PILL_TEXT = {
     "Found": "Found",
     "Missing": "Needs A File",
@@ -129,10 +135,14 @@ STATUS_PILL_TEXT = {
     "Not scanned": "Not Scanned",
 }
 S3_STATUS_PILL_STYLES = {
-    "not_started": ("#F0F3F8", "#E3E9F1", "#000032"),
-    "running": ("#E6EFFD", "#c9dcf8", "#0a48a8"),
-    "done": ("#e7f4ec", "#cfe6da", "#14663f"),
-    "failed": ("#fdecea", "#f2c9c4", "#b3372c"),
+    "not_started": (
+        ("#F0F3F8", "#243049"),
+        ("#E3E9F1", "#324461"),
+        ("#000032", "#EAF1F8"),
+    ),
+    "running": (("#E6EFFD", "#13233E"), ("#C9DCF8", "#254A78"), ("#0A48A8", "#8EC1FF")),
+    "done": (("#E7F4EC", "#123828"), ("#CFE6DA", "#23543D"), ("#14663F", "#4ADE80")),
+    "failed": (("#FDECEA", "#3A1A14"), ("#F2C9C4", "#6B2B28"), ("#B3372C", "#F87171")),
 }
 
 OUTPUT_TERM_ORDER = ["Infographic", "Excel", "Mini Report"]
@@ -245,8 +255,6 @@ _DIAGNOSTIC_RESOURCE_SAMPLE_LIMIT = 720
 _DIAGNOSTIC_BASELINE_SAMPLE_COUNT = 6
 _DIAGNOSTIC_TREND_POINT_LIMIT = 120
 _DIAGNOSTIC_LOG_TAIL_CHARS = 100_000
-DIAGNOSTIC_CARD_BG = "#F8FAFD"
-DIAGNOSTIC_GAUGE_TRACK = "#DDE5EE"
 
 _RUN_FOLDER_RE = re.compile(
     r"^(?:RUN_FOLDER:|\s*Run folder\s*:)\s*(.+?)\s*$", re.IGNORECASE
@@ -257,6 +265,14 @@ _RUN_LOG_RE = re.compile(r"^\s*Run log\s*:\s*(.+?)\s*$")
 def _display_path(value: object) -> str:
     text = clean_user_path(value)
     return os.path.normpath(text) if text else ""
+
+
+def _mode_color(color) -> str:
+    """Resolve a CustomTkinter light/dark color for native Tk drawing."""
+    if isinstance(color, tuple | list):
+        index = 1 if ctk.get_appearance_mode().lower() == "dark" and len(color) > 1 else 0
+        return str(color[index])
+    return str(color)
 
 
 def _field_id(key: str, field_key: str) -> str:
@@ -373,8 +389,8 @@ def _pill_bg_photo(bg: str, border: str, width: int, height: int) -> ImageTk.Pho
 def _caret_icon(expanded: bool, size: int = 12) -> ctk.CTkImage:
     scale = 4
     canvas = size * scale
-    image = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(image)
+    light = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
+    dark = Image.new("RGBA", (canvas, canvas), (0, 0, 0, 0))
     if expanded:
         points = [
             (0.2 * canvas, 0.32 * canvas),
@@ -387,9 +403,11 @@ def _caret_icon(expanded: bool, size: int = 12) -> ctk.CTkImage:
             (0.32 * canvas, 0.8 * canvas),
             (0.75 * canvas, 0.5 * canvas),
         ]
-    draw.polygon(points, fill="#000032")
-    image = image.resize((size, size), Image.Resampling.LANCZOS)
-    return ctk.CTkImage(light_image=image, dark_image=image, size=(size, size))
+    ImageDraw.Draw(light).polygon(points, fill="#000032")
+    ImageDraw.Draw(dark).polygon(points, fill="#EAF1F8")
+    light = light.resize((size, size), Image.Resampling.LANCZOS)
+    dark = dark.resize((size, size), Image.Resampling.LANCZOS)
+    return ctk.CTkImage(light_image=light, dark_image=dark, size=(size, size))
 
 
 @lru_cache(maxsize=2)
@@ -539,13 +557,13 @@ class DatePopup(ctk.CTkToplevel):
     def _build_widgets(self) -> None:
         outer = ctk.CTkFrame(self, fg_color=PAPER, corner_radius=14)
         outer.pack(padx=12, pady=12, fill="both", expand=True)
-        header = tk.Frame(outer, bg=PLUM)
+        header = tk.Frame(outer, bg=_mode_color(PLUM))
         header.pack(fill="x", padx=12, pady=(12, 0))
         nav_style = {
-            "bg": PLUM,
-            "fg": PAPER,
-            "activebackground": PLUM_SOFT,
-            "activeforeground": PLUM,
+            "bg": _mode_color(PLUM),
+            "fg": _mode_color(PAPER),
+            "activebackground": _mode_color(PLUM_SOFT),
+            "activeforeground": _mode_color(PLUM),
             "relief": "flat",
             "bd": 0,
             "font": (UI_FONT, 11, "bold"),
@@ -559,21 +577,39 @@ class DatePopup(ctk.CTkToplevel):
             header, text=">", command=lambda: self._shift_month(1), **nav_style
         ).pack(side="right", padx=(0, 6), pady=4)
         self._month_label = tk.Label(
-            header, bg=PLUM, fg=PAPER, font=(UI_FONT, 11, "bold")
+            header,
+            bg=_mode_color(PLUM),
+            fg=_mode_color(PAPER),
+            font=(UI_FONT, 11, "bold"),
         )
         self._month_label.pack(side="left", expand=True, fill="x", pady=4)
 
         grid = tk.Frame(
-            outer, bg=PAPER, highlightthickness=1, highlightbackground=PLUM_SOFT
+            outer,
+            bg=_mode_color(PAPER),
+            highlightthickness=1,
+            highlightbackground=_mode_color(PLUM_SOFT),
         )
         grid.pack(padx=12, pady=(0, 8))
         for col, name in enumerate(self.WEEKDAYS):
             tk.Label(
-                grid, text=name, bg=PAPER, fg=MUTED, font=(UI_FONT, 10), width=4, pady=4
+                grid,
+                text=name,
+                bg=_mode_color(PAPER),
+                fg=_mode_color(MUTED),
+                font=(UI_FONT, 10),
+                width=4,
+                pady=4,
             ).grid(row=0, column=col)
         for index in range(42):
             cell = tk.Label(
-                grid, text="", bg=PAPER, fg=INK, font=(UI_FONT, 11), width=4, pady=5
+                grid,
+                text="",
+                bg=_mode_color(PAPER),
+                fg=_mode_color(INK),
+                font=(UI_FONT, 11),
+                width=4,
+                pady=5,
             )
             cell.grid(row=1 + index // 7, column=index % 7, padx=1, pady=1)
             cell.bind("<Button-1>", lambda _e, c=cell: self._pick_cell(c))
@@ -631,15 +667,27 @@ class DatePopup(ctk.CTkToplevel):
     def _style_cell(self, cell: tk.Label, hovered: bool = False) -> None:
         cell_date = self._cell_dates.get(cell)
         if cell_date is None:
-            cell.configure(bg=PAPER, fg=INK, font=(UI_FONT, 11))
+            cell.configure(bg=_mode_color(PAPER), fg=_mode_color(INK), font=(UI_FONT, 11))
         elif cell_date == self._selected:
-            cell.configure(bg=PLUM, fg=PAPER, font=(UI_FONT, 11, "bold"))
+            cell.configure(
+                bg=_mode_color(PLUM),
+                fg=_mode_color(PAPER),
+                font=(UI_FONT, 11, "bold"),
+            )
         elif hovered:
-            cell.configure(bg=PLUM_SOFT, fg=PLUM, font=(UI_FONT, 11))
+            cell.configure(
+                bg=_mode_color(PLUM_SOFT),
+                fg=_mode_color(PLUM),
+                font=(UI_FONT, 11),
+            )
         elif cell_date == date.today():
-            cell.configure(bg=PAPER, fg=MOSS, font=(UI_FONT, 11, "bold"))
+            cell.configure(
+                bg=_mode_color(PAPER),
+                fg=_mode_color(MOSS),
+                font=(UI_FONT, 11, "bold"),
+            )
         else:
-            cell.configure(bg=PAPER, fg=INK, font=(UI_FONT, 11))
+            cell.configure(bg=_mode_color(PAPER), fg=_mode_color(INK), font=(UI_FONT, 11))
 
     def _pick_cell(self, cell: tk.Label) -> None:
         picked = self._cell_dates.get(cell)
@@ -734,6 +782,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.data_root_var = ctk.StringVar(value="")
         self.output_folder_var = ctk.StringVar(value=_display_path(DEFAULT_WORK_DIR))
         self.run_name_var = ctk.StringVar(value="")
+        self.dark_mode_var = ctk.BooleanVar(value=False)
         self.scan_confirmation_var = ctk.StringVar(value="")
         self.scan_missing_var = ctk.StringVar(value="")
 
@@ -1090,12 +1139,14 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     @staticmethod
     def _diagnostic_health_color(health: str) -> str:
-        return {
-            "Healthy": MOSS,
-            "Watch": OCHRE,
-            "Lagging": CLAY,
-            "Blocked": CLAY,
-        }.get(health, OCHRE)
+        return _mode_color(
+            {
+                "Healthy": MOSS,
+                "Watch": OCHRE,
+                "Lagging": CLAY,
+                "Blocked": CLAY,
+            }.get(health, OCHRE)
+        )
 
     @staticmethod
     def _fmt_metric(value: object, suffix: str = "") -> str:
@@ -1738,7 +1789,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
     def _create_diagnostics_guidance_panel(self, parent, row: int) -> None:
         guide = ctk.CTkFrame(
             parent,
-            fg_color="#F8FBFE",
+            fg_color=DIAGNOSTIC_GUIDE_BG,
             corner_radius=8,
             border_width=1,
             border_color=HAIRLINE,
@@ -1826,7 +1877,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         )
         value.grid(row=0, column=1, sticky="e", padx=(8, 0))
         canvas = tk.Canvas(
-            card, height=78, bg=DIAGNOSTIC_CARD_BG, highlightthickness=0, bd=0
+            card,
+            height=78,
+            bg=_mode_color(DIAGNOSTIC_CARD_BG),
+            highlightthickness=0,
+            bd=0,
         )
         canvas.grid(row=1, column=0, sticky="ew", padx=12, pady=(8, 0))
         detail = ctk.CTkLabel(
@@ -1853,7 +1908,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 return
         except TclError:
             return
-        canvas.configure(bg=DIAGNOSTIC_CARD_BG)
+        canvas.configure(bg=_mode_color(DIAGNOSTIC_CARD_BG))
         canvas.delete("all")
         width, height = max(canvas.winfo_width(), 260), max(canvas.winfo_height(), 72)
         top, right, bottom, left = 8, 4, 10, 4
@@ -1873,26 +1928,38 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             top,
             left + plot_width,
             top + plot_height,
-            outline=DIAGNOSTIC_GAUGE_TRACK,
+            outline=_mode_color(DIAGNOSTIC_GAUGE_TRACK),
         )
         watch_y = top + plot_height * (1 - max(0.0, min(1.0, watch_at / lag_at)))
         canvas.create_line(
-            left, watch_y, left + plot_width, watch_y, fill=OCHRE, dash=(3, 4)
+            left,
+            watch_y,
+            left + plot_width,
+            watch_y,
+            fill=_mode_color(OCHRE),
+            dash=(3, 4),
         )
         canvas.create_text(
             left + 5,
             watch_y - 6,
             text="Watch",
-            fill=OCHRE,
+            fill=_mode_color(OCHRE),
             font=(UI_FONT, 8, "bold"),
             anchor="w",
         )
-        canvas.create_line(left, top, left + plot_width, top, fill=CLAY, dash=(3, 4))
+        canvas.create_line(
+            left,
+            top,
+            left + plot_width,
+            top,
+            fill=_mode_color(CLAY),
+            dash=(3, 4),
+        )
         canvas.create_text(
             left + 5,
             top + 8,
             text="Sustained issue",
-            fill=CLAY,
+            fill=_mode_color(CLAY),
             font=(UI_FONT, 8, "bold"),
             anchor="w",
         )
@@ -1901,7 +1968,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 left + plot_width / 2,
                 top + plot_height / 2,
                 text="Collecting",
-                fill=MUTED,
+                fill=_mode_color(MUTED),
                 font=(UI_FONT, 10),
             )
             return
@@ -2012,7 +2079,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             fg_color="transparent",
             corner_radius=0,
             scrollbar_button_color=PLUM,
-            scrollbar_button_hover_color="#0B4FC0",
+            scrollbar_button_hover_color=PRIMARY_HOVER,
         )
         body.grid(row=1, column=0, sticky="nsew", padx=18, pady=(0, 10))
         body.grid_columnconfigure(0, weight=1)
@@ -2189,12 +2256,34 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         ).grid(row=2, column=0, sticky="w", pady=(8, 0))
         right = ctk.CTkFrame(bar, fg_color="transparent")
         right.grid(row=0, column=3, sticky="e", padx=(0, 30))
+        self.theme_switch = ctk.CTkSwitch(
+            right,
+            text="Dark mode",
+            variable=self.dark_mode_var,
+            command=self._toggle_theme,
+            progress_color=PLUM,
+            fg_color=BRAND_TRACK,
+            button_color="#FFFFFF",
+            text_color="#FFFFFF",
+            font=(UI_FONT, 13),
+            switch_width=30,
+            switch_height=17,
+        )
+        self.theme_switch.grid(row=0, column=0)
+        ctk.CTkFrame(right, width=1, height=28, fg_color="#33335B", corner_radius=0).grid(
+            row=0, column=1, padx=18
+        )
         ctk.CTkLabel(
             right,
             text="2.0",
             text_color="#FFFFFF",
             font=(UI_FONT, 13),
-        ).grid(row=0, column=0)
+        ).grid(row=0, column=2)
+
+    def _toggle_theme(self) -> None:
+        ctk.set_appearance_mode("dark" if self.dark_mode_var.get() else "light")
+        self._close_diagnostics_window()
+        self._show_step(self.step)
 
     def _build_step_rail(self) -> None:
         holder = ctk.CTkFrame(self, fg_color=RAIL, corner_radius=0)
@@ -2306,7 +2395,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             height=44,
             corner_radius=8,
             fg_color=PAPER,
-            hover_color="#F4F7FB",
+            hover_color=SURFACE_HOVER,
             border_width=1,
             border_color=FIELD_BORDER,
             text_color=INK,
@@ -2323,7 +2412,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             height=44,
             corner_radius=8,
             fg_color=PLUM,
-            hover_color="#0a48a8",
+            hover_color=PRIMARY_HOVER,
             text_color="#FFFFFF",
             font=(UI_FONT, 15, "bold"),
         )
@@ -2335,10 +2424,17 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         font = tkfont.Font(family=UI_FONT, size=15, weight="bold")
         return font.measure(text) + 2 * side_padding
 
-    def _pill_button(self, parent, text: str, command, fg: str, text_color: str = PAPER):
-        hover = {PLUM: "#0B4FC0", PAPER: "#EEF3F8", FOG: "#CAD8E8", CLAY: "#9A330A"}.get(
-            fg, fg
-        )
+    def _pill_button(self, parent, text: str, command, fg, text_color=PAPER):
+        if fg == PLUM:
+            hover = PRIMARY_HOVER
+        elif fg == PAPER:
+            hover = SURFACE_HOVER
+        elif fg == FOG:
+            hover = ("#CAD8E8", "#3B4864")
+        elif fg == CLAY:
+            hover = ("#9A330A", "#7A302C")
+        else:
+            hover = fg
         return ctk.CTkButton(
             parent,
             text=text,
@@ -2365,7 +2461,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             corner_radius=8,
             border_width=1,
             border_color=HAIRLINE,
-            hover_color="#F4F7FB",
+            hover_color=SURFACE_HOVER,
             font=(UI_FONT, 13, "bold"),
         )
         return button
@@ -2426,6 +2522,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _sync_nav(self) -> None:
         locked = self._build_running
+        self.theme_switch.configure(state="disabled" if locked else "normal")
         self.reset_button.configure(state="disabled" if locked else "normal")
         self.back_button.configure(
             state="disabled" if locked or self.step == 1 else "normal"
@@ -2652,7 +2749,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             corner_radius=8,
             border_width=1,
             border_color=FIELD_BORDER,
-            hover_color="#F4F7FB",
+            hover_color=SURFACE_HOVER,
             font=(UI_FONT, 15, "bold"),
         )
         return button
@@ -2712,7 +2809,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             fg_color="transparent",
             corner_radius=0,
             scrollbar_button_color=PLUM,
-            scrollbar_button_hover_color="#0B4FC0",
+            scrollbar_button_hover_color=PRIMARY_HOVER,
         )
         scroll.grid_columnconfigure(0, weight=1)
         self._wire_scrollable_inner_width(scroll)
@@ -3109,14 +3206,15 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         label = STATUS_PILL_TEXT.get(status, status)
         fg, bg = S2_PILL_STYLES.get(status, S2_PILL_NEUTRAL)
         if status in {"Missing", "Scanning", "Not scanned"}:
-            return label, fg, bg
+            return label, _mode_color(fg), _mode_color(bg)
         if not self._module_selected_for_step2(key):
-            return label, fg, bg
+            return label, _mode_color(fg), _mode_color(bg)
         if status == "Found" and self._module_has_reviewable_inputs(key):
             if self._module_reviewed(key):
-                return label, fg, bg
-            return NEEDS_REVIEW_PILL, *S2_PILL_STYLES[NEEDS_REVIEW_PILL]
-        return label, fg, bg
+                return label, _mode_color(fg), _mode_color(bg)
+            review_fg, review_bg = S2_PILL_STYLES[NEEDS_REVIEW_PILL]
+            return NEEDS_REVIEW_PILL, _mode_color(review_fg), _mode_color(review_bg)
+        return label, _mode_color(fg), _mode_color(bg)
 
     def _modules_awaiting_review(self, keys) -> list[str]:
         pending = []
@@ -3335,11 +3433,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             height=row_h + (self._S2_MISSING_EXTRA if missing else 0),
             bd=0,
             highlightthickness=0,
-            bg=PAPER,
+            bg=_mode_color(PAPER),
         )
         canvas.pack(fill="x")
         controls: dict[str, object] = {"canvas": canvas, "status": status}
-        controls["rule"] = canvas.create_line(2, 0, 2000, 0, fill=ROW_RULE)
+        controls["rule"] = canvas.create_line(2, 0, 2000, 0, fill=_mode_color(ROW_RULE))
         controls["accent"] = canvas.create_rectangle(
             0, 0, self._S2_ACCENT_MIN, row_h, fill="", outline=""
         )
@@ -3375,13 +3473,18 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             mid,
             text=_truncate_for_width(name_text, fonts["name"], self._S2_NAME_MIN - 14),
             font=fonts["name"],
-            fill=INK,
+            fill=_mode_color(INK),
             anchor="w",
         )
         desc_x = name_x + self._S2_NAME_MIN + gap
         summary = MODULE_DETAILS.get(key, {}).get("summary", "")
         controls["desc"] = canvas.create_text(
-            desc_x, mid, text=summary, font=fonts["desc"], fill=INK, anchor="w"
+            desc_x,
+            mid,
+            text=summary,
+            font=fonts["desc"],
+            fill=_mode_color(INK),
+            anchor="w",
         )
         controls["desc_text"] = summary
         pill_label, pill_fg, pill_bg = self._module_pill(key, status)
@@ -3409,7 +3512,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             mid,
             text="Details",
             font=fonts["link"],
-            fill=PLUM,
+            fill=_mode_color(PLUM),
             anchor="e",
             tags=("link",),
         )
@@ -3418,7 +3521,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             row_h + 14,
             text=self._missing_input_message(key),
             font=fonts["desc"],
-            fill=CLAY,
+            fill=_mode_color(CLAY),
             anchor="w",
             state="normal" if missing else "hidden",
         )
@@ -3480,15 +3583,17 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             return
         available = self._module_available(key)
         selected = bool(self.module_vars[key].get()) and available
-        fill = PLUM if selected else PAPER
-        outline = PLUM if selected else FIELD_BORDER
+        fill = _mode_color(PLUM if selected else PAPER)
+        outline = _mode_color(PLUM if selected else FIELD_BORDER)
         if not available:
-            fill, outline = FOG, FIELD_BORDER
+            fill, outline = _mode_color(FOG), _mode_color(FIELD_BORDER)
         try:
             if canvas.winfo_exists():
                 canvas.itemconfigure(box, fill=fill, outline=outline)
                 canvas.itemconfigure(
-                    check, fill=PAPER, state="normal" if selected else "hidden"
+                    check,
+                    fill=_mode_color(PAPER),
+                    state="normal" if selected else "hidden",
                 )
         except TclError:
             pass
@@ -3542,7 +3647,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     wrapper.pack_forget()
                 canvas = controls.get("canvas")
                 if canvas is not None and canvas.winfo_exists():
-                    canvas.configure(bg=PAPER)
+                    canvas.configure(bg=_mode_color(PAPER))
                     canvas.itemconfigure(controls["accent"], fill="", outline="")
             except TclError:
                 pass
@@ -3587,8 +3692,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 self._build_module_expansion(controls["expansion"], key)
                 controls["expansion_built"] = True
             wrapper.pack(fill="x", after=canvas)
-            canvas.configure(bg=EXPANSION_TINT)
-            canvas.itemconfigure(controls["accent"], fill=PLUM, outline=PLUM)
+            canvas.configure(bg=_mode_color(EXPANSION_TINT))
+            canvas.itemconfigure(
+                controls["accent"],
+                fill=_mode_color(PLUM),
+                outline=_mode_color(PLUM),
+            )
         except TclError:
             return
         self._expanded_module_key = key
@@ -3712,7 +3821,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             body_label.pack(anchor="w", fill="x", pady=(2, 0))
             body_labels.append(body_label)
             if col < 2:
-                tk.Frame(inner, bg=RUN_DETAIL_RULE, width=1).grid(
+                tk.Frame(inner, bg=_mode_color(RUN_DETAIL_RULE), width=1).grid(
                     row=0, column=grid_col + 1, sticky="ns", padx=20
                 )
 
@@ -3803,7 +3912,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 height=30,
                 border_width=1,
                 border_color=HAIRLINE,
-                hover_color="#F4F7FB",
+                hover_color=SURFACE_HOVER,
                 font=(UI_FONT, 12, "bold"),
             )
             if not self.module_vars[key].get():
@@ -3974,7 +4083,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 height=36,
                 corner_radius=8,
                 fg_color=PLUM,
-                hover_color="#0B4FC0",
+                hover_color=PRIMARY_HOVER,
                 command=lambda k=key, fk=field.key, e=entry: self._open_date_picker(
                     k, fk, e
                 ),
@@ -4228,7 +4337,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             font=(UI_FONT, 15),
             text_color=INK,
             fg_color=PLUM,
-            hover_color="#0B4FC0",
+            hover_color=PRIMARY_HOVER,
             checkbox_width=18,
             checkbox_height=18,
             corner_radius=4,
@@ -4286,7 +4395,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 height=32,
                 corner_radius=8,
                 fg_color=PLUM,
-                hover_color="#0B4FC0",
+                hover_color=PRIMARY_HOVER,
                 command=lambda fk=field_key, e=entry: self._open_date_picker(
                     "perfmon", fk, e
                 ),
@@ -4700,7 +4809,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             is_last = col == len(values) - 1
             row.grid_columnconfigure(grid_col, weight=1 if is_last else 0)
             if col:
-                tk.Frame(row, bg=RUN_DETAIL_RULE, width=1).grid(
+                tk.Frame(row, bg=_mode_color(RUN_DETAIL_RULE), width=1).grid(
                     row=0, column=grid_col - 1, sticky="ns", padx=24
                 )
             cell = ctk.CTkFrame(row, fg_color="transparent")
@@ -4788,9 +4897,15 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         fonts = self._step3_fonts()
         row_h = self._S3_ROW_HEIGHT
         gap = self._S3_GAP
-        canvas = tk.Canvas(card, height=row_h, bd=0, highlightthickness=0, bg=PAPER)
+        canvas = tk.Canvas(
+            card,
+            height=row_h,
+            bd=0,
+            highlightthickness=0,
+            bg=_mode_color(PAPER),
+        )
         canvas.pack(fill="x", padx=2)
-        rule = canvas.create_line(0, 0, 2000, 0, fill=ROW_RULE)
+        rule = canvas.create_line(0, 0, 2000, 0, fill=_mode_color(ROW_RULE))
         inset = 16
         mid = row_h // 2
         canvas.create_image(inset, mid, image=_canvas_icon("check_tile", 16), anchor="w")
@@ -4802,7 +4917,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 self._module_display_name(key), fonts["name"], name_max
             ),
             font=fonts["name"],
-            fill=INK,
+            fill=_mode_color(INK),
             anchor="w",
         )
         desc_text = MODULE_DETAILS.get(key, {}).get("summary", "")
@@ -4811,7 +4926,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             mid,
             text=desc_text,
             font=fonts["desc"],
-            fill=INK,
+            fill=_mode_color(INK),
             anchor="w",
         )
         badge_items = [
@@ -4819,7 +4934,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             for term in self._module_output_terms(key)
         ]
         pill_w, pill_h = 118, 24
-        style = S3_STATUS_PILL_STYLES["not_started"]
+        style = tuple(
+            _mode_color(color) for color in S3_STATUS_PILL_STYLES["not_started"]
+        )
         pill_bg_item = canvas.create_image(
             0, mid, image=_pill_bg_photo(style[0], style[1], pill_w, pill_h), anchor="e"
         )
@@ -5052,8 +5169,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         self.build_button.configure(state="disabled", text="Building")
 
     def _set_status_cell(self, key: str, state: str, text: str | None = None) -> None:
-        bg, border, text_color = S3_STATUS_PILL_STYLES.get(
-            state, S3_STATUS_PILL_STYLES["not_started"]
+        bg, border, text_color = (
+            _mode_color(color)
+            for color in S3_STATUS_PILL_STYLES.get(
+                state, S3_STATUS_PILL_STYLES["not_started"]
+            )
         )
         if text is None:
             text = state.replace("_", " ").capitalize()

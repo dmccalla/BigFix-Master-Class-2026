@@ -76,6 +76,11 @@ _TEXT_EXT = {
 # This guard names the strings it bans, so it cannot scan itself.
 _EXCL_FILES = {Path(__file__).resolve()}
 
+_ALLOWED_PROJECT_REFERENCES = (
+    "https://github.com/dmccalla/BigFix-Master-Class-2026/issues",
+    "https://github.com/dmccalla/BigFix-Master-Class-2026",
+)
+
 # Approved references retained after the Master Class task cleanup.
 _ALLOWED_BES_REFERENCES = (
     "<Source>HCL BigFix AVP and Professional Services</Source>",
@@ -101,6 +106,8 @@ def _hits(path: Path) -> list[str]:
     except OSError:
         return hits
     for number, line in enumerate(lines, 1):
+        for reference in _ALLOWED_PROJECT_REFERENCES:
+            line = line.replace(reference, "")
         if path.suffix.lower() == ".bes":
             for reference in _ALLOWED_BES_REFERENCES:
                 line = line.replace(reference, "")

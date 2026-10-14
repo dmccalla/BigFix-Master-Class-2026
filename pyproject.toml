@@ -21,7 +21,7 @@ dependencies = [
     "pandas>=2.0.0",
     "xlsxwriter>=3.0.0",
     # customtkinter powers the desktop UI.
-    "customtkinter>=5.2.0,<6.0.0",
+    "customtkinter>=5.2.0,<7.0.0",
 ]
 
 [dependency-groups]

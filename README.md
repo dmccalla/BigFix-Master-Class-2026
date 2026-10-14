@@ -2,15 +2,41 @@
 
 Automated performance and configuration analysis for BigFix.
 
-The Workbench takes data collected from a BigFix deployment, runs the three
-Master Class analysis modules against it, and writes each module's Mini Report,
-Infographic and Excel workbook into one run folder.
+The Workbench takes data collected from a BigFix deployment, runs the selected
+Master Class analysis modules, and writes Mini Reports, Infographics, and
+supporting Excel workbooks where applicable into a timestamped run folder.
+
+## Purpose And Project Status
+
+Built for the Master Class, the Workbench is a completed class demonstration,
+not an application under ongoing active development. It is intended to inspire
+class members and showcase the possibilities of automation.
+
+Class members are encouraged to add their own modules and extend the Workbench.
+Much of the application was built with AI assistance, and you can continue
+using AI to develop your own extensions to the framework.
+
+Class members have read-only access to the GitHub repository:
+[https://github.com/dmccalla/BigFix-Master-Class-2026](https://github.com/dmccalla/BigFix-Master-Class-2026).
+Make changes in your own copy or fork. Report issues and request enhancements
+through the repository's [Issues tab](https://github.com/dmccalla/BigFix-Master-Class-2026/issues).
+Further work on the class version will be considered
+in response to those requests.
+
+## Analysis Modules
 
 | Module | What it needs | What it writes |
 |---|---|---|
 | Client Performance Analysis | A Client Performance Counters export (XML or CSV). Optional: the Top 10 evaluation capture, the UDP notification capture and a `Deployment_Information` folder. | Mini Report, Infographic, Excel |
 | Perfmon Infrastructure Analysis | A PerfMon `.blg` capture from a BigFix server, with a second capture optional. | Mini Report, Infographic, Excel |
 | FillDB Performance Analysis | The FillDB performance logs, or the analyzer's CSV. | Mini Report, Infographic |
+
+For FillDB, keep raw logs and their rollover files together in one folder.
+Select any log in the set; the Workbench combines the related logs in
+chronological order and runs `MXFillDBPerf` automatically. An existing CSV
+must have been generated with `--healthcheck`. The analyzed data is included
+in the Mini Report; no Excel workbook is needed because `MXFillDBPerf` does
+not produce a separate dataset for sorting or filtering.
 
 The repository ships small FillDB and Perfmon samples under `SampleData`.
 
@@ -27,6 +53,9 @@ on the repository's v2.0 release. To add it to a clone, extract
   the BigFix Performance Toolkit, which ships in `Utilities`. An analyzer CSV
   needs no extra tool.
 - Python 3.12 or newer, installed with "Add Python to PATH".
+- uv, installed after Python. In PowerShell, run
+  `winget install --id=astral-sh.uv -e`, reopen PowerShell, and check
+  `uv --version`.
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
 - Microsoft Word and Excel are the preferred and most extensively tested
@@ -35,15 +64,23 @@ on the repository's v2.0 release. To add it to a clone, extract
   compatibility coverage than Word and Excel.
 
 The Workbench installs its own packages into a private `.venv` folder next
-to the code. Your Python installation is not changed. Every package version
-is pinned and at least seven days old.
+to the code. Your Python installation is not changed. Runtime dependencies
+are pinned. Dependency cooldowns hold back new package versions for at least
+seven days before routine updates use them.
 
 ## Using The Workbench
+
+The [User Guide (Word)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_User_Guide.docx)
+and [User Guide (PDF)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf)
+cover setup, data collection, the three-step workflow, and outputs.
 
 See [Getting Started](Docs/Getting_Started.md) for the application workflow
 and outputs. [Data Collection](Docs/Data_Collection.md) describes the files
 each module needs, where they come from, and how the live labs run the
 corresponding BigFix collection tasks first.
+
+Version 2.1 adds the **Dark mode** switch for light and dark appearance.
+The switch is unavailable while a build is running.
 
 ## Layout
 

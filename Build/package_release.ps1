@@ -233,6 +233,12 @@ $productName $version
 3. Read Docs\Getting_Started.md before class. Docs\Data_Collection.md describes
    the files each module needs.
 
+Windows may block the .cmd launcher because it was downloaded from the Internet.
+If it will not run, right-click the .cmd file and select Properties. On the
+General tab, tick the Unblock box at the bottom, then click OK. Run the launcher
+again. If Unblock is not shown, no change is needed. See the User Guide for the
+file Properties screenshot.
+
 Release notes are in CHANGELOG.md. The software bill of materials is
 sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.
 "@

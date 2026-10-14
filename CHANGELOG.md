@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Documentation
+
+- Add Windows launcher Unblock steps and the file Properties screenshot to the user guide, lab startup steps, and installation documentation. Refresh the guide PDFs and packaged startup instructions.
+
 ## [2.0]
 
 ### Added

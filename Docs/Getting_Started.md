@@ -24,6 +24,14 @@ deployment is needed to follow it.
    continue. Creating the environment and installing the packages takes
    about a minute. Later runs skip this and open the app straight away.
 
+### Unblock the Windows launcher
+
+Windows may block the `.cmd` launcher because it was downloaded from the Internet. If it will not run, right-click the `.cmd` file and select **Properties**. On the **General** tab, tick the **Unblock** box at the bottom, then click **OK**. Run the launcher again. If **Unblock** is not shown, no change is needed.
+
+![Windows launcher file Properties with the Unblock checkbox selected](User%20Guide/windows-launcher-unblock.png)
+
+*The screenshot uses Run Diagnostics Workbench.cmd as an example. The same steps apply to this tool's `.cmd` launcher.*
+
 If the launcher reports that Python was not found or is too old, install
 Python 3.12 or newer and run the launcher again. If an install fails part
 way through, delete the `.venv` folder and run the launcher again.

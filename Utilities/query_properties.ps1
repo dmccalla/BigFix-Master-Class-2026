@@ -7,10 +7,8 @@
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 # query_properties.ps1
-# Reads the Client Performance Counter XML captures and writes CSVs for loop
-# data, the Top 10 slowest evaluations, and UDP notification results.
-# Fast on big estates. Rows fold into per-lookup totals in one pass.
-# The API is queried once per analysis, not once per property.
+# Reads Client Performance XML and writes loop, Top 10, and UDP CSV files.
+# Queries each analysis once and summarizes Top 10 rows in one pass.
 param(
     [Alias("LoopInputXml")]
     [string]$LoopXml = "",
@@ -31,18 +29,14 @@ param(
     [int]$TopCount = 10,
     [int]$TimeoutSec = 120,
     [int]$QueryAttempts = 2,
-    # Capture mode. A single session-relevance query over the whole estate is
-    # cut short by the server on a large deployment, and the truncation is
-    # silent: the action still succeeds and the capture is simply short. These
-    # run the same relevance in slices and append each slice to the capture,
-    # which the answer scanner already accepts as concatenated documents.
+    # Query large deployments in batches to avoid short responses.
+    # Each batch is appended to the capture file.
     [string]$CaptureLoopXml = "",
     [string]$CaptureUdpXml = "",
     [string]$CaptureTop10Xml = "",
     [int]$BatchSize = 1000,
-    # Extra relevance clause narrowing which computers are captured, for
-    # example 'exists bes computer group whose (name of it = "Pilot")'. Left
-    # empty the capture covers every computer.
+    # Optional relevance to limit the captured computers.
+    # Leave blank to capture all computers.
     [string]$ComputerFilter = "",
     [switch]$IgnoreCertificateErrors,
     [switch]$Quiet
@@ -107,17 +101,16 @@ function StopForBigFixDatabaseCompatibility($Purpose, $Message) {
     Fail "BigFix server-side database compatibility error during $Purpose. No capture files were retained. This is not a client data or collector error. Confirm that every server-side BigFix component connected to the Enterprise database is compatible with the current platform level. Server response: $Message"
 }
 
-# Matches one answer element. Capture files can hold several concatenated XML
-# documents, so answers are scanned instead of DOM parsed.
+# Capture files may contain multiple XML documents, so scan answer elements.
 $AnswerRegex = [regex]::new('<Answer\b[^>]*>(.*?)</Answer>', 'Singleline, Compiled')
-# One top10 row. Example: 12.5: BES Support.123:Some Property
+# Parses one Top 10 row.
 $Top10LineRegex = [regex]::new('^(?:\d+\s+\d+(?:\.\d+)?%\s+)?(?<sec>\d+(?:\.\d+)?):\s*(?<lookup>.+)$', 'Compiled')
 # Splits a lookup into site, analysis id, and property.
 $LookupRegex = [regex]::new('^(?<site>.+)\.(?<analysisId>\d+):(?<property>.+)$', 'Compiled')
-# Splits a resolved property descriptor back into its fields.
+# Splits a resolved property descriptor into fields.
 $DescriptorRegex = [regex]::new('^Analysis Name=(?<an>.*) \| Display Name=(?<dn>.*) \| Name=(?<n>.*) \| Source Name=(?<sn>.*) \| Source ID=(?<sid>.*)$', 'Compiled')
 
-# Returns every answer in the file. Falls back to plain text lines.
+# Reads answers from XML or plain text lines.
 function ReadAnswers($Path) {
     if ([string]::IsNullOrWhiteSpace($Path)) { return @() }
     if (-not (Test-Path -LiteralPath $Path)) { Fail "Input file is missing: $Path" }
@@ -136,7 +129,7 @@ function ReadAnswers($Path) {
     $out
 }
 
-# Computer names can contain commas. Extra leading fields merge back into the name.
+# Computer names can contain commas. Merge extra fields into the name.
 function SplitAnswerFields($Line, $Expected) {
     $parts = @("$Line".Split(","))
     if ($parts.Count -le $Expected) { return $parts }
@@ -166,13 +159,14 @@ function IsLoopMetricField($Value) {
 
 function SplitLoopAnswerFields($Line) {
     $parts = @("$Line".Split(","))
-    if ($parts.Count -le 7) {
-        while ($parts.Count -lt 7) { $parts += "" }
+    if ($parts.Count -eq 14) {
         return $parts
     }
 
-    $tailStart = $parts.Count - 3
-    $middleEnd = $parts.Count - 4
+    if ($parts.Count -lt 14) { return @() }
+
+    $tailStart = $parts.Count - 10
+    $middleEnd = $parts.Count - 11
     for ($i = 1; $i -lt $middleEnd; $i++) {
         if ((IsLoopMetricField $parts[$i]) -and (IsLoopMetricField $parts[$i + 1])) {
             return @(
@@ -182,12 +176,19 @@ function SplitLoopAnswerFields($Line) {
                 (JoinAnswerFieldSlice $parts ($i + 2) $middleEnd),
                 "$($parts[$tailStart])".Trim(),
                 "$($parts[$tailStart + 1])".Trim(),
-                "$($parts[$tailStart + 2])".Trim()
+                "$($parts[$tailStart + 2])".Trim(),
+                "$($parts[$tailStart + 3])".Trim(),
+                "$($parts[$tailStart + 4])".Trim(),
+                "$($parts[$tailStart + 5])".Trim(),
+                "$($parts[$tailStart + 6])".Trim(),
+                "$($parts[$tailStart + 7])".Trim(),
+                "$($parts[$tailStart + 8])".Trim(),
+                "$($parts[$tailStart + 9])".Trim()
             )
         }
     }
 
-    SplitAnswerFields $Line 7
+    return @(SplitAnswerFields $Line 14)
 }
 
 function BuildLoopFromAnswers($Answers, $OutputPath) {
@@ -199,14 +200,21 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {
         "Platform Health Check - Last UDP Ping",
         "Platform Health Check - Receiving UDP Pings",
         "Platform Health Check - Command Polling Enabled",
-        "Platform Health Check - Command Polling Minutes"
+        "Platform Health Check - Command Polling Minutes",
+        "Platform Health Check - FastHashVerify Enabled",
+        "Platform Health Check - FastHashVerify Work ms",
+        "Platform Health Check - FastHashVerify Sleep ms",
+        "Platform Health Check - Agent Multicore Scaling Enabled",
+        "Platform Health Check - Agent CPU Work Idle",
+        "Platform Health Check - Agent CPU Sleep Idle",
+        "Platform Health Check - Agent Total Physical CPU Core Count"
     )
     $loopRows = New-Object System.Collections.Generic.List[object]
     foreach ($answer in $Answers) {
         if (-not $answer) { continue }
         if ($answer -match '^\s*Computer Name\s*,') { continue }
         $parts = @(SplitLoopAnswerFields $answer)
-        if ($parts.Count -lt 7) { continue }
+        if ($parts.Count -ne 14) { continue }
         $loopRows.Add([pscustomobject]@{
             "Computer Name" = $parts[0].Trim()
             "Platform Health Check - Maximum Cycle Minutes" = $parts[1].Trim()
@@ -215,6 +223,13 @@ function BuildLoopFromAnswers($Answers, $OutputPath) {
             "Platform Health Check - Receiving UDP Pings" = $parts[4].Trim()
             "Platform Health Check - Command Polling Enabled" = $parts[5].Trim()
             "Platform Health Check - Command Polling Minutes" = $parts[6].Trim()
+            "Platform Health Check - FastHashVerify Enabled" = $parts[7].Trim()
+            "Platform Health Check - FastHashVerify Work ms" = $parts[8].Trim()
+            "Platform Health Check - FastHashVerify Sleep ms" = $parts[9].Trim()
+            "Platform Health Check - Agent Multicore Scaling Enabled" = $parts[10].Trim()
+            "Platform Health Check - Agent CPU Work Idle" = $parts[11].Trim()
+            "Platform Health Check - Agent CPU Sleep Idle" = $parts[12].Trim()
+            "Platform Health Check - Agent Total Physical CPU Core Count" = $parts[13].Trim()
         })
     }
     if ($loopRows.Count) {
@@ -257,13 +272,12 @@ function BuildUdpFromAnswers($Answers, $OutputPath) {
     }
 }
 
-# One query returns every property of the analysis, in the same text format
-# the old per property query used, so the CSV Result strings are unchanged.
+# Query all analysis properties at once and keep the existing CSV result format.
 function AnalysisRelevance($Site, $AnalysisId) {
     '("Analysis Name=" & name of source analysis of it & " | Display Name=" & display name of it & " | Name=" & name of it & " | Source Name=" & source name of it & " | Source ID=" & (source id of it as string)) of bes properties whose (name of site of source analysis of it = "' + $Site + '" and id of source analysis of it = ' + $AnalysisId + ')'
 }
 
-# API setup, done once and only when something actually needs the API.
+# Set up the API only when it is needed.
 $script:ApiReady = $false
 function EnsureApiReady($Purpose) {
     if ($script:ApiReady) { return }
@@ -285,9 +299,7 @@ function EnsureApiReady($Purpose) {
     $script:ApiReady = $true
 }
 
-# Raw response body, so a capture keeps the server's own XML rather than a
-# re-serialised copy. Errors are raised, never written to the capture: a
-# truncated or failed query must not look like a short estate.
+# Keep the original response body. Fail queries instead of saving incomplete captures.
 function InvokeBigFixQueryRaw($Relevance, $Purpose = "BigFix API query") {
     $url = $script:ApiQueryUrl + "?relevance=" + [Uri]::EscapeDataString($Relevance)
     $attempt = 0
@@ -324,8 +336,7 @@ function ComputerSetRelevance($Filter) {
     "set of BES computers whose ($Filter)"
 }
 
-# Slice boundaries taken from the real ids rather than a fixed stride, so every
-# batch holds BatchSize computers however sparsely the ids are allocated.
+# Build batches from reported computer IDs.
 function GetComputerIdBatches($Filter, $Size) {
     $setRel = ComputerSetRelevance $Filter
     $idRel = "(id of it as string) of elements of $setRel"
@@ -356,9 +367,7 @@ function NewComputerIdBatch($Ids) {
     }
 }
 
-# A failed or silently short response is retried in smaller slices. This keeps
-# large deployments moving while still failing with the exact computer id and
-# BigFix error when one endpoint cannot be queried safely.
+# Retry a failed or short batch as smaller batches.
 function CaptureBatchWithFallback($Template, $OutputPath, $Label, $Filter, $Batch, $BatchName, [bool]$RequireFullCount) {
     $scope = "id of it >= $($Batch.Low) and id of it <= $($Batch.High)"
     if (-not [string]::IsNullOrWhiteSpace($Filter)) { $scope = "($Filter) and $scope" }
@@ -388,9 +397,8 @@ function CaptureBatchWithFallback($Template, $OutputPath, $Label, $Filter, $Batc
     }
 }
 
-# Runs one relevance template per batch and appends each response to the
-# capture. The template must contain the COMPUTERSET token where the computer
-# set belongs.
+# Run the template for each batch and append the response to the capture.
+# COMPUTERSET is replaced with that batch's computers.
 function CaptureBatched($Template, $OutputPath, $Label, $Filter, $Size) {
     EnsureApiReady "capturing $Label"
     $batches = @(GetComputerIdBatches $Filter $Size)
@@ -403,7 +411,7 @@ function CaptureBatched($Template, $OutputPath, $Label, $Filter, $Size) {
         $index++
         $captured += CaptureBatchWithFallback $Template $OutputPath $Label $Filter $b "$index/$($batches.Count)" $true
     }
-    # The whole point of the exercise. A short capture is reported, not shipped.
+    # Reject short captures.
     if ($captured -lt $expected) {
         Fail "$Label capture is short: $captured answers for $expected computers. Lower -BatchSize and run again."
     }
@@ -416,10 +424,7 @@ function InvokeBigFixQuery($Relevance) {
     Log "Request URL: $url"
     $response = InvokeBigFixQueryRaw $Relevance "BigFix API query"
     [xml]$xml = $response.Content
-    # A zero-answer Result yields $null, and $null through a pipeline is one
-    # iteration, not none. Without this filter an empty result reads as a
-    # single blank row: a phantom computer id of 0, or a descriptor that
-    # "did not parse".
+    # Ignore null answers so an empty result does not create a blank row.
     @($xml.BESAPI.Query.Result.Answer | Where-Object { $null -ne $_ } | ForEach-Object { $_.InnerText })
 }
 
@@ -434,12 +439,10 @@ try {
 if ($QueryAttempts -lt 1) { $QueryAttempts = 1 }
 
 # --- Capture ---------------------------------------------------------------
-# Same relevance the task used to run through a single iem call, with the
-# computer set factored out so it can be sliced. COMPUTERSET is substituted per
-# batch.
+# Use the existing loop relevance with COMPUTERSET replaced per batch.
 $LoopTemplate = @'
-(item 0 of it & "," & item 1 of it & "," & item 2 of it & "," & item 3 of it & "," & item 4 of it & "," & item 5 of it & "," & item 6 of it)
-of (item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it)
+(item 0 of it & "," & item 1 of it & "," & item 2 of it & "," & item 3 of it & "," & item 4 of it & "," & item 5 of it & "," & item 6 of it & "," & item 7 of it & "," & item 8 of it & "," & item 9 of it & "," & item 10 of it & "," & item 11 of it & "," & item 12 of it & "," & item 13 of it)
+of (item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it, item 13 of it)
 of
 (
   (
@@ -449,9 +452,16 @@ of
     (if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Last UDP Ping Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Last UDP Ping Property Does Not Exist"))),
     (if (size of item 4 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 4 of it)) else (if (size of item 4 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 4 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist"))),
     (if (size of item 5 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 5 of it)) else (if (size of item 5 of it > 1) then (("Platform Health Check - Command Polling Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 5 of it) as string) else ("Platform Health Check - Command Polling Enabled Property Does Not Exist"))),
-    (if (size of item 6 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 6 of it)) else (if (size of item 6 of it > 1) then (("Platform Health Check - Command Polling Minutes Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 6 of it) as string) else ("Platform Health Check - Command Polling Minutes Property Does Not Exist")))
+    (if (size of item 6 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 6 of it)) else (if (size of item 6 of it > 1) then (("Platform Health Check - Command Polling Minutes Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 6 of it) as string) else ("Platform Health Check - Command Polling Minutes Property Does Not Exist"))),
+    (if (size of item 7 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 7 of it)) else (if (size of item 7 of it > 1) then (("Platform Health Check - FastHashVerify Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 7 of it) as string) else ("Platform Health Check - FastHashVerify Enabled Property Does Not Exist"))),
+    (if (size of item 8 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 8 of it)) else (if (size of item 8 of it > 1) then (("Platform Health Check - FastHashVerify Work ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 8 of it) as string) else ("Platform Health Check - FastHashVerify Work ms Property Does Not Exist"))),
+    (if (size of item 9 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 9 of it)) else (if (size of item 9 of it > 1) then (("Platform Health Check - FastHashVerify Sleep ms Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 9 of it) as string) else ("Platform Health Check - FastHashVerify Sleep ms Property Does Not Exist"))),
+    (if (size of item 10 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 10 of it)) else (if (size of item 10 of it > 1) then (("Platform Health Check - Agent Multicore Scaling Enabled Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 10 of it) as string) else ("Platform Health Check - Agent Multicore Scaling Enabled Property Does Not Exist"))),
+    (if (size of item 11 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 11 of it)) else (if (size of item 11 of it > 1) then (("Platform Health Check - Agent CPU Work Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 11 of it) as string) else ("Platform Health Check - Agent CPU Work Idle Property Does Not Exist"))),
+    (if (size of item 12 of it = 1) then ((if it = "" then "Not Set" else it) of concatenation ";" of values of results (item 0 of it, elements of item 12 of it)) else (if (size of item 12 of it > 1) then (("Platform Health Check - Agent CPU Sleep Idle Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 12 of it) as string) else ("Platform Health Check - Agent CPU Sleep Idle Property Does Not Exist"))),
+    (if (size of item 13 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 13 of it)) else (if (size of item 13 of it > 1) then (("Platform Health Check - Agent Total Physical CPU Core Count Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 13 of it) as string) else ("Platform Health Check - Agent Total Physical CPU Core Count Property Does Not Exist")))
   )
-  of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it)
+  of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it, item 4 of it, item 5 of it, item 6 of it, item 7 of it, item 8 of it, item 9 of it, item 10 of it, item 11 of it, item 12 of it, item 13 of it)
 )
 of
 (
@@ -461,16 +471,21 @@ of
   (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Last UDP Ping") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Last UDP Ping") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Last UDP Ping") as lowercase)),
   (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase)),
   (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Enabled") as lowercase or name of it as lowercase = ("Platform Health Check - Command Polling Enbaled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Enabled") as lowercase or name of it as lowercase = ("Platform Health Check - Command Polling Enbaled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Enabled") as lowercase or name of it as lowercase = ("Platform Health Check - Command Polling Enbaled") as lowercase)),
-  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase))
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Command Polling Minutes") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Enabled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Enabled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Enabled") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Work ms") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Work ms") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Work ms") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Sleep ms") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - FastHashVerify Sleep ms") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - FastHashVerify Sleep ms") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent Multicore Scaling Enabled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent Multicore Scaling Enabled") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent Multicore Scaling Enabled") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent CPU Work Idle") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent CPU Work Idle") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent CPU Work Idle") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent CPU Sleep Idle") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent CPU Sleep Idle") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent CPU Sleep Idle") as lowercase)),
+  (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent Total Physical CPU Core Count") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Agent Total Physical CPU Core Count") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Agent Total Physical CPU Core Count") as lowercase))
 )
 '@
 $LoopTemplate = ($LoopTemplate -replace '\s+', ' ').Trim()
 
 $UdpTemplate = '(item 0 of it & ", " & item 1 of it & ", " & item 2 of it & ", " & item 3 of it) of (item 0 of it, item 1 of it, item 2 of it, item 3 of it) of (((if exists name of item 0 of it then name of item 0 of it else "Computer ID " & (id of item 0 of it as string)),(if (size of item 1 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 1 of it)) else (if (size of item 1 of it > 1) then (("IP Address Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 1 of it) as string) else ("IP Address Property Does Not Exist"))),(if (size of item 2 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 2 of it)) else (if (size of item 2 of it > 1) then (("Relay Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 2 of it) as string) else ("Relay Property Does Not Exist"))),(if (size of item 3 of it = 1) then ((if it = "" then "Not Reported" else it) of concatenation ";" of values of results (item 0 of it, elements of item 3 of it)) else (if (size of item 3 of it > 1) then (("Platform Health Check - Receiving UDP Pings Duplicates: " & concatenation "|" of ((name of it) & "=" & (id of it as string)) of elements of item 3 of it) as string) else ("Platform Health Check - Receiving UDP Pings Property Does Not Exist")))) of (elements of item 0 of it, item 1 of it, item 2 of it, item 3 of it)) of (COMPUTERSET, set of bes properties whose (reserved flag of it AND name of it as lowercase = ("IP Address") as lowercase), set of bes properties whose (name of it as lowercase = ("Relay") as lowercase), (if exists bes properties whose ((name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") then set of bes properties whose ((name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase) and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)") else set of bes properties whose (name of it as lowercase = ("Platform Health Check - Receiving UDP Pings") as lowercase)))'
 
-# The original Top 10 query had no computer set at all, so it could not be
-# sliced and had no expected count to check against. Scoping it by computer
-# gives it both.
+# Scope the Top 10 query by computer so it can be batched and checked.
 $Top10Template = 'values of results (elements of COMPUTERSET, elements of set of bes properties whose (name of it = "Platform Health Check - Top 10 Slow Evaluations" and name of source analysis of it = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"))'
 
 if (-not [string]::IsNullOrWhiteSpace($CaptureLoopXml)) {
@@ -482,8 +497,7 @@ if (-not [string]::IsNullOrWhiteSpace($CaptureUdpXml)) {
     $UdpXml = $CaptureUdpXml
 }
 if (-not [string]::IsNullOrWhiteSpace($CaptureTop10Xml)) {
-    # Not every computer reports this property, so a short answer count here is
-    # expected rather than a failure. Reported for visibility only.
+    # This property is optional. Report a short answer count but do not fail.
     EnsureApiReady "capturing Top 10"
     $batches = @(GetComputerIdBatches $ComputerFilter $BatchSize)
     Remove-Item -LiteralPath $CaptureTop10Xml -ErrorAction SilentlyContinue
@@ -517,8 +531,7 @@ if ([string]::IsNullOrWhiteSpace($UdpXml)) {
     BuildUdpFromAnswers $udpAnswers $OutputUdpCsv
 }
 
-# One pass over the top10 rows. Each row updates count, total, and max for
-# its lookup. No row objects, no grouping, no sorting of raw rows.
+# Summarize each Top 10 lookup while reading the rows.
 $agg = New-Object 'System.Collections.Generic.Dictionary[string,object]'
 $rowsSeen = 0
 foreach ($answer in (ReadAnswers $top10Source)) {
@@ -547,7 +560,7 @@ if ($agg.Count -eq 0) {
 }
 if ($TopCount -le 0) { $TopCount = 10 }
 
-# Classify each distinct lookup. Background rows resolve locally.
+# Classify each lookup. Background rows resolve locally.
 $candidates = New-Object System.Collections.Generic.List[object]
 foreach ($entry in $agg.GetEnumerator()) {
     $stats = $entry.Value
@@ -582,14 +595,12 @@ if (@($candidates | Where-Object { $_.NeedsLookup }).Count -gt 0) {
     EnsureApiReady "resolving Top10 lookups"
 }
 
-# One API query per distinct analysis. Index every returned descriptor by
-# display name, name, source name, and source id. The dictionary is case
-# sensitive to match relevance equality.
+# Query each analysis once and index its property descriptors.
 $analysisIndex = New-Object 'System.Collections.Generic.Dictionary[string,object]'
 $analysisError = New-Object 'System.Collections.Generic.Dictionary[string,string]'
 foreach ($c in $candidates) {
     if (-not $c.NeedsLookup) { continue }
-    # Id first: the id is numeric, so the first pipe is always the separator.
+    # The first pipe follows the numeric source ID.
     $key = "$($c.AnalysisId)|$($c.Site)"
     if ($analysisIndex.ContainsKey($key) -or $analysisError.ContainsKey($key)) { continue }
     try {
@@ -614,9 +625,7 @@ foreach ($c in $candidates) {
     }
 }
 
-# Resolve every lookup locally. A lookup matches on display name, name,
-# source name, or trailing digits as source id. Same rule as the old
-# per property relevance. Prop 007 matches source id 7.
+# Match lookups by display name, property name, source name, or source ID.
 foreach ($c in $candidates) {
     if (-not $c.NeedsLookup) { continue }
     $key = "$($c.AnalysisId)|$($c.Site)"
@@ -641,8 +650,7 @@ foreach ($c in $candidates) {
     else { $c.Status = "NO RESULTS"; $c.Result = $c.Lookup }
 }
 
-# Group by resolved name. Lookups resolving to the same name merge with
-# exact combined stats.
+# Combine rows that resolve to the same name.
 $groups = New-Object 'System.Collections.Generic.Dictionary[string,object]'
 foreach ($c in $candidates) {
     $g = $null
@@ -670,7 +678,7 @@ foreach ($entry in $groups.GetEnumerator()) {
     })
 }
 
-# Slowest average first. Ties break on total, then occurrences, then name.
+# Sort by average time, then total time, count, and name.
 $report = @($report | Sort-Object @{e={$_.SortSeconds};d=$true}, @{e={$_.TotalClientProcessingSeconds};d=$true}, @{e={$_.Occurrences};d=$true}, Result | Select-Object -First $TopCount)
 if ($report.Count) {
     $report | Select-Object $topColumns | Export-Csv -LiteralPath $OutputTop10Csv -NoTypeInformation
@@ -685,6 +693,6 @@ $parse = @($candidates | Where-Object { $_.Status -eq "PARSE FAILED" }).Count
 Log "Query run finished. OK=$ok; No Results=$none; Errors=$err; Parse Failed=$parse"
 Log "Top10 Result CSV: $OutputTop10Csv"
 
-# Exit 2 means some rows failed. The CSV is still written.
+# Exit 2 when some rows cannot be resolved. The CSV is still written.
 if ($err -gt 0 -or $parse -gt 0) { exit 2 }
 exit 0

@@ -164,9 +164,11 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
     loop_xml.write_text(
         _doc(
             [
-                "BFCLIENT1,42,17,Mon, 14 Sep 2026 10:00:00 -0400,True,1,60",
+                "BFCLIENT1,42,17,Mon, 14 Sep 2026 10:00:00 -0400,True,1,60,"
+                "1,10,490,1,15,85,8",
                 "NEIE10N248RC45B, RRC's Air M4,21,15.0,Mon, "
-                "14 Sep 2026 10:00:00 -0400,False,0,Not Enabled",
+                "14 Sep 2026 10:00:00 -0400,False,0,Not Enabled,"
+                "Not Set,Not Set,Not Set,Not Applicable,Not Set,Not Set,Not Reported",
             ]
         ),
         encoding="utf-8",
@@ -240,6 +242,23 @@ def test_query_properties_reads_xml_answers_and_preserves_timings(
     assert loop_rows[1]["Platform Health Check - Command Polling Enabled"] == "0"
     assert (
         loop_rows[1]["Platform Health Check - Command Polling Minutes"] == "Not Enabled"
+    )
+    assert loop_rows[0]["Platform Health Check - FastHashVerify Enabled"] == "1"
+    assert loop_rows[0]["Platform Health Check - FastHashVerify Work ms"] == "10"
+    assert loop_rows[0]["Platform Health Check - FastHashVerify Sleep ms"] == "490"
+    assert loop_rows[0]["Platform Health Check - Agent Multicore Scaling Enabled"] == "1"
+    assert loop_rows[0]["Platform Health Check - Agent CPU Work Idle"] == "15"
+    assert loop_rows[0]["Platform Health Check - Agent CPU Sleep Idle"] == "85"
+    assert (
+        loop_rows[0]["Platform Health Check - Agent Total Physical CPU Core Count"] == "8"
+    )
+    assert (
+        loop_rows[1]["Platform Health Check - Agent Multicore Scaling Enabled"]
+        == "Not Applicable"
+    )
+    assert (
+        loop_rows[1]["Platform Health Check - Agent Total Physical CPU Core Count"]
+        == "Not Reported"
     )
 
     with udp_csv.open(encoding="utf-8-sig", newline="") as handle:

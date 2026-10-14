@@ -53,6 +53,10 @@ def _rows(path: Path) -> list[list[str]]:
 
 
 @pytest.mark.skipif(POWERSHELL is None, reason="PowerShell is not available")
+@pytest.mark.skipif(
+    not (SAMPLE / "Client_Loop_10-06-2026_2130.xml").exists(),
+    reason="The class sample capture is not tracked, so check it when present",
+)
 def test_standalone_reproduces_the_server_csvs_from_the_sample(tmp_path: Path) -> None:
     loop_csv = tmp_path / "loop.csv"
     udp_csv = tmp_path / "udp.csv"

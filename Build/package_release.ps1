@@ -7,6 +7,7 @@
 <#
 .SYNOPSIS
     Build the release package uploaded to GitHub Releases.
+    See Build/RELEASE_RULES.md before publishing.
 
 .DESCRIPTION
     Stages the tracked files an attendee needs, generates the CycloneDX SBOM

@@ -13,6 +13,7 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Resolve standalone Action Site Top 10 property IDs to friendly names, while retaining analysis lookups and raw IDs for unresolved rows.
 - Reject reversed report and collection date ranges before a build starts.
 - Match Client Performance capture properties by the exact product analysis title in any import site. Warn only when that product's analysis is missing, inactive, or duplicated.
 - Align the Client Performance multicore fallback with the other product collectors.

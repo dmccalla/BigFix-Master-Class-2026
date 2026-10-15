@@ -277,6 +277,34 @@ function AnalysisRelevance($Site, $AnalysisId) {
     '("Analysis Name=" & name of source analysis of it & " | Display Name=" & display name of it & " | Name=" & name of it & " | Source Name=" & source name of it & " | Source ID=" & (source id of it as string)) of bes properties whose (name of site of source analysis of it = "' + $Site + '" and id of source analysis of it = ' + $AnalysisId + ')'
 }
 
+# Action Site Evaluate Property rows use the REST property ID, not an analysis ID.
+function GetActionSitePropertyNames {
+    $url = $script:ApiQueryUrl -replace '/query$', '/properties'
+    $attempt = 0
+    while ($attempt -lt $QueryAttempts) {
+        $attempt++
+        try {
+            $response = Invoke-WebRequest -Uri $url -Headers $script:Headers -UseBasicParsing -TimeoutSec $TimeoutSec
+            [xml]$xml = $response.Content
+            if ($null -eq $xml.BESAPI) { throw "Unexpected property-list response." }
+            $names = @{}
+            foreach ($property in @($xml.BESAPI.Property)) {
+                $id = "$($property.ID)".Trim()
+                $name = "$($property.Name)".Trim()
+                if ($id -match '^\d+$' -and $name) { $names[$id] = $name }
+            }
+            return ,$names
+        } catch {
+            $detail = Err $_
+            if ($attempt -ge $QueryAttempts) {
+                throw "Action Site property list failed after $attempt attempt(s). Details: $detail"
+            }
+            Log "Action Site property list failed on attempt $attempt/$QueryAttempts. Retrying. Details: $detail" "WARN"
+            Start-Sleep -Seconds $attempt
+        }
+    }
+}
+
 # Set up the API only when it is needed.
 $script:ApiReady = $false
 function EnsureApiReady($Purpose) {
@@ -566,7 +594,7 @@ foreach ($entry in $agg.GetEnumerator()) {
     $stats = $entry.Value
     $c = [pscustomobject]@{
         Lookup = $entry.Key; Site = ""; AnalysisId = 0; Property = ""
-        NeedsLookup = $false; Status = "OK"; Result = ""
+        NeedsLookup = $false; IsActionSiteProperty = $false; Status = "OK"; Result = ""
         Occurrences = [int]$stats[0]
         AvgClientProcessingSeconds = $stats[1] / $stats[0]
         TotalClientProcessingSeconds = $stats[1]
@@ -585,6 +613,7 @@ foreach ($entry in $agg.GetEnumerator()) {
             else { $c.Result = "Background Evaluation of External Site: $($c.Site)" }
         } else {
             $c.NeedsLookup = $true
+            $c.IsActionSiteProperty = $c.Site -ieq "actionsite" -and $c.Property -match '^Evaluate Property \d+$'
         }
     }
     $candidates.Add($c)
@@ -595,11 +624,24 @@ if (@($candidates | Where-Object { $_.NeedsLookup }).Count -gt 0) {
     EnsureApiReady "resolving Top10 lookups"
 }
 
+$actionSitePropertyNames = @{}
+$actionSitePropertyError = ""
+if (@($candidates | Where-Object { $_.IsActionSiteProperty }).Count -gt 0) {
+    try {
+        $actionSitePropertyNames = GetActionSitePropertyNames
+        Log "Fetched $($actionSitePropertyNames.Count) Action Site property names"
+    } catch {
+        $actionSitePropertyError = Err $_
+        Log $actionSitePropertyError "WARN"
+    }
+}
+
 # Query each analysis once and index its property descriptors.
 $analysisIndex = New-Object 'System.Collections.Generic.Dictionary[string,object]'
 $analysisError = New-Object 'System.Collections.Generic.Dictionary[string,string]'
 foreach ($c in $candidates) {
     if (-not $c.NeedsLookup) { continue }
+    if ($c.IsActionSiteProperty -and $actionSitePropertyNames.ContainsKey("$($c.AnalysisId)")) { continue }
     # The first pipe follows the numeric source ID.
     $key = "$($c.AnalysisId)|$($c.Site)"
     if ($analysisIndex.ContainsKey($key) -or $analysisError.ContainsKey($key)) { continue }
@@ -628,6 +670,12 @@ foreach ($c in $candidates) {
 # Match lookups by display name, property name, source name, or source ID.
 foreach ($c in $candidates) {
     if (-not $c.NeedsLookup) { continue }
+    if ($c.IsActionSiteProperty -and $actionSitePropertyNames.ContainsKey("$($c.AnalysisId)")) {
+        $name = $actionSitePropertyNames["$($c.AnalysisId)"]
+        $c.Status = "OK"
+        $c.Result = "Retrieved Property: $name ($($c.Lookup))"
+        continue
+    }
     $key = "$($c.AnalysisId)|$($c.Site)"
     if ($analysisError.ContainsKey($key)) {
         $c.Status = "ERROR"
@@ -647,7 +695,10 @@ foreach ($c in $candidates) {
         }
     }
     if ($answers.Count) { $c.Status = "OK"; $c.Result = ($answers -join " ; ") }
-    else { $c.Status = "NO RESULTS"; $c.Result = $c.Lookup }
+    elseif ($c.IsActionSiteProperty -and $actionSitePropertyError) {
+        $c.Status = "ERROR"
+        $c.Result = "$($c.Lookup) | $actionSitePropertyError"
+    } else { $c.Status = "NO RESULTS"; $c.Result = $c.Lookup }
 }
 
 # Combine rows that resolve to the same name.

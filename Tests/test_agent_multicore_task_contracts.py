@@ -70,3 +70,20 @@ def test_agent_cpu_settings_collector_reads_all_fourteen_fields() -> None:
     assert "$parts[13].Trim()" in content
     assert "_BESClient_Resource_MaxCoreUtilization" not in content
     assert "_BESClient_Resource_WorkTypeScalar" not in content
+
+def test_standalone_helper_matches_embedded_fourteen_field_collector() -> None:
+    utility = (ROOT / "Utilities" / "query_properties.ps1").read_text(encoding="utf-8")
+    utility = utility[utility.index("# query_properties.ps1") :].strip()
+    action = ElementTree.parse(COLLECTOR).getroot().findtext(".//ActionScript") or ""
+    start = action.index("# query_properties.ps1")
+    embedded = action[start : action.index("\n__END__", start)].strip()
+    assert embedded == utility.replace("{", "{{")
+
+    for script in (utility, embedded):
+        assert "if ($parts.Count -eq 14)" in script
+        assert "if ($parts.Count -ne 14)" in script
+        assert '"Platform Health Check - FastHashVerify Enabled"' in script
+        assert '"Platform Health Check - Agent CPU Work Idle"' in script
+        assert "$parts[13].Trim()" in script
+        assert "Count -eq 7" not in script
+        assert '(if it = "" then "Not Applicable" else it) of concatenation ";" of values of results (item 0 of it, elements of item 10 of it)' in script

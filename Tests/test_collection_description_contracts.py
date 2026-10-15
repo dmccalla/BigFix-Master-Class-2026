@@ -22,14 +22,36 @@ FILES = {
     "agent": "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes",
     "filldb": "BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
 }
-STUBS = """() => {
+ANALYSIS_TITLE = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"
+
+STUBS = r"""() => {
     window.calls = []; window.dialogs = [];
     window.scenario = {master: true, windows: true, busy: false};
+
+    window.analysisCatalog = [
+        'BigFix Platform Health Check -- Client Performance Counters - Basic (2.0)',
+        'BigFix Master Class -- Client Performance Counters - Basic (2.0)',
+        'TA Health Check -- Client Performance Counters - Basic (2.0)'
+    ].map(name => ({name, site: 'actionsite', custom: false, active: true}));
     window.EvaluateRelevance = q => {
         if (q === 'master flag of current console user') return scenario.master ? 'True' : 'False';
         if (q === 'host name of root server') return 'root.example.invalid';
         if (q.includes('operating system of it starts with')) return scenario.windows ? 'True' : 'False';
         if (q.includes('exists bes action')) return scenario.busy ? 'True' : 'False';
+
+        if (q.includes('Client Performance Counters - Basic')) {
+            const exact = q.match(/name of it = "([^"]+)"/);
+            const partial = q.match(/name of it contains "([^"]+)"/);
+            const site = q.match(/name of it = "([^"]+)"\)\s*$/);
+            const scoped = q.includes('of bes sites whose');
+            const active = analysisCatalog.filter(a =>
+                (!exact || a.name === exact[1]) &&
+                (!partial || a.name.includes(partial[1])) &&
+                (!scoped || !site || a.site === site[1]) &&
+                (!q.includes('custom site flag of it') || a.custom) && (!q.includes('active flag of it') || a.active)
+            );
+            return (q.includes('number of bes fixlets') ? active.length > 1 : active.length > 0) ? 'True' : 'False';
+        }
         if (q.includes('analysis flag') || q.includes('exists activations')) return 'True';
         throw new Error('Unexpected relevance: ' + q);
     };
@@ -220,3 +242,54 @@ def test_launch_guards_still_block(page, key, guard):
         page.locator("#apiPasswordConfirm").fill("different")
     assert invoke(page) == []
     assert page.evaluate("dialogs.length") > 0
+
+
+@pytest.mark.parametrize("site", ["actionsite", "Renamed Lab Site", "TA Health Check"])
+def test_agent_launch_with_all_three_analyses_active_has_no_false_warning(page, site):
+    load(page, "agent")
+    page.evaluate(
+        "site => analysisCatalog.forEach(a => {a.site = site; a.custom = site !== 'actionsite';})",
+        site,
+    )
+    assert invoke(page) == [expected_call("agent")]
+    assert page.evaluate("dialogs") == []
+
+
+@pytest.mark.parametrize("condition", ["inactive", "missing", "renamed"])
+def test_agent_warns_if_its_own_analysis_is_unavailable_while_others_are_active(
+    page, condition
+):
+    load(page, "agent")
+    page.evaluate(
+        """({title, condition}) => {
+            const own = analysisCatalog.find(a => a.name === title);
+            if (condition === 'inactive') own.active = false;
+            if (condition === 'missing') window.analysisCatalog = analysisCatalog.filter(a => a !== own);
+            if (condition === 'renamed') own.name = 'Renamed Client Analysis';
+        }""",
+        {"title": ANALYSIS_TITLE, "condition": condition},
+    )
+    # The prerequisite warning remains advisory, as in the existing task.
+    assert invoke(page) == [expected_call("agent")]
+    dialogs = page.evaluate("dialogs")
+    assert len(dialogs) == 1
+    assert "could not confirm" in dialogs[0]
+
+
+@pytest.mark.parametrize("duplicate_active", [False, True])
+def test_agent_warns_once_for_duplicate_copies_of_its_own_analysis(
+    page, duplicate_active
+):
+    load(page, "agent")
+    page.evaluate(
+        """({title, active}) => {
+            const own = analysisCatalog.find(a => a.name === title);
+            analysisCatalog.push({...own, site: 'Another Custom Site', active});
+        }""",
+        {"title": ANALYSIS_TITLE, "active": duplicate_active},
+    )
+    assert invoke(page) == [expected_call("agent")]
+    dialogs = page.evaluate("dialogs")
+    assert len(dialogs) == 1
+    assert "More than one copy" in dialogs[0]
+    assert ANALYSIS_TITLE in dialogs[0]

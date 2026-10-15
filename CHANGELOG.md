@@ -11,6 +11,11 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Fixed
+
+- Match Client Performance capture properties by the exact product analysis title in any import site. Warn only when that product's analysis is missing, inactive, or duplicated.
+- Align the Client Performance multicore fallback with the other product collectors.
+
 ### Documentation
 
 - Add Windows launcher Unblock steps and the file Properties screenshot to the user guide, lab startup steps, and installation documentation. Refresh the guide PDFs and packaged startup instructions.

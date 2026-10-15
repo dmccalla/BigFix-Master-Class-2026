@@ -42,8 +42,8 @@ The repository ships small FillDB and Perfmon samples under `SampleData`.
 
 The lab sample data the Student Lab Guide uses, including the Client
 Performance capture, is in `SampleData\BigFix Master Class 2026\Results`.
-It is too large for the repository. It ships inside the release zip and as `Sample-Data-Results.zip`
-on the repository's v2.0 release. To add it to a clone, extract
+It is too large for the repository. Download `Sample-Data-Results.zip` from
+the repository's v2.1 release. To add it to a clone, extract
 `Sample-Data-Results.zip` into the Workbench folder.
 
 ## Requirements

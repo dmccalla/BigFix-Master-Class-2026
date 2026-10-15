@@ -6,21 +6,37 @@ ship together and carry one version number.
 
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 the project uses [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
-Every released version is tagged in git as `vMAJOR.MINOR.PATCH`. See
+Every released version is tagged in git with a matching `v`-prefixed version. See
 the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+## [2.1] - 2026-10-15
+
+### Added
+
+- Add a dark mode switch for the desktop application and publish the final
+  student user guide in Word and PDF.
+
 ### Fixed
 
-- Resolve standalone Action Site Top 10 property IDs to friendly names, while retaining analysis lookups and raw IDs for unresolved rows.
+- Resolve standalone Action Site Top 10 property IDs to friendly names, while
+  retaining analysis lookups and raw IDs for unresolved rows.
 - Reject reversed report and collection date ranges before a build starts.
-- Match Client Performance capture properties by the exact product analysis title in any import site. Warn only when that product's analysis is missing, inactive, or duplicated.
-- Align the Client Performance multicore fallback with the other product collectors.
+- Match Client Performance capture properties by the exact product analysis
+  title in any import site. Warn when that analysis is missing, inactive, or
+  duplicated.
+- Accept partial Client Performance collector results when some Top 10 lookups
+  remain unresolved. Keep the standalone helper in sync with the embedded task
+  and its fourteen-field loop capture.
+- Align the Client Performance multicore fallback with the other collectors.
+- Correct Client Loop score bands, the Report Minimum Interval collection
+  header, and the Client Performance report opener.
 
 ### Documentation
 
-- Add Windows launcher Unblock steps and the file Properties screenshot to the user guide, lab startup steps, and installation documentation. Refresh the guide PDFs and packaged startup instructions.
+- Explain how to unblock downloaded Windows launchers in the user guide,
+  startup steps, and installation instructions.
 
 ## [2.0]
 

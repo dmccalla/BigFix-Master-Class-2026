@@ -1,6 +1,6 @@
 [project]
 name = "master-class-diagnostics-workbench"
-version = "2.0"
+version = "2.1"
 description = "Master Class Diagnostics Workbench: automated performance and configuration analysis for BigFix."
 license = "MIT"
 license-files = ["LICENSE"]

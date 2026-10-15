@@ -68,10 +68,14 @@ function Test-IncludedTrackedFile {
     param([string]$RelativePath)
 
     $path = $RelativePath.Replace("\", "/")
-    $rootFiles = @("README.md", "CHANGELOG.md", "LICENSE", "NOTICE", "AUTHORS.md", "SECURITY.md", "pyproject.toml", "requirements.txt")
+    if ($path.EndsWith(".md", [StringComparison]::OrdinalIgnoreCase)) { return $false }
+    if ($path.StartsWith("Docs/", [StringComparison]::OrdinalIgnoreCase)) {
+        return $path.EndsWith(".pdf", [StringComparison]::OrdinalIgnoreCase)
+    }
+    $rootFiles = @("LICENSE", "NOTICE", "pyproject.toml", "requirements.txt")
     if ($rootFiles -contains $path) { return $true }
 
-    $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/", "Docs/")
+    $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/")
     if (-not ($prefixes | Where-Object { $path.StartsWith($_) })) { return $false }
     if ($path -match '(^|/)sitecustomize\.py$') { return $true }
     if ($path -match '(^|/)__pycache__/') { return $false }
@@ -127,11 +131,10 @@ $trackedFiles = & git -C $repoRoot ls-files
 $includedFiles = @($trackedFiles | Where-Object { Test-IncludedTrackedFile $_ })
 
 $required = @(
-    "README.md",
-    "CHANGELOG.md",
     "LICENSE",
     "NOTICE",
     "requirements.txt",
+    "Docs/User Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf",
     "Launchers/Run Diagnostics Workbench.cmd",
     "App/diagnostics_workbench_ui.py",
     "App/run_diagnostics.py",
@@ -161,7 +164,7 @@ $stagingPath = Join-Path $workRoot $packageName
 $sbomEnv = Join-Path $workRoot "_sbom_env"
 $zipPath = Join-Path $outputRoot "$packageName.zip"
 $checksumPath = "$zipPath.sha256"
-foreach ($relativePath in $includedFiles + @("START_HERE.txt", "sbom.cyclonedx.json", "THIRD_PARTY_NOTICES.md", "release-manifest.json")) {
+foreach ($relativePath in $includedFiles + @("START_HERE.txt", "sbom.cyclonedx.json", "THIRD_PARTY_NOTICES.txt", "release-manifest.json")) {
     $destination = [IO.Path]::GetFullPath((Join-Path $stagingPath $relativePath))
     if (-not $destination.StartsWith("$stagingPath\", [StringComparison]::OrdinalIgnoreCase)) {
         throw "Package file escapes the staging directory: $relativePath"
@@ -219,7 +222,7 @@ try {
     # The notices are written from inside the runtime environment so the
     # inventory is exactly what the launcher installs. See the script's docstring
     # for why pip-licenses cannot be pointed at it from here.
-    & $runtimePython (Join-Path $repoRoot "Build\third_party_notices.py") (Join-Path $stagingPath "THIRD_PARTY_NOTICES.md") --ignore pip
+    & $runtimePython (Join-Path $repoRoot "Build\third_party_notices.py") (Join-Path $stagingPath "THIRD_PARTY_NOTICES.txt") --ignore pip
     if ($LASTEXITCODE -ne 0) { throw "Writing the third-party notices failed (exit $LASTEXITCODE)" }
     Remove-PackageDirectory -Path $sbomEnv -ParentPath $workRoot
 
@@ -230,8 +233,8 @@ $productName $version
    a private Python environment for the tool. Python 3.12 or newer is required.
 2. On the Folders step, choose the sample data at SampleData\BigFix Master Class 2026
    to try the Workbench without a deployment, or your own collected data.
-3. Read Docs\Getting_Started.md before class. Docs\Data_Collection.md describes
-   the files each module needs.
+3. Read Docs\User Guide\Master_Class_Diagnostics_Workbench_User_Guide.pdf
+   before class. It covers setup, data collection and report generation.
 
 Windows may block the .cmd launcher because it was downloaded from the Internet.
 If it will not run, right-click the .cmd file and select Properties. On the
@@ -239,8 +242,9 @@ General tab, tick the Unblock box at the bottom, then click OK. Run the launcher
 again. If Unblock is not shown, no change is needed. See the User Guide for the
 file Properties screenshot.
 
-Release notes are in CHANGELOG.md. The software bill of materials is
-sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.
+Release notes are at https://github.com/dmccalla/BigFix-Master-Class-2026/releases/tag/v$version.
+The software bill of materials is sbom.cyclonedx.json and the license
+inventory is THIRD_PARTY_NOTICES.txt.
 "@
     [IO.File]::WriteAllText((Join-Path $stagingPath "START_HERE.txt"), $startHere, (New-Object Text.UTF8Encoding($false)))
 
@@ -265,7 +269,8 @@ sbom.cyclonedx.json and the license inventory is THIRD_PARTY_NOTICES.md.
     }
     [IO.File]::WriteAllText((Join-Path $stagingPath "release-manifest.json"), ($manifest | ConvertTo-Json -Depth 6), (New-Object Text.UTF8Encoding($false)))
 
-    Compress-Archive -LiteralPath $stagingPath -DestinationPath $zipPath -CompressionLevel Optimal
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    [IO.Compression.ZipFile]::CreateFromDirectory($stagingPath, $zipPath, [IO.Compression.CompressionLevel]::Optimal, $false)
     $zipHash = (Get-FileHash -Algorithm SHA256 -LiteralPath $zipPath).Hash.ToLowerInvariant()
     [IO.File]::WriteAllText($checksumPath, "$zipHash  $([IO.Path]::GetFileName($zipPath))`n", (New-Object Text.UTF8Encoding($false)))
     $buildSucceeded = $true

@@ -135,6 +135,11 @@ def package_fixture():
             "Utilities/MXFillDBPerf.exe",
             "Templates/Diagnostics_Style_Template.docx",
             "pyproject.toml",
+            "Docs/Getting_Started.md",
+            "Docs/User Guide/guide.docx",
+            "Docs/User Guide/screenshot.png",
+            "Docs/User Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf",
+            "Docs/Lab Guide/lab.pdf",
             "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- "
             "POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
         ]
@@ -199,18 +204,26 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
         assert checksum == hashlib.sha256(archive.read_bytes()).hexdigest()
         with zipfile.ZipFile(archive) as zipped:
             contents = {
-                entry.filename.removeprefix(f"{PACKAGE}/"): zipped.read(entry)
+                entry.filename: zipped.read(entry)
                 for entry in zipped.infolist()
                 if not entry.is_dir()
             }
-            assert all(name.startswith(f"{PACKAGE}/") for name in zipped.namelist())
-        assert set(contents) == set(files) | {
+            assert all(not name.startswith(f"{PACKAGE}/") for name in zipped.namelist())
+        included_files = {
+            name for name in files
+            if not name.lower().endswith(".md")
+            and (not name.startswith("Docs/") or name.lower().endswith(".pdf"))
+        }
+        assert set(contents) == included_files | {
             "START_HERE.txt",
             "sbom.cyclonedx.json",
-            "THIRD_PARTY_NOTICES.md",
+            "THIRD_PARTY_NOTICES.txt",
             "release-manifest.json",
         }
-        for relative in files:
+        assert not any(name.lower().endswith(".md") for name in contents)
+        assert all(name.lower().endswith(".pdf") for name in contents if name.startswith("Docs/"))
+        assert b"Docs\\User Guide\\Master_Class_Diagnostics_Workbench_User_Guide.pdf" in contents["START_HERE.txt"]
+        for relative in included_files:
             expected = (root / relative).read_bytes()
             if relative.endswith(".cmd"):
                 expected = expected.replace(b"\n", b"\r\n")

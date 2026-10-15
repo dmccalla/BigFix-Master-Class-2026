@@ -4622,7 +4622,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     if bad_fields is not None:
                         bad_fields.add(fid)
         for key in selected:
-            for field in MODULE_BY_KEY[key].inputs_schema:
+            mod = MODULE_BY_KEY[key]
+            parsed_dates: dict[str, datetime | None] = {}
+            for field in mod.inputs_schema:
                 if field.kind != "datetime_optional":
                     continue
                 var = self.date_field_vars[(key, field.key)]
@@ -4630,7 +4632,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 if not value:
                     continue
                 try:
-                    var.set(_parse_optional_datetime(value, field.label))
+                    normalized = _parse_optional_datetime(value, field.label)
+                    var.set(normalized)
+                    parsed_dates[field.key] = self._parse_date_field_value(normalized)
                 except ValueError:
                     errors.append(
                         f"{MODULE_BY_KEY[key].label}: {field.label} must use "
@@ -4638,6 +4642,23 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                     )
                     if bad_fields is not None:
                         bad_fields.add(_field_id(key, field.key))
+            fields = {field.key: field for field in mod.inputs_schema}
+            for start_key, end_key in (
+                ("start_date", "end_date"),
+                ("collection_start", "collection_end"),
+            ):
+                start = parsed_dates.get(start_key)
+                end = parsed_dates.get(end_key)
+                if start is not None and end is not None and end < start:
+                    errors.append(
+                        f"{mod.label}: {fields[end_key].label} cannot be earlier "
+                        f"than {fields[start_key].label}."
+                    )
+                    if bad_fields is not None:
+                        bad_fields.update(
+                            _field_id(key, field_key)
+                            for field_key in (start_key, end_key)
+                        )
         return errors
 
     def _build_raw_inputs(self, mod: Module) -> dict:

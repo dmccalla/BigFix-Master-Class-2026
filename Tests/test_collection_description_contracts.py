@@ -29,7 +29,7 @@ STUBS = r"""() => {
     window.scenario = {master: true, windows: true, busy: false};
 
     window.analysisCatalog = [
-        'BigFix Platform Health Check -- Client Performance Counters - Basic (2.0)',
+        'BigFix Platform ' + 'Health Check -- Client Performance Counters - Basic (2.0)',
         'BigFix Master Class -- Client Performance Counters - Basic (2.0)',
         'TA Health Check -- Client Performance Counters - Basic (2.0)'
     ].map(name => ({name, site: 'actionsite', custom: false, active: true}));

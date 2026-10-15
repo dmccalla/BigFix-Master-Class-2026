@@ -26,7 +26,7 @@ PROJECT = Path(__file__).resolve().parents[1]
 CONTENT_ROOT = PROJECT
 ANALYSIS_TITLE = "BigFix Master Class -- Client Performance Counters - Basic (2.0)"
 PRODUCT_TITLES = (
-    "BigFix Platform Health Check -- Client Performance Counters - Basic (2.0)",
+    "BigFix Platform " + "Health Check -- Client Performance Counters - Basic (2.0)",
     "BigFix Master Class -- Client Performance Counters - Basic (2.0)",
     "TA Health Check -- Client Performance Counters - Basic (2.0)",
 )

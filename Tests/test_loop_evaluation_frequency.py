@@ -96,8 +96,8 @@ def _write_xml(folder: Path) -> Path:
         ("1 day", 1440),
         ("2 days", 2880),
         ("1 day, 06:00:00", 1800),
-        ("no-val", None),
-        ("", None),
+        ("no-val", 0),
+        ("", 0),
         ("garbage", None),
     ],
 )
@@ -163,14 +163,13 @@ def test_evaluation_frequency_rows_count_bands_and_status(tmp_path: Path) -> Non
     rows = loop.evaluation_frequency_rows(summary)
 
     assert rows == [
-        ["Every report", "2 / 7", "28.6%", "1", "1", "Needs Attention"],
+        ["Every report", "3 / 7", "42.9%", "1", "2", "Needs Attention"],
         ["Under 15 minutes", "1 / 7", "14.3%", "1", "0", "Needs Attention"],
         ["15 minutes to 1 hour", "0 / 7", "0.0%", "0", "0", "Advisory"],
         ["1 hour to 6 hours", "1 / 7", "14.3%", "0", "1", "Advisory"],
         ["6 hours or longer", "2 / 7", "28.6%", "1", "1", "Healthy"],
-        ["Not set", "1 / 7", "14.3%", "0", "1", "Not Assessed"],
     ]
-    assert loop.frequent_property_count(summary) == 3
+    assert loop.frequent_property_count(summary) == 4
     assert loop.frequent_property_count(None) == 0
 
 
@@ -209,6 +208,7 @@ def test_repeated_eval_cost_uses_the_longer_of_interval_and_loop(
 
     assert rows == [
         [APP_PROPERTY, APP_ANALYSIS, "Every report", "68.38", "120", "136.8"],
+        ["Unset", "Unset Analysis", "Every report", "7", "120", "14.0"],
         ["BIOS", "Hardware Information (Windows)", "1 hour", "3.38", "24", "1.4"],
     ]
 
@@ -289,7 +289,7 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
     findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
     assert [c.text for c in findings.rows[1].cells] == [
         "CLT-02",
-        "Medium, 3 active properties evaluate more often than every 15 minutes. "
+        "Medium, 4 active properties evaluate more often than every 15 minutes. "
         "See Evaluation Frequency.",
     ]
     cost = next(t for t in doc.tables if t.cell(0, 0).text == "Property")
@@ -303,9 +303,7 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
     ]
     paragraphs = [p.text for p in doc.paragraphs]
     assert any("12m 00s average loop time" in p for p in paragraphs)
-    assert any(
-        p.startswith("NOTE: 1 active property has no interval set.") for p in paragraphs
-    )
+    assert not any("could not be read" in p for p in paragraphs)
 
 
 def test_word_report_omits_evaluation_frequency_without_the_data(

@@ -1344,11 +1344,13 @@ def parse_interval_minutes(text: str) -> float | None:
     """Minutes for a BigFix interval string, or None when none is set.
 
     The collection writes 00:00:00 for every report, 01:00:00 style clocks,
-    and "1 day" style spans. no-val means the property has no interval.
+    and "1 day" style spans. no-val means the property has no interval, and
+    BigFix evaluates such a property every report, so it reads as 0 minutes.
+    None is left for a value that cannot be read.
     """
     value = text.strip().lower()
     if not value or value == "no-val":
-        return None
+        return 0.0
     minutes = 0.0
     matched = False
     day = re.search(r"(\d+)\s*days?", value)
@@ -4311,9 +4313,9 @@ def generate_word(
             document.add_paragraph(
                 f"This table covers the {len(property_intervals.properties):,} active "
                 "properties. Each one has an evaluation interval that sets how often "
-                "the Client re-evaluates it. A property set to every report runs on "
-                "every loop. The guideline is 6 hours or longer unless the data must "
-                "be current."
+                "the Client re-evaluates it. A property set to every report, or with "
+                "no interval set, runs on every loop. The guideline is 6 hours or "
+                "longer unless the data must be current."
             )
         )
         build_word_table(
@@ -4342,12 +4344,12 @@ def generate_word(
             add_note_paragraph(
                 document,
                 (
-                    "1 active property has no interval set. It is listed as Not "
-                    "set and is not counted as every report."
+                    "1 active property has an interval that could not be read. "
+                    "It is listed as Not set and is not counted as every report."
                     if not_set == 1
-                    else f"{not_set:,} active properties have no interval set. "
-                    "They are listed as Not set and are not counted as every "
-                    "report."
+                    else f"{not_set:,} active properties have an interval that "
+                    "could not be read. They are listed as Not set and are not "
+                    "counted as every report."
                 ),
             )
         cost_rows = repeated_eval_cost_rows(

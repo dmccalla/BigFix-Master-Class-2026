@@ -11,6 +11,14 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Added
+
+- Add Evaluation Frequency to the Client Performance report. It counts active properties by evaluation interval, shows the cost of repeated Top 10 evaluations, and raises finding CLT-02 for properties evaluated more often than every 15 minutes. Collect Deployment Information now writes an Active Properties by Evaluation Interval block to Property_Info, so run it again to add the section to an older capture.
+
+### Changed
+
+- Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.
+
 ## [2.1] - 2026-10-15
 
 ### Added

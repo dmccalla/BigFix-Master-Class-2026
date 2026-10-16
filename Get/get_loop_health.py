@@ -1306,6 +1306,270 @@ def _properties_value(pressure: ActionSitePressure) -> str:
     )
 
 
+# ---------------------------------------------------------------------------
+# Evaluation Frequency: how often each active property is evaluated
+# ---------------------------------------------------------------------------
+
+PROPERTY_INTERVAL_SECTION = "Active Properties by Evaluation Interval"
+PROPERTY_INTERVAL_WIDTH = 9
+PROPERTY_INTERVAL_FREQUENT_MINUTES = 15.0
+PROPERTY_INTERVAL_GUIDELINE_MINUTES = 360.0
+INTERVAL_BAND_ORDER = (
+    "Every report",
+    "Under 15 minutes",
+    "15 minutes to 1 hour",
+    "1 hour to 6 hours",
+    "6 hours or longer",
+    "Not set",
+)
+
+
+@dataclass
+class PropertyInterval:
+    name: str
+    analysis: str
+    site: str
+    issuer: str
+    interval_minutes: float | None
+    content_source: str
+
+
+@dataclass
+class PropertyIntervalSummary:
+    source_file: Path
+    properties: list[PropertyInterval]
+
+
+def parse_interval_minutes(text: str) -> float | None:
+    """Minutes for a BigFix interval string, or None when none is set.
+
+    The collection writes 00:00:00 for every report, 01:00:00 style clocks,
+    and "1 day" style spans. no-val means the property has no interval.
+    """
+    value = text.strip().lower()
+    if not value or value == "no-val":
+        return None
+    minutes = 0.0
+    matched = False
+    day = re.search(r"(\d+)\s*days?", value)
+    if day:
+        minutes += int(day.group(1)) * 1440
+        matched = True
+    clock = re.search(r"(\d+):(\d{2}):(\d{2})", value)
+    if clock:
+        minutes += (
+            int(clock.group(1)) * 60 + int(clock.group(2)) + int(clock.group(3)) / 60
+        )
+        matched = True
+    return minutes if matched else None
+
+
+def interval_band(minutes: float | None) -> str:
+    if minutes is None:
+        return "Not set"
+    if minutes <= 0:
+        return "Every report"
+    if minutes < PROPERTY_INTERVAL_FREQUENT_MINUTES:
+        return "Under 15 minutes"
+    if minutes < 60:
+        return "15 minutes to 1 hour"
+    if minutes < PROPERTY_INTERVAL_GUIDELINE_MINUTES:
+        return "1 hour to 6 hours"
+    return "6 hours or longer"
+
+
+def interval_band_status(band: str) -> str:
+    if band in {"Every report", "Under 15 minutes"}:
+        return status_spine.NEEDS_ATTENTION.word
+    if band in {"15 minutes to 1 hour", "1 hour to 6 hours"}:
+        return status_spine.ADVISORY.word
+    if band == "6 hours or longer":
+        return status_spine.HEALTHY.word
+    return status_spine.NOT_ASSESSED.word
+
+
+def format_interval_minutes(minutes: float | None) -> str:
+    if minutes is None:
+        return "Not set"
+    if minutes <= 0:
+        return "Every report"
+    if minutes % 1440 == 0:
+        days = int(minutes // 1440)
+        return f"{days} day" + ("" if days == 1 else "s")
+    if minutes % 60 == 0:
+        hours = int(minutes // 60)
+        return f"{hours} hour" + ("" if hours == 1 else "s")
+    if minutes < 60:
+        return f"{minutes:g} minutes"
+    return f"{int(minutes // 60)} h {int(minutes % 60)} min"
+
+
+def _property_interval_rows(lines: list[str]) -> list[PropertyInterval] | None:
+    """Rows of the interval section, or None when the section is absent."""
+    start = next(
+        (
+            i
+            for i, line in enumerate(lines)
+            if line.startswith("//=") and PROPERTY_INTERVAL_SECTION in line
+        ),
+        None,
+    )
+    if start is None:
+        return None
+    values: list[str] = []
+    for line in lines[start + 1 :]:
+        if line.startswith("//="):
+            break
+        text = line.strip()
+        if not text or text.lower().startswith("column headers:"):
+            continue
+        values.append(text)
+    rows: list[PropertyInterval] = []
+    for i in range(0, len(values) - PROPERTY_INTERVAL_WIDTH + 1, PROPERTY_INTERVAL_WIDTH):
+        chunk = values[i : i + PROPERTY_INTERVAL_WIDTH]
+        rows.append(
+            PropertyInterval(
+                name=chunk[0],
+                analysis=chunk[1],
+                site=chunk[2],
+                issuer=chunk[6],
+                interval_minutes=parse_interval_minutes(chunk[7]),
+                content_source=chunk[8],
+            )
+        )
+    return rows
+
+
+def parse_property_intervals(folder: Path | None) -> PropertyIntervalSummary | None:
+    """Read the active property intervals from the Property_Info capture."""
+    if folder is None or not folder.is_dir():
+        return None
+    for path in _candidate_files(
+        folder, ["Property_Info*.xml", "Property_Info*.log", "Property_Info*"]
+    ):
+        rows = _property_interval_rows(read_capture_or_log_text(path).splitlines())
+        if rows is not None:
+            return PropertyIntervalSummary(source_file=path, properties=rows)
+    return None
+
+
+def property_interval_band_counts(
+    summary: PropertyIntervalSummary,
+) -> dict[str, dict[str, int]]:
+    counts = {
+        band: {"total": 0, "custom": 0, "external": 0} for band in INTERVAL_BAND_ORDER
+    }
+    for item in summary.properties:
+        entry = counts[interval_band(item.interval_minutes)]
+        entry["total"] += 1
+        key = "custom" if item.content_source.lower() == "custom" else "external"
+        entry[key] += 1
+    return counts
+
+
+def frequent_property_count(summary: PropertyIntervalSummary | None) -> int:
+    """Active properties evaluated every report or more often than 15 minutes."""
+    if summary is None:
+        return 0
+    return sum(
+        1
+        for item in summary.properties
+        if interval_band(item.interval_minutes) in {"Every report", "Under 15 minutes"}
+    )
+
+
+def evaluation_frequency_rows(summary: PropertyIntervalSummary) -> list[list[str]]:
+    counts = property_interval_band_counts(summary)
+    total = len(summary.properties)
+    rows: list[list[str]] = []
+    for band in INTERVAL_BAND_ORDER:
+        entry = counts[band]
+        if band == "Not set" and entry["total"] == 0:
+            continue
+        share = (entry["total"] / total * 100) if total else 0.0
+        rows.append(
+            [
+                band,
+                count_with_denominator(entry["total"], total),
+                f"{share:.1f}%",
+                f"{entry['custom']:,}",
+                f"{entry['external']:,}",
+                interval_band_status(band),
+            ]
+        )
+    return rows
+
+
+def active_property_rows(summary: PropertyIntervalSummary) -> list[list[Any]]:
+    return [
+        [
+            item.name,
+            item.analysis,
+            item.site,
+            item.issuer,
+            format_interval_minutes(item.interval_minutes),
+            interval_band(item.interval_minutes),
+            item.content_source,
+        ]
+        for item in summary.properties
+    ]
+
+
+def _offender_property_key(result: str) -> tuple[str, str] | None:
+    """(analysis, property) names from a Top 10 analysis result, else None."""
+    fields: dict[str, str] = {}
+    for part in result.split(" | "):
+        name, sep, value = part.partition("=")
+        if sep:
+            fields[name.strip().lower()] = value.strip()
+    analysis = fields.get("analysis name")
+    prop = fields.get("name")
+    if not analysis or not prop:
+        return None
+    return analysis.lower(), prop.lower()
+
+
+def repeated_eval_cost_rows(
+    summary: PropertyIntervalSummary,
+    offenders: list[LoopOffenderSummary],
+    average_loop_minutes: float,
+) -> list[list[str]]:
+    """Client minutes per day for Top 10 analysis properties, worst first.
+
+    A property cannot run more often than the loop completes, so the longer of
+    its interval and the average loop time sets the runs per day.
+    """
+    by_key: dict[tuple[str, str], PropertyInterval] = {}
+    for item in summary.properties:
+        by_key.setdefault((item.analysis.lower(), item.name.lower()), item)
+    costed: list[tuple[float, list[str]]] = []
+    for offender in offenders:
+        key = _offender_property_key(offender.result)
+        item = by_key.get(key) if key else None
+        if item is None or item.interval_minutes is None:
+            continue
+        cycle = max(item.interval_minutes, average_loop_minutes)
+        if cycle <= 0:
+            continue
+        runs = 1440 / cycle
+        minutes = offender.avg_client_processing_seconds * runs / 60
+        costed.append(
+            (
+                minutes,
+                [
+                    item.name,
+                    item.analysis,
+                    format_interval_minutes(item.interval_minutes),
+                    format_loop_offender_seconds(offender.avg_client_processing_seconds),
+                    f"{runs:,.0f}",
+                    f"{minutes:,.1f}",
+                ],
+            )
+        )
+    costed.sort(key=lambda pair: pair[0], reverse=True)
+    return [row for _minutes, row in costed]
+
+
 def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
     size_mb = actionsite_size_mb(pressure)
     if size_mb is None:
@@ -3194,6 +3458,7 @@ def generate_excel(
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
     agent_multicore_summary: AgentMulticoreSummary | None = None,
     agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
+    property_intervals: PropertyIntervalSummary | None = None,
     stamp: str = "",
 ) -> None:
     metrics_rows = [
@@ -3345,6 +3610,45 @@ def generate_excel(
                 columns=["Metric", "Value", "Status", "Basis"],
             )
             pressure_df.to_excel(writer, sheet_name="Contributing Factors", index=False)
+        if property_intervals:
+            pd.DataFrame(
+                evaluation_frequency_rows(property_intervals),
+                columns=[
+                    "Interval",
+                    "Properties / Active",
+                    "% of Active",
+                    "Custom",
+                    "External",
+                    "Status",
+                ],
+            ).to_excel(writer, sheet_name="Evaluation Frequency", index=False)
+            pd.DataFrame(
+                active_property_rows(property_intervals),
+                columns=[
+                    "Property",
+                    "Analysis",
+                    "Site",
+                    "Issued By",
+                    "Interval",
+                    "Interval Band",
+                    "Content Source",
+                ],
+            ).to_excel(writer, sheet_name="Active Properties", index=False)
+            cost_rows = repeated_eval_cost_rows(
+                property_intervals, loop_offenders or [], metrics.avg_mean_seconds / 60
+            )
+            if cost_rows:
+                pd.DataFrame(
+                    cost_rows,
+                    columns=[
+                        "Property",
+                        "Analysis",
+                        "Interval",
+                        "Average Eval Time (Seconds)",
+                        "Runs per Day",
+                        "Client Minutes per Day",
+                    ],
+                ).to_excel(writer, sheet_name="Repeated Eval Cost", index=False)
         if udp_summary:
             pd.DataFrame(
                 udp_coverage_rows(udp_summary),
@@ -3769,6 +4073,7 @@ def generate_word(
     fast_hash_verify_summary: FastHashVerifySummary | None = None,
     agent_multicore_summary: AgentMulticoreSummary | None = None,
     agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
+    property_intervals: PropertyIntervalSummary | None = None,
     stamp: str = "",
     include_automated_findings: bool = False,
 ) -> None:
@@ -3828,22 +4133,39 @@ def generate_word(
     )
 
     if include_automated_findings:
+        finding_rows: list[list[str]] = []
         finding_impact = {
             "WARNING": "High",
             "CRITICAL": "Critical",
         }.get(str(metrics.overall_status or "").upper())
         if finding_impact:
+            finding_rows.append(
+                [
+                    "CLT-01",
+                    f"{finding_impact}, client evaluation loop health "
+                    "below the healthy threshold.",
+                ]
+            )
+        frequent = frequent_property_count(property_intervals)
+        if frequent:
+            subject = (
+                "1 active property evaluates"
+                if frequent == 1
+                else f"{frequent:,} active properties evaluate"
+            )
+            finding_rows.append(
+                [
+                    "CLT-02",
+                    f"Medium, {subject} more often than every 15 minutes. "
+                    "See Evaluation Frequency.",
+                ]
+            )
+        if finding_rows:
             document.add_heading("Automated Findings", level=3)
             build_word_table(
                 document,
                 ["Finding ID", "Automated Finding"],
-                [
-                    [
-                        "CLT-01",
-                        f"{finding_impact}, client evaluation loop health "
-                        "below the healthy threshold.",
-                    ]
-                ],
+                finding_rows,
                 {0},
             )
 
@@ -3932,7 +4254,7 @@ def generate_word(
         "problem."
     )
 
-    if loop_offenders or actionsite_pressure:
+    if loop_offenders or actionsite_pressure or property_intervals:
         document.add_heading("Loop Cost", level=3)
         document.add_paragraph(
             "These tables show where loop time goes. They add context and do not "
@@ -3982,6 +4304,86 @@ def generate_word(
             {1, 2},
             status_col=2,
         )
+
+    if property_intervals:
+        document.add_heading("Evaluation Frequency", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                f"This table covers the {len(property_intervals.properties):,} active "
+                "properties. Each one has an evaluation interval that sets how often "
+                "the Client re-evaluates it. A property set to every report runs on "
+                "every loop. The guideline is 6 hours or longer unless the data must "
+                "be current."
+            )
+        )
+        build_word_table(
+            document,
+            [
+                "Interval",
+                "Properties / Active",
+                "% of Active",
+                "Custom",
+                "External",
+                "Status",
+            ],
+            evaluation_frequency_rows(property_intervals),
+            {1, 2, 3, 4, 5},
+            status_col=5,
+        )
+        document.add_paragraph(
+            "Custom properties are the customer's own content and can be changed "
+            "directly. External properties come from external content sites and are tuned by "
+            "deactivating or re-activating the analysis."
+        )
+        not_set = sum(
+            1 for item in property_intervals.properties if item.interval_minutes is None
+        )
+        if not_set:
+            add_note_paragraph(
+                document,
+                (
+                    "1 active property has no interval set. It is listed as Not "
+                    "set and is not counted as every report."
+                    if not_set == 1
+                    else f"{not_set:,} active properties have no interval set. "
+                    "They are listed as Not set and are not counted as every "
+                    "report."
+                ),
+            )
+        cost_rows = repeated_eval_cost_rows(
+            property_intervals, loop_offenders or [], metrics.avg_mean_seconds / 60
+        )
+        if cost_rows:
+            document.add_heading("Cost of Repeated Evaluations", level=4)
+            keep_with_next(
+                document.add_paragraph(
+                    "Interval alone does not show load. This table takes the "
+                    "analysis properties from the Top 10 Most Expensive Evaluations "
+                    "and repeats their cost by their interval. A property cannot run "
+                    "more often than the loop completes, so every report uses the "
+                    f"{format_minutes_seconds(metrics.avg_mean_seconds)} average loop "
+                    "time."
+                )
+            )
+            build_word_table(
+                document,
+                [
+                    "Property",
+                    "Analysis",
+                    "Interval",
+                    "Average Eval Time (Seconds)",
+                    "Runs per Day",
+                    "Client Minutes per Day",
+                ],
+                cost_rows,
+                {2, 3, 4, 5},
+            )
+            add_note_paragraph(
+                document,
+                "Top 10 rows that are site background evaluations have no property "
+                "interval and are not repeated here. The workbook lists every active "
+                "property and its interval.",
+            )
 
     if udp_summary or command_polling_summary:
         document.add_heading("Notification and Polling", level=3)
@@ -4401,6 +4803,21 @@ def main() -> int:
                 "Information' on the root server. The Contributing Factors "
                 "table is left out of this report."
             )
+        property_intervals = parse_property_intervals(deployment_info_folder)
+        if deployment_info_folder is not None and property_intervals is None:
+            log.warn(
+                "Property_Info has no 'Active Properties by Evaluation Interval' "
+                "section. Run 'Collect Deployment Information' again to add "
+                "Evaluation Frequency to this report."
+            )
+        if property_intervals:
+            log.detail(
+                "Active properties with intervals", len(property_intervals.properties)
+            )
+            log.detail(
+                "Evaluated every report or under 15 minutes",
+                frequent_property_count(property_intervals),
+            )
         loop_offenders = load_loop_offenders(
             top_offenders_file, top_count=args.top_offenders_count
         )
@@ -4505,6 +4922,7 @@ def main() -> int:
             fast_hash_verify_summary=fast_hash_verify_summary,
             agent_multicore_summary=agent_multicore_summary,
             agent_cpu_idle_summary=agent_cpu_idle_summary,
+            property_intervals=property_intervals,
             stamp=stamp,
         )
 
@@ -4521,6 +4939,7 @@ def main() -> int:
                 fast_hash_verify_summary=fast_hash_verify_summary,
                 agent_multicore_summary=agent_multicore_summary,
                 agent_cpu_idle_summary=agent_cpu_idle_summary,
+                property_intervals=property_intervals,
                 stamp=stamp,
                 include_automated_findings=args.include_automated_findings,
             )

@@ -31,7 +31,7 @@ Reviews how long clients take to evaluate their content, and why.
 | Report Start Date and End Date | Yes | Entered on step 2 | The period the collection covers. |
 | Top 10 slowest evaluations | No | `*top10-query-results*.csv`, `*top10*.csv`, `*top10*.txt`, `*top10*.xml`, and evaluation-time exports | The session relevance query in `Utilities\query_properties.ps1`, or its console export. Adds the Top 10 Most Expensive Evaluations table. |
 | UDP notifications | No | `*udp-notification*.csv`, `*udp_notification*.csv`, the `.xml` forms, `*udp-ping*.csv`, `*receiving*udp*.csv` | The same script. Adds UDP coverage by relay and by subnet, and the Command Polling Review. |
-| `Deployment_Information` folder | Yes | A folder named `Deployment_Information` | The Collect Deployment Information task on the root server. The module reads `General_Info`, `Content_Info`, `Operator_Info` and `Action_Info` (the `.xml` capture is preferred and the `.log` is the fallback). Adds the Contributing Factors section. |
+| `Deployment_Information` folder | Yes | A folder named `Deployment_Information` | The Collect Deployment Information task on the root server. The module reads `General_Info`, `Content_Info`, `Operator_Info` and `Action_Info` (the `.xml` capture is preferred and the `.log` is the fallback). Adds the Contributing Factors and Evaluation Frequency sections. Evaluation Frequency reads the active property intervals from `Property_Info`. |
 
 ## Perfmon Infrastructure Analysis
 

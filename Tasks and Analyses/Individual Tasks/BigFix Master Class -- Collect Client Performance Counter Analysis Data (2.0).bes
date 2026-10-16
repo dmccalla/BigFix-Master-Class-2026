@@ -34,7 +34,7 @@
 <DIV class=hc-eyebrow>&nbsp;</DIV>
 <DIV class=hc-h1>Collect Client Performance Counter Analysis Data</DIV>
 <DIV class=hc-lead><FONT color=#000000>
-<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing.</FONT></DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. The "Collect Deployment Information" task must also have been run, because the report needs its Deployment_Information results.</FONT></DIV>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -52,11 +52,11 @@
 <DIV onclick=hcToggle() id=hcTog class=hc-toggle>[+] Full description &amp; deployment notes</DIV>
 <DIV id=hcNotes class=hc-body style="DISPLAY: none">
 <DIV class=hc-sec>Description</DIV><FONT size=2>
-<P style="FONT-SIZE: 14px"><STRONG><FONT color=#000000>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. Its suggested that the analysis be activated for at least 24 hours before collecting the data.</FONT></STRONG></P>
+<P style="FONT-SIZE: 14px"><STRONG><FONT color=#000000>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. The "Collect Deployment Information" task must also have been run, because the report needs its Deployment_Information results. Its suggested that the analysis be activated for at least 24 hours before collecting the data.</FONT></STRONG></P>
 <P style="FONT-SIZE: 14px"><FONT color=#000000>This task automates the Client Performance lab collection for the BigFix Master Class.&nbsp; This task will perform the following steps: </FONT></P>
 <DIV style="FONT-SIZE: 14px">
 <UL>
-<LI><FONT color=#000000>Backup any existing health check deployment information results.&nbsp; </FONT>
+<LI><FONT color=#000000>Back up any existing Client_Loop results.&nbsp; </FONT>
 <LI><FONT color=#000000>Create the existing collection directory structure on the C: drive.&nbsp; </FONT>
 <UL>
 <LI><FONT color=#000000><STRONG>Note:</STRONG> Edit the actionscript if you want something different.</FONT></LI></UL>

@@ -4395,6 +4395,12 @@ def main() -> int:
             generated_at=generated_at,
         )
         actionsite_pressure = parse_actionsite_pressure(deployment_info_folder)
+        if actionsite_pressure is None:
+            log.warn(
+                "Deployment_Information folder not found. Run 'Collect Deployment "
+                "Information' on the root server. The Contributing Factors "
+                "table is left out of this report."
+            )
         loop_offenders = load_loop_offenders(
             top_offenders_file, top_count=args.top_offenders_count
         )

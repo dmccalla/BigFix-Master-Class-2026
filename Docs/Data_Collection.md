@@ -11,7 +11,7 @@ Folder at it. The Workbench looks in these subfolders:
 ```
 <Data Folder>\
     Client_Loop\              Client Performance Counters export, Top 10 and UDP captures
-    Deployment_Information\   The *_Info_*.log captures from the root server
+    Deployment_Information\   The Collect Deployment Information captures from the root server (required for Client Performance)
     Perfmon\                  One or two PerfMon .blg captures
     FillDB_Performance\       FillDB performance .log files, or the analyzer CSV
 ```
@@ -31,7 +31,7 @@ Reviews how long clients take to evaluate their content, and why.
 | Report Start Date and End Date | Yes | Entered on step 2 | The period the collection covers. |
 | Top 10 slowest evaluations | No | `*top10-query-results*.csv`, `*top10*.csv`, `*top10*.txt`, `*top10*.xml`, and evaluation-time exports | The session relevance query in `Utilities\query_properties.ps1`, or its console export. Adds the Top 10 Most Expensive Evaluations table. |
 | UDP notifications | No | `*udp-notification*.csv`, `*udp_notification*.csv`, the `.xml` forms, `*udp-ping*.csv`, `*receiving*udp*.csv` | The same script. Adds UDP coverage by relay and by subnet, and the Command Polling Review. |
-| `Deployment_Information` folder | No | A folder named `Deployment_Information` | The root server information captures (`General_Info`, `Client_Settings_Info`, `Relay_Server_Info` and the rest). Adds the Contributing Factors section. |
+| `Deployment_Information` folder | Yes | A folder named `Deployment_Information` | The Collect Deployment Information task on the root server. The module reads `General_Info`, `Content_Info`, `Operator_Info` and `Action_Info` (the `.xml` capture is preferred and the `.log` is the fallback). Adds the Contributing Factors section. |
 
 ## Perfmon Infrastructure Analysis
 

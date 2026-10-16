@@ -1625,7 +1625,9 @@ MODULES: list[Module] = [
         note=(
             "Use the Client_Loop_*.csv export or the Client Performance Counters "
             "- Basic Excel/CSV export. The Advanced export includes additional "
-            "data and is not supported. FastHashVerify, CPU idle, and client multicore "
+            "data and is not supported. The Deployment_Information folder from the "
+            "Collect Deployment Information task is required and adds the "
+            "Contributing Factors table. FastHashVerify, CPU idle, and client multicore "
             "client settings are included when supplied by the Client Performance Counters export."
         ),
     ),

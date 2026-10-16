@@ -165,13 +165,16 @@ MODULE_DETAILS = {
             "CPU and hashing settings."
         ),
         "does": (
-            "Creates an Infographic, Excel file, and Mini Report. Optional data adds "
-            "expensive evaluations, UDP notification coverage, Command Polling Review, "
+            "Creates an Infographic, Excel file, and Mini Report. The "
+            "Deployment_Information folder adds the Contributing Factors table. "
+            "Optional data adds expensive evaluations, UDP notification coverage, "
+            "Command Polling Review, "
             "relay details, subnet details, FastHashVerify settings, and client multicore settings."
         ),
         "use": (
-            "Use this with a Client Loop XML or CSV capture. The Client Performance "
-            "Counters Basic export is also supported."
+            "Use this with a Client Loop XML or CSV capture and the "
+            "Deployment_Information folder from the Collect Deployment Information "
+            "task. The Client Performance Counters Basic export is also supported."
         ),
         "consultant": (
             "Confirm the collection period, slow client counts, UDP results, command "
@@ -222,6 +225,9 @@ STEP_HEADERS = {
     "filldb": "FillDB Performance Analysis",
 }
 BROWSABLE_INPUT_KINDS = {"file", "file_optional", "folder", "folder_optional"}
+# Loop context inputs the UI requires although the schema declares them
+# folder_optional, so discovery can still fill them in.
+LOOP_REQUIRED_CONTEXT_FIELDS = {"deployment_info_folder"}
 LOGO_ASSET_PATH = PROJECT_ROOT / "Assets" / "workbench_icon.png"
 CONDENSED_FONT_FILE = PROJECT_ROOT / "Fonts" / "Roboto" / "RobotoCondensed-Bold.ttf"
 
@@ -3101,7 +3107,9 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
     def _input_field_state(self, mod: Module, field: InputField) -> tuple[str, str]:
         path = self._resolved_input_for_field(mod, field)
-        required = field.kind in {"file", "folder"}
+        required = field.kind in {"file", "folder"} or (
+            mod.key == "loop" and field.key in LOOP_REQUIRED_CONTEXT_FIELDS
+        )
         if path is None:
             return ("Needed" if required else "Optional", "Not selected")
         valid, reason = self._validate_field_input(mod, field, path)
@@ -3116,7 +3124,12 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         mod = MODULE_BY_KEY[key]
         primary = self._primary_field(mod)
         missing: list[str] = []
-        for field in [primary] if primary is not None else []:
+        fields = [primary] if primary is not None else []
+        if key == "loop":
+            fields += [
+                f for f in mod.inputs_schema if f.key in LOOP_REQUIRED_CONTEXT_FIELDS
+            ]
+        for field in fields:
             path = self._resolved_input_for_field(mod, field)
             if path is None:
                 missing.append(field.label)
@@ -3141,6 +3154,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             if primary is None:
                 return "Missing", "This module has no primary input."
             valid, reason = self._validate_field_input(mod, primary, manual)
+            if valid and self._missing_required_input_labels(mod.key):
+                return "Missing", self._missing_input_message(mod.key)
             if valid:
                 return "Found", f"Found: {_display_path(manual)}"
             return "Missing", f"Manual selection problem: {reason}"
@@ -3155,6 +3170,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             )
         path = self._discovered.get(mod.key)
         if path is not None:
+            if self._missing_required_input_labels(mod.key):
+                return "Missing", self._missing_input_message(mod.key)
             return "Found", f"Found: {_display_path(path)}"
         return "Missing", self._missing_input_message(mod.key)
 

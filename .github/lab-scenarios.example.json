@@ -1,0 +1,161 @@
+{
+  "server_url": "https://BFROOT1.dmc.lab:52311",
+  "site_name": "BigFix Workbench Test",
+  "allowed_computer_ids": [
+    8317784
+  ],
+  "request_timeout_seconds": 60,
+  "client_query_timeout_seconds": 120,
+  "action_timeout_seconds": 900,
+  "poll_seconds": 5,
+  "scenarios": [
+    {
+      "name": "filldb-performance-manual-lifecycle",
+      "computer_id": 8317784,
+      "preconditions": [
+        {
+          "name": "FillDB performance logging is disabled",
+          "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "equals": "True"
+        },
+        {
+          "name": "No central FillDB performance path is active",
+          "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "equals": "True"
+        }
+      ],
+      "steps": [
+        {
+          "name": "enable-without-auto-disable",
+          "task_file": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
+          "parameters": {
+            "restart": "Y",
+            "rootServerName": "BFROOT1.dmc.lab",
+            "fillDBPerfLogsSizeMB": "1000",
+            "fillDBPerfLogsSizeByte": "1048576000",
+            "fillDBPerfLogsSizeNoLimit": "0",
+            "fillDBPerfLogsDuration": "1",
+            "fillDBPerfLogsNoDisable": "-1"
+          },
+          "assertions": [
+            {
+              "name": "FillDB performance logging is enabled",
+              "query": "exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "FillDB performance path uses the central folder",
+              "query": "exists value \"PerformanceDataPath\" whose (it as string as lowercase = \"c:\\bigfix_health_check\\platform\\results\\logs\\filldb_performance\\filldbperf.log\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "No performance expiration is set",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
+              "equals": "False"
+            }
+          ],
+          "forbidden_generated_action": {
+            "title_contains": "Disable FillDB Performance Logging",
+            "observation_seconds": 45
+          }
+        },
+        {
+          "name": "manual-disable",
+          "task_file": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- FillDB Performance Logging is Enabled (2.0).bes",
+          "parameters": {
+            "restart": "Y"
+          },
+          "assertions": [
+            {
+              "name": "FillDB performance logging is disabled",
+              "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "Central performance path is no longer active",
+              "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "Performance backup marker value is removed",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Backup_Value\" of client",
+              "equals": "False"
+            },
+            {
+              "name": "Performance expiration marker value is removed",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
+              "equals": "False"
+            }
+          ]
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "name": "filldb-performance-generated-disable",
+      "computer_id": 8317784,
+      "preconditions": [
+        {
+          "name": "FillDB performance logging is disabled",
+          "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "equals": "True"
+        }
+      ],
+      "steps": [
+        {
+          "name": "enable-and-auto-disable",
+          "task_file": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
+          "parameters": {
+            "restart": "Y",
+            "rootServerName": "BFROOT1.dmc.lab",
+            "fillDBPerfLogsSizeMB": "1000",
+            "fillDBPerfLogsSizeByte": "1048576000",
+            "fillDBPerfLogsSizeNoLimit": "0",
+            "fillDBPerfLogsDuration": "0",
+            "fillDBPerfLogsNoDisable": "0"
+          },
+          "parameters_from_env": {
+            "apiUsername": "BIGFIX_USERNAME"
+          },
+          "secure_parameters_from_env": {
+            "apiPassword": "BIGFIX_PASSWORD"
+          },
+          "generated_action": {
+            "title_contains": "Disable FillDB Performance Logging",
+            "spawn_timeout_seconds": 180,
+            "wait_for_completion": true,
+            "timeout_seconds": 600,
+            "assertions": [
+              {
+                "name": "Generated disable turns performance logging off",
+                "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+                "equals": "True"
+              },
+              {
+                "name": "Generated disable clears the central performance path",
+                "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+                "equals": "True"
+              },
+              {
+                "name": "Generated disable does not restore a sentinel path",
+                "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase = \"was not set\" or it as string as lowercase = \"needs to be set\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+                "equals": "True"
+              },
+              {
+                "name": "Generated disable removes the performance backup marker value",
+                "query": "exists values of settings \"__FillDB_Perf_Logs_Backup_Value\" of client",
+                "equals": "False"
+              },
+              {
+                "name": "Generated disable removes the performance expiration marker value",
+                "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
+                "equals": "False"
+              }
+            ]
+          }
+        }
+      ],
+      "enabled": true
+    }
+  ]
+}

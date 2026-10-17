@@ -1,0 +1,66 @@
+name: Controlled BigFix lab
+
+on:
+  workflow_dispatch:
+    inputs:
+      command:
+        type: choice
+        options: [plan, check, run]
+        default: plan
+        description: Plan offline, check prerequisites, or execute lab actions
+      server_url:
+        type: string
+        default: https://BFROOT1.dmc.lab:52311
+        description: Lab server URL
+      computer_id:
+        type: string
+        default: "8317784"
+        description: One approved lab computer ID
+      execute:
+        type: boolean
+        default: false
+        description: Explicitly authorize the selected lab actions
+      confirm_server:
+        type: string
+        description: For run, repeat the exact lab hostname
+
+permissions:
+  contents: read
+
+concurrency:
+  group: controlled-bigfix-lab
+  cancel-in-progress: false
+
+jobs:
+  lab:
+    runs-on: ${{ inputs.command == 'plan' && 'windows-latest' || fromJSON('["self-hosted","Windows","bigfix-lab"]') }}
+    timeout-minutes: 40
+    env:
+      BIGFIX_SERVER_URL: ${{ inputs.server_url }}
+      BIGFIX_LAB_COMPUTER_ID: ${{ inputs.computer_id }}
+      BIGFIX_TOKEN: ${{ secrets.BIGFIX_LAB_TOKEN }}
+      BIGFIX_USERNAME: ${{ secrets.BIGFIX_LAB_USERNAME }}
+      BIGFIX_PASSWORD: ${{ secrets.BIGFIX_LAB_PASSWORD }}
+      LAB_COMMAND: ${{ inputs.command }}
+      LAB_EXECUTE: ${{ inputs.execute }}
+      LAB_CONFIRM: ${{ inputs.confirm_server }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Run the explicitly selected lab checks
+        shell: pwsh
+        run: |
+          $labArgs = @($env:LAB_COMMAND, '--server-url', $env:BIGFIX_SERVER_URL, '--computer-id', $env:BIGFIX_LAB_COMPUTER_ID, '--output', "$env:RUNNER_TEMP/bigfix-lab")
+          if ($env:LAB_EXECUTE -eq 'true') { $labArgs += '--execute' }
+          if ($env:LAB_CONFIRM) { $labArgs += @('--confirm-server', $env:LAB_CONFIRM) }
+          python .github/lab_scenarios.py @labArgs
+          exit $LASTEXITCODE
+      - name: Save lab results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: bigfix-lab-results
+          path: ${{ runner.temp }}/bigfix-lab
+          retention-days: 14

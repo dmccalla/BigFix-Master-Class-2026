@@ -25,6 +25,7 @@ dependencies = [
 ]
 
 [dependency-groups]
+validation = ["pypdfium2>=4.30,<6", "pyinstaller>=6.16,<7"]
 dev = [
     "bandit>=1.7.9",
     "cyclonedx-bom>=4.0.0",

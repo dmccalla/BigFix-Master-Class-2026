@@ -11,10 +11,12 @@ import tomllib
 from pathlib import Path
 
 
-def locked_requirements(lockfile: Path) -> list[str]:
+def locked_requirements(
+    lockfile: Path, tools: tuple[str, ...] = ("pytest", "ruff")
+) -> list[str]:
     with lockfile.open("rb") as handle:
         packages = tomllib.load(handle)["package"]
-    pending = ["pytest", "ruff"]
+    pending = list(tools)
     resolved: dict[str, str] = {}
     while pending:
         name = pending.pop()
@@ -35,6 +37,14 @@ def locked_requirements(lockfile: Path) -> list[str]:
 
 if __name__ == "__main__":
     subprocess.run(
-        [sys.executable, "-m", "pip", "install", *locked_requirements(Path("uv.lock"))],
+        [
+            sys.executable,
+            "-m",
+            "pip",
+            "install",
+            *locked_requirements(
+                Path("uv.lock"), tuple(sys.argv[1:]) or ("pytest", "ruff")
+            ),
+        ],
         check=True,
     )

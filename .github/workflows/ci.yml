@@ -58,3 +58,31 @@ jobs:
 
       - name: Test
         run: python -m pytest -q
+
+  delivery:
+    name: Client Performance delivery
+    runs-on: windows-latest
+    timeout-minutes: 15
+    env:
+      WORKBENCH_RUN_DELIVERY: "1"
+      WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/delivery
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: uv.lock
+      - name: Install runtime packages
+        run: python -m pip install -r requirements.txt
+      - name: Install locked test tools
+        run: python .github/install-ci-tools.py
+      - name: Build and verify the known-answer report
+        run: python -m pytest -q Tests/test_client_delivery.py Tests/test_delivery_tools.py
+      - name: Save delivery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-delivery
+          path: ${{ runner.temp }}/delivery
+          retention-days: 14

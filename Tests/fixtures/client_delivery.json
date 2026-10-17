@@ -1,0 +1,149 @@
+{
+  "case": "client-delivery-v1",
+  "loop_headers": [
+    "Computer Name",
+    "Platform Health Check - Maximum Cycle Minutes",
+    "Platform Health Check - Average Cycle Minutes"
+  ],
+  "loop_rows": [
+    [
+      "QA-FAST",
+      "20",
+      "10"
+    ],
+    [
+      "QA-30",
+      "45",
+      "30"
+    ],
+    [
+      "QA-60",
+      "75",
+      "60"
+    ],
+    [
+      "QA-SLOW",
+      "90",
+      "61"
+    ],
+    [
+      "QA-MISSING",
+      "<not reported>",
+      "<not reported>"
+    ],
+    [
+      "QA-ERROR",
+      "<error>",
+      "<error>"
+    ]
+  ],
+  "properties": [
+    [
+      "QA Every Report",
+      "00:00:00",
+      "External"
+    ],
+    [
+      "QA Fast",
+      "00:05:00",
+      "Custom"
+    ],
+    [
+      "QA Boundary 15",
+      "00:15:00",
+      "Custom"
+    ],
+    [
+      "QA Hour",
+      "01:00:00",
+      "External"
+    ],
+    [
+      "QA Six Hours",
+      "06:00:00",
+      "External"
+    ],
+    [
+      "QA Unset",
+      "no-val",
+      "Custom"
+    ],
+    [
+      "QA Unreadable",
+      "garbage",
+      "External"
+    ]
+  ],
+  "expected_metrics": {
+    "total_devices": 4,
+    "score_total_devices": 6,
+    "not_reported_count": 1,
+    "error_count": 1,
+    "avg_healthy": 1,
+    "avg_warning": 2,
+    "avg_critical": 3,
+    "avg_mean_seconds": 2415,
+    "slowest_avg_seconds": 3660,
+    "peak_max_seconds": 5400,
+    "environment_score": 56,
+    "overall_status": "CRITICAL"
+  },
+  "expected_frequency": [
+    [
+      "Every report",
+      "2 / 7",
+      "28.6%",
+      "1",
+      "1",
+      "Needs Attention"
+    ],
+    [
+      "Under 15 minutes",
+      "1 / 7",
+      "14.3%",
+      "1",
+      "0",
+      "Needs Attention"
+    ],
+    [
+      "15 minutes to 1 hour",
+      "1 / 7",
+      "14.3%",
+      "1",
+      "0",
+      "Advisory"
+    ],
+    [
+      "1 hour to 6 hours",
+      "1 / 7",
+      "14.3%",
+      "0",
+      "1",
+      "Advisory"
+    ],
+    [
+      "6 hours or longer",
+      "1 / 7",
+      "14.3%",
+      "0",
+      "1",
+      "Healthy"
+    ],
+    [
+      "Not set",
+      "1 / 7",
+      "14.3%",
+      "0",
+      "1",
+      "Not Assessed"
+    ]
+  ],
+  "expected_cost": [
+    "QA Every Report",
+    "QA Analysis",
+    "Every report",
+    "60",
+    "36",
+    "35.8"
+  ]
+}

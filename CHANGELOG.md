@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Tests
+
+- Add known-answer Client Performance delivery checks, cross-product result comparison, rendered-output validation, clean release ZIP checks, and explicit lab scenarios. Save build logs and rendered artifacts for diagnosis.
+
 ### Fixed
 
 - Run lint and formatting once, separately from the Python 3.12, 3.13 and 3.14 tests, so style failures cannot prevent regression tests from running. Install CI tools from uv.lock, cancel superseded runs, and resolve the outstanding formatting failures.

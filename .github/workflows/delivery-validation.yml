@@ -1,0 +1,80 @@
+name: Delivery and release validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    name: Clean Windows release
+    runs-on: windows-latest
+    timeout-minutes: 35
+    env:
+      WORKBENCH_RUN_DELIVERY: "1"
+      WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/validation/delivery
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: uv.lock
+      - name: Install runtime packages
+        run: python -m pip install -r requirements.txt
+      - name: Install locked validation tools
+        run: python .github/install-ci-tools.py pytest ruff pyinstaller cyclonedx-bom pip-licenses uv
+      - name: Build the reference report
+        run: python -m pytest -q Tests/test_client_delivery.py
+      - name: Build the real release ZIP
+        run: powershell -NoProfile -File Build/package_release.ps1 -OutputPath "${{ runner.temp }}/validation/package"
+      - name: Validate and launch the extracted release
+        shell: pwsh
+        run: |
+          $archive = @(Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/validation/package" -Filter '*.zip')
+          if ($archive.Count -ne 1) { throw 'Expected one release ZIP' }
+          $deliveryRun = @(Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/validation/delivery" -Directory -Filter 'run-*')
+          if ($deliveryRun.Count -ne 1) { throw 'Expected one delivery run' }
+          python .github/release_smoke.py $archive[0].FullName --output "$env:RUNNER_TEMP/validation/smoke" --evidence "$($deliveryRun[0].FullName)/evidence" --expected-commit "${{ github.sha }}"
+          exit $LASTEXITCODE
+      - name: Save release evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-validation
+          path: |
+            ${{ runner.temp }}/validation/delivery/**
+            ${{ runner.temp }}/validation/package/*.zip*
+            ${{ runner.temp }}/validation/smoke/*.log
+            ${{ runner.temp }}/validation/smoke/*.json
+            ${{ runner.temp }}/validation/smoke/report/**
+          retention-days: 14
+
+  rendered-report:
+    name: Rendered report layout
+    needs: package
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Install locked PDF tools
+        run: python .github/install-ci-tools.py pypdfium2 pillow
+      - name: Install the document renderer
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-writer fonts-crosextra-carlito
+      - uses: actions/download-artifact@v4
+        with:
+          name: release-validation
+          path: ${{ runner.temp }}/delivery-input
+      - name: Render and inspect the generated report
+        run: python .github/inspect_report.py "$RUNNER_TEMP"/delivery-input/delivery/run-*/report/*.docx --output "$RUNNER_TEMP/rendered" --soffice soffice
+      - name: Save rendered pages and layout findings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: rendered-report
+          path: ${{ runner.temp }}/rendered
+          retention-days: 14

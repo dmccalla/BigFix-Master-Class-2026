@@ -13,7 +13,6 @@ jobs:
     timeout-minutes: 35
     env:
       WORKBENCH_RUN_DELIVERY: "1"
-      WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/validation/delivery
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,6 +25,8 @@ jobs:
       - name: Install locked validation tools
         run: python .github/install-ci-tools.py pytest ruff pyinstaller cyclonedx-bom pip-licenses uv
       - name: Build the reference report
+        env:
+          WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/validation/delivery
         run: python -m pytest -q Tests/test_client_delivery.py
       - name: Build the real release ZIP
         run: powershell -NoProfile -File Build/package_release.ps1 -OutputPath Temp/validation/package
@@ -41,7 +42,7 @@ jobs:
           if ($archive.Count -ne 1) { throw 'Expected one release ZIP' }
           $deliveryRun = @(Get-ChildItem -LiteralPath "$env:RUNNER_TEMP/validation/delivery" -Directory -Filter 'run-*')
           if ($deliveryRun.Count -ne 1) { throw 'Expected one delivery run' }
-          python .github/release_smoke.py $archive[0].FullName --output "$env:RUNNER_TEMP/validation/smoke" --evidence "$($deliveryRun[0].FullName)/evidence" --expected-commit "${{ github.sha }}"
+          python .github/release_smoke.py ($archive[0].FullName) --output "$env:RUNNER_TEMP/validation/smoke" --evidence "$($deliveryRun[0].FullName)/evidence" --expected-commit "${{ github.sha }}"
           exit $LASTEXITCODE
       - name: Save release evidence
         if: always()

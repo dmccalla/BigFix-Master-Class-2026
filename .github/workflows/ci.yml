@@ -65,7 +65,6 @@ jobs:
     timeout-minutes: 15
     env:
       WORKBENCH_RUN_DELIVERY: "1"
-      WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/delivery
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -78,6 +77,8 @@ jobs:
       - name: Install locked test tools
         run: python .github/install-ci-tools.py
       - name: Build and verify the known-answer report
+        env:
+          WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/delivery
         run: python -m pytest -q Tests/test_client_delivery.py Tests/test_delivery_tools.py
       - name: Save delivery evidence
         if: always()

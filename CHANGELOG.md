@@ -19,6 +19,7 @@ the project release process for the steps to cut a release.
 
 - Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.
 - Add the Evaluation Frequency block to the sample Property_Info captures, and say in the lab guide that the Client Performance module requires the Deployment Information results.
+- Say in the user guide what the collection tasks change on a server, which tasks change client settings, and how the Collect tasks handle credentials. Rebuild the PDF.
 
 ## [2.1] - 2026-10-15
 

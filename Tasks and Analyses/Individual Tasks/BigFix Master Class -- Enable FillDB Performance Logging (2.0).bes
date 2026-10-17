@@ -534,7 +534,7 @@ waithidden cmd.exe /C echo Logging was automatically disabled by the auto-genera
 			<HasTimeRange>false</HasTimeRange>
 			<HasStartTime>false</HasStartTime>
 			<HasEndTime>true</HasEndTime>
-			<EndDateTimeLocalOffset>P2D</EndDateTimeLocalOffset>
+			<EndDateTimeLocalOffset>P{((parameter "fillDBPerfLogsDuration" as integer + 24) / 24)}DT{((parameter "fillDBPerfLogsDuration" as integer + 24) mod 24)}H</EndDateTimeLocalOffset>
 			<HasDayOfWeekConstraint>false</HasDayOfWeekConstraint>
 			<UseUTCTime>false</UseUTCTime>
 			<ActiveUserRequirement>NoRequirement</ActiveUserRequirement>

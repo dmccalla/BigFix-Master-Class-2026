@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Fixed
+
+- Make each generated disable action stay open for the logging duration plus one day. It used a fixed two days, so a duration over 24 hours could outlast the action and leave logging on. The FillDB Performance task now computes the offset from their own duration input. The default 24 hours still gives two days.
+
 ### Added
 
 - Add Evaluation Frequency to the Client Performance report. It counts active properties by evaluation interval, shows the cost of repeated Top 10 evaluations, and raises finding CLT-02 for properties evaluated more often than every 15 minutes. Collect Deployment Information now writes an Active Properties by Evaluation Interval block to Property_Info, so run it again to add the section to an older capture.

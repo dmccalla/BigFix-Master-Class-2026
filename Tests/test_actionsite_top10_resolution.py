@@ -38,7 +38,9 @@ def test_collector_embeds_this_helper() -> None:
     helper = helper[helper.index(marker) :].strip()
     for task in tasks:
         script = ET.parse(task).getroot().findtext(".//ActionScript") or ""
-        embedded = script[script.index(marker) : script.index("\n__END__", script.index(marker))].strip()
+        embedded = script[
+            script.index(marker) : script.index("\n__END__", script.index(marker))
+        ].strip()
         assert embedded == helper.replace("{", "{{")
 
 
@@ -47,7 +49,9 @@ def _capture(*answers: str) -> str:
     return f"<BESAPI><Query><Result>{content}</Result></Query></BESAPI>"
 
 
-def _run(tmp_path: Path, *, property_api_fails: bool = False) -> tuple[list[dict], list[str]]:
+def _run(
+    tmp_path: Path, *, property_api_fails: bool = False
+) -> tuple[list[dict], list[str]]:
     loop_xml = tmp_path / "loop.xml"
     top10_xml = tmp_path / "top10.xml"
     top10_csv = tmp_path / "top10.csv"
@@ -96,10 +100,10 @@ function Invoke-WebRequest {{
     -LoopXml '{loop_xml.as_posix()}' `
     -Top10Input '{top10_xml.as_posix()}' `
     -OutputTop10Csv '{top10_csv.as_posix()}' `
-    -OutputUdpCsv '{(tmp_path / 'udp.csv').as_posix()}' `
+    -OutputUdpCsv '{(tmp_path / "udp.csv").as_posix()}' `
     -ApiQueryUrl 'https://example.invalid/api/query' `
     -BigFixUsername test -BigFixPassword test -QueryAttempts 1 `
-    -LogFile '{(tmp_path / 'query.log').as_posix()}' -Quiet
+    -LogFile '{(tmp_path / "query.log").as_posix()}' -Quiet
 exit $LASTEXITCODE
 """,
         encoding="utf-8",
@@ -110,7 +114,9 @@ exit $LASTEXITCODE
         text=True,
         check=False,
     )
-    assert result.returncode == (2 if property_api_fails else 0), result.stdout + result.stderr
+    assert result.returncode == (2 if property_api_fails else 0), (
+        result.stdout + result.stderr
+    )
     with top10_csv.open(encoding="utf-8-sig", newline="") as handle:
         rows = list(csv.DictReader(handle))
     return rows, requests.read_text(encoding="utf-8").splitlines()
@@ -130,15 +136,26 @@ def test_actionsite_properties_resolve_by_rest_id_without_changing_analysis_rows
     assert client_settings["AvgClientProcessingSeconds"] == "8"
     assert client_settings["TotalClientProcessingSeconds"] == "16"
     assert client_settings["MaxClientProcessingSeconds"] == "10"
-    assert by_result["Retrieved Property: CPU (actionsite.6:Evaluate Property 1)"]["Status"] == "OK"
+    assert (
+        by_result["Retrieved Property: CPU (actionsite.6:Evaluate Property 1)"]["Status"]
+        == "OK"
+    )
     assert by_result["actionsite.999:Evaluate Property 1"]["Status"] == "NO RESULTS"
-    assert by_result[
-        "Analysis Name=Sample Analysis | Display Name=Example Check | Name=Example Check | Source Name=Example Check | Source ID=1"
-    ]["Status"] == "OK"
-    assert by_result[
-        "Analysis Name=Action Site Analysis | Display Name=Another Check | Name=Another Check | Source Name=Another Check | Source ID=1"
-    ]["Status"] == "OK"
-    assert by_result["Background Evaluation of External Site: Test Site"]["Status"] == "OK"
+    assert (
+        by_result[
+            "Analysis Name=Sample Analysis | Display Name=Example Check | Name=Example Check | Source Name=Example Check | Source ID=1"
+        ]["Status"]
+        == "OK"
+    )
+    assert (
+        by_result[
+            "Analysis Name=Action Site Analysis | Display Name=Another Check | Name=Another Check | Source Name=Another Check | Source ID=1"
+        ]["Status"]
+        == "OK"
+    )
+    assert (
+        by_result["Background Evaluation of External Site: Test Site"]["Status"] == "OK"
+    )
     assert sum(route.endswith("/api/properties") for route in requests) == 1
     assert sum("/api/query?" in route for route in requests) == 3
 
@@ -149,7 +166,10 @@ def test_property_api_error_keeps_raw_lookup_and_timing(tmp_path: Path) -> None:
     actionsite = [row for row in rows if row["Result"].startswith("actionsite.")]
     assert len(actionsite) == 3
     assert all(row["Status"] == "ERROR" for row in actionsite)
-    assert next(row for row in actionsite if row["Result"].startswith("actionsite.18"))[
-        "TotalClientProcessingSeconds"
-    ] == "16"
+    assert (
+        next(row for row in actionsite if row["Result"].startswith("actionsite.18"))[
+            "TotalClientProcessingSeconds"
+        ]
+        == "16"
+    )
     assert sum(route.endswith("/api/properties") for route in requests) == 1

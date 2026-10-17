@@ -8,12 +8,34 @@ on:
 permissions:
   contents: read
 
-# One command per step. The Windows runner's shell only reports the last
-# command's exit code, so a failed install inside a multi-line step would
-# pass silently and surface later as missing modules.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
+  quality:
+    name: Lint and format
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: uv.lock
+
+      - name: Install locked CI tools
+        run: python .github/install-ci-tools.py
+
+      - name: Ruff check
+        run: python -m ruff check .
+
+      - name: Ruff format
+        run: python -m ruff format --check .
+
   test:
-    name: Lint and test (Python ${{ matrix.python-version }})
+    name: Tests (Python ${{ matrix.python-version }})
     runs-on: windows-latest
     strategy:
       fail-fast: false
@@ -26,21 +48,13 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
           cache: pip
-
-      - name: Upgrade pip
-        run: python -m pip install --upgrade pip
+          cache-dependency-path: uv.lock
 
       - name: Install the runtime packages
         run: python -m pip install -r requirements.txt
 
-      - name: Install the test tools
-        run: python -m pip install pytest ruff
-
-      - name: Ruff check
-        run: python -m ruff check .
-
-      - name: Ruff format
-        run: python -m ruff format --check .
+      - name: Install locked CI tools
+        run: python .github/install-ci-tools.py
 
       - name: Test
         run: python -m pytest -q

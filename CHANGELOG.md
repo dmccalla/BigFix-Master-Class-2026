@@ -13,6 +13,7 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Run lint and formatting once, separately from the Python 3.12, 3.13 and 3.14 tests, so style failures cannot prevent regression tests from running. Install CI tools from uv.lock, cancel superseded runs, and resolve the outstanding formatting failures.
 - Make each generated disable action stay open for the logging duration plus one day. It used a fixed two days, so a duration over 24 hours could outlast the action and leave logging on. The FillDB Performance task now computes the offset from their own duration input. The default 24 hours still gives two days.
 
 ### Added

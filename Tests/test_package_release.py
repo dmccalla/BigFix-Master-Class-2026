@@ -210,7 +210,8 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
             }
             assert all(not name.startswith(f"{PACKAGE}/") for name in zipped.namelist())
         included_files = {
-            name for name in files
+            name
+            for name in files
             if not name.lower().endswith(".md")
             and (not name.startswith("Docs/") or name.lower().endswith(".pdf"))
         }
@@ -221,8 +222,13 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
             "release-manifest.json",
         }
         assert not any(name.lower().endswith(".md") for name in contents)
-        assert all(name.lower().endswith(".pdf") for name in contents if name.startswith("Docs/"))
-        assert b"Docs\\User Guide\\Master_Class_Diagnostics_Workbench_User_Guide.pdf" in contents["START_HERE.txt"]
+        assert all(
+            name.lower().endswith(".pdf") for name in contents if name.startswith("Docs/")
+        )
+        assert (
+            b"Docs\\User Guide\\Master_Class_Diagnostics_Workbench_User_Guide.pdf"
+            in contents["START_HERE.txt"]
+        )
         for relative in included_files:
             expected = (root / relative).read_bytes()
             if relative.endswith(".cmd"):

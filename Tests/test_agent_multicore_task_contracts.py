@@ -71,6 +71,7 @@ def test_agent_cpu_settings_collector_reads_all_fourteen_fields() -> None:
     assert "_BESClient_Resource_MaxCoreUtilization" not in content
     assert "_BESClient_Resource_WorkTypeScalar" not in content
 
+
 def test_standalone_helper_matches_embedded_fourteen_field_collector() -> None:
     utility = (ROOT / "Utilities" / "query_properties.ps1").read_text(encoding="utf-8")
     utility = utility[utility.index("# query_properties.ps1") :].strip()
@@ -86,4 +87,7 @@ def test_standalone_helper_matches_embedded_fourteen_field_collector() -> None:
         assert '"Platform Health Check - Agent CPU Work Idle"' in script
         assert "$parts[13].Trim()" in script
         assert "Count -eq 7" not in script
-        assert '(if it = "" then "Not Applicable" else it) of concatenation ";" of values of results (item 0 of it, elements of item 10 of it)' in script
+        assert (
+            '(if it = "" then "Not Applicable" else it) of concatenation ";" of values of results (item 0 of it, elements of item 10 of it)'
+            in script
+        )

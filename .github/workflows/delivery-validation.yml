@@ -28,7 +28,12 @@ jobs:
       - name: Build the reference report
         run: python -m pytest -q Tests/test_client_delivery.py
       - name: Build the real release ZIP
-        run: powershell -NoProfile -File Build/package_release.ps1 -OutputPath "${{ runner.temp }}/validation/package"
+        run: powershell -NoProfile -File Build/package_release.ps1 -OutputPath Temp/validation/package
+      - name: Collect the release archive
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory -Force -Path "$env:RUNNER_TEMP/validation/package" | Out-Null
+          Get-ChildItem -LiteralPath 'Temp/validation/package' -File | ForEach-Object { Copy-Item -LiteralPath $_.FullName -Destination "$env:RUNNER_TEMP/validation/package" }
       - name: Validate and launch the extracted release
         shell: pwsh
         run: |

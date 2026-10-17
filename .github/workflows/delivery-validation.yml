@@ -23,7 +23,7 @@ jobs:
       - name: Install runtime packages
         run: python -m pip install -r requirements.txt
       - name: Install locked validation tools
-        run: python .github/install-ci-tools.py pytest ruff pyinstaller cyclonedx-bom pip-licenses uv
+        run: python .github/install-ci-tools.py pytest ruff pyinstaller cyclonedx-bom pip-licenses
       - name: Build the reference report
         env:
           WORKBENCH_DELIVERY_OUTPUT: ${{ runner.temp }}/validation/delivery

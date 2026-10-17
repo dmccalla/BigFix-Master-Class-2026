@@ -150,3 +150,17 @@ def test_release_smoke_rejects_escaping_zip_member(tmp_path):
     with pytest.raises(ValueError, match="Unsafe ZIP member"):
         load_tool("release_smoke").verify_archive(archive, tmp_path / "out", "expected")
     assert not (tmp_path / "escape.txt").exists()
+
+
+def test_workflow_validation_tools_exist_in_the_project_lockfile():
+    installer = load_tool("install-ci-tools")
+    requests = []
+    for workflow in (REPO / ".github/workflows").glob("*.yml"):
+        for line in workflow.read_text(encoding="utf-8").splitlines():
+            if "run: python " in line and "install-ci-tools.py" in line:
+                tools = tuple(line.partition("install-ci-tools.py")[2].strip().split())
+                requests.append((workflow.name, tools))
+                assert installer.locked_requirements(
+                    ROOT / "uv.lock", tools or ("pytest", "ruff")
+                ), workflow
+    assert requests, "No locked workflow tool installation found"

@@ -384,6 +384,8 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
         value_text = str(value)
         if isinstance(value, bool):
             value_text = "Yes" if value else "No"
+        if value_text == "Not supplied":
+            return value_text
         if suffix:
             value_text += suffix
         source = environment.get(source_key)
@@ -1243,7 +1245,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
     # value/marker/pill (average, not peak -- a transient spike must not fail an
     # otherwise-healthy counter; 2026-07-02 per user).
     counters = []
-    findings_summary = {"critical": 0, "warning": 0}
+    findings_summary = {"critical": 0, "warning": 0, "cannotVerify": 0}
     finding_ids: list[str] = []
     for section_data in observations.get("sections", {}).values():
         name = re.sub(r"\s+", " ", str(section_data.get("section", ""))).strip()
@@ -1254,6 +1256,8 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         if res != "pass":
             if status in ("warning", "warn", "advisory", "needs attention"):
                 findings_summary["warning"] += 1
+            elif status in ("not available", "cannot verify"):
+                findings_summary["cannotVerify"] += 1
             else:
                 findings_summary["critical"] += 1
             source_id = perfmon_section_source_id(name)
@@ -1287,7 +1291,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         "status": {"cls": cls, "label": label},
         "counters": counters,
         "findingsSummary": {
-            "total": findings_summary["critical"] + findings_summary["warning"],
+            "total": sum(findings_summary.values()),
             **findings_summary,
         },
         "findingIds": sorted(finding_ids),

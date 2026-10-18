@@ -1320,7 +1320,7 @@ INTERVAL_BAND_ORDER = (
     "15 minutes to 1 hour",
     "1 hour to 6 hours",
     "6 hours or longer",
-    "Not set",
+    "Unreadable",
 )
 
 
@@ -1346,7 +1346,7 @@ def parse_interval_minutes(text: str) -> float | None:
     The collection writes 00:00:00 for every report, 01:00:00 style clocks,
     and "1 day" style spans. no-val means the property has no interval, and
     BigFix evaluates such a property every report, so it reads as 0 minutes.
-    None is left for a value that cannot be read.
+    None is left for a value that cannot be read, shown as Unreadable.
     """
     value = text.strip().lower()
     if not value or value == "no-val":
@@ -1368,7 +1368,7 @@ def parse_interval_minutes(text: str) -> float | None:
 
 def interval_band(minutes: float | None) -> str:
     if minutes is None:
-        return "Not set"
+        return "Unreadable"
     if minutes <= 0:
         return "Every report"
     if minutes < PROPERTY_INTERVAL_FREQUENT_MINUTES:
@@ -1392,7 +1392,7 @@ def interval_band_status(band: str) -> str:
 
 def format_interval_minutes(minutes: float | None) -> str:
     if minutes is None:
-        return "Not set"
+        return "Unreadable"
     if minutes <= 0:
         return "Every report"
     if minutes % 1440 == 0:
@@ -1486,7 +1486,7 @@ def evaluation_frequency_rows(summary: PropertyIntervalSummary) -> list[list[str
     rows: list[list[str]] = []
     for band in INTERVAL_BAND_ORDER:
         entry = counts[band]
-        if band == "Not set" and entry["total"] == 0:
+        if band == "Unreadable" and entry["total"] == 0:
             continue
         share = (entry["total"] / total * 100) if total else 0.0
         rows.append(
@@ -1912,6 +1912,27 @@ def format_loop_offender_strip_seconds(seconds: float | None) -> str:
     if math.isnan(seconds_float) or seconds_float <= 0:
         return "Not available"
     return f"{seconds_float:,.1f} s"
+
+
+def format_loop_offender_evaluation(result: str) -> str:
+    """Name an analysis property and its analysis. Leave other results as they are."""
+    text = str(result or "").strip()
+    fields: dict[str, str] = {}
+    for part in text.split(" | "):
+        name, sep, value = part.partition("=")
+        if sep:
+            fields[name.strip().lower()] = value.strip()
+    analysis = fields.get("analysis name")
+    prop = fields.get("name") or fields.get("display name")
+    if analysis and prop:
+        return f"{prop} (analysis: {analysis})"
+    return text
+
+
+def loop_health_finding_text(finding_impact: str) -> str:
+    """CLT-01 text. The score is Warning below 90 and Critical below 70."""
+    limit = 70 if finding_impact == "Critical" else 90
+    return f"{finding_impact}, the client loop health score is below {limit}"
 
 
 def compact_loop_offender_label(result: str, limit: int = 56) -> str:
@@ -3227,11 +3248,55 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
+def clt02_finding_text(frequent: int) -> str:
+    subject = (
+        "1 active property is" if frequent == 1 else f"{frequent:,} active properties are"
+    )
+    return f"Medium, {subject} set to every report or to under 15 minutes"
+
+
+# CLT-03 is raised when more than this share of devices has no usable loop data.
+CLT03_NO_DATA_PCT_LIMIT = 5.0
+
+
+def clt03_raised(metrics: ReportMetrics) -> bool:
+    total = metrics.score_total_devices
+    if total <= 0:
+        return False
+    return metrics.total_issue_count / total * 100 > CLT03_NO_DATA_PCT_LIMIT
+
+
+def clt03_finding_text(metrics: ReportMetrics) -> str:
+    verb = "has" if metrics.total_issue_count == 1 else "have"
+    return (
+        f"Medium, {metrics.total_issue_count:,} of "
+        f"{metrics.score_total_devices:,} devices "
+        f"({pct(metrics.total_issue_pct)}) {verb} no usable loop data"
+    )
+
+
+def loop_findings_line(finding_impact: str, frequent: int, no_data: bool = False) -> str:
+    """Infographic header line, for example Raises 2 findings (1 High, 1 Medium)."""
+    impacts = (
+        ([finding_impact] if finding_impact else [])
+        + (["Medium"] if frequent else [])
+        + (["Medium"] if no_data else [])
+    )
+    if not impacts:
+        return ""
+    if len(impacts) == 1:
+        return f"Raises 1 {impacts[0]} finding"
+    counts = Counter(impacts)
+    split = ", ".join(f"{counts[impact]} {impact}" for impact in dict.fromkeys(impacts))
+    return f"Raises {len(impacts)} findings ({split})"
+
+
 def generate_png(
     metrics: ReportMetrics,
     png_output: Path,
     loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
+    property_intervals: PropertyIntervalSummary | None = None,
 ) -> None:
     """Render the Client Loop Performance infographic from the design HTML.
 
@@ -3321,7 +3386,7 @@ def generate_png(
         },
         {
             "color": status_spine.CRITICAL.mark,
-            "label": f"Critical over {fmt_min(c_min)} min",
+            "label": f"Critical over {fmt_min(c_min)} min or no data",
             "count": f"{metrics.avg_critical:,}",
             "pct": round(metrics.avg_critical_pct * 100, 1)
             if metrics.avg_critical
@@ -3332,6 +3397,18 @@ def generate_png(
     meta = f"{scored_total:,} devices scored"
     if metrics.report_span_text:
         meta += f" &middot; {metrics.report_span_text} collection"
+
+    findings: list[dict[str, str]] = []
+    if finding_impact:
+        findings.append(
+            {"id": "CLT-01", "text": loop_health_finding_text(finding_impact)}
+        )
+    frequent = frequent_property_count(property_intervals)
+    if frequent:
+        findings.append({"id": "CLT-02", "text": clt02_finding_text(frequent)})
+    no_data = clt03_raised(metrics)
+    if no_data:
+        findings.append({"id": "CLT-03", "text": clt03_finding_text(metrics)})
 
     top_offender = loop_offenders[0] if loop_offenders else None
     if top_offender:
@@ -3346,20 +3423,8 @@ def generate_png(
     data = {
         "title": "Client Performance",
         "meta": meta,
-        "findingsLine": (f"Raises 1 {finding_impact} finding" if finding_impact else ""),
-        "findings": (
-            [
-                {
-                    "id": "CLT-01",
-                    "text": (
-                        f"{finding_impact}, client evaluation loop health "
-                        "below the healthy threshold"
-                    ),
-                }
-            ]
-            if finding_impact
-            else []
-        ),
+        "findingsLine": loop_findings_line(finding_impact, frequent, no_data),
+        "findings": findings,
         "score": metrics.environment_score,
         "scoreColor": score_color,
         "status": {"cls": cls, "label": status_label},
@@ -3923,13 +3988,18 @@ def context_strip_tiles(
         else "All scored devices have usable loop data"
     )
 
+    reporting_tile: dict[str, object] = {
+        "label": "Devices reporting",
+        "value": reporting_value,
+        "caption": reporting_detail,
+        "muted": False,
+    }
+    if clt03_raised(metrics):
+        # Red only when CLT-03 is raised.
+        reporting_tile["color"] = status_spine.CRITICAL.mark
+
     return [
-        {
-            "label": "Devices reporting",
-            "value": reporting_value,
-            "caption": reporting_detail,
-            "muted": False,
-        },
+        reporting_tile,
         {
             "label": "No UDP pings received",
             "value": udp_value,
@@ -3949,6 +4019,7 @@ def client_loop_infographic_key_rows(
     metrics: ReportMetrics,
     loop_offenders: list[LoopOffenderSummary] | None = None,
     udp_summary: UdpNotificationSummary | None = None,
+    property_intervals: PropertyIntervalSummary | None = None,
 ) -> list[list[str]]:
     """Return one row per Infographic tile: the value shown and what it means."""
     context = context_strip_tiles(metrics, loop_offenders, udp_summary)
@@ -3969,6 +4040,11 @@ def client_loop_infographic_key_rows(
         else "Not available"
     )
     raised = str(metrics.overall_status or "").upper() in ("WARNING", "CRITICAL")
+    raised_ids = (
+        (["CLT-01"] if raised else [])
+        + (["CLT-02"] if frequent_property_count(property_intervals) else [])
+        + (["CLT-03"] if clt03_raised(metrics) else [])
+    )
     return [
         [
             "Health score",
@@ -3978,7 +4054,8 @@ def client_loop_infographic_key_rows(
         [
             "Loop distribution",
             f"{metrics.avg_healthy:,} · {metrics.avg_warning:,} · {metrics.avg_critical:,}",
-            "Devices averaging under 30, 30 to 60, and over 60 minutes per loop.",
+            "Devices averaging under 30, 30 to 60, and over 60 minutes per loop. "
+            "Critical also counts devices with no usable data.",
         ],
         [
             "Average loop time",
@@ -3998,7 +4075,8 @@ def client_loop_infographic_key_rows(
         [
             "Devices reporting",
             tiles["Devices reporting"],
-            "Devices that reported usable loop data.",
+            "Devices that reported usable loop data. Devices without it count "
+            "as Critical in the distribution and the score.",
         ],
         [
             "No UDP pings received",
@@ -4012,8 +4090,11 @@ def client_loop_infographic_key_rows(
         ],
         [
             "Findings raised",
-            "CLT-01" if raised else "None raised",
-            "CLT-01 is raised when loop health is below the healthy threshold.",
+            ", ".join(raised_ids) if raised_ids else "None raised",
+            "CLT-01 is raised when the health score is below 90. CLT-02 is "
+            "raised when an active property is set to every report or to under "
+            "15 minutes. CLT-03 is raised when more than 5% of devices have no "
+            "usable loop data.",
         ],
     ]
 
@@ -4130,7 +4211,9 @@ def generate_word(
     build_word_table(
         document,
         ["Infographic tile", "Value", "What it means"],
-        client_loop_infographic_key_rows(metrics, loop_offenders, udp_summary),
+        client_loop_infographic_key_rows(
+            metrics, loop_offenders, udp_summary, property_intervals
+        ),
         {1},
     )
 
@@ -4144,22 +4227,22 @@ def generate_word(
             finding_rows.append(
                 [
                     "CLT-01",
-                    f"{finding_impact}, client evaluation loop health "
-                    "below the healthy threshold.",
+                    f"{loop_health_finding_text(finding_impact)}.",
                 ]
             )
         frequent = frequent_property_count(property_intervals)
         if frequent:
-            subject = (
-                "1 active property evaluates"
-                if frequent == 1
-                else f"{frequent:,} active properties evaluate"
-            )
             finding_rows.append(
                 [
                     "CLT-02",
-                    f"Medium, {subject} more often than every 15 minutes. "
-                    "See Evaluation Frequency.",
+                    f"{clt02_finding_text(frequent)}. See Evaluation Frequency.",
+                ]
+            )
+        if clt03_raised(metrics):
+            finding_rows.append(
+                [
+                    "CLT-03",
+                    f"{clt03_finding_text(metrics)}. See Reporting Issues.",
                 ]
             )
         if finding_rows:
@@ -4285,7 +4368,7 @@ def generate_word(
                     str(item.rank),
                     format_loop_offender_seconds(item.avg_client_processing_seconds),
                     f"{item.occurrences:,}",
-                    item.result,
+                    format_loop_offender_evaluation(item.result),
                 ]
                 for item in loop_offenders
             ],
@@ -4313,9 +4396,10 @@ def generate_word(
             document.add_paragraph(
                 f"This table covers the {len(property_intervals.properties):,} active "
                 "properties. Each one has an evaluation interval that sets how often "
-                "the Client re-evaluates it. A property set to every report, or with "
-                "no interval set, runs on every loop. The guideline is 6 hours or "
-                "longer unless the data must be current."
+                "the Client re-evaluates it. A property set to every report runs on "
+                "every loop. So does a property with no interval, because BigFix "
+                "evaluates it every report. The guideline is 6 hours or longer unless "
+                "the data must be current."
             )
         )
         build_word_table(
@@ -4345,10 +4429,10 @@ def generate_word(
                 document,
                 (
                     "1 active property has an interval that could not be read. "
-                    "It is listed as Not set and is not counted as every report."
+                    "It is listed as Unreadable and is not counted as every report."
                     if not_set == 1
                     else f"{not_set:,} active properties have an interval that "
-                    "could not be read. They are listed as Not set and are not "
+                    "could not be read. They are listed as Unreadable and are not "
                     "counted as every report."
                 ),
             )
@@ -4362,9 +4446,9 @@ def generate_word(
                     "Interval alone does not show load. This table takes the "
                     "analysis properties from the Top 10 Most Expensive Evaluations "
                     "and repeats their cost by their interval. A property cannot run "
-                    "more often than the loop completes, so every report uses the "
+                    "more often than the loop completes. Any interval shorter than the "
                     f"{format_minutes_seconds(metrics.avg_mean_seconds)} average loop "
-                    "time."
+                    "time uses the loop time."
                 )
             )
             build_word_table(
@@ -4435,8 +4519,10 @@ def generate_word(
         document.add_heading("Command Polling", level=4)
         keep_with_next(
             document.add_paragraph(
-                "The first four rows add up to all devices. The last three are "
-                "checks, and a device can appear in more than one."
+                f"The first four rows add up to the "
+                f"{command_polling_summary.total_devices:,} devices that reported "
+                "polling data. The last three are checks, and a device can appear "
+                "in more than one."
             )
         )
         build_word_table(
@@ -4908,6 +4994,7 @@ def main() -> int:
             png_output,
             loop_offenders=loop_offenders,
             udp_summary=udp_summary,
+            property_intervals=property_intervals,
         )
 
         log.step("Generating Excel workbook")

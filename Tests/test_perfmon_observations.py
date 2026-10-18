@@ -1243,7 +1243,12 @@ def test_perfmon_scorecard_payload_carries_finding_summary(
     assert result == output
     assert captured["chart"] == "perfmon"
     data = captured["data"]
-    assert data["findingsSummary"] == {"total": 2, "critical": 1, "warning": 1}
+    assert data["findingsSummary"] == {
+        "total": 2,
+        "critical": 1,
+        "warning": 1,
+        "cannotVerify": 0,
+    }
     assert data["findingIds"] == ["PRF-INF-02", "PRF-INF-09"]
 
 
@@ -1390,3 +1395,150 @@ def test_perfmon_scorecard_no_data_behavior() -> None:
 
     assert all(sum(counts.values()) == 0 for counts in rows.values())
     assert inject_perfmon_charts.perfmon_overall_score(rows) is None
+
+
+def test_analyze_counts_a_spike_the_chart_clips() -> None:
+    """One reading far above the limit is a violation even when the chart clips it."""
+    counter = "Processor_Total_Privileged_Time"
+    values = [2.0] * 100 + [60.0]
+    df = pd.DataFrame(
+        {
+            "Time": pd.date_range("2026-08-18 07:00:00", periods=len(values), freq="min"),
+            counter: values,
+        }
+    )
+
+    chart_df, findings = get_perfmon_charts.analyze(
+        df,
+        [counter],
+        memory_gb=0,
+        disk_count=0,
+        vm=False,
+        rolling_window=10,
+        pct=0.98,
+        pad=1.15,
+        sample_start_str="08-18-2026 07:00",
+        sample_end_str="08-18-2026 08:40",
+        mem_src="Parameter Supplied",
+        cpu_src="Parameter Supplied",
+        disk_src="Parameter Supplied",
+    )
+
+    finding = findings[0]
+    assert finding["Maximum"] == 60.0
+    assert finding["Violations"] == 1
+    assert finding["Samples"] == len(values)
+    # The average is still low, so the counter itself is not failed by one spike.
+    assert finding["Status"] == "OK"
+    # The chart still clips the spike for display.
+    assert chart_df[counter].max() < 60.0
+
+
+# --- 10-18 review wording -------------------------------------------------------------
+
+
+def _supplied_cpu_and_unsupplied_memory_findings() -> list[dict]:
+    df = pd.DataFrame(
+        {
+            "Time": pd.date_range("2026-08-18 07:00", periods=5, freq="min"),
+            "System_Processor_Queue_Length": [1, 2, 1, 2, 1],
+            "Paging_File_Total_Usage_Peak": [3, 3, 3, 3, 3],
+        }
+    )
+    _chart_df, findings = get_perfmon_charts.analyze(
+        df,
+        ["System_Processor_Queue_Length", "Paging_File_Total_Usage_Peak"],
+        memory_gb=0,
+        disk_count=0,
+        vm=False,
+        rolling_window=10,
+        pct=0.98,
+        pad=1.15,
+        sample_start_str="08-18-2026 07:00",
+        sample_end_str="08-18-2026 07:04",
+        mem_src="Not supplied",
+        cpu_src="Parameter Supplied",
+        disk_src="Parameter Supplied",
+    )
+    return findings
+
+
+def test_unsupplied_memory_priority_item_names_the_reason() -> None:
+    observations = get_perfmon_charts.build_perfmon_observations(
+        _supplied_cpu_and_unsupplied_memory_findings(), []
+    )
+
+    assert observations["summary"]["priority_items"] == [
+        "Paging_File_Total_Usage_Peak - Cannot Verify; physical memory was not supplied"
+    ]
+
+
+def test_supplied_value_confidence_sentence_is_accurate() -> None:
+    observations = get_perfmon_charts.build_perfmon_observations(
+        _supplied_cpu_and_unsupplied_memory_findings(), []
+    )
+
+    text = observations["sections"]["CPU Latency"]["observation"]
+    assert (
+        "Confidence is medium because one or more hardware context values were "
+        "supplied or inferred and not detected from the capture."
+    ) in text
+    assert "inferred or not supplied" not in text
+
+
+def test_hardware_context_reads_not_supplied_once() -> None:
+    xml = inject_perfmon_charts.build_perfmon_hardware_context_xml(
+        {
+            "environment": {
+                "Logical Processor Count": 4,
+                "Logical Processor Source": "Detected from BLG",
+                "Analyzed System Physical Memory (GB)": "Not supplied",
+                "Physical Memory Source": "Not supplied",
+            }
+        }
+    )
+
+    assert "Not supplied GB" not in xml
+    assert "(Not supplied)" not in xml
+    assert "Not supplied" in xml
+
+
+def test_scorecard_counts_cannot_verify_apart_from_critical(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from Lib.Design import html_charts
+
+    captured: dict[str, object] = {}
+
+    def fake_render_chart(chart, data, output_path):
+        captured["data"] = data
+        Path(output_path).write_bytes(_TINY_PNG)
+
+    monkeypatch.setattr(html_charts, "render_chart", fake_render_chart)
+
+    inject_perfmon_charts.render_perfmon_scorecard(
+        {
+            "sections": {
+                "Disk Latency": {
+                    "section": "Disk Latency",
+                    "status": "Critical",
+                    "average": 24,
+                    "threshold": "<= 20 ms",
+                },
+                "Memory Health": {
+                    "section": "Memory Health",
+                    "status": "Not Available",
+                    "average": None,
+                    "threshold": "<= 5%",
+                },
+            }
+        },
+        tmp_path / "perfmon.png",
+    )
+
+    assert captured["data"]["findingsSummary"] == {
+        "total": 2,
+        "critical": 1,
+        "warning": 0,
+        "cannotVerify": 1,
+    }

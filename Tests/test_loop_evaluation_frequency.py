@@ -108,7 +108,7 @@ def test_interval_text_converts_to_minutes(text: str, minutes: float | None) -> 
 @pytest.mark.parametrize(
     ("minutes", "band"),
     [
-        (None, "Not set"),
+        (None, "Unreadable"),
         (0, "Every report"),
         (5, "Under 15 minutes"),
         (15, "15 minutes to 1 hour"),
@@ -238,12 +238,12 @@ def _healthy_metrics() -> loop.ReportMetrics:
         avg_critical_pct=0.0,
         avg_over_120=0,
         avg_over_120_pct=0.0,
-        not_reported_count=1,
+        not_reported_count=0,
         error_count=0,
-        not_reported_pct=0.1,
+        not_reported_pct=0.0,
         error_pct=0.0,
-        total_issue_count=1,
-        total_issue_pct=0.1,
+        total_issue_count=0,
+        total_issue_pct=0.0,
         healthy_threshold_seconds=1800,
         critical_threshold_seconds=3600,
         fix_first_count=0,
@@ -289,7 +289,7 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
     findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
     assert [c.text for c in findings.rows[1].cells] == [
         "CLT-02",
-        "Medium, 4 active properties evaluate more often than every 15 minutes. "
+        "Medium, 4 active properties are set to every report or to under 15 minutes. "
         "See Evaluation Frequency.",
     ]
     cost = next(t for t in doc.tables if t.cell(0, 0).text == "Property")
@@ -324,3 +324,99 @@ def test_word_report_omits_evaluation_frequency_without_the_data(
     ]
     assert "Evaluation Frequency" not in headings
     assert "Automated Findings" not in headings
+
+
+# --- 10-18 review wording -------------------------------------------------------------
+
+
+def test_top10_cell_names_the_property_and_its_analysis() -> None:
+    assert (
+        loop.format_loop_offender_evaluation(_analysis_result(APP_ANALYSIS, APP_PROPERTY))
+        == f"{APP_PROPERTY} (analysis: {APP_ANALYSIS})"
+    )
+    site = "Background Evaluation of External Site: Enterprise Security"
+    assert loop.format_loop_offender_evaluation(site) == site
+
+
+def test_clt01_text_names_the_score_that_raises_it() -> None:
+    assert (
+        loop.loop_health_finding_text("High")
+        == "High, the client loop health score is below 90"
+    )
+    assert (
+        loop.loop_health_finding_text("Critical")
+        == "Critical, the client loop health score is below 70"
+    )
+
+
+def test_findings_line_counts_each_finding() -> None:
+    assert loop.loop_findings_line("High", 3) == "Raises 2 findings (1 High, 1 Medium)"
+    assert loop.loop_findings_line("High", 0) == "Raises 1 High finding"
+    assert loop.loop_findings_line("", 3) == "Raises 1 Medium finding"
+    assert loop.loop_findings_line("", 0) == ""
+
+
+def test_infographic_lists_clt02_and_names_no_data_as_critical(
+    monkeypatch, tmp_path: Path
+) -> None:
+    _write_log(tmp_path)
+    summary = loop.parse_property_intervals(tmp_path)
+    metrics = _healthy_metrics()
+    metrics.overall_status = "WARNING"
+    captured: dict = {}
+
+    def capture_chart(kind, data, output):
+        captured.update({"kind": kind, "data": data})
+
+    monkeypatch.setattr("Lib.Design.html_charts.render_chart", capture_chart)
+
+    loop.generate_png(metrics, tmp_path / "loop.png", property_intervals=summary)
+
+    data = captured["data"]
+    assert [f["id"] for f in data["findings"]] == ["CLT-01", "CLT-02"]
+    assert data["findingsLine"] == "Raises 2 findings (1 High, 1 Medium)"
+    labels = [item["label"] for item in data["legend"]]
+    assert labels[-1] == "Critical over 60 min or no data"
+
+
+def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
+    _write_log(tmp_path)
+    summary = loop.parse_property_intervals(tmp_path)
+    offenders = [_offender(68.38, _analysis_result(APP_ANALYSIS, APP_PROPERTY))]
+    word_output = tmp_path / "loop.docx"
+    png = tmp_path / "loop.png"
+    png.write_bytes(PNG_1X1)
+
+    loop.generate_word(
+        _healthy_metrics(),
+        png,
+        word_output,
+        loop_offenders=offenders,
+        property_intervals=summary,
+        include_automated_findings=True,
+    )
+
+    doc = Document(str(word_output))
+    text = "\n".join(p.text for p in doc.paragraphs)
+    assert "A property set to every report runs on every loop. So does a property" in text
+    assert "with no interval, because BigFix evaluates it every report." in text
+    assert (
+        "Any interval shorter than the 12m 00s average loop time uses the loop time."
+        in text
+    )
+
+    key = next(t for t in doc.tables if t.cell(0, 0).text == "Infographic tile")
+    rows = {row.cells[0].text: [c.text for c in row.cells] for row in key.rows}
+    assert rows["Findings raised"][1] == "CLT-02"
+    assert (
+        rows["Findings raised"][2]
+        == "CLT-01 is raised when the health score is below 90. CLT-02 is raised "
+        "when an active property is set to every report or to under 15 minutes. "
+        "CLT-03 is raised when more than 5% of devices have no usable loop data."
+    )
+    assert rows["Loop distribution"][2].endswith(
+        "Critical also counts devices with no usable data."
+    )
+
+    top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")
+    assert top10.rows[1].cells[3].text == f"{APP_PROPERTY} (analysis: {APP_ANALYSIS})"

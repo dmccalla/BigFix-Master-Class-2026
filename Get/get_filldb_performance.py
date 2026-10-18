@@ -74,6 +74,15 @@ from Lib.Themes.word_stub_utils import (
 
 CSV_COLUMNS = ["FillDB Object", "Count", "Time (ms)", "Rate/s", "Health Check"]
 PERFORMANCE_COLUMNS = CSV_COLUMNS
+COUNT_COLUMNS = ("Count", "Time (ms)", "Rate/s")
+# Analyzer statistics shown in Capture Summary, labeled as the analyzer labels them.
+ANALYZER_STATISTICS = (
+    "Duration (s)",
+    "Throughput (lines/s)",
+    "FillDB Duration (hh:mm:ss)",
+    "FillDB Parsing Threads",
+    "FillDB Database Threads",
+)
 TABLE_WIDTHS = [3480, 2820, 1160, 873, 2282]
 TABLE_WIDTH = sum(TABLE_WIDTHS)
 SUMMARY_COLUMNS = ["Statistic", "Value"]
@@ -245,13 +254,33 @@ def format_count(value: float) -> str:
     return f"{value:,.0f}"
 
 
+def format_table_number(value: str) -> str:
+    """Add thousands separators to a plain number. Leave any other text alone."""
+    text = str(value).strip()
+    try:
+        number = float(text)
+    except ValueError:
+        return value
+    if text.lstrip("-").isdigit():
+        return f"{int(number):,}"
+    return f"{number:,}"
+
+
 def is_capture_stat_row(row: dict[str, str]) -> bool:
     name = clean_object_name(row.get("FillDB Object", "")).strip().lower()
     return name in _CAPTURE_STAT_NAMES
 
 
 def object_performance_rows(rows: list[dict[str, str]]) -> list[dict[str, str]]:
-    return [row for row in rows if not is_capture_stat_row(row)]
+    """Object rows only. The analyzer CSV ends with a Statistic and Value block."""
+    objects: list[dict[str, str]] = []
+    for row in rows:
+        name = clean_object_name(row.get("FillDB Object", "")).strip().lower()
+        if name == "statistic":
+            break
+        if not is_capture_stat_row(row):
+            objects.append(row)
+    return objects
 
 
 def titlecase_label(value: str) -> str:
@@ -645,6 +674,8 @@ def build_word_table(document: DocxDocument, rows: list[dict[str, str]]) -> None
             value = item.get(column_name, "")
             if column_name == "FillDB Object":
                 value = titlecase_label(value)
+            elif column_name in COUNT_COLUMNS:
+                value = format_table_number(value)
             set_cell_text(
                 cell,
                 value,
@@ -673,6 +704,10 @@ def build_capture_summary_table(
             format_count(lines_processed) if lines_processed else "Not available",
         ),
     ]
+    for label in ANALYZER_STATISTICS:
+        value = find_stat_text(rows, label)
+        if value:
+            summary_rows.append((label, format_table_number(value)))
 
     table = document.add_table(rows=1, cols=len(SUMMARY_COLUMNS))
     table.autofit = True
@@ -735,7 +770,7 @@ def add_score_method_note(document: DocxDocument) -> None:
 
     for text in (
         "Formula: Great% x 100 + Good% x 67 + Poor% x 34",
-        "This score is separate from the Summary Scorecard category scores; it is a focused technical signal for the FillDB capture.",
+        "This score covers the FillDB capture only.",
         "Rows without a recognized Health Check result are shown for context "
         "but are not included in the score.",
         "Score bands: 85-100 Healthy, 60-84 Needs Attention, 0-59 Critical.",

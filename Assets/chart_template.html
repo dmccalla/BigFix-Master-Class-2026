@@ -388,8 +388,10 @@ function buildLoop(d){
     const value = String(c.value || '');
     if(/relay(?:s)?\s+(?:w\/\s+most|with)\s+udp issues/i.test(label) && /^none$/i.test(value.trim())) return '#187A43';
     if(/devices reporting/i.test(label)){
+      // Red comes only from the data, when a finding is raised.
+      if(c.color) return c.color;
       const m = value.match(/([\d,]+)\s*\/\s*([\d,]+)/);
-      if(m && Number(m[1].replace(/,/g,'')) < Number(m[2].replace(/,/g,''))) return '#C2410C';
+      if(m && Number(m[1].replace(/,/g,'')) < Number(m[2].replace(/,/g,''))) return '#0B1640';
       return '#187A43';
     }
     return '#0B1640';
@@ -1073,8 +1075,9 @@ function srcPerfmonFindingLine(d){
   const ids = srcFindingIdList(d.findingIds);
   let critical = Math.max(countNumber(summary.critical || summary.failed || 0) || 0, 0);
   let warning = Math.max(countNumber(summary.warning || summary.needsAttention || 0) || 0, 0);
+  const cannotVerify = Math.max(countNumber(summary.cannotVerify || 0) || 0, 0);
   let total = Math.max(countNumber(summary.total || 0) || 0, 0);
-  if(total <= 0 && critical + warning <= 0){
+  if(total <= 0 && critical + warning + cannotVerify <= 0){
     const outside = (d.counters || []).filter(row => {
       const result = String((row || [])[3] || '').toLowerCase();
       return result && !['ok','pass','passed','healthy'].includes(result);
@@ -1085,13 +1088,16 @@ function srcPerfmonFindingLine(d){
     const outsideLine = `<strong style="color:${SRC_CRITICAL};">${fmtCount(outside)}</strong> total ${SRC_DOT} <strong style="color:${SRC_CRITICAL};">${fmtCount(outside)}</strong> outside thresholds`;
     return ids ? srcFindingSummaryLine(outsideLine) + srcFindingSummaryLine(ids) : srcFindingSummaryLine(outsideLine);
   }
-  total = total || critical + warning;
+  total = total || critical + warning + cannotVerify;
   const parts = [];
   if(critical){
     parts.push(`<span><strong style="color:${SRC_CRITICAL};">${fmtCount(critical)}</strong> critical</span>`);
   }
   if(warning){
     parts.push(`<span><strong style="color:${SRC_ATTENTION};">${fmtCount(warning)}</strong> warning</span>`);
+  }
+  if(cannotVerify){
+    parts.push(`<span><strong style="color:#000032;">${fmtCount(cannotVerify)}</strong> cannot verify</span>`);
   }
   const totalColor = critical ? SRC_CRITICAL : SRC_ATTENTION;
   const summaryLine = [`<strong style="color:${totalColor};">${fmtCount(total)}</strong> total`, parts.join(` ${SRC_DOT} `)].filter(Boolean).join(` ${SRC_DOT} `);

@@ -650,7 +650,14 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
             )
 
     if confidence and confidence != "High" and status != "Not Available":
-        result += f" Confidence is {confidence.lower()} because one or more hardware context values were inferred or not supplied."
+        if confidence == "Medium":
+            # Medium means a value was supplied by the user, not detected.
+            result += (
+                " Confidence is medium because one or more hardware context "
+                "values were supplied or inferred and not detected from the capture."
+            )
+        else:
+            result += f" Confidence is {confidence.lower()} because one or more hardware context values were inferred or not supplied."
 
     if len(ordered) > 1:
         non_ok = [item for item in ordered if item.get("Status") != "OK"]
@@ -783,9 +790,12 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
         if item.get("Status") == "OK":
             continue
         if item.get("Status") == "Not Available":
-            review_items.append(
-                f"{item.get('Counter')} - Cannot Verify; no samples recorded"
+            reason = (
+                "physical memory was not supplied"
+                if item.get("NotScoredReason") == MEMORY_NOT_SUPPLIED
+                else "no samples recorded"
             )
+            review_items.append(f"{item.get('Counter')} - Cannot Verify; {reason}")
         else:
             review_items.append(
                 f"{item.get('Counter')} - {item.get('Status')}; "
@@ -1257,11 +1267,13 @@ def analyze(
         if amax is not None:
             chart_df[col] = chart_df[col].clip(upper=amax * 0.98)
 
-        # Per-sample status (clipped values) still drives the violation counts
-        # shown as detail, but the counter's overall status is judged on the
-        # AVERAGE, not the peak (2026-07-02, per user: a transient spike must not
-        # fail an otherwise-healthy counter; the sustained average is what scores).
-        statuses = chart_df[col].apply(lambda v: sample_status(v, thr))
+        # Per-sample status drives the violation counts shown as detail. It uses
+        # the real readings, not the values clipped for the chart, so a spike the
+        # chart flattens is still counted. The counter's overall status is judged
+        # on the AVERAGE, not the peak (2026-07-02, per user: a transient spike
+        # must not fail an otherwise-healthy counter; the sustained average is
+        # what scores).
+        statuses = analysis_df[col].apply(lambda v: sample_status(v, thr))
         n_crit = int((statuses == "Critical").sum())
         n_warn = int((statuses == "Warning").sum())
         n_samp = int(vals.count())

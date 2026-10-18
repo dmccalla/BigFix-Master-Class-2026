@@ -193,9 +193,7 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
         == ["Status", "Devices / Total", "% of Total"]
         for table in doc.tables
     )
-    assert any(
-        "The first four rows add up to all devices." in p.text for p in doc.paragraphs
-    )
+    assert any("devices that reported polling data." in p.text for p in doc.paragraphs)
     assert not any("generated with this module" in p.text for p in doc.paragraphs)
     assert not any(
         "Context Signal" in [cell.text for cell in table.rows[0].cells]

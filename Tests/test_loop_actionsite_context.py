@@ -51,12 +51,12 @@ def _sample_loop_metrics() -> loop.ReportMetrics:
         avg_critical_pct=0.0,
         avg_over_120=0,
         avg_over_120_pct=0.0,
-        not_reported_count=1,
+        not_reported_count=0,
         error_count=0,
-        not_reported_pct=0.1,
+        not_reported_pct=0.0,
         error_pct=0.0,
-        total_issue_count=1,
-        total_issue_pct=0.1,
+        total_issue_count=0,
+        total_issue_pct=0.0,
         healthy_threshold_seconds=1800,
         critical_threshold_seconds=3600,
         fix_first_count=0,
@@ -84,7 +84,7 @@ def test_loop_chart_names_the_source_id_for_its_raised_finding(
     assert captured["data"]["findings"] == [
         {
             "id": "CLT-01",
-            "text": "High, client evaluation loop health below the healthy threshold",
+            "text": "High, the client loop health score is below 90",
         }
     ]
 
@@ -148,7 +148,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
     assert headings.index("Automated Findings") < headings.index("Loop Health")
     assert [cell.text for cell in findings_table.rows[1].cells] == [
         "CLT-01",
-        "High, client evaluation loop health below the healthy threshold.",
+        "High, the client loop health score is below 90.",
     ]
 
     healthy_output = tmp_path / "healthy-loop.docx"
@@ -419,7 +419,7 @@ def test_context_strip_tiles_feed_chart_data_with_missing_udp_fallback() -> None
         {
             "label": "Devices reporting",
             "value": "10 / 10",
-            "caption": "1 have no usable loop data",
+            "caption": "All scored devices have usable loop data",
             "muted": False,
         },
         {

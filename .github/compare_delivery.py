@@ -18,7 +18,7 @@ def compare(paths: list[Path]) -> dict:
         raise ValueError("Unknown delivery result schema")
     differences = {
         key: [report.get(key) for report in reports]
-        for key in ("case", "metrics", "frequency", "cost", "chart", "finding_ids")
+        for key in ("case", "metrics", "frequency", "top10", "chart", "finding_ids")
         if any(report.get(key) != reports[0].get(key) for report in reports[1:])
     }
     return {

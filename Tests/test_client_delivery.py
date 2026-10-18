@@ -192,9 +192,12 @@ def test_real_report_workbook_and_chart_agree(delivered):
             workbook["Evaluation Frequency"].iter_rows(min_row=2, values_only=True)
         )
         assert [list(row) for row in frequencies] == CASE["expected_frequency"]
-        cost = list(workbook["Repeated Eval Cost"].iter_rows(min_row=2, values_only=True))
-        assert len(cost) == 1
-        assert list(cost[0]) == CASE["expected_cost"]
+        assert "Repeated Eval Cost" not in workbook.sheetnames
+        offenders = list(workbook["Evaluation Offenders"].iter_rows(values_only=True))
+        interval_col = list(offenders[0]).index("Interval")
+        assert CASE["expected_top10"]["interval"] in [
+            row[interval_col] for row in offenders[1:]
+        ]
     finally:
         workbook.close()
     document = Document(artifact(delivered, ".docx"))
@@ -204,12 +207,17 @@ def test_real_report_workbook_and_chart_agree(delivered):
     ]
     frequency_table = next(table for table in tables if table[0][0] == "Interval")
     assert frequency_table[1:] == CASE["expected_frequency"]
-    cost_table = next(table for table in tables if table[0][0] == "Property")
-    assert cost_table[1] == CASE["expected_cost"]
+    assert not any(table[0][0] == "Property" for table in tables)
+    top10 = next(table for table in tables if table[0][0] == "Rank")
+    assert top10[0][-1] == "Interval"
+    assert [
+        CASE["expected_top10"]["evaluation"],
+        CASE["expected_top10"]["interval"],
+    ] in [row[3:5] for row in top10[1:]]
     findings = next(table for table in tables if table[0][0] == "Finding ID")
-    assert any(
-        row[0] == "CLT-02" and "3 active properties" in row[1] for row in findings[1:]
-    )
+    assert len(findings) == 2
+    assert findings[1][0] == "CLT-01"
+    assert "3 active properties are set to every report" in findings[1][1]
     sidecar = json.loads(
         artifact(delivered, ".chartdata.json").read_text(encoding="utf-8")
     )
@@ -229,7 +237,7 @@ def test_real_report_workbook_and_chart_agree(delivered):
             for field in CASE["expected_metrics"]
         },
         "frequency": [list(row) for row in frequencies],
-        "cost": [list(row) for row in cost],
+        "top10": [row[3:5] for row in top10[1:]],
         "chart": {key: data[key] for key in ("score", "barPct", "dist")},
         "finding_ids": sorted(row[0] for row in findings[1:]),
     }

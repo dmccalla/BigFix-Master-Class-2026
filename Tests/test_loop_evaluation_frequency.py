@@ -191,7 +191,7 @@ def _analysis_result(analysis: str, name: str) -> str:
     )
 
 
-def test_repeated_eval_cost_uses_the_longer_of_interval_and_loop(
+def test_top10_interval_names_the_property_interval_or_why_there_is_none(
     tmp_path: Path,
 ) -> None:
     _write_log(tmp_path)
@@ -204,13 +204,16 @@ def test_repeated_eval_cost_uses_the_longer_of_interval_and_loop(
         _offender(7.0, _analysis_result("Unset Analysis", "Unset")),
     ]
 
-    rows = loop.repeated_eval_cost_rows(summary, offenders, average_loop_minutes=12.0)
+    intervals = [loop.offender_interval(o.result, summary) for o in offenders]
 
-    assert rows == [
-        [APP_PROPERTY, APP_ANALYSIS, "Every report", "68.38", "120", "136.8"],
-        ["Unset", "Unset Analysis", "Every report", "7", "120", "14.0"],
-        ["BIOS", "Hardware Information (Windows)", "1 hour", "3.38", "24", "1.4"],
+    assert intervals == [
+        "1 hour",
+        "Every report",
+        "Not a property",
+        "Not found",
+        "Every report",
     ]
+    assert loop.offender_interval(offenders[0].result, None) == "Not collected"
 
 
 def _healthy_metrics() -> loop.ReportMetrics:
@@ -282,27 +285,18 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
         "Top 10 Most Expensive Evaluations",
         "Contributing Factors",
         "Evaluation Frequency",
-        "Cost of Repeated Evaluations",
     ]
+    assert "Cost of Repeated Evaluations" not in headings
     assert [h for h in headings if h in order] == order
 
     findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
     assert [c.text for c in findings.rows[1].cells] == [
-        "CLT-02",
-        "Medium, 4 active properties are set to every report or to under 15 minutes. "
+        "CLT-01",
+        "Medium.\n4 active properties are set to every report or to under 15 minutes. "
         "See Evaluation Frequency.",
     ]
-    cost = next(t for t in doc.tables if t.cell(0, 0).text == "Property")
-    assert [c.text for c in cost.rows[1].cells] == [
-        APP_PROPERTY,
-        APP_ANALYSIS,
-        "Every report",
-        "68.38",
-        "120",
-        "136.8",
-    ]
+    assert not any(t.cell(0, 0).text == "Property" for t in doc.tables)
     paragraphs = [p.text for p in doc.paragraphs]
-    assert any("12m 00s average loop time" in p for p in paragraphs)
     assert not any("could not be read" in p for p in paragraphs)
 
 
@@ -338,25 +332,35 @@ def test_top10_cell_names_the_property_and_its_analysis() -> None:
     assert loop.format_loop_offender_evaluation(site) == site
 
 
-def test_clt01_text_names_the_score_that_raises_it() -> None:
-    assert (
-        loop.loop_health_finding_text("High")
-        == "High, the client loop health score is below 90"
+def test_clt01_names_the_score_that_raises_it() -> None:
+    metrics = _healthy_metrics()
+    metrics.overall_status = "WARNING"
+    reasons = loop.loop_finding_reasons(metrics)
+    assert loop.loop_finding_text(reasons) == (
+        "High. The client loop health score is below 90."
     )
-    assert (
-        loop.loop_health_finding_text("Critical")
-        == "Critical, the client loop health score is below 70"
+    metrics.overall_status = "CRITICAL"
+    reasons = loop.loop_finding_reasons(metrics)
+    assert loop.loop_finding_text(reasons) == (
+        "Critical. The client loop health score is below 70."
     )
 
 
-def test_findings_line_counts_each_finding() -> None:
-    assert loop.loop_findings_line("High", 3) == "Raises 2 findings (1 High, 1 Medium)"
-    assert loop.loop_findings_line("High", 0) == "Raises 1 High finding"
-    assert loop.loop_findings_line("", 3) == "Raises 1 Medium finding"
-    assert loop.loop_findings_line("", 0) == ""
+def test_findings_line_counts_reasons_of_the_one_finding(tmp_path: Path) -> None:
+    _write_log(tmp_path)
+    summary = loop.parse_property_intervals(tmp_path)
+    metrics = _healthy_metrics()
+    metrics.overall_status = "WARNING"
+    both = loop.loop_finding_reasons(metrics, summary)
+    assert loop.loop_findings_line(both) == "Raises 1 High finding (2 reasons)"
+    score_only = loop.loop_finding_reasons(metrics)
+    assert loop.loop_findings_line(score_only) == "Raises 1 High finding"
+    frequency_only = loop.loop_finding_reasons(_healthy_metrics(), summary)
+    assert loop.loop_findings_line(frequency_only) == "Raises 1 Medium finding"
+    assert loop.loop_findings_line([]) == ""
 
 
-def test_infographic_lists_clt02_and_names_no_data_as_critical(
+def test_infographic_lists_one_clt01_and_names_no_data_as_critical(
     monkeypatch, tmp_path: Path
 ) -> None:
     _write_log(tmp_path)
@@ -373,8 +377,14 @@ def test_infographic_lists_clt02_and_names_no_data_as_critical(
     loop.generate_png(metrics, tmp_path / "loop.png", property_intervals=summary)
 
     data = captured["data"]
-    assert [f["id"] for f in data["findings"]] == ["CLT-01", "CLT-02"]
-    assert data["findingsLine"] == "Raises 2 findings (1 High, 1 Medium)"
+    assert data["findings"] == [
+        {
+            "id": "CLT-01",
+            "text": "High. The client loop health score is below 90. "
+            "4 active properties are set to every report or to under 15 minutes.",
+        }
+    ]
+    assert data["findingsLine"] == "Raises 1 High finding (2 reasons)"
     labels = [item["label"] for item in data["legend"]]
     assert labels[-1] == "Critical over 60 min or no data"
 
@@ -400,19 +410,16 @@ def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
     text = "\n".join(p.text for p in doc.paragraphs)
     assert "A property set to every report runs on every loop. So does a property" in text
     assert "with no interval, because BigFix evaluates it every report." in text
-    assert (
-        "Any interval shorter than the 12m 00s average loop time uses the loop time."
-        in text
-    )
+    assert "uses the loop time" not in text
 
     key = next(t for t in doc.tables if t.cell(0, 0).text == "Infographic tile")
     rows = {row.cells[0].text: [c.text for c in row.cells] for row in key.rows}
-    assert rows["Findings raised"][1] == "CLT-02"
+    assert rows["Findings raised"][1] == "CLT-01"
     assert (
         rows["Findings raised"][2]
-        == "CLT-01 is raised when the health score is below 90. CLT-02 is raised "
-        "when an active property is set to every report or to under 15 minutes. "
-        "CLT-03 is raised when more than 5% of devices have no usable loop data."
+        == "CLT-01 is raised for any of three reasons. The health score is below "
+        "90. An active property is set to every report or to under 15 minutes. "
+        "More than 5% of devices have no usable loop data."
     )
     assert rows["Loop distribution"][2].endswith(
         "Critical also counts devices with no usable data."

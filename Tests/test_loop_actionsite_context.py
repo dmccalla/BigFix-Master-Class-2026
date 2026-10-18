@@ -84,7 +84,7 @@ def test_loop_chart_names_the_source_id_for_its_raised_finding(
     assert captured["data"]["findings"] == [
         {
             "id": "CLT-01",
-            "text": "High, the client loop health score is below 90",
+            "text": "High. The client loop health score is below 90.",
         }
     ]
 
@@ -148,7 +148,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
     assert headings.index("Automated Findings") < headings.index("Loop Health")
     assert [cell.text for cell in findings_table.rows[1].cells] == [
         "CLT-01",
-        "High, the client loop health score is below 90.",
+        "High.\nThe client loop health score is below 90. See Loop Health.",
     ]
 
     healthy_output = tmp_path / "healthy-loop.docx"
@@ -389,7 +389,13 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
         table
         for table in doc.tables
         if [cell.text for cell in table.rows[0].cells]
-        == ["Rank", "Average Eval Time (Seconds)", "Occurrences", "Evaluation"]
+        == [
+            "Rank",
+            "Average Eval Time (Seconds)",
+            "Occurrences",
+            "Evaluation",
+            "Interval",
+        ]
     ]
     assert offender_tables
     assert [cell.text for cell in offender_tables[0].rows[1].cells] == [
@@ -397,6 +403,7 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
         "42",
         "15",
         "Background Evaluation of Custom Site: Resolve",
+        "Not a property",
     ]
 
 

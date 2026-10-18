@@ -79,10 +79,10 @@ def inspect_report(document: Path, output: Path, soffice: str) -> dict:
     joined = " ".join(" ".join(texts).split())
     for expected in (
         "Evaluation Frequency",
-        "Cost of Repeated Evaluations",
+        "Top 10 Most Expensive Evaluations",
         "QA Every Report",
-        "CLT-02",
-        "35.8",
+        "CLT-01",
+        "Every report",
     ):
         if expected not in joined:
             issues.append({"issue": "expected report content missing", "text": expected})

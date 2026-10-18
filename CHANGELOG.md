@@ -22,14 +22,20 @@ the project release process for the steps to cut a release.
 
 ### Added
 
-- Add Evaluation Frequency to the Client Performance report. It counts active properties by evaluation interval, shows the cost of repeated Top 10 evaluations, and raises finding CLT-02 for properties set to every report or to under 15 minutes. Collect Deployment Information now writes an Active Properties by Evaluation Interval block to Property_Info, so run it again to add the section to an older capture.
-- Raise finding CLT-03 in the Client Performance report when more than 5% of scored devices have no usable loop data. The Devices Reporting number on the Infographic is red only when CLT-03 is raised. The Reading the Infographic table explains CLT-01, CLT-02 and CLT-03.
+- Add Evaluation Frequency to the Client Performance report. It counts active properties by evaluation interval. Collect Deployment Information now writes an Active Properties by Evaluation Interval block to Property_Info, so run it again to add the section to an older capture.
+- Report every Client Performance finding as CLT-01, with one reason per cause: the health score is below 90, active properties are set to every report or to under 15 minutes, or more than 5% of scored devices have no usable loop data. The finding takes the highest impact of its reasons. The Devices Reporting number on the Infographic is red only when missing data is a reason.
+- Add an Interval column to the Top 10 Most Expensive Evaluations table and the Evaluation Offenders sheet.
+- Name _BESClient_Report_MinimumAnalysisInterval under Evaluation Frequency when a device sets it, and list its values in the Min Analysis Interval sheet. A setting with no value means 60 seconds.
 
 ### Changed
 
 - Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.
 - Add the Evaluation Frequency block to the sample Property_Info captures, and say in the lab guide that the Client Performance module requires the Deployment Information results.
 - Say in the user guide what the collection tasks change on a server, which tasks change client settings, and how the Collect tasks handle credentials. Rebuild the PDF.
+
+### Removed
+
+- Remove the Cost of Repeated Evaluations section and the Repeated Eval Cost sheet. Its runs per day were an estimate at the average loop time. The Top 10 Interval column shows the fact it rested on.
 
 ## [2.1] - 2026-10-15
 

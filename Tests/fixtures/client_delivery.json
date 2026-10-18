@@ -138,12 +138,8 @@
       "Not Assessed"
     ]
   ],
-  "expected_cost": [
-    "QA Every Report",
-    "QA Analysis",
-    "Every report",
-    "60",
-    "36",
-    "35.8"
-  ]
+  "expected_top10": {
+    "evaluation": "QA Every Report (analysis: QA Analysis)",
+    "interval": "Every report"
+  }
 }

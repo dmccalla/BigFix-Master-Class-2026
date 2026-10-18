@@ -4,10 +4,9 @@
 # Master Class Diagnostics Workbench
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
-"""CLT-03: devices with no usable loop data.
+"""CLT-01 names missing loop data when more than 5% of scored devices have none.
 
-The Devices Reporting tile is red only when CLT-03 is raised, which is when
-more than 5% of scored devices have no usable loop data.
+The Devices Reporting tile is red only then.
 """
 
 from __future__ import annotations
@@ -66,44 +65,33 @@ def _metrics(reporting: int, no_data: int) -> loop.ReportMetrics:
     )
 
 
-def test_clt03_is_raised_only_above_five_percent() -> None:
-    assert not loop.clt03_raised(_metrics(100, 0))
-    assert not loop.clt03_raised(_metrics(95, 5))
-    assert loop.clt03_raised(_metrics(94, 6))
+def test_missing_data_is_a_reason_only_above_five_percent() -> None:
+    assert not loop.no_usable_data_raised(_metrics(100, 0))
+    assert not loop.no_usable_data_raised(_metrics(95, 5))
+    assert loop.no_usable_data_raised(_metrics(94, 6))
     # The 10-06 sample: 60 of 2,537 is 2.4%.
-    assert not loop.clt03_raised(_metrics(2477, 60))
+    assert not loop.no_usable_data_raised(_metrics(2477, 60))
 
 
-def test_clt03_text_names_the_devices_and_the_share() -> None:
-    assert (
-        loop.clt03_finding_text(_metrics(94, 6))
-        == "Medium, 6 of 100 devices (6.0%) have no usable loop data"
-    )
-    assert (
-        loop.clt03_finding_text(_metrics(10, 1))
-        == "Medium, 1 of 11 devices (9.1%) has no usable loop data"
-    )
+def test_missing_data_reason_names_the_devices_and_the_share() -> None:
+    [reason] = loop.loop_finding_reasons(_metrics(94, 6))
+    assert reason.impact == "Medium"
+    assert reason.text == "6 of 100 devices (6.0%) have no usable loop data"
+    assert reason.section == "Reporting Issues"
+    [single] = loop.loop_finding_reasons(_metrics(10, 1))
+    assert single.text == "1 of 11 devices (9.1%) has no usable loop data"
 
 
-def test_clt02_text_matches_what_it_counts() -> None:
-    assert (
-        loop.clt02_finding_text(51)
-        == "Medium, 51 active properties are set to every report or to under 15 minutes"
-    )
-    assert (
-        loop.clt02_finding_text(1)
-        == "Medium, 1 active property is set to every report or to under 15 minutes"
-    )
+def test_one_finding_takes_the_highest_impact_of_its_reasons() -> None:
+    metrics = _metrics(94, 6)
+    metrics.overall_status = "CRITICAL"
+    reasons = loop.loop_finding_reasons(metrics)
+    assert [r.impact for r in reasons] == ["Critical", "Medium"]
+    assert loop.loop_finding_impact(reasons) == "Critical"
+    assert loop.loop_findings_line(reasons) == "Raises 1 Critical finding (2 reasons)"
 
 
-def test_findings_line_counts_two_medium_findings() -> None:
-    assert (
-        loop.loop_findings_line("High", 3, True) == "Raises 3 findings (1 High, 2 Medium)"
-    )
-    assert loop.loop_findings_line("", 0, True) == "Raises 1 Medium finding"
-
-
-def test_reporting_tile_is_red_only_when_clt03_is_raised() -> None:
+def test_reporting_tile_is_red_only_when_missing_data_is_a_reason() -> None:
     below = loop.context_strip_tiles(_metrics(2477, 60))[0]
     assert below["label"] == "Devices reporting"
     assert "color" not in below
@@ -120,7 +108,7 @@ def test_template_does_not_turn_partial_reporting_red_by_itself() -> None:
     assert "#C2410C" not in branch
 
 
-def test_infographic_lists_clt03(monkeypatch, tmp_path: Path) -> None:
+def test_infographic_lists_missing_data_under_clt01(monkeypatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     def capture_chart(kind, data, output):
@@ -132,15 +120,15 @@ def test_infographic_lists_clt03(monkeypatch, tmp_path: Path) -> None:
     data = captured["data"]
     assert data["findings"] == [
         {
-            "id": "CLT-03",
-            "text": "Medium, 6 of 100 devices (6.0%) have no usable loop data",
+            "id": "CLT-01",
+            "text": "Medium. 6 of 100 devices (6.0%) have no usable loop data.",
         }
     ]
     assert data["findingsLine"] == "Raises 1 Medium finding"
     assert data["context"][0]["color"] == "#C2410C"
 
 
-def test_no_clt03_below_the_limit(monkeypatch, tmp_path: Path) -> None:
+def test_no_finding_below_the_limit(monkeypatch, tmp_path: Path) -> None:
     captured: dict = {}
 
     def capture_chart(kind, data, output):
@@ -153,22 +141,27 @@ def test_no_clt03_below_the_limit(monkeypatch, tmp_path: Path) -> None:
     assert "color" not in captured["data"]["context"][0]
 
 
-def test_word_report_raises_and_explains_clt03(tmp_path: Path) -> None:
+def test_word_report_lists_every_reason_in_one_row(tmp_path: Path) -> None:
     word_output = tmp_path / "loop.docx"
     png = tmp_path / "loop.png"
     png.write_bytes(PNG_1X1)
+    metrics = _metrics(94, 6)
+    metrics.overall_status = "WARNING"
 
-    loop.generate_word(_metrics(94, 6), png, word_output, include_automated_findings=True)
+    loop.generate_word(metrics, png, word_output, include_automated_findings=True)
 
     doc = Document(str(word_output))
     findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
+    assert len(findings.rows) == 2
     assert [c.text for c in findings.rows[1].cells] == [
-        "CLT-03",
-        "Medium, 6 of 100 devices (6.0%) have no usable loop data. See Reporting Issues.",
+        "CLT-01",
+        "High.\n"
+        "The client loop health score is below 90. See Loop Health.\n"
+        "6 of 100 devices (6.0%) have no usable loop data. See Reporting Issues.",
     ]
     key = next(t for t in doc.tables if t.cell(0, 0).text == "Infographic tile")
     rows = {row.cells[0].text: [c.text for c in row.cells] for row in key.rows}
-    assert rows["Findings raised"][1] == "CLT-03"
+    assert rows["Findings raised"][1] == "CLT-01"
     assert rows["Devices reporting"][2] == (
         "Devices that reported usable loop data. Devices without it count as "
         "Critical in the distribution and the score."

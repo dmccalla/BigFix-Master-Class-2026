@@ -1531,45 +1531,153 @@ def _offender_property_key(result: str) -> tuple[str, str] | None:
     return analysis.lower(), prop.lower()
 
 
-def repeated_eval_cost_rows(
-    summary: PropertyIntervalSummary,
-    offenders: list[LoopOffenderSummary],
-    average_loop_minutes: float,
-) -> list[list[str]]:
-    """Client minutes per day for Top 10 analysis properties, worst first.
-
-    A property cannot run more often than the loop completes, so the longer of
-    its interval and the average loop time sets the runs per day.
-    """
-    by_key: dict[tuple[str, str], PropertyInterval] = {}
+def offender_interval(result: str, summary: PropertyIntervalSummary | None) -> str:
+    """Interval of a Top 10 analysis property, or why there is none."""
+    key = _offender_property_key(result)
+    if key is None:
+        return "Not a property"
+    if summary is None:
+        return "Not collected"
     for item in summary.properties:
-        by_key.setdefault((item.analysis.lower(), item.name.lower()), item)
-    costed: list[tuple[float, list[str]]] = []
-    for offender in offenders:
-        key = _offender_property_key(offender.result)
-        item = by_key.get(key) if key else None
-        if item is None or item.interval_minutes is None:
-            continue
-        cycle = max(item.interval_minutes, average_loop_minutes)
-        if cycle <= 0:
-            continue
-        runs = 1440 / cycle
-        minutes = offender.avg_client_processing_seconds * runs / 60
-        costed.append(
+        if (item.analysis.lower(), item.name.lower()) == key:
+            return format_interval_minutes(item.interval_minutes)
+    return "Not found"
+
+
+# ---------------------------------------------------------------------------
+# Minimum Analysis Interval: the Client-side floor on analysis evaluation
+# ---------------------------------------------------------------------------
+
+MINIMUM_ANALYSIS_INTERVAL_SETTING = "_BESClient_Report_MinimumAnalysisInterval"
+MINIMUM_ANALYSIS_INTERVAL_NO_VALUE_SECONDS = 60
+CLIENT_SETTINGS_SECTION = "CLIENT SETTINGS ="
+
+
+@dataclass
+class MinimumAnalysisInterval:
+    raw_value: str
+    seconds: int | None
+    devices: int
+
+
+def parse_minimum_analysis_interval(
+    folder: Path | None,
+) -> list[MinimumAnalysisInterval] | None:
+    """Value groups of the setting from Client_Settings_Info.
+
+    A device lists the setting only when it is set. A setting with no value
+    uses the 60 second default. An empty list means no device sets it.
+    """
+    if folder is None or not folder.is_dir():
+        return None
+    name = MINIMUM_ANALYSIS_INTERVAL_SETTING.lower()
+    for path in _candidate_files(
+        folder, ["Client_Settings_Info*.xml", "Client_Settings_Info*.log"]
+    ):
+        lines = read_capture_or_log_text(path).splitlines()
+        start = next(
             (
-                minutes,
-                [
-                    item.name,
-                    item.analysis,
-                    format_interval_minutes(item.interval_minutes),
-                    format_loop_offender_seconds(offender.avg_client_processing_seconds),
-                    f"{runs:,.0f}",
-                    f"{minutes:,.1f}",
-                ],
-            )
+                i
+                for i, line in enumerate(lines)
+                if line.startswith("//=") and CLIENT_SETTINGS_SECTION in line
+            ),
+            None,
         )
-    costed.sort(key=lambda pair: pair[0], reverse=True)
-    return [row for _minutes, row in costed]
+        if start is None:
+            continue
+        rows: list[MinimumAnalysisInterval] = []
+        i = start + 1
+        while i + 2 < len(lines) and not lines[i].startswith("//="):
+            if lines[i].strip().lower() != name:
+                i += 1
+                continue
+            raw = lines[i + 1].strip()
+            count = lines[i + 2].strip().replace(",", "")
+            if not raw:
+                seconds = MINIMUM_ANALYSIS_INTERVAL_NO_VALUE_SECONDS
+            else:
+                seconds = int(raw) if raw.isdigit() else None
+            rows.append(
+                MinimumAnalysisInterval(
+                    raw_value=raw,
+                    seconds=seconds,
+                    devices=int(count) if count.isdigit() else 0,
+                )
+            )
+            i += 3
+        rows.sort(
+            key=lambda row: -1 if row.seconds is None else row.seconds, reverse=True
+        )
+        return rows
+    return None
+
+
+def _seconds_in_words(seconds: int) -> str:
+    if seconds % 60 == 0:
+        minutes = seconds // 60
+        return f"{minutes} minute" + ("" if minutes == 1 else "s")
+    return f"{seconds:,} seconds"
+
+
+def _device_count(count: int) -> str:
+    return f"{count:,} device" + ("" if count == 1 else "s")
+
+
+def _minimum_analysis_value(row: MinimumAnalysisInterval) -> str:
+    if not row.raw_value:
+        return "60 seconds (no value set)"
+    return _seconds_in_words(row.seconds or 0)
+
+
+def minimum_analysis_interval_effect(
+    row: MinimumAnalysisInterval, average_loop_seconds: float
+) -> str:
+    if row.seconds is None:
+        return "Cannot tell"
+    if row.seconds > average_loop_seconds:
+        return f"Analyses run at most once every {_seconds_in_words(row.seconds)}"
+    return "No change at the average loop time"
+
+
+def minimum_analysis_interval_paragraph(
+    rows: list[MinimumAnalysisInterval], average_loop_seconds: float
+) -> str:
+    total = sum(row.devices for row in rows)
+    loop = format_minutes_seconds(average_loop_seconds)
+    above = [
+        r for r in rows if r.seconds is not None and r.seconds > average_loop_seconds
+    ]
+    below = [
+        r for r in rows if r.seconds is not None and r.seconds <= average_loop_seconds
+    ]
+    unreadable = sum(r.devices for r in rows if r.seconds is None)
+    sentences = [f"{_device_count(total)} set {MINIMUM_ANALYSIS_INTERVAL_SETTING}."]
+    for row in above:
+        sentences.append(
+            f"On {_device_count(row.devices)} it is {_minimum_analysis_value(row)}, "
+            f"longer than the {loop} average loop time, so analyses there run at "
+            f"most once every {_seconds_in_words(row.seconds or 0)}."
+        )
+    if below:
+        count = sum(r.devices for r in below)
+        subject = f"The other {_device_count(count)}" if above else _device_count(count)
+        values = {_minimum_analysis_value(r) for r in below}
+        if len(values) == 1:
+            sentences.append(
+                f"{subject} use {values.pop()}, which is shorter than the "
+                f"{'loop' if above else f'{loop} average loop time'} and changes nothing."
+            )
+        else:
+            sentences.append(
+                f"{subject} use shorter values than the "
+                f"{'loop' if above else f'{loop} average loop time'}, which change nothing."
+            )
+    if unreadable:
+        verb = "has" if unreadable == 1 else "have"
+        sentences.append(
+            f"{_device_count(unreadable)} {verb} a value that cannot be read."
+        )
+    return " ".join(sentences)
 
 
 def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
@@ -1927,12 +2035,6 @@ def format_loop_offender_evaluation(result: str) -> str:
     if analysis and prop:
         return f"{prop} (analysis: {analysis})"
     return text
-
-
-def loop_health_finding_text(finding_impact: str) -> str:
-    """CLT-01 text. The score is Warning below 90 and Critical below 70."""
-    limit = 70 if finding_impact == "Critical" else 90
-    return f"{finding_impact}, the client loop health score is below {limit}"
 
 
 def compact_loop_offender_label(result: str, limit: int = 56) -> str:
@@ -3248,47 +3350,91 @@ def processed_to_dataframe(rows: list[ProcessedRow]) -> pd.DataFrame:
     return pd.DataFrame(data)
 
 
-def clt02_finding_text(frequent: int) -> str:
-    subject = (
-        "1 active property is" if frequent == 1 else f"{frequent:,} active properties are"
-    )
-    return f"Medium, {subject} set to every report or to under 15 minutes"
+# CLT-01 is the one Client Performance finding. It can carry several reasons,
+# and its impact is the highest impact among them.
+LOOP_FINDING_ID = "CLT-01"
+NO_DATA_PCT_LIMIT = 5.0
+_IMPACT_RANK = {"Medium": 1, "High": 2, "Critical": 3}
 
 
-# CLT-03 is raised when more than this share of devices has no usable loop data.
-CLT03_NO_DATA_PCT_LIMIT = 5.0
+@dataclass
+class LoopFindingReason:
+    impact: str
+    text: str
+    section: str
 
 
-def clt03_raised(metrics: ReportMetrics) -> bool:
+def no_usable_data_raised(metrics: ReportMetrics) -> bool:
+    """True when more than 5% of scored devices have no usable loop data."""
     total = metrics.score_total_devices
     if total <= 0:
         return False
-    return metrics.total_issue_count / total * 100 > CLT03_NO_DATA_PCT_LIMIT
+    return metrics.total_issue_count / total * 100 > NO_DATA_PCT_LIMIT
 
 
-def clt03_finding_text(metrics: ReportMetrics) -> str:
-    verb = "has" if metrics.total_issue_count == 1 else "have"
-    return (
-        f"Medium, {metrics.total_issue_count:,} of "
-        f"{metrics.score_total_devices:,} devices "
-        f"({pct(metrics.total_issue_pct)}) {verb} no usable loop data"
+def loop_finding_reasons(
+    metrics: ReportMetrics,
+    property_intervals: PropertyIntervalSummary | None = None,
+) -> list[LoopFindingReason]:
+    reasons: list[LoopFindingReason] = []
+    impact = {"WARNING": "High", "CRITICAL": "Critical"}.get(
+        str(metrics.overall_status or "").upper()
     )
+    if impact:
+        limit = 70 if impact == "Critical" else 90
+        reasons.append(
+            LoopFindingReason(
+                impact,
+                f"The client loop health score is below {limit}",
+                "Loop Health",
+            )
+        )
+    frequent = frequent_property_count(property_intervals)
+    if frequent:
+        subject = (
+            "1 active property is"
+            if frequent == 1
+            else f"{frequent:,} active properties are"
+        )
+        reasons.append(
+            LoopFindingReason(
+                "Medium",
+                f"{subject} set to every report or to under 15 minutes",
+                "Evaluation Frequency",
+            )
+        )
+    if no_usable_data_raised(metrics):
+        verb = "has" if metrics.total_issue_count == 1 else "have"
+        reasons.append(
+            LoopFindingReason(
+                "Medium",
+                f"{metrics.total_issue_count:,} of {metrics.score_total_devices:,} "
+                f"devices ({pct(metrics.total_issue_pct)}) {verb} no usable loop data",
+                "Reporting Issues",
+            )
+        )
+    return reasons
 
 
-def loop_findings_line(finding_impact: str, frequent: int, no_data: bool = False) -> str:
-    """Infographic header line, for example Raises 2 findings (1 High, 1 Medium)."""
-    impacts = (
-        ([finding_impact] if finding_impact else [])
-        + (["Medium"] if frequent else [])
-        + (["Medium"] if no_data else [])
-    )
-    if not impacts:
+def loop_finding_impact(reasons: list[LoopFindingReason]) -> str:
+    return max((r.impact for r in reasons), key=_IMPACT_RANK.__getitem__, default="")
+
+
+def loop_finding_text(reasons: list[LoopFindingReason]) -> str:
+    """Infographic text: the impact, then each reason as its own sentence."""
+    if not reasons:
         return ""
-    if len(impacts) == 1:
-        return f"Raises 1 {impacts[0]} finding"
-    counts = Counter(impacts)
-    split = ", ".join(f"{counts[impact]} {impact}" for impact in dict.fromkeys(impacts))
-    return f"Raises {len(impacts)} findings ({split})"
+    return f"{loop_finding_impact(reasons)}. " + " ".join(f"{r.text}." for r in reasons)
+
+
+def loop_findings_line(reasons: list[LoopFindingReason]) -> str:
+    """Infographic header line, for example Raises 1 High finding (2 reasons)."""
+    if not reasons:
+        return ""
+    line = f"Raises 1 {loop_finding_impact(reasons)} finding"
+    if len(reasons) > 1:
+        line += f" ({len(reasons)} reasons)"
+    return line
 
 
 def generate_png(
@@ -3398,17 +3544,10 @@ def generate_png(
     if metrics.report_span_text:
         meta += f" &middot; {metrics.report_span_text} collection"
 
-    findings: list[dict[str, str]] = []
-    if finding_impact:
-        findings.append(
-            {"id": "CLT-01", "text": loop_health_finding_text(finding_impact)}
-        )
-    frequent = frequent_property_count(property_intervals)
-    if frequent:
-        findings.append({"id": "CLT-02", "text": clt02_finding_text(frequent)})
-    no_data = clt03_raised(metrics)
-    if no_data:
-        findings.append({"id": "CLT-03", "text": clt03_finding_text(metrics)})
+    reasons = loop_finding_reasons(metrics, property_intervals)
+    findings: list[dict[str, str]] = (
+        [{"id": LOOP_FINDING_ID, "text": loop_finding_text(reasons)}] if reasons else []
+    )
 
     top_offender = loop_offenders[0] if loop_offenders else None
     if top_offender:
@@ -3423,7 +3562,7 @@ def generate_png(
     data = {
         "title": "Client Performance",
         "meta": meta,
-        "findingsLine": loop_findings_line(finding_impact, frequent, no_data),
+        "findingsLine": loop_findings_line(reasons),
         "findings": findings,
         "score": metrics.environment_score,
         "scoreColor": score_color,
@@ -3526,6 +3665,7 @@ def generate_excel(
     agent_multicore_summary: AgentMulticoreSummary | None = None,
     agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
     property_intervals: PropertyIntervalSummary | None = None,
+    minimum_analysis_interval: list[MinimumAnalysisInterval] | None = None,
     stamp: str = "",
 ) -> None:
     metrics_rows = [
@@ -3666,6 +3806,7 @@ def generate_excel(
                         ),
                         "Occurrences": item.occurrences,
                         "Result": item.result,
+                        "Interval": offender_interval(item.result, property_intervals),
                     }
                     for item in loop_offenders
                 ]
@@ -3701,21 +3842,26 @@ def generate_excel(
                     "Content Source",
                 ],
             ).to_excel(writer, sheet_name="Active Properties", index=False)
-            cost_rows = repeated_eval_cost_rows(
-                property_intervals, loop_offenders or [], metrics.avg_mean_seconds / 60
-            )
-            if cost_rows:
-                pd.DataFrame(
-                    cost_rows,
-                    columns=[
-                        "Property",
-                        "Analysis",
-                        "Interval",
-                        "Average Eval Time (Seconds)",
-                        "Runs per Day",
-                        "Client Minutes per Day",
-                    ],
-                ).to_excel(writer, sheet_name="Repeated Eval Cost", index=False)
+        if minimum_analysis_interval:
+            pd.DataFrame(
+                [
+                    [
+                        MINIMUM_ANALYSIS_INTERVAL_SETTING,
+                        row.raw_value,
+                        row.seconds,
+                        row.devices,
+                        minimum_analysis_interval_effect(row, metrics.avg_mean_seconds),
+                    ]
+                    for row in minimum_analysis_interval
+                ],
+                columns=[
+                    "Setting",
+                    "Value",
+                    "Seconds Used",
+                    "Devices",
+                    "Effect at the Average Loop Time",
+                ],
+            ).to_excel(writer, sheet_name="Min Analysis Interval", index=False)
         if udp_summary:
             pd.DataFrame(
                 udp_coverage_rows(udp_summary),
@@ -3994,8 +4140,8 @@ def context_strip_tiles(
         "caption": reporting_detail,
         "muted": False,
     }
-    if clt03_raised(metrics):
-        # Red only when CLT-03 is raised.
+    if no_usable_data_raised(metrics):
+        # Red only when CLT-01 names missing loop data.
         reporting_tile["color"] = status_spine.CRITICAL.mark
 
     return [
@@ -4039,12 +4185,7 @@ def client_loop_infographic_key_rows(
         if loop_offenders
         else "Not available"
     )
-    raised = str(metrics.overall_status or "").upper() in ("WARNING", "CRITICAL")
-    raised_ids = (
-        (["CLT-01"] if raised else [])
-        + (["CLT-02"] if frequent_property_count(property_intervals) else [])
-        + (["CLT-03"] if clt03_raised(metrics) else [])
-    )
+    raised = bool(loop_finding_reasons(metrics, property_intervals))
     return [
         [
             "Health score",
@@ -4090,11 +4231,10 @@ def client_loop_infographic_key_rows(
         ],
         [
             "Findings raised",
-            ", ".join(raised_ids) if raised_ids else "None raised",
-            "CLT-01 is raised when the health score is below 90. CLT-02 is "
-            "raised when an active property is set to every report or to under "
-            "15 minutes. CLT-03 is raised when more than 5% of devices have no "
-            "usable loop data.",
+            LOOP_FINDING_ID if raised else "None raised",
+            "CLT-01 is raised for any of three reasons. The health score is "
+            "below 90. An active property is set to every report or to under 15 "
+            "minutes. More than 5% of devices have no usable loop data.",
         ],
     ]
 
@@ -4157,6 +4297,7 @@ def generate_word(
     agent_multicore_summary: AgentMulticoreSummary | None = None,
     agent_cpu_idle_summary: AgentCpuIdleSummary | None = None,
     property_intervals: PropertyIntervalSummary | None = None,
+    minimum_analysis_interval: list[MinimumAnalysisInterval] | None = None,
     stamp: str = "",
     include_automated_findings: bool = False,
 ) -> None:
@@ -4218,33 +4359,18 @@ def generate_word(
     )
 
     if include_automated_findings:
-        finding_rows: list[list[str]] = []
-        finding_impact = {
-            "WARNING": "High",
-            "CRITICAL": "Critical",
-        }.get(str(metrics.overall_status or "").upper())
-        if finding_impact:
-            finding_rows.append(
+        reasons = loop_finding_reasons(metrics, property_intervals)
+        finding_rows = (
+            [
                 [
-                    "CLT-01",
-                    f"{loop_health_finding_text(finding_impact)}.",
+                    LOOP_FINDING_ID,
+                    f"{loop_finding_impact(reasons)}.\n"
+                    + "\n".join(f"{r.text}. See {r.section}." for r in reasons),
                 ]
-            )
-        frequent = frequent_property_count(property_intervals)
-        if frequent:
-            finding_rows.append(
-                [
-                    "CLT-02",
-                    f"{clt02_finding_text(frequent)}. See Evaluation Frequency.",
-                ]
-            )
-        if clt03_raised(metrics):
-            finding_rows.append(
-                [
-                    "CLT-03",
-                    f"{clt03_finding_text(metrics)}. See Reporting Issues.",
-                ]
-            )
+            ]
+            if reasons
+            else []
+        )
         if finding_rows:
             document.add_heading("Automated Findings", level=3)
             build_word_table(
@@ -4352,7 +4478,8 @@ def generate_word(
             document.add_paragraph(
                 "The slowest evaluations each device reported, averaged across the "
                 "deployment. Occurrences is how many times an evaluation appeared in "
-                "a device's Top 10."
+                "a device's Top 10. Interval is how often an analysis property is "
+                "set to run. A site evaluation is not a property and has no interval."
             )
         )
         build_word_table(
@@ -4362,6 +4489,7 @@ def generate_word(
                 "Average Eval Time (Seconds)",
                 "Occurrences",
                 "Evaluation",
+                "Interval",
             ],
             [
                 [
@@ -4369,10 +4497,11 @@ def generate_word(
                     format_loop_offender_seconds(item.avg_client_processing_seconds),
                     f"{item.occurrences:,}",
                     format_loop_offender_evaluation(item.result),
+                    offender_interval(item.result, property_intervals),
                 ]
                 for item in loop_offenders
             ],
-            {0, 1, 2},
+            {0, 1, 2, 4},
         )
 
     if actionsite_pressure:
@@ -4436,39 +4565,11 @@ def generate_word(
                     "counted as every report."
                 ),
             )
-        cost_rows = repeated_eval_cost_rows(
-            property_intervals, loop_offenders or [], metrics.avg_mean_seconds / 60
-        )
-        if cost_rows:
-            document.add_heading("Cost of Repeated Evaluations", level=4)
-            keep_with_next(
-                document.add_paragraph(
-                    "Interval alone does not show load. This table takes the "
-                    "analysis properties from the Top 10 Most Expensive Evaluations "
-                    "and repeats their cost by their interval. A property cannot run "
-                    "more often than the loop completes. Any interval shorter than the "
-                    f"{format_minutes_seconds(metrics.avg_mean_seconds)} average loop "
-                    "time uses the loop time."
+        if minimum_analysis_interval:
+            document.add_paragraph(
+                minimum_analysis_interval_paragraph(
+                    minimum_analysis_interval, metrics.avg_mean_seconds
                 )
-            )
-            build_word_table(
-                document,
-                [
-                    "Property",
-                    "Analysis",
-                    "Interval",
-                    "Average Eval Time (Seconds)",
-                    "Runs per Day",
-                    "Client Minutes per Day",
-                ],
-                cost_rows,
-                {2, 3, 4, 5},
-            )
-            add_note_paragraph(
-                document,
-                "Top 10 rows that are site background evaluations have no property "
-                "interval and are not repeated here. The workbook lists every active "
-                "property and its interval.",
             )
 
     if udp_summary or command_polling_summary:
@@ -4906,6 +5007,14 @@ def main() -> int:
                 "Evaluated every report or under 15 minutes",
                 frequent_property_count(property_intervals),
             )
+        minimum_analysis_interval = parse_minimum_analysis_interval(
+            deployment_info_folder
+        )
+        if minimum_analysis_interval:
+            log.detail(
+                "Devices with a minimum analysis interval",
+                sum(row.devices for row in minimum_analysis_interval),
+            )
         loop_offenders = load_loop_offenders(
             top_offenders_file, top_count=args.top_offenders_count
         )
@@ -5012,6 +5121,7 @@ def main() -> int:
             agent_multicore_summary=agent_multicore_summary,
             agent_cpu_idle_summary=agent_cpu_idle_summary,
             property_intervals=property_intervals,
+            minimum_analysis_interval=minimum_analysis_interval,
             stamp=stamp,
         )
 
@@ -5029,6 +5139,7 @@ def main() -> int:
                 agent_multicore_summary=agent_multicore_summary,
                 agent_cpu_idle_summary=agent_cpu_idle_summary,
                 property_intervals=property_intervals,
+                minimum_analysis_interval=minimum_analysis_interval,
                 stamp=stamp,
                 include_automated_findings=args.include_automated_findings,
             )

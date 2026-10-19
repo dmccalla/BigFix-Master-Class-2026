@@ -13,6 +13,7 @@ the project release process for the steps to cut a release.
 
 ### Tests
 
+- Extend the known-answer delivery evidence with the cases the 10-19 lab run exposed: a site evaluation and a Retrieved Property in the Top 10, a headerless UDP .xml in the collector's format, and _BESClient_Report_MinimumAnalysisInterval set with and without a value.
 - Add known-answer Client Performance delivery checks, cross-product result comparison, rendered-output validation, clean release ZIP checks, and explicit lab scenarios. Save build logs and rendered artifacts for diagnosis.
 
 ### Fixed

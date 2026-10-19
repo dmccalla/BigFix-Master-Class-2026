@@ -141,5 +141,71 @@
   "expected_top10": {
     "evaluation": "QA Every Report (analysis: QA Analysis)",
     "interval": "Every report"
-  }
+  },
+  "offender_rows": [
+    [
+      1,
+      50,
+      50,
+      50,
+      "OK",
+      "Background Evaluation of External Site: QA Site"
+    ],
+    [
+      3,
+      30,
+      90,
+      40,
+      "OK",
+      "Retrieved Property: QA Retrieved (actionsite.13:Evaluate Property 1)"
+    ]
+  ],
+  "expected_top10_rows": [
+    [
+      "QA Every Report (analysis: QA Analysis)",
+      "Every report"
+    ],
+    [
+      "Background Evaluation of External Site: QA Site",
+      "Not a property"
+    ],
+    [
+      "Retrieved Property: QA Retrieved (actionsite.13:Evaluate Property 1)",
+      "Not collected"
+    ]
+  ],
+  "udp_answers": [
+    "QA-FAST, 10.0.0.1, relay-a:52311, True",
+    "QA-30, 10.0.0.2, relay-a:52311, True",
+    "QA-45, 10.0.0.3, relay-b:52311, False",
+    "QA-90, 10.0.0.4, relay-b:52311, Not Reported"
+  ],
+  "minimum_analysis_interval_rows": [
+    [
+      "3600",
+      "1"
+    ],
+    [
+      "",
+      "2"
+    ]
+  ],
+  "expected_udp_coverage": [
+    [
+      "Receiving UDP Pings",
+      "2 / 4",
+      "50.0%"
+    ],
+    [
+      "Not Receiving UDP Pings",
+      "1 / 4",
+      "25.0%"
+    ],
+    [
+      "Not Reported / Error",
+      "1 / 4",
+      "25.0%"
+    ]
+  ],
+  "expected_minimum_analysis_interval": "3 devices set _BESClient_Report_MinimumAnalysisInterval. On 1 device it is 60 minutes, longer than the 40m 15s average loop time, so analyses there run at most once every 60 minutes. The other 2 devices use 60 seconds (no value set), which is shorter than the loop and changes nothing."
 }

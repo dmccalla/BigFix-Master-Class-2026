@@ -86,7 +86,35 @@ def write_evidence(folder: Path, *, include_intervals: bool = True) -> dict[str,
                 "Analysis Name=QA Analysis | Display Name=QA Every Report | Name=QA Every Report | Source Name=QA Every Report | Source ID=1",
             ]
         )
-    return {"capture": capture, "deployment": deployment, "offenders": offenders}
+        # A site evaluation and a retrieved property, as the lab Top 10 has.
+        writer.writerows(CASE["offender_rows"])
+    # The UDP BESAPI capture has no header row.
+    udp = folder / "UDP_Notifications_QA.xml"
+    udp.write_text(
+        '<?xml version="1.0" encoding="UTF-8"?><BESAPI><Query><Result>'
+        + "".join(
+            f'<Answer type="string">{line}</Answer>' for line in CASE["udp_answers"]
+        )
+        + "</Result></Query></BESAPI>",
+        encoding="utf-8",
+    )
+    settings = [
+        "CLIENT SETTINGS INFORMATION",
+        "//===== CLIENT SETTINGS ==================================",
+        "Column Headers: Setting Name, Setting Value, Number of Machines",
+    ]
+    for value, count in CASE["minimum_analysis_interval_rows"]:
+        settings += ["_BESClient_Report_MinimumAnalysisInterval ", f" {value}", count]
+    settings.append("//===== ICMP CONTROLS ==================================")
+    (deployment / "Client_Settings_Info_QA.log").write_text(
+        "\n".join(settings) + "\n", encoding="utf-8"
+    )
+    return {
+        "capture": capture,
+        "deployment": deployment,
+        "offenders": offenders,
+        "udp": udp,
+    }
 
 
 def calculated_metrics():
@@ -150,6 +178,8 @@ def delivered(tmp_path_factory):
         str(evidence["deployment"]),
         "--evaluation-times-file",
         str(evidence["offenders"]),
+        "--udp-notifications-file",
+        str(evidence["udp"]),
         "--report-start-date",
         "10-01-2026",
         "--report-end-date",
@@ -214,6 +244,16 @@ def test_real_report_workbook_and_chart_agree(delivered):
         CASE["expected_top10"]["evaluation"],
         CASE["expected_top10"]["interval"],
     ] in [row[3:5] for row in top10[1:]]
+    assert [row[3:5] for row in top10[1:]] == CASE["expected_top10_rows"]
+    coverage = next(
+        table
+        for table in tables
+        if table[0][:2] == ["Status", "Devices / Total"]
+        and table[1][0] == "Receiving UDP Pings"
+    )
+    assert coverage[1:] == CASE["expected_udp_coverage"]
+    paragraphs = [p.text for p in document.paragraphs]
+    assert CASE["expected_minimum_analysis_interval"] in paragraphs
     findings = next(table for table in tables if table[0][0] == "Finding ID")
     assert len(findings) == 2
     assert findings[1][0] == "CLT-01"

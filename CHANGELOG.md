@@ -11,6 +11,18 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Deployment collection
+
+- Use the standard form-encoded Session Relevance route for lab preflight checks. Explorer-only JSON requests could return HTTP 503 while the collector's normal route was healthy. Keep normal engine selection and test the request contract.
+
+- Record per-request timings and failure categories in CSV/JSON diagnostics, stop on rejected authentication or three consecutive availability failures, and report distinct BigFix action exit codes. Preserve partial XML evidence, distinguish permission and relevance errors from outages, and document the policy in the collection design and task descriptions.
+
+- Default the standalone Collect Deployment Information pause to 5 seconds. Explain capacity differences, the 1-second override, and console reauthentication after an expected root service restart.
+- Generate 113 headings and blank lines locally as BESAPI XML fragments. Preserve the 177 real API queries, capture order, and optional human readable log conversion.
+- Capture Actionsite Size and the 12 root-server client relevance results in XML even with logs off. Stop creating the partial Root_Server_Info log when log output is disabled.
+- Add offline capture and pacing contracts plus controlled log-on and log-off lab scenarios. Live lab validation is required before updating the combined task.
+
+
 ### Tests
 
 - Extend the known-answer delivery evidence with the cases the 10-19 lab run exposed: a site evaluation and a Retrieved Property in the Top 10, a headerless UDP .xml in the collector's format, and _BESClient_Report_MinimumAnalysisInterval set with and without a value.

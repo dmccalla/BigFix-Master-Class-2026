@@ -1,0 +1,237 @@
+{
+  "server_url": "https://BFROOT1.dmc.lab:52311",
+  "site_name": "BigFix Workbench Test",
+  "allowed_computer_ids": [
+    8317784
+  ],
+  "request_timeout_seconds": 60,
+  "client_query_timeout_seconds": 120,
+  "action_timeout_seconds": 3600,
+  "poll_seconds": 10,
+  "scenarios": [
+    {
+      "name": "deployment-standalone-logs-0",
+      "computer_id": 8317784,
+      "preconditions": [
+        {
+          "name": "The allowed target is the Windows root server",
+          "query": "windows of operating system and exists main gather service and not exists relay service",
+          "equals": "True"
+        }
+      ],
+      "steps": [
+        {
+          "name": "collect-all-sections",
+          "task_file": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Deployment Information (2.0).bes",
+          "parameters": {
+            "rootServerName": "BFROOT1.dmc.lab",
+            "generateLogFiles": "0",
+            "collectGeneral": "true",
+            "collectRootServer": "true",
+            "collectRelay": "true",
+            "collectRelayAffiliation": "true",
+            "collectClient": "true",
+            "collectClientSettings": "true",
+            "collectOperator": "true",
+            "collectContent": "true",
+            "collectProperty": "true",
+            "collectAction": "true"
+          },
+          "secure_parameters_from_env": {
+            "apiUsername": "BIGFIX_USERNAME",
+            "apiPassword": "BIGFIX_PASSWORD"
+          },
+          "assertions": [
+            {
+              "name": "General_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"General_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Root_Server_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Root_Server_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Relay_Server_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Relay_Server_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Relay_Affiliation_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Relay_Affiliation_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Client_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Client_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Client_Settings_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Client_Settings_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Operator_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Operator_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Content_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Content_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Property_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Property_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Action_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Action_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Actionsite size is preserved in XML",
+              "query": "exists lines whose (it contains \"Actionsite Size:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"General_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Root client relevance is preserved in XML",
+              "query": "exists lines whose (it contains \"Registration List Size:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Root_Server_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Property interval block is preserved",
+              "query": "exists lines whose (it contains \"Active Properties by Evaluation Interval\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Property_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "No failed query response is hidden",
+              "query": "not exists lines whose (it contains \"<Error>\" or it starts with \"ERROR:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Optional human readable logs match selection",
+              "query": "number of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".log\")",
+              "equals": "0"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "deployment-standalone-logs-1",
+      "computer_id": 8317784,
+      "preconditions": [
+        {
+          "name": "The allowed target is the Windows root server",
+          "query": "windows of operating system and exists main gather service and not exists relay service",
+          "equals": "True"
+        }
+      ],
+      "steps": [
+        {
+          "name": "collect-all-sections",
+          "task_file": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Deployment Information (2.0).bes",
+          "parameters": {
+            "rootServerName": "BFROOT1.dmc.lab",
+            "generateLogFiles": "1",
+            "collectGeneral": "true",
+            "collectRootServer": "true",
+            "collectRelay": "true",
+            "collectRelayAffiliation": "true",
+            "collectClient": "true",
+            "collectClientSettings": "true",
+            "collectOperator": "true",
+            "collectContent": "true",
+            "collectProperty": "true",
+            "collectAction": "true"
+          },
+          "secure_parameters_from_env": {
+            "apiUsername": "BIGFIX_USERNAME",
+            "apiPassword": "BIGFIX_PASSWORD"
+          },
+          "assertions": [
+            {
+              "name": "General_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"General_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Root_Server_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Root_Server_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Relay_Server_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Relay_Server_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Relay_Affiliation_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Relay_Affiliation_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Client_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Client_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Client_Settings_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Client_Settings_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Operator_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Operator_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Content_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Content_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Property_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Property_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Action_Info_ XML capture exists",
+              "query": "exists ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Action_Info_\" and name of it ends with \".xml\" and name of it does not contain \"Admin_Tool\" and size of it > 0)",
+              "equals": "True"
+            },
+            {
+              "name": "Actionsite size is preserved in XML",
+              "query": "exists lines whose (it contains \"Actionsite Size:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"General_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Root client relevance is preserved in XML",
+              "query": "exists lines whose (it contains \"Registration List Size:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Root_Server_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Property interval block is preserved",
+              "query": "exists lines whose (it contains \"Active Properties by Evaluation Interval\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it starts with \"Property_Info_\" and name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "No failed query response is hidden",
+              "query": "not exists lines whose (it contains \"<Error>\" or it starts with \"ERROR:\") of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".xml\")",
+              "equals": "True"
+            },
+            {
+              "name": "Optional human readable logs match selection",
+              "query": "number of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".log\")",
+              "equals": "10"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

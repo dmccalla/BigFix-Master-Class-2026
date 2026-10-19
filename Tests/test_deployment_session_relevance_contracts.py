@@ -90,19 +90,47 @@ EXPECTED = {
 
 
 def _queries(path: Path) -> list[tuple[str, str, str]]:
+    """Return API expressions and locally generated literal entries in capture order."""
+    import html
+
     root = ET.parse(path).getroot()
     found = []
     for node in root.iter("ActionScript"):
-        for line in (node.text or "").splitlines():
-            if line.lstrip().startswith("//"):
-                continue
-            match = re.search(
-                r'GET query --relevance=(\S+)\s+>>?\s+\{parameter "([^"]+)"\}',
-                line,
+        script = node.text or ""
+        # Match one API command at a time; a dot must not consume another line.
+        api_pattern = re.compile(
+            r'^waithidden [^\n]* GET query --relevance=(\S+)\s+>>?\s+\{parameter "([^"\n]+)"\}',
+            re.M,
+        )
+        entries = []
+        for match in api_pattern.finditer(script):
+            encoded, capture = match.groups()
+            entries.append((match.start(), capture, unquote(encoded), encoded))
+        wrapped_pattern = re.compile(
+            r'^waithidden powershell[^\n]* -Mode Request -Resource query -EncodedRelevance "(\S+)" -Capture "\{parameter "([^"\n]+)"\}"',
+            re.M,
+        )
+        for match in wrapped_pattern.finditer(script):
+            encoded, capture = match.groups()
+            entries.append((match.start(), capture, unquote(encoded), encoded))
+        local_pattern = re.compile(
+            r"^// Local capture text \(no API request\)\.\n(.*?)"
+            r'(?:^move __(?:append|create)file "\{parameter "([^"\n]+)"\}"|^waithidden cmd.exe /C type __(?:append|create)file >> "\{parameter "([^"\n]+)"\}")',
+            re.M | re.S,
+        )
+        for match in local_pattern.finditer(script):
+            block, moved, appended = match.groups()
+            answer = re.search(
+                r'^(?:appendfile )?<Answer type="string">(.*?)</Answer>$', block, re.M
             )
-            if match:
-                encoded, capture = match.groups()
-                found.append((capture, unquote(encoded), encoded))
+            assert answer
+            query = '("' + html.unescape(answer.group(1)) + '")'
+            entries.append(
+                (match.start(), moved or appended, query, quote(query, safe=""))
+            )
+        found.extend(
+            (capture, query, encoded) for _, capture, query, encoded in sorted(entries)
+        )
     return found
 
 

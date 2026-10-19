@@ -445,12 +445,15 @@ class BigFixAPI:
         raise HarnessError(f"BigFix API {method} {path} failed unexpectedly")
 
     def session_query(self, relevance: str) -> list[Any]:
-        payload = json.dumps({"relevance": relevance}).encode("utf-8")
+        # Use the ordinary API route, matching the collector and supporting normal engine selection.
+        payload = parse.urlencode({"relevance": relevance, "output": "json"}).encode(
+            "utf-8"
+        )
         result = self._request(
             "POST",
             "/api/query",
             payload,
-            content_type="application/json+relevance",
+            content_type="application/x-www-form-urlencoded",
             accept="application/json",
         )
         try:

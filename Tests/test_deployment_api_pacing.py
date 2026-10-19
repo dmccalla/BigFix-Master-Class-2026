@@ -120,6 +120,11 @@ def test_all_local_fragments_are_complete_besapi_documents():
         document = ET.fromstring(xml)
         assert document.tag == "BESAPI"
         assert len(document.findall("./Query/Result/Answer")) == 1
+        assert (
+            document.findtext("./Query/Evaluation/Time")
+            == "Not applicable: local capture"
+        )
+        assert document.findtext("./Query/Evaluation/Plurality") == "Singular"
 
 
 def test_fatal_helper_codes_are_checked_before_pacing_can_overwrite_them():

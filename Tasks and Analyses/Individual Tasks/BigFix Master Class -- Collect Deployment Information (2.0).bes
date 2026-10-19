@@ -535,6 +535,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">GENERAL DEPLOYMENT INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -549,6 +553,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -568,6 +576,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -582,6 +594,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -734,6 +750,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("Actionsite Size: " & (sum of sizes of files of folder ((preceding text of first "BESClient.exe" of pathname of regapps "BESClient.exe") & "__BESData\actionsite") / 1000) as string & " KB") | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -801,6 +821,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">ROOT SERVER INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -815,6 +839,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -834,6 +862,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -848,6 +880,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -908,6 +944,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of ((concatenation "; " of (((name of it & " - Total Space: " & (total space of it / 1024 / 1024) as string & "MB") & " - Free Space: " & ((free space of it / 1024 / 1024) as string & "MB")) of drives whose (type of it = "DRIVE_FIXED"))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -922,6 +962,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Log File Size: " & (if (it > 0) then (if (it < (1024*1024) ) then ((it / 1024) as string & " KB") else ((it / (1024*1024)) as string & " MB")) else ("N/A")) of (if (name of operating system starts with "Win") then (if (exists service "BESRootServer") then (size of file (value "DataDirectoryPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string & "\FillDB.log")) else (-1)) else (if (exists main gather service) then (size of file (key ("DebugOut") of section ("Software\BigFix\Enterprise Server\FillDB") of file "/var/opt/BESServer/besserver.config")) else (-1)))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -936,6 +980,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("Number of Files in Buffer Dir: " & (if (exists main gather service) then ((number of files of it + number of files of folders of it) of folder (if (name of operating system starts with "Win") then (value "BufferDir" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of registry as string) else (key ("BufferDir") of section ("Software\BigFix\Enterprise Server\FillDB") of file "besserver.config" of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client)))as string) else ("N/A"))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -950,6 +998,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("Buffer Dir Size: " & (if (exists main gather service) then ((number of files of it + number of files of folders of it) of folder (if (name of operating system starts with "Win") then (value "BufferDir" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of registry as string) else (key ("BufferDir") of section ("Software\BigFix\Enterprise Server\FillDB") of file "besserver.config" of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client)))as string) else ("N/A"))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -965,6 +1017,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("Registration List Size: " & (if (exists file(it)) then ((size of file (it) / 1024) as string & " KB") else "N/A") of (if (name of operating system starts with "Win") then (value "RegistrationList Location" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\ClientRegister" of registry as string) else (pathname of parent folder of folder (value of setting "_BESRelay_HTTPServer_ServerRootPath" of client) & "/ClientRegisterData/registrationlist.txt"))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -979,6 +1035,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("Web Reports SSL: " & (if (exists service "BESWebReportsServer") then (if (exists setting "_WebReports_HTTPServer_UseSSLFlag" whose (value of it = "1") of client) then ("HTTPS") else ("HTTP")) else ("N/A"))) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -993,6 +1053,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Number of DB Updating Threads): " & (value "NumberOfDBUpdatingThreads" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1007,6 +1071,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Number of DB Updating Threads for Query): " & (value "NumberOfDBUpdatingThreadsForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1021,6 +1089,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Number of Parsing Threads): " & (value "NumberOfParsingThreads" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1035,6 +1107,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Number of Parsing Threads For Query): " & (value "NumberOfParsingThreadsForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1049,6 +1125,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Parallelism Enabled): " & (value "ParallelismEnabled" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1063,6 +1143,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">{(concatenation "&gt;" of substrings separated by ">" of (concatenation "&lt;" of substrings separated by "<" of (concatenation "&amp;" of substrings separated by "&" of (("FillDB Parallelism (Parallelism Enabled For Query): " & (value "ParallelismEnabledForQuery" of key "HKEY_LOCAL_MACHINE\SOFTWARE\WOW6432Node\BigFix\Enterprise Server\FillDB" of x32 registry as string)) | "Not available"))))}</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1096,6 +1180,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">RELAY SERVER INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1110,6 +1198,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1129,6 +1221,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1143,6 +1239,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1252,6 +1352,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1271,6 +1375,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Relays with Stale Actionsite Versions (based upon BES Health Checks::Actionsite Version) - Version, Relay Name</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1290,6 +1398,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1304,6 +1416,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Relay Server Aggregation Statistics (Total Child Count) - Relay Name, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1323,6 +1439,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1337,6 +1457,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Relay Server Aggregation Statistics (Client Child Count) - Relay Name, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1356,6 +1480,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1370,6 +1498,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Relay Server Aggregation Statistics (Relay Child Count) - Relay Name, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1413,6 +1545,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">RELAY AFFILIATION INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1427,6 +1563,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1446,6 +1586,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1460,6 +1604,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1474,6 +1622,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">_BESClient_Register_Affiliation_SeekList, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1493,6 +1645,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1507,6 +1663,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">_BESRelay_Register_Affiliation_Advertisementlist, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1550,6 +1710,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">CLIENT INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1564,6 +1728,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1583,6 +1751,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1597,6 +1769,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1734,6 +1910,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">CLIENT SETTINGS INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1748,6 +1928,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1767,6 +1951,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1781,6 +1969,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1800,6 +1992,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ROOT SERVER AND RELAY SETTINGS ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1814,6 +2010,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Description: Unique client settings specified on relays (limited to _BESClient_Relay, _Enterprise Server, _BESGather and _BESRelay prefix settings)</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1828,6 +2028,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Setting Name, Setting Value, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1842,6 +2046,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1861,6 +2069,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1880,6 +2092,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== CLIENT SETTINGS ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1894,6 +2110,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Description: Unique client settings specified on clients (non-relays, limited to _BESClient_ prefix settings excluding archive manager settings, _BESClient_Emsg, _BESClient_SecureRegistration, _BESClient_ActionManager, _BESClient_ActionArchiver, _BESClient_Diagnostics_Password settings. Also contains a special section for ICMP control settings.</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1908,6 +2128,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Setting Name, Setting Value, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1922,6 +2146,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1941,6 +2169,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1960,6 +2192,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ICMP CONTROLS ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1974,6 +2210,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -1988,6 +2228,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_Automatic, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2007,6 +2251,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_MaximumTTLToPing, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2026,6 +2274,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_IntervalSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2045,6 +2297,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_MaxRetryIntervalSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2064,6 +2320,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_MinRetryIntervalSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2083,6 +2343,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_RelaySelect_ResistFailureIntervalSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2102,6 +2366,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Report_MinimumInterval, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2121,6 +2389,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Resource_InterruptSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2140,6 +2412,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2159,6 +2435,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== COMMAND POLLING ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2173,6 +2453,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2187,6 +2471,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Comm_CommandPollEnable, Number of Machines </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2206,6 +2494,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Comm_CommandPollIntervalSeconds, Number of Machines</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2225,6 +2517,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2244,6 +2540,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== CLIENT CPU USAGE ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2258,6 +2558,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2272,6 +2576,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Resource_WorkNormal, Number of Machines </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2291,6 +2599,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Resource_SleepNormal, Number of Machines </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2310,6 +2622,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Resource_SleepIdle, Number of Machines </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2329,6 +2645,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Value of _BESClient_Resource_WorkIdle, Number of Machines </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2371,6 +2691,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">OPERATOR INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2385,6 +2709,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2404,6 +2732,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2418,6 +2750,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2545,6 +2881,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">CONTENT INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2559,6 +2899,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2578,6 +2922,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2592,6 +2940,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2731,6 +3083,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2745,6 +3101,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== EXTERNAL SITES INFORMATION  ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2759,6 +3119,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Display Name, Site Version, Number of Subscribed Computers, Most Recent Fixlet Modification, Number of Fixlets Within the Site</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2773,6 +3137,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2792,6 +3160,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2806,6 +3178,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== CUSTOM SITES INFORMATION  ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2820,6 +3196,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Site Name, Number of Subscribed Computers, Number of Fixlets Within the Site, Number of Writers to Site, Number of Readers to Site, Number of Owners to Site</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2834,6 +3214,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2876,6 +3260,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">PROPERTY INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2890,6 +3278,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2909,6 +3301,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2923,6 +3319,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2977,6 +3377,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== Custom BES Properties with frequent evaluations (sub 15 minutes) ================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -2991,6 +3395,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Property Name, Source Analysis Site Name, Property ID, Issued By, Evaluation Interval</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3005,6 +3413,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3024,6 +3436,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== Active Properties by Evaluation Interval ================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3038,6 +3454,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Property Name, Source Analysis Name, Source Analysis Site Name, Site ID, Analysis ID, Property ID, Issued By, Evaluation Interval, Content Source</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3052,6 +3472,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3095,6 +3519,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">ACTION INFORMATION</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3109,6 +3537,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3128,6 +3560,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Report Version: 1.0</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3142,6 +3578,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3226,6 +3666,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3242,6 +3686,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ACTIONS BY ISSUER (ALL)  ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3256,6 +3704,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Name of Issuer, Number of Actions</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3270,6 +3722,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3289,6 +3745,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3303,6 +3763,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ACTIONS BY ISSUER (OPEN)  ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3317,6 +3781,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Name of Issuer, Number of Actions</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3331,6 +3799,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3350,6 +3822,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3364,6 +3840,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ACTIONS BY DATE  ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3378,6 +3858,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Timeframe, State, # of Actions In State</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3392,6 +3876,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3411,6 +3899,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3425,6 +3917,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">//===== ACTIONS BY SOURCE ==================================</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3439,6 +3935,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string">Column Headers: Site Name, State, # of Actions In State</Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF
@@ -3453,6 +3953,10 @@ createfile until DI_LOCAL_XML_EOF
 <Result>
 <Answer type="string"> </Answer>
 </Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
 </Query>
 </BESAPI>
 DI_LOCAL_XML_EOF

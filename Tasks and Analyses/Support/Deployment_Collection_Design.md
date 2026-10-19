@@ -14,6 +14,9 @@ combined task.
   is known to handle it. The existing 0-second override remains available.
 - Generate the 113 constant headings and blank lines locally as BESAPI XML fragments.
   Keep their text, destinations, and ordering. Do not send them to `/api/query`.
+  Include the schema-required Evaluation element, with Time explicitly marked
+  `Not applicable: local capture` and Plurality `Singular`. Do not invent a server
+  evaluation duration for locally generated data.
 - Preserve all 177 real Session Relevance expressions. With all sections selected,
   pacing alone adds about 15 minutes at the default, plus request execution time.
   The two admin requests run only when the optional human readable logs are selected.

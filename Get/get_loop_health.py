@@ -3585,7 +3585,9 @@ def generate_png(
     ]
 
     meta = f"{scored_total:,} devices scored"
-    if metrics.report_span_text:
+    # Only a real span reads as "N days collection". Missing or invalid dates
+    # stay in Excel's Report Range row.
+    if metrics.report_span_text.endswith(("day", "days")):
         meta += f" &middot; {metrics.report_span_text} collection"
 
     reasons = loop_finding_reasons(metrics, property_intervals)

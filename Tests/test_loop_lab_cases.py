@@ -134,3 +134,26 @@ def test_headerless_udp_capture_is_recognized(tmp_path: Path) -> None:
     path = _write_udp_xml(tmp_path, LAB_UDP_ANSWERS)
     assert loop._is_udp_notifications_file(path)
     assert run_diagnostics._looks_like_udp_notification_file(path)
+
+
+def test_infographic_header_names_a_span_only_when_dates_were_given(
+    monkeypatch, tmp_path: Path
+) -> None:
+    from test_loop_reporting_coverage import _metrics
+
+    captured: dict = {}
+
+    def capture_chart(kind, data, output):
+        captured["meta"] = data["meta"]
+
+    monkeypatch.setattr("Lib.Design.html_charts.render_chart", capture_chart)
+    metrics = _metrics(10, 0)
+    for span, expected in (
+        ("Not provided", "10 devices scored"),
+        ("Invalid range", "10 devices scored"),
+        ("1 day", "10 devices scored &middot; 1 day collection"),
+        ("6 days", "10 devices scored &middot; 6 days collection"),
+    ):
+        metrics.report_span_text = span
+        loop.generate_png(metrics, tmp_path / "loop.png")
+        assert captured["meta"] == expected

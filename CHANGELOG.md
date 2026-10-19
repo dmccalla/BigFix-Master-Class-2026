@@ -17,6 +17,7 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Leave the collection span out of the Client Performance Infographic header when no report dates were given. It read "Not provided collection".
 - Label a Retrieved Property in the Top 10 Interval column as Not collected. It said Not a property, but retrieved properties have intervals that the Property_Info capture does not list. Site evaluations still read Not a property.
 - Read a UDP notifications .xml capture chosen as the input. It has no header row, so the report said Not collected. It is now split the way the collector splits it and gives the same counts as the collector's CSV.
 - Run lint and formatting once, separately from the Python 3.12, 3.13 and 3.14 tests, so style failures cannot prevent regression tests from running. Install CI tools from uv.lock, cancel superseded runs, and resolve the outstanding formatting failures.

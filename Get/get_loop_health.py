@@ -957,9 +957,45 @@ def discover_loop_offenders_file(
     return None
 
 
+UDP_NOTIFICATION_COLUMNS = (
+    "Computer Name",
+    "IPv4 Addresses",
+    "Relay",
+    "Platform Health Check - Receiving UDP Pings",
+)
+_UDP_STATUS_RE = re.compile(r"^(?:true|false|yes|no|not reported)\b", re.IGNORECASE)
+
+
+def udp_capture_rows(text: str) -> list[list[str]]:
+    """Rows of a headerless UDP BESAPI capture.
+
+    Splits each answer the way query_properties.ps1 does: on commas, with
+    any extra leading fields folded into the computer name, keeping only
+    answers whose fourth field is a UDP status.
+    """
+    rows: list[list[str]] = []
+    for line in text.splitlines():
+        if not line.strip() or re.match(r"^\s*Computer Name\s*,", line):
+            continue
+        parts = line.split(",")
+        if len(parts) < 4:
+            continue
+        if len(parts) > 4:
+            lead = len(parts) - 3
+            parts = [",".join(parts[:lead]), *parts[lead:]]
+        parts = [part.strip() for part in parts]
+        if _UDP_STATUS_RE.match(parts[3]):
+            rows.append(parts)
+    return rows
+
+
 def _is_udp_notifications_file(path: Path) -> bool:
     if path.suffix.lower() not in {".csv", ".xml"}:
         return False
+    if path.suffix.lower() == ".xml":
+        sampled = sample_capture_lines(path, 1)
+        if sampled and udp_capture_rows(sampled[0]):
+            return True
 
     columns = {str(column).strip().casefold() for column in _header_columns(path)}
     return (
@@ -1535,7 +1571,11 @@ def offender_interval(result: str, summary: PropertyIntervalSummary | None) -> s
     """Interval of a Top 10 analysis property, or why there is none."""
     key = _offender_property_key(result)
     if key is None:
-        return "Not a property"
+        # A site evaluation has no interval. A retrieved property has one,
+        # but the Property_Info capture lists analysis properties only.
+        if str(result).strip().lower().startswith("background evaluation of"):
+            return "Not a property"
+        return "Not collected"
     if summary is None:
         return "Not collected"
     for item in summary.properties:
@@ -2389,7 +2429,11 @@ def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary |
 
     try:
         if path.suffix.lower() == ".xml":
-            df = pd.read_csv(io.StringIO(read_capture_or_log_text(path)))
+            # The BESAPI capture has no header row.
+            df = pd.DataFrame(
+                udp_capture_rows(read_capture_or_log_text(path)),
+                columns=list(UDP_NOTIFICATION_COLUMNS),
+            )
         else:
             df = pd.read_csv(path)
     except Exception:
@@ -4479,7 +4523,8 @@ def generate_word(
                 "The slowest evaluations each device reported, averaged across the "
                 "deployment. Occurrences is how many times an evaluation appeared in "
                 "a device's Top 10. Interval is how often an analysis property is "
-                "set to run. A site evaluation is not a property and has no interval."
+                "set to run. A site evaluation is not a property and has no interval. "
+                "A retrieved property's interval is not in the capture."
             )
         )
         build_word_table(

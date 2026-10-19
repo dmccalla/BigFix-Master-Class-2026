@@ -17,6 +17,8 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Label a Retrieved Property in the Top 10 Interval column as Not collected. It said Not a property, but retrieved properties have intervals that the Property_Info capture does not list. Site evaluations still read Not a property.
+- Read a UDP notifications .xml capture chosen as the input. It has no header row, so the report said Not collected. It is now split the way the collector splits it and gives the same counts as the collector's CSV.
 - Run lint and formatting once, separately from the Python 3.12, 3.13 and 3.14 tests, so style failures cannot prevent regression tests from running. Install CI tools from uv.lock, cancel superseded runs, and resolve the outstanding formatting failures.
 - Make each generated disable action stay open for the logging duration plus one day. It used a fixed two days, so a duration over 24 hours could outlast the action and leave logging on. The FillDB Performance task now computes the offset from their own duration input. The default 24 hours still gives two days.
 

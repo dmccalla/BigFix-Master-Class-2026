@@ -684,6 +684,12 @@ def _looks_like_udp_notification_file(path: Path) -> bool:
         sampled = sample_capture_lines(path, 1)
         if not sampled:
             return False
+        # The BESAPI capture has no header row. Its answers are the data rows.
+        fields = [field.strip() for field in sampled[0].split(",")]
+        if len(fields) >= 4 and re.match(
+            r"^(?:true|false|yes|no|not reported)\b", fields[-1], re.IGNORECASE
+        ):
+            return True
         header_row = next(csv.reader([sampled[0]]), [])
         columns = {str(column).strip().casefold() for column in header_row}
     else:

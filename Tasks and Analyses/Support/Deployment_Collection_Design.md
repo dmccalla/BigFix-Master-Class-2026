@@ -114,6 +114,8 @@ Full no-error lab scenarios deliberately flag this compatibility condition. A
 correctly reported incomplete collection is not proof that all requested data was
 available. Review engine support before treating the operator statistics as complete.
 The collection changes do not alter engine registrations, priorities, or services.
+Recheck these three queries after an Explorer upgrade before carrying this lab
+limitation forward. Support can differ between engine versions and deployments.
 
 ## Operator guidance and verification
 
@@ -138,3 +140,40 @@ The lab harness uses standard form-encoded Session Relevance requests for prefli
 matching normal engine selection for the collector. It does not force the optional
 Explorer-only JSON request mode. A preflight transport failure must be distinguished
 from a failure in an executed collection action.
+
+## Validation record, 2026-10-19
+
+The controlled target was BFROOT1, computer ID 8317784. Runs were sequential.
+One-second pacing was an explicit lab override where shown; the default remains
+five seconds. Action numbers identify retained lab evidence, not release versions.
+
+| Action | Coverage | Result |
+|---|---|---|
+| 1705 | Platform standalone, General section, default 5 seconds, logs off | Completed, code 0. All 26 requests succeeded. Actionsite Size remained in XML; no data log was created. |
+| 1707 | Platform standalone, every section, 1-second override, logs on | Finished incomplete, code 24004. All 179 requests were attempted. Only DI-107/108/109 failed with the engine limitation above. Retained 10 XML captures, 10 logs and 183 CSV lines including the header. |
+| 1709 | TA standalone, Root section, 1-second override, logs off | Completed, code 0. Eight requests succeeded. Root client values remained in XML; no partial Root log was created. All seven retained-capture assertions passed after correcting the assertion's CSV-field matching. |
+| 1711 | Class standalone, Root section, 1-second override, logs on | Completed, code 0. Eight requests succeeded. Root XML and its readable log were retained. All seven assertions passed. |
+| 1713 | Platform Day 1 combined, Deployment Information only, 1-second override, logs off | Finished incomplete, code 24004. All 177 requests were attempted. Only DI-107/108/109 failed. Retained 10 XML captures, no data logs, and 181 CSV lines including the header. Actionsite, root client values, and the property evaluation interval block remained in XML. |
+
+Harmless native exit probes 1697 and 1703 confirmed Failed status with exit codes
+24002 and 24003. A development run also exercised the three-unusable-response
+gate before the CLI native-output correction; it stopped with 24003. Those probes
+do not claim a production authentication or availability outage was induced.
+
+The full offline suites passed: Platform 2,277 tests, TA 639 tests, and Class 633
+tests, with their environment-dependent skips. Ruff lint and format checks passed
+in all three repositories. Native Windows helper tests cover failure classification,
+counter reset, partial Result plus Error, Unicode and large response preservation.
+Consumer compatibility tests compare the existing Get parsing and generated
+reference-table XML before and after collection changes, including diagnostics
+alongside evidence. Get and Inject production scripts were not changed.
+
+Normalized standalone action bodies match across all three repositories. Frozen
+contracts preserve the 177 query expressions, 113 constant fragments, and all 13
+client relevance expressions. The combined task reuses that collection and retains
+its 104 existing dashboard query commands. Combined live coverage selects Deployment
+Information only; it does not claim a new dashboard runtime validation.
+
+These results verify the collector and retained output contract. They do not remove
+the three existing query-engine limitations or establish production capacity.
+Human readable diagnostic summaries and cross-deployment baselines are deferred.

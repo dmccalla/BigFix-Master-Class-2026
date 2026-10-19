@@ -129,7 +129,7 @@
             },
             {
               "name": "Collector diagnostics contain no failure category",
-              "query": "not exists lines whose (it contains \"Failure\" or it contains \"Failed\" or it contains \"Incomplete\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "query": "not exists lines whose (it contains \",%22AuthenticationFailure%22,\" or it contains \",%22PermissionFailure%22,\" or it contains \",%22AvailabilityFailure%22,\" or it contains \",%22RequestFailure%22,\" or it contains \",%22QueryFailure%22,\" or it contains \",%22LocalCollectorFailure%22,\" or it contains \",%22LoginFailed%22,\" or it contains \",%22Incomplete%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
               "equals": "True"
             }
           ]
@@ -256,7 +256,7 @@
             },
             {
               "name": "Collector diagnostics contain no failure category",
-              "query": "not exists lines whose (it contains \"Failure\" or it contains \"Failed\" or it contains \"Incomplete\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "query": "not exists lines whose (it contains \",%22AuthenticationFailure%22,\" or it contains \",%22PermissionFailure%22,\" or it contains \",%22AvailabilityFailure%22,\" or it contains \",%22RequestFailure%22,\" or it contains \",%22QueryFailure%22,\" or it contains \",%22LocalCollectorFailure%22,\" or it contains \",%22LoginFailed%22,\" or it contains \",%22Incomplete%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
               "equals": "True"
             }
           ]

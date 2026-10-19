@@ -43,6 +43,9 @@ class FakeIem {
         if (kind == "query-error") {
             Console.WriteLine("<?xml version=\"1.0\"?><BESAPI><Query><Error>Unsupported inspector</Error></Query></BESAPI>"); return 0;
         }
+        if (kind == "query-error-partial") {
+            Console.WriteLine("<?xml version=\"1.0\"?><BESAPI><Query><Result><Answer type=\"integer\">14</Answer></Result><Error>This operation is not supported.</Error></Query></BESAPI>"); return 0;
+        }
         if (kind == "unicode") {
             Console.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BESAPI><Query><Result><Answer type=\"string\">Caf\u00e9 \u5ba2\u6237 &amp; value</Answer></Result></Query></BESAPI>"); return 0;
         }
@@ -174,10 +177,13 @@ def test_three_consecutive_availability_failures_stop(collector, response):
     assert data["ConsecutiveAvailabilityFailures"] == 3
 
 
-def test_permission_and_query_errors_continue_then_report_incomplete(collector):
+@pytest.mark.parametrize("query_response", ["query-error", "query-error-partial"])
+def test_permission_and_query_errors_continue_then_report_incomplete(
+    collector, query_response
+):
     call, state, _, capture = collector
     assert call("Request", "forbidden") == 0
-    assert call("Request", "query-error") == 0
+    assert call("Request", query_response) == 0
     assert call("Request", "success") == 0
     assert call("Finish") == 24004
     data = json.loads(state.read_text())

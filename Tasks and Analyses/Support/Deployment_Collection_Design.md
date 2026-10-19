@@ -25,8 +25,8 @@ combined task.
   conversion. XML-only collection must retain them and must not create a partial
   `Root_Server_Info` log.
 - Use the CLI `--outFile` option to receive native XML without redirected-console
-  encoding conversion. Stream those response-file bytes directly to their existing captures. Read only
-  the newly appended response to classify it, using a streaming XML reader. Do not
+  encoding conversion. Stream those response-file bytes directly to their existing
+  captures. Read only the newly appended response to classify it, using a streaming XML reader. Do not
   rebuild query answers or hold complete large result sets in memory.
 - Preserve concatenated BESAPI documents. Captures are not single XML documents.
   Keep XML and locally collected answers even if a later request fails. Back up the
@@ -94,6 +94,26 @@ sets the action exit code. The
 [`continue if` command](https://developer.bigfix.com/action-script/reference/flow-control/continue-if.html)
 stops execution when its condition is false. Consult the action's success criteria
 when interpreting its displayed status.
+
+## Query engine compatibility
+
+The root server's normal `/api/query` route selects an available Explorer before
+falling back to Web Reports. See the [query API reference](https://developer.bigfix.com/rest-api/api/query.html).
+The collector keeps that routing and the existing relevance expressions. A running
+engine can still reject an operation that it does not support.
+
+On the controlled BFROOT1 lab run of 2026-10-19, Explorer at `192.168.4.7` rejected
+the existing administered-computer count operations in requests `DI-107`, `DI-108`,
+and `DI-109`: the non-master-operator average and the operator minimum and maximum.
+The CLI returned exit code 0 while its XML contained `<Error>`. These are query
+failures, not availability failures. The collector retains the response, records
+the missing evidence, continues the remaining requests, and finishes with 24004.
+The 177 original expressions and their output labels remain unchanged.
+
+Full no-error lab scenarios deliberately flag this compatibility condition. A
+correctly reported incomplete collection is not proof that all requested data was
+available. Review engine support before treating the operator statistics as complete.
+The collection changes do not alter engine registrations, priorities, or services.
 
 ## Operator guidance and verification
 

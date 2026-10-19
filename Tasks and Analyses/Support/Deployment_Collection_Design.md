@@ -21,7 +21,8 @@ combined task.
   server values. Append these answers to the appropriate XML before optional log
   conversion. XML-only collection must retain them and must not create a partial
   `Root_Server_Info` log.
-- Stream native API response bytes directly to their existing captures. Read only
+- Use the CLI `--outFile` option to receive native XML without redirected-console
+  encoding conversion. Stream those response-file bytes directly to their existing captures. Read only
   the newly appended response to classify it, using a streaming XML reader. Do not
   rebuild query answers or hold complete large result sets in memory.
 - Preserve concatenated BESAPI documents. Captures are not single XML documents.

@@ -6,7 +6,7 @@
   ],
   "request_timeout_seconds": 60,
   "client_query_timeout_seconds": 120,
-  "action_timeout_seconds": 3600,
+  "action_timeout_seconds": 7200,
   "poll_seconds": 10,
   "scenarios": [
     {
@@ -116,6 +116,21 @@
               "name": "Optional human readable logs match selection",
               "query": "number of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".log\")",
               "equals": "0"
+            },
+            {
+              "name": "Collector diagnostics report successful completion",
+              "query": "exists lines whose (it contains \",%22Completed%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "True"
+            },
+            {
+              "name": "Every expected API request has a diagnostic row",
+              "query": "number of lines of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "181"
+            },
+            {
+              "name": "Collector diagnostics contain no failure category",
+              "query": "not exists lines whose (it contains \"Failure\" or it contains \"Failed\" or it contains \"Incomplete\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "True"
             }
           ]
         }
@@ -228,6 +243,21 @@
               "name": "Optional human readable logs match selection",
               "query": "number of ((files of folders of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\")) whose (name of it ends with \".log\")",
               "equals": "10"
+            },
+            {
+              "name": "Collector diagnostics report successful completion",
+              "query": "exists lines whose (it contains \",%22Completed%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "True"
+            },
+            {
+              "name": "Every expected API request has a diagnostic row",
+              "query": "number of lines of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "183"
+            },
+            {
+              "name": "Collector diagnostics contain no failure category",
+              "query": "not exists lines whose (it contains \"Failure\" or it contains \"Failed\" or it contains \"Incomplete\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "True"
             }
           ]
         }

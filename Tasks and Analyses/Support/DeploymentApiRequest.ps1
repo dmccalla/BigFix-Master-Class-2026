@@ -61,6 +61,9 @@ try {
     $start.FileName = $IemPath
     $start.Arguments = 'GET ' + $Resource
     if ($Resource -eq 'query') { $start.Arguments += ' --relevance=' + $EncodedRelevance }
+    $responseFile = $StateFile + '.response.xml'
+    if ([IO.File]::Exists($responseFile)) { [IO.File]::Delete($responseFile) }
+    $start.Arguments += ' --outFile "' + $responseFile + '"'
     $start.UseShellExecute = $false
     $start.CreateNoWindow = $true
     $start.RedirectStandardOutput = $true
@@ -70,18 +73,22 @@ try {
     $process = New-Object Diagnostics.Process
     $process.StartInfo = $start
     [void]$process.Start()
-    # Stream native response bytes into the existing capture, as CLI redirection did.
-    # Parse only this request's appended portion; do not load large result sets into RAM.
+    # Ask the CLI to write XML natively. Its redirected stdout can be UTF-16
+    # even when the XML declares UTF-8; --outFile avoids that transport conversion.
+    $outTask = $process.StandardOutput.ReadToEndAsync()
+    $errTask = $process.StandardError.ReadToEndAsync()
+    $process.WaitForExit()
+    $stdout = $outTask.Result
+    $stderr = $errTask.Result
     $captureStream = [IO.File]::Open($Capture, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Read)
     $responseOffset = $captureStream.Length
     $captureStream.Position = $responseOffset
-    $outTask = $process.StandardOutput.BaseStream.CopyToAsync($captureStream)
-    $errTask = $process.StandardError.ReadToEndAsync()
-    $process.WaitForExit()
-    [void]$outTask.GetAwaiter().GetResult()
+    if ([IO.File]::Exists($responseFile)) {
+        $nativeResponse = [IO.File]::OpenRead($responseFile)
+        try { $nativeResponse.CopyTo($captureStream) } finally { $nativeResponse.Dispose() }
+    }
     $captureStream.WriteByte(10)
     $captureStream.Dispose()
-    $stderr = $errTask.Result
     $cliCode = $process.ExitCode
     $watch.Stop()
     $state.Requests++
@@ -94,7 +101,7 @@ try {
     $prefixLength = $prefixReader.Read($prefixBuffer, 0, $prefixBuffer.Length)
     $stdoutPrefix = if ($prefixLength -gt 0) { -join $prefixBuffer[0..($prefixLength - 1)] } else { '' }
     $prefixReader.Dispose()
-    $statusText = $stderr
+    $statusText = $stderr + "`n" + $stdout
     if ($stdoutPrefix -notmatch '^\s*(?:<\?xml|<BESAPI)') { $statusText += "`n" + $stdoutPrefix }
     $httpMatch = [regex]::Match($statusText, '(?im)^.*(?:HTTP|status)[^\r\n]*?\b([45]\d\d)\b')
     if ($httpMatch.Success) { $httpCode = $httpMatch.Groups[1].Value }
@@ -155,10 +162,12 @@ try {
     Save-State $state
     Write-Row $outcome $cliCode $httpCode $watch.ElapsedMilliseconds $evaluation
     $process.Dispose()
+    if ([IO.File]::Exists($responseFile)) { [IO.File]::Delete($responseFile) }
     exit $state.FinalCode
 } catch {
     # Do not print raw CLI output, arguments, or exception details into diagnostics.
     try {
+        if ($responseFile -and [IO.File]::Exists($responseFile)) { [IO.File]::Delete($responseFile) }
         if ($null -ne $captureStream) { $captureStream.Dispose() }
         if ($null -ne $reader) { $reader.Dispose() }
         if ($null -ne $responseStream) { $responseStream.Dispose() }

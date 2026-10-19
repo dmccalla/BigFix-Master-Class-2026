@@ -26,7 +26,13 @@ using System;
 class FakeIem {
     static int Main(string[] args) {
         Console.OutputEncoding = new System.Text.UTF8Encoding(false);
-        string kind = args[args.Length - 1].Replace("--relevance=", "");
+        string kind = "";
+        for (int i = 0; i < args.Length; i++) {
+            if (args[i].StartsWith("--relevance=")) kind = args[i].Replace("--relevance=", "");
+            if (args[i] == "--outFile") {
+                Console.SetOut(new System.IO.StreamWriter(args[++i], false, new System.Text.UTF8Encoding(false)) { AutoFlush = true });
+            }
+        }
         if (kind == "unauthorized") { Console.Error.WriteLine("HTTP Error 401: Unauthorized"); return 7; }
         if (kind == "unauthorized-stdout") { Console.WriteLine("HTTP status 401 Unauthorized"); return 7; }
         if (kind == "forbidden") { Console.Error.WriteLine("HTTP Error 403: Forbidden"); return 7; }
@@ -146,6 +152,7 @@ def test_authentication_failure_stops_immediately(collector, response):
     assert call("Request", response) == 24002
     assert json.loads(state.read_text())["Requests"] == 1
     assert "AuthenticationFailure" in capture.read_text()
+    assert not Path(str(state) + ".response.xml").exists()
 
 
 def test_login_failure_has_its_own_code(collector):

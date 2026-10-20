@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Documentation
+
+- Add Docs/Reference/Guide_Versions.md. It records the NFR guide (11.x.4) and Capacity Planning guide (11.x.12) editions the thresholds and sizing figures are built against, the value each check takes from them, and the house values neither guide states.
+
 ### Deployment collection
 
 - Use the standard form-encoded Session Relevance route for lab preflight checks. Explorer-only JSON requests could return HTTP 503 while the collector's normal route was healthy. Keep normal engine selection and test the request contract.

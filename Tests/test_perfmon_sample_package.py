@@ -57,7 +57,7 @@ New-LargePerfmonSampleArchive -Files $files -OutputDirectory $env:OUTPUT -Versio
 
 @pytest.mark.parametrize(
     "archive_root",
-    ["SampleData/Large_Perfmon", "Report Builder/SampleData/Large_Perfmon"],
+    ["SampleData/Large_Perfmon", "Nested App/SampleData/Large_Perfmon"],
 )
 def test_companion_archive_has_exact_bytes_hashes_and_safe_layout(tmp_path, archive_root):
     source = tmp_path / "samples"

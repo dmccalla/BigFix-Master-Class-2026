@@ -61,6 +61,7 @@ the project release process for the steps to cut a release.
 
 ### Changed
 
+- Apply Design's approved heading styles to the Mini Report template. H3 is 16 pt with a rule above and 20 pt before. H4 is 12 pt. Normal spacing is 0 pt before and 8 pt after, with no color. Headings use Aptos.
 - Spell PerfMon in the text readers see: report titles, app labels and messages, console and log lines, and help text. File and folder names, identifiers, globs and config keys keep Perfmon.
 - Rate ActionSite size against a 10 MB soft warning (Needs Attention) and a 25 MB hard ceiling (Critical), by Duncan's 10-19 ruling. It used a "Review" word no other Contributing Factors row uses.
 - Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.

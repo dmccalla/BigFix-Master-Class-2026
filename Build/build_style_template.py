@@ -109,17 +109,29 @@ TABLE_STYLE_XML = f"""
 </w:style>
 """
 
-# Heading and body definitions copied from the full Workbench's report
-# template: (size in points, color, space before, space after, extra pPr).
-# The template's heading font is a licensed one this project does not ship,
-# so the headings use the body font in bold instead.
+# Headings use the body font. This product ships no other font.
+HEADING_FONT = BODY_FONT
+
+# Heading and body definitions: (size in points, color, space before and after
+# in twentieths of a point). H1, H3, H4 and Normal follow Design's Proposed
+# Styles from the 10-19 review, approved by Duncan. H3 carries a 0.75 pt rule
+# above it so a new section separates from the table before it.
 HEADINGS = {
-    1: dict(size=24, color=NAVY, before=240, after=180, keep=True),
+    1: dict(size=24, color=NAVY, before=240, after=180, keep=True, font=HEADING_FONT),
     2: dict(size=18, color=SLATE, before=240, after=None, keep=True),
-    3: dict(size=14, color=NAVY, before=60, after=60, keep=False, line=276),
-    4: dict(size=14, color=BLUE, before=200, after=None, keep=True),
+    3: dict(
+        size=16,
+        color=NAVY,
+        before=400,
+        after=120,
+        keep=True,
+        font=HEADING_FONT,
+        rule=True,
+    ),
+    4: dict(size=12, color=BLUE, before=280, after=80, keep=True),
 }
-NORMAL_SPACING = (120, 120)
+NORMAL_SPACING = (0, 160)
+RULE_COLOR = "E3E9F1"
 
 
 def _set_font(
@@ -127,9 +139,10 @@ def _set_font(
     size_pt: int | None = None,
     bold: bool | None = None,
     color: RGBColor | None = None,
+    name: str = BODY_FONT,
 ) -> None:
     font = style.font
-    font.name = BODY_FONT
+    font.name = name
     if color is not None:
         font.color.rgb = color
     if size_pt is not None:
@@ -145,7 +158,7 @@ def _set_font(
         for attr in ("ascii", "hAnsi", "cs", "eastAsia"):
             rfonts.set(
                 f"{{http://schemas.openxmlformats.org/wordprocessingml/2006/main}}{attr}",
-                BODY_FONT,
+                name,
             )
         for attr in ("asciiTheme", "hAnsiTheme", "cstheme", "eastAsiaTheme"):
             rfonts.attrib.pop(
@@ -164,6 +177,22 @@ def _set_spacing(
         fmt.line_spacing = line / 240
 
 
+def _rule_above(style) -> None:
+    """A 0.75 pt line above the paragraph, placed before spacing as Word expects."""
+    ppr = style.element.get_or_add_pPr()
+    border = parse_xml(
+        '<w:pBdr xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main">'
+        f'<w:top w:val="single" w:sz="6" w:space="8" w:color="{RULE_COLOR}"/></w:pBdr>'
+    )
+    spacing = ppr.find(
+        "{http://schemas.openxmlformats.org/wordprocessingml/2006/main}spacing"
+    )
+    if spacing is not None:
+        spacing.addprevious(border)
+    else:
+        ppr.append(border)
+
+
 def build(output: Path = OUTPUT) -> Path:
     document = Document()
     styles = document.styles
@@ -176,12 +205,20 @@ def build(output: Path = OUTPUT) -> Path:
     _set_spacing(normal, *NORMAL_SPACING)
     for level, spec in HEADINGS.items():
         heading = styles[f"Heading {level}"]
-        _set_font(heading, size_pt=spec["size"], bold=True, color=spec["color"])
+        _set_font(
+            heading,
+            size_pt=spec["size"],
+            bold=True,
+            color=spec["color"],
+            name=spec.get("font", BODY_FONT),
+        )
         # python-docx's stock Heading 4 is italic. The report template's is not.
         heading.font.italic = False
         _set_spacing(heading, spec["before"], spec["after"], spec.get("line"))
         heading.paragraph_format.keep_with_next = spec["keep"]
         heading.paragraph_format.keep_together = spec["keep"]
+        if spec.get("rule"):
+            _rule_above(heading)
     _set_font(styles["Title"], size_pt=28)
     for name in ("Caption", "List Bullet", "List Number", "List Paragraph"):
         try:

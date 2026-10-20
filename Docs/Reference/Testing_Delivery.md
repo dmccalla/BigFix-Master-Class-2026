@@ -1,8 +1,8 @@
 # Delivery validation
 
 Every push runs the known-answer Client Performance checks. The fixture includes
-the 30- and 60-minute boundaries, missing/error results, evaluation intervals,
-and a repeated evaluation cost. The real report job checks the Word tables,
+the 15-, 30- and 60-minute group boundaries, missing/error results, evaluation
+intervals, and the Top 10 Interval column. The real report job checks the Word tables,
 Excel rows and chart values together, and saves build logs, chart HTML and PNGs.
 
 The same fixture and expected answers are checked in all three products.

@@ -191,10 +191,10 @@ FAINT = DesignColor(
 # to read as small body text, a darker AA TEXT companion of the same hue.
 #
 #   Level            Mark hex   Text hex   Score band   Per-check
-#   Healthy          #1F8A5B    #1F8A5B*   85-100       Pass
+#   Healthy          #1F8A5B    #1F8A5B*   90-100       Pass
 #   Advisory         #2A6FDB    #2A6FDB    (info only)  Advisory
-#   Needs Attention  #A85D00    #9A5500    60-84        (rolls up from Fails)
-#   Critical         #C5283D    #C5283D    0-59         Fail
+#   Needs Attention  #A85D00    #9A5500    70-89        (rolls up from Fails)
+#   Critical         #C5283D    #C5283D    0-69         Fail
 #   Not Assessed     #5B677A    #595959    excluded     Cannot Verify
 #   * green is AA only for bold/large text (its only text use); amber & light
 #     grey fail AA as text, so status text uses the darker companion hue.
@@ -205,7 +205,7 @@ SUCCESS = DesignColor(
     hex_value="#1F8A5B",
     intent=ColorIntent.SUCCESS,
     wcag_aa_contrast_ratio=4.33,
-    notes="Healthy spine green: dots/bars + bold chip text (AA for bold/large). Score band 85-100; per-check Pass.",
+    notes="Healthy spine green: dots/bars + bold chip text (AA for bold/large). Score band 90-100; per-check Pass.",
 )
 
 SUCCESS_BG = DesignColor(
@@ -242,7 +242,7 @@ WARNING = DesignColor(
     hex_value="#9A5500",
     intent=ColorIntent.WARNING,
     wcag_aa_contrast_ratio=5.7,
-    notes="Needs Attention text companion. Clears WCAG AA on white and on the soft amber status background. Score band 60-84.",
+    notes="Needs Attention text companion. Clears WCAG AA on white and on the soft amber status background. Score band 70-89.",
 )
 
 ATTENTION_MARK = DesignColor(

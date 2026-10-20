@@ -96,7 +96,7 @@ def rating_for_score(score) -> str:
 
 
 def band_label(word: str) -> str:
-    """Human band string for a spine word, e.g. 'Healthy' -> '85-100'. Empty for
+    """Human band string for a spine word, e.g. 'Healthy' -> '90-100'. Empty for
     levels with no score band (Advisory, Not Assessed)."""
     level = BY_WORD.get(word)
     if not level or level.low is None:

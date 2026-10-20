@@ -24,9 +24,9 @@ The Capacity Planning guide (11.x.12, 10-05-2026) has none of the values these t
 | CPU privileged time | PRF-INF-06 | 15 | 10% or less of aggregate CPU | 10% of total CPU time, by ruling 10-19-2026 |
 | Network health | PRF-INF-07 | 16 | Error and discard counters approach zero | Any increase between samples fails, by ruling 10-19-2026 |
 | Memory health | PRF-INF-09 | 17 | Paging File % Usage Peak 5% or less of physical memory | Same. The counter is converted from a share of the page file |
-| FillDB health check | PRF-BIG-30 | 25 | Parallel DB Update (Short Batch), Parallel DB Update, Batch Rate and Parallel Parsing rate Good or Great | Changing to follow the guide, by ruling 10-19-2026 |
+| FillDB health check | PRF-BIG-30 | 25 | Parallel DB Update (Short Batch), Parallel DB Update, Batch Rate and Parallel Parsing rate Good or Great | Scored on these four only. Good or Great earns 100, Poor earns 0, by ruling 10-19-2026 |
 
-The PerfMon warning levels (CPU utilization 70%, CPU queue 3, privileged time 8%, page file 4%) are not in the guide. By ruling 10-19-2026 they are being removed so that only the guide's limits apply.
+PerfMon applies only the guide's limits. The warning levels it once used (CPU utilization 70%, CPU queue 3, privileged time 8%, page file 4%) are not in the guide and were removed by ruling 10-19-2026.
 
 ## Values With No Published Source
 
@@ -35,6 +35,7 @@ These are house values. Neither guide states them.
 | Value | Where |
 |---|---|
 | Client loop groups at 15, 30 and 60 minutes | Client Performance |
+| Score cut-offs 90 and 70 | Client Performance, PerfMon, FillDB |
 | ActionSite 10 MB soft warning. A 25 MB hard ceiling is being added by ruling 10-19-2026 | Client Performance, Contributing Factors |
 | Subscribed sites 100, computer groups 100, Fixlets and tasks 80,000 | Client Performance, Contributing Factors |
 | Analyses or properties 10,000 total or 500 active | Client Performance, Contributing Factors |

@@ -36,7 +36,7 @@ These are house values. Neither guide states them.
 |---|---|
 | Client loop groups at 15, 30 and 60 minutes | Client Performance |
 | Score cut-offs 90 and 70 | Client Performance, PerfMon, FillDB |
-| ActionSite 10 MB soft warning. A 25 MB hard ceiling is being added by ruling 10-19-2026 | Client Performance, Contributing Factors |
+| ActionSite 10 MB soft warning (Needs Attention) and 25 MB hard ceiling (Critical), by ruling 10-19-2026 | Client Performance, Contributing Factors |
 | Subscribed sites 100, computer groups 100, Fixlets and tasks 80,000 | Client Performance, Contributing Factors |
 | Analyses or properties 10,000 total or 500 active | Client Performance, Contributing Factors |
 | Master operators 5, master operator open actions 25, master operator content 50 | Client Performance, Contributing Factors |

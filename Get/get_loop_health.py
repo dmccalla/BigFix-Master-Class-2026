@@ -1238,11 +1238,16 @@ def _actionsite_status_for_value(value: float | None, threshold: float) -> str:
     return status_spine.HEALTHY.word
 
 
-def _actionsite_size_status_for_value(value: float | None, threshold: float) -> str:
+def _actionsite_size_status_for_value(
+    value: float | None, soft_warning: float, hard_ceiling: float
+) -> str:
+    """ActionSite size: Healthy up to the soft warning, Critical over the ceiling."""
     if value is None:
         return status_spine.NOT_ASSESSED.word
-    if value > threshold:
-        return "Review"
+    if value > hard_ceiling:
+        return status_spine.CRITICAL.word
+    if value > soft_warning:
+        return status_spine.NEEDS_ATTENTION.word
     return status_spine.HEALTHY.word
 
 
@@ -1728,8 +1733,8 @@ def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
         [
             "ActionSite size",
             size_value,
-            _actionsite_size_status_for_value(size_mb, 10.0),
-            "Healthy at 10 MB or below; review when over 10 MB.",
+            _actionsite_size_status_for_value(size_mb, 10.0, 25.0),
+            "Healthy at 10 MB or below. Soft warning over 10 MB. Hard ceiling at 25 MB.",
         ],
         [
             "Subscribed sites",

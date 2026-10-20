@@ -61,6 +61,7 @@ the project release process for the steps to cut a release.
 
 ### Changed
 
+- Rate ActionSite size against a 10 MB soft warning (Needs Attention) and a 25 MB hard ceiling (Critical), by Duncan's 10-19 ruling. It used a "Review" word no other Contributing Factors row uses.
 - Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.
 - Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects · M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
 - Score client loops in four groups, by Duncan's 10-19 ruling on Design's review. Healthy is under 15 minutes (100 points), Good is 15 to 30 (85), Warning is 30 to 60 (67) and Critical is over 60 or no usable data (34). The Infographic draws no usable data as a hatched part of Critical, and the Loop Health table gives it its own row. Excel adds Good rows and a Good Threshold. `--good-threshold` joins `--healthy-threshold`, whose default is now 00:15:00.

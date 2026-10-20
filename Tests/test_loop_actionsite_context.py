@@ -229,7 +229,7 @@ def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
             "ActionSite size",
             "6.8 MB (6,931 KB)",
             "Healthy",
-            "Healthy at 10 MB or below; review when over 10 MB.",
+            "Healthy at 10 MB or below. Soft warning over 10 MB. Hard ceiling at 25 MB.",
         ],
         [
             "Subscribed sites",
@@ -312,8 +312,8 @@ def test_parse_actionsite_pressure_reads_log_only_fields_when_xml_exists(
     assert loop.actionsite_pressure_rows(pressure)[0] == [
         "ActionSite size",
         "18.6 MB (19,046 KB)",
-        "Review",
-        "Healthy at 10 MB or below; review when over 10 MB.",
+        "Needs Attention",
+        "Healthy at 10 MB or below. Soft warning over 10 MB. Hard ceiling at 25 MB.",
     ]
 
 
@@ -596,7 +596,7 @@ def test_actionsite_pressure_rows_use_spine_statuses_for_thresholds(
     rows = loop.actionsite_pressure_rows(pressure)
 
     assert [row[2] for row in rows] == [
-        "Review",
+        "Needs Attention",
         "Not Assessed",
         "Not Assessed",
         "Not Assessed",

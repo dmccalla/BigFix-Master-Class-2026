@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Verify the default demonstration data with current Client Performance, PerfMon and FillDB report builds. Record capture provenance, current-field coverage and input hashes without changing original capture dates.
+
 - Build a separate versioned large-Perfmon sample ZIP and SHA-256 with each release package. Keep the small default sample separate, validate external BLG inputs before staging, and record hashes and extraction paths in the companion manifest.
 
 ### Sample data

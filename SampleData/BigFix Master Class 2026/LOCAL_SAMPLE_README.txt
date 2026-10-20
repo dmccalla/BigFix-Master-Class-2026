@@ -1,4 +1,4 @@
-LOCAL TEST SAMPLE - refreshed 2026-10-19
+LOCAL TEST SAMPLE - current format verified 2026-10-20
 
 Select this folder as the data folder: SampleData\BigFix Master Class 2026
 There is no nested Results folder in this local test copy.
@@ -20,3 +20,12 @@ average times. A retrieved-property interval is correctly Not collected.
 
 Existing local inputs were backed up before consolidation. No production
 code or collection task content is changed by this sample refresh.
+
+Validation on 2026-10-20:
+The current local app generated Client Performance, PerfMon and FillDB
+Performance reports from this folder. CSV/XML loop and UDP inputs agree.
+Minimum analysis intervals, property evaluation intervals, client settings
+and Top 10 examples are present. PerfMon has 60 sample readings and FillDB
+has 24 source rows. These compact inputs demonstrate the current report
+fields; the validation date is not a new collection date.
+See SAMPLE_DATA_VALIDATION.json for input hashes and collector versions.

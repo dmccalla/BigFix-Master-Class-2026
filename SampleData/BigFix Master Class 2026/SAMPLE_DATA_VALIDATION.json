@@ -1,0 +1,262 @@
+{
+  "schema_version": 1,
+  "validated_on": "2026-10-20",
+  "dataset": "BigFix Master Class 2026",
+  "provenance": "Demonstration inputs with retained original capture dates; validation is not a fresh live collection.",
+  "hash_policy": "UTF-8 text uses LF-normalized line endings; binary files use raw bytes.",
+  "report_code_commit": "32a104d0485339e7adf17f5a0d11b26cc8e55d5b",
+  "reports_built": [
+    "Client Performance",
+    "PerfMon",
+    "FillDB Performance"
+  ],
+  "checks": {
+    "folder_auto_discovery": "passed",
+    "loop_csv_xml_parity": "passed",
+    "loop_source_rows": 2537,
+    "active_property_intervals": 244,
+    "minimum_analysis_intervals": [
+      {
+        "seconds": 1800,
+        "devices": 1
+      },
+      {
+        "seconds": 600,
+        "devices": 2
+      }
+    ],
+    "top10_entries": 10,
+    "retrieved_property_example": true,
+    "top10_timing_consistency": "passed",
+    "udp_csv_xml_parity": "passed",
+    "filldb_source_rows": 24,
+    "perfmon_readings": 60,
+    "all_three_report_builds": "passed"
+  },
+  "collector_sources": [
+    {
+      "path": "Tasks and Analyses/Analyses/BigFix Master Class -- Client Performance Counters - Basic (2.0).bes",
+      "sha256": "651f07641a41cae8b3459445a7f2e2a0f96aeae34c01c9bdefbf4ca0ead00f09"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes",
+      "sha256": "d06d610e5caf986133db9fa042e78880135ad1d324056ed901e5f92af47b17bb"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Deployment Information (2.0).bes",
+      "sha256": "ae36a7ca3c94b3d9e6035db8168223382d622044763cd2171b307e06f3005860"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0).bes",
+      "sha256": "b13a58d3be5b251cbad5bd19b7683824da57b35c623440fa154909bd3cef48dd"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable Client FastHashVerify Setting (Default - 25% Single Core) (2.0).bes",
+      "sha256": "b7346a35913e9eea8cf15936d942cf6baf29c83b921b811d258a114fecb3adb6"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
+      "sha256": "78c7a0581055e40b69018ef2d0df417d7d449abc9fedab28eec4a6fda3db295e"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (2.0).bes",
+      "sha256": "547de0355ae829ef8c44c03e27df7d57a437d1e59b9a26e097b607f6fe6a3bda"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set CPU Utilization to 2% on Windows Multi-Core Systems (2.0).bes",
+      "sha256": "6b30717dcc2b0010fb6d4151e5aa033a38ef2f7f8dde07020249f9c685774162"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set CPU Utilization to 20% (2.0).bes",
+      "sha256": "6ff5197386c62c90557cada892d8d0cf3ec79e96fe5012361290cf6c4bfb5a65"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Setup and Run Perfmon Counters (2.0).bes",
+      "sha256": "fbf2abdbeceaf735a8255b8459af793892dff8e03e5e57795663c4779646f1d2"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- FillDB Performance Logging is Enabled (2.0).bes",
+      "sha256": "9e7a20cf81cc1e139e6b5ac8aa7232acf736f0f7ae57f68746a85b4b97b35ae3"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
+      "sha256": "0b319113aae3de56c8bfb4f23a479fcb2333fcd602be5197456cb9a06a785ffd"
+    }
+  ],
+  "input_files": [
+    {
+      "path": "Client_Loop/Client_Loop_10-06-2026_2130.csv",
+      "bytes_for_hash": 364267,
+      "hash_mode": "utf8_lf",
+      "sha256": "01554a5129a706e8367cc613e45681d03cec3f156a60aa0de7dbdee28f64eba2"
+    },
+    {
+      "path": "Client_Loop/Client_Loop_10-06-2026_2130.xml",
+      "bytes_for_hash": 401941,
+      "hash_mode": "utf8_lf",
+      "sha256": "a7af36e162197ca5cf20d9c025884241de492f04f3704428ae3e4e236283bc20"
+    },
+    {
+      "path": "Client_Loop/top10-query-results.csv",
+      "bytes_for_hash": 1350,
+      "hash_mode": "utf8_lf",
+      "sha256": "dce20ddb1d4bc0fda4650fe0450194e56ea868ecd7fa8220d625b0da686884e9"
+    },
+    {
+      "path": "Client_Loop/udp-notification-results.csv",
+      "bytes_for_hash": 152787,
+      "hash_mode": "utf8_lf",
+      "sha256": "eebc6c77c02de0b2b2b4468494607a665aeadec733b51d69776037cdd65013b0"
+    },
+    {
+      "path": "Client_Loop/UDP_Notifications_10-06-2026_2130.xml",
+      "bytes_for_hash": 244164,
+      "hash_mode": "utf8_lf",
+      "sha256": "103d7d52af0d95258d5ab7b872553d09cdb0c568a389d51098c2a78cb733120d"
+    },
+    {
+      "path": "Deployment_Information/Clients/Client_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 1613,
+      "hash_mode": "utf8_lf",
+      "sha256": "7e441ec19a0ae77908231ca35c947f6d9ab8fbde667f12510d7f2ee63531eaa0"
+    },
+    {
+      "path": "Deployment_Information/Clients/Client_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 15376,
+      "hash_mode": "utf8_lf",
+      "sha256": "9457221e67b0f1109077e7061ac4726ac7c500c64b02c452b974f01399879f5a"
+    },
+    {
+      "path": "Deployment_Information/Clients/Client_Settings_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 5893,
+      "hash_mode": "utf8_lf",
+      "sha256": "0ab52f0655a2334368a91eeacf858dfbe070554ca1f4f59dd2fcfdf3d73e7e77"
+    },
+    {
+      "path": "Deployment_Information/Clients/Client_Settings_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 41680,
+      "hash_mode": "utf8_lf",
+      "sha256": "7c22bf5dbe1bee3090bfc1c8f12dc7ee0a1cf2c6b72bd8ece53586b14ff2bc9d"
+    },
+    {
+      "path": "Deployment_Information/Content/Action_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 3324,
+      "hash_mode": "utf8_lf",
+      "sha256": "5ac7dbd6198a04e306df355fc506cab3eca45eaed2d42308cbaef82e4dc22405"
+    },
+    {
+      "path": "Deployment_Information/Content/Action_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 26534,
+      "hash_mode": "utf8_lf",
+      "sha256": "dc298b388fe0a0ba2d44a99da51c149c1f6e09c04d6dda51f7714939349b64fb"
+    },
+    {
+      "path": "Deployment_Information/Content/Content_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 8561,
+      "hash_mode": "utf8_lf",
+      "sha256": "4818daf1663abc6b816123d6503011059f4ed80f76e1cdcf9470b7d4507c24b3"
+    },
+    {
+      "path": "Deployment_Information/Content/Content_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 39264,
+      "hash_mode": "utf8_lf",
+      "sha256": "9c13a93b086bc32238819bffa92c30e8600e9f5ae6a3b9ed9f20cb2fe0d3949e"
+    },
+    {
+      "path": "Deployment_Information/Content/Property_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 30504,
+      "hash_mode": "utf8_lf",
+      "sha256": "c67348f47c875767ee47643e63e26535f070586d8046a8c73c5b0bd67029cbcd"
+    },
+    {
+      "path": "Deployment_Information/Content/Property_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 115664,
+      "hash_mode": "utf8_lf",
+      "sha256": "d224b692ae468d5b0627775c02167e7785dc59862a72a9ecf7b7f74de089bd64"
+    },
+    {
+      "path": "Deployment_Information/General/General_Info_Admin_Tool_Fields_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 646,
+      "hash_mode": "utf8_lf",
+      "sha256": "b5accd2afd43b2861f49b9192e4a93796cf71aa87c41e61328f0b45e46baef38"
+    },
+    {
+      "path": "Deployment_Information/General/General_Info_Admin_Tool_Options_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 355,
+      "hash_mode": "utf8_lf",
+      "sha256": "1507a3d1617c446217b470e5d04855027a7b74ebecada646759b64f2d44af71e"
+    },
+    {
+      "path": "Deployment_Information/General/General_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 1313,
+      "hash_mode": "utf8_lf",
+      "sha256": "e0aeb539dcc7c6a6c9d4c1a46af94f5f2626020cc05c25eaae92ca2cd1bcd6f3"
+    },
+    {
+      "path": "Deployment_Information/General/General_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 15614,
+      "hash_mode": "utf8_lf",
+      "sha256": "edca97492c47a127361b76fdae8d00566867b1db2bc79764b25f09fa7a51ff33"
+    },
+    {
+      "path": "Deployment_Information/Operators/Operator_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 923,
+      "hash_mode": "utf8_lf",
+      "sha256": "71c2cee0155ed570cd10a4cb939a1a5b4a567abf2823a1a6442b849244a0b843"
+    },
+    {
+      "path": "Deployment_Information/Operators/Operator_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 11686,
+      "hash_mode": "utf8_lf",
+      "sha256": "5708ae11b116fd15a7082e15d59b6e34b3e8354f770061b6d273503de82473ca"
+    },
+    {
+      "path": "Deployment_Information/Relays/Relay_Affiliation_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 262,
+      "hash_mode": "utf8_lf",
+      "sha256": "3e5f68fe50644786cfb853ffec8317174b1dc58161efac04e11dc537660ecd7c"
+    },
+    {
+      "path": "Deployment_Information/Relays/Relay_Affiliation_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 3902,
+      "hash_mode": "utf8_lf",
+      "sha256": "020ac36014d486caccf968c0e4ac8722d9bb4eb722952b37f035d7118f30302b"
+    },
+    {
+      "path": "Deployment_Information/Relays/Relay_Server_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 2972,
+      "hash_mode": "utf8_lf",
+      "sha256": "468cd0b8bcea768bf04596f66e5351828fbfa8ac02099dc0d8a0b57174346986"
+    },
+    {
+      "path": "Deployment_Information/Relays/Relay_Server_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 24026,
+      "hash_mode": "utf8_lf",
+      "sha256": "5620c75802f876768649b456af13901a59ae166613bf0941040ea97123f05b89"
+    },
+    {
+      "path": "Deployment_Information/Server/Root_Server_Info_BFROOT1_09-30-2026_0821.log",
+      "bytes_for_hash": 956,
+      "hash_mode": "utf8_lf",
+      "sha256": "84e3722ec6adaa50b6fc43cece3ec73c8cec163a1286fcf3ff6343373d33f25d"
+    },
+    {
+      "path": "Deployment_Information/Server/Root_Server_Info_BFROOT1_09-30-2026_0821.xml",
+      "bytes_for_hash": 10035,
+      "hash_mode": "utf8_lf",
+      "sha256": "b55709e207971fc91cf19c6ee644ae83e05f7cc1c6d19175c3bb0cd64b3ca294"
+    },
+    {
+      "path": "FillDB_Performance/FillDBPerf_analysis.csv",
+      "bytes_for_hash": 1147,
+      "hash_mode": "utf8_lf",
+      "sha256": "694730d98f107e9090483e002cddd625318a3464e239d049348b483b5aec6257"
+    },
+    {
+      "path": "Perfmon/server.blg",
+      "bytes_for_hash": 14680064,
+      "hash_mode": "raw_bytes",
+      "sha256": "50f786d60cda1ca0a5f0295dd68dd53436db637d5f90dff20f8e87dd11f29e22"
+    }
+  ]
+}

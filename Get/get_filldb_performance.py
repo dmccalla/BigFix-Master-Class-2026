@@ -556,6 +556,11 @@ def generate_filldb_chart(
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
         "assessmentNote": filldb_assessment_note(rows),
+        "scoringLine": (
+            "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 "
+            "Critical. Good or Great earns 100 and Poor earns 0 on the four guide "
+            "checks."
+        ),
     }
     html_charts.render_chart("filldb", data, output_path)
 

@@ -137,3 +137,37 @@ def test_review_summary_forms() -> None:
         "Of the 2 counters reviewed, none failed the standard, 1 was Advisory and 1 "
         "met it. The 2 counters roll up into the "
     )
+
+
+def test_scorecard_tile_and_scoring_line(monkeypatch, tmp_path) -> None:
+    import inject_perfmon_charts as inject
+
+    from Lib.Design import html_charts
+
+    captured = {}
+
+    def fake_render(chart, data, output_path):
+        captured["data"] = data
+
+    monkeypatch.setattr(html_charts, "render_chart", fake_render)
+    observations = {
+        "sections": {
+            "Storage Operations": {
+                "section": "Storage Operations",
+                "status": "OK",
+                "average": 477.6,
+                "threshold": (
+                    "No limit. Reviewed for flat-lining against 5,000 transfers per second."
+                ),
+            }
+        }
+    }
+    inject.render_perfmon_scorecard(observations, tmp_path / "card.png")
+    data = captured["data"]
+    tile = data["counters"][0]
+    assert tile[2] == "~5,000/s"
+    assert tile[4] == 8
+    assert data["scoringLine"] == (
+        "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 Critical. "
+        "Points per area: Pass 100, Advisory 55, Cannot Verify 25, Fail 0."
+    )

@@ -3336,10 +3336,10 @@ def calculate_metrics(
     )[:fix_first_count]
 
     environment_score = round(
-        (avg_healthy_pct * 100)
-        + (avg_good_pct * 85)
-        + (avg_warning_pct * 67)
-        + (avg_critical_pct * 34)
+        (avg_healthy_pct * LOOP_GROUP_POINTS["Healthy"])
+        + (avg_good_pct * LOOP_GROUP_POINTS["Good"])
+        + (avg_warning_pct * LOOP_GROUP_POINTS["Warning"])
+        + (avg_critical_pct * LOOP_GROUP_POINTS["Critical"])
     )
     environment_score = max(0, min(100, environment_score))
 
@@ -3642,6 +3642,7 @@ def generate_png(
         {
             "color": status_spine.HEALTHY.mark,
             "label": f"Healthy under {fmt_min(h_min)} min",
+            "points": LOOP_GROUP_POINTS["Healthy"],
             "count": f"{metrics.avg_healthy:,}",
             "pct": round(metrics.avg_healthy_pct * 100, 1)
             if metrics.avg_healthy
@@ -3653,6 +3654,7 @@ def generate_png(
             {
                 "color": status_spine.GOOD.mark,
                 "label": f"Good {fmt_min(h_min)} to {fmt_min(g_min)} min",
+                "points": LOOP_GROUP_POINTS["Good"],
                 "count": f"{metrics.avg_good:,}",
                 "pct": round(metrics.avg_good_pct * 100, 1) if metrics.avg_good else None,
             }
@@ -3661,6 +3663,7 @@ def generate_png(
         {
             "color": status_spine.NEEDS_ATTENTION.mark,
             "label": f"Needs Attention {fmt_min(g_min)} to {fmt_min(c_min)} min",
+            "points": LOOP_GROUP_POINTS["Warning"],
             "count": f"{metrics.avg_warning:,}",
             "pct": round(metrics.avg_warning_pct * 100, 1)
             if metrics.avg_warning
@@ -3669,12 +3672,14 @@ def generate_png(
         {
             "color": status_spine.CRITICAL.mark,
             "label": f"Critical over {fmt_min(c_min)} min",
+            "points": LOOP_GROUP_POINTS["Critical"],
             "count": f"{metrics.avg_over_critical:,}",
             "pct": None,
         },
         {
             "color": status_spine.CRITICAL.mark,
             "label": "Critical no usable data",
+            "points": LOOP_GROUP_POINTS["Critical"],
             "count": f"{metrics.total_issue_count:,}",
             "pct": None,
             "hatch": True,
@@ -3715,6 +3720,7 @@ def generate_png(
         "distLabel": f"Loop distribution &middot; {scored_total:,} devices scored",
         "dist": dist,
         "legend": legend,
+        "scoringLine": LOOP_SCORING_LINE,
         "footer": [
             {"label": "Average loop time", "value": m_s(metrics.avg_mean_seconds)},
             {
@@ -4470,6 +4476,16 @@ def add_note_paragraph(document, text: str) -> None:
 # Rollup tables in the Mini Report stop at this many rows so a large deployment
 # cannot run the report to dozens of pages. The workbook always keeps every row.
 MINI_REPORT_ROLLUP_LIMIT = 10
+
+
+# Points each device earns for its loop group (Duncan's option B, 10-19).
+LOOP_GROUP_POINTS = {"Healthy": 100, "Good": 85, "Warning": 67, "Critical": 34}
+LOOP_SCORING_LINE = (
+    "Score ranges: 90 to 100 Healthy, 70 to 89 Warning, 0 to 69 Critical. Points per "
+    "device: "
+    + ", ".join(f"{group} {points}" for group, points in LOOP_GROUP_POINTS.items())
+    + "."
+)
 
 
 UNREPORTED_GROUPS = {"Not reported", "Unknown"}

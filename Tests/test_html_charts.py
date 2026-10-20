@@ -437,7 +437,8 @@ def test_perfmon_scorecard_keeps_exempt_header_and_simple_metric_cards() -> None
     assert "analysisHeader(" not in section
     assert "scoreLockup(" not in section
     assert "srcHeader('PerfMon Counters'" in section
-    assert "+ srcScoreBar(score, color)" in section
+    assert "+ miniScoreScale(score, color, 'Needs Attention')" in section
+    assert "+ miniScoringLine(d.scoringLine)" in section
     assert "grid-template-columns:repeat(4,1fr)" in section
     assert "srcPerfmonFindingLine(d)" in section
     assert "limit marker" not in section
@@ -772,3 +773,30 @@ def test_overview_bars_use_score_status_or_neutral_tracks_only() -> None:
     assert "overviewStatusWord(k)" in section
     assert "#3D5A80" not in section
     assert "background:#F0F2F5;border-radius:3px;" in section
+
+
+def test_mini_report_infographics_carry_the_scoring_legend() -> None:
+    """Design 10-20, Section 3: larger score, ticks at 70 and 90, named ranges and
+    a scoring line on the Client Performance, FillDB and PerfMon cards."""
+    html = html_charts._build_html("loop", {}, card_width=960)
+    helpers = html[
+        html.index("function miniScoreLockup") : html.index("// ---- LOOP ----")
+    ]
+    assert "font-size:153px" in helpers
+    assert "letter-spacing:0.14em" in helpers
+    assert "left:70%" in helpers and "left:90%" in helpers
+    assert "0 to 69" in helpers and "70 to 89" in helpers and "90 to 100" in helpers
+    for builder, middle in (
+        ("function buildLoop", "'Warning'"),
+        ("function buildFilldb", "'Needs Attention'"),
+        ("function buildPerfmon", "'Needs Attention'"),
+    ):
+        start = html.index(builder)
+        section = html[start : html.index("\nfunction ", start + 10)]
+        assert "miniScoreLockup(" in section, builder
+        assert f", {middle})" in section, builder
+        assert "miniScoringLine(d.scoringLine)" in section, builder
+    loop = html[
+        html.index("function buildLoop") : html.index("// ---- SCORING SUMMARY ----")
+    ]
+    assert "${l.points} pts" in loop

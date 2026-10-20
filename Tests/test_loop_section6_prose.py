@@ -82,3 +82,10 @@ def test_excel_health_summary_calls_the_loop_groups_groups() -> None:
     source = loop.Path(loop.__file__).read_text(encoding="utf-8")
     assert '"Band": "Healthy"' not in source
     assert '"Group": "Healthy"' in source
+
+
+def test_loop_scoring_line_uses_the_score_points() -> None:
+    assert loop.LOOP_SCORING_LINE == (
+        "Score ranges: 90 to 100 Healthy, 70 to 89 Warning, 0 to 69 Critical. Points per "
+        "device: Healthy 100, Good 85, Warning 67, Critical 34."
+    )

@@ -101,6 +101,20 @@ PERFMON_SCORE_WEIGHTS = {
     "FAIL": 0.0,
     "CANNOT VERIFY": 0.25,
 }
+PERFMON_SCORING_LINE = (
+    "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 Critical. "
+    "Points per area: "
+    + ", ".join(
+        f"{label} {round(PERFMON_SCORE_WEIGHTS[key] * 100)}"
+        for key, label in (
+            ("PASS", "Pass"),
+            ("ADVISORY", "Advisory"),
+            ("CANNOT VERIFY", "Cannot Verify"),
+            ("FAIL", "Fail"),
+        )
+    )
+    + "."
+)
 CHART_BG_PAGE = THEME.bg_page
 CHART_BG_CARD = THEME.bg_card
 CHART_TITLE = THEME.title
@@ -1241,7 +1255,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         # Stylized: the design marker sits at a fixed 62% (fail) / 80% (pass); the
         # fill places the AVERAGE relative to the parsed limit, clamped, so the bar
         # ends before the marker when passing and past it when failing.
-        th = re.search(r"[\d,.]+", str(thr_str))
+        th = re.search(r"\d[\d,]*(?:\.\d+)?", str(thr_str))
         if avg_val is not None and th:
             try:
                 a = float(avg_val)
@@ -1273,7 +1287,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
             return f"limit {m.group(1)}{unit}{qualifier}"
         if "approach zero" in s.lower():
             return "approach zero"
-        m2 = re.search(r"([\d,]+)\s*(?:transfers/sec|/sec|/s)", s)
+        m2 = re.search(r"([\d,]+)\s*(?:transfers per second|transfers/sec|/sec|/s)", s)
         if m2:
             return f"~{m2.group(1)}/s"
         return (s[:18] + "…") if len(s) > 20 else (s or "-")
@@ -1343,6 +1357,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
             **findings_summary,
         },
         "findingIds": sorted(finding_ids),
+        "scoringLine": PERFMON_SCORING_LINE,
     }
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)

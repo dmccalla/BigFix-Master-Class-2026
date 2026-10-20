@@ -240,7 +240,7 @@ the shipped five-second default and the original request/capture contracts remai
 | 1715 | Platform standalone, General and Root, five-second pacing, data logs off | Completed, code 0. All 34 requests succeeded; 38 CSV lines. Counts, server versions, root hardware, readable summary and XML client values verified. This first run preceded the separate first-request window refinement. |
 | 1717 | TA standalone, Root only, one-second pacing, data logs off | Completed, code 0. Eight requests and 12 CSV lines; root values retained, zero data logs. Summary and schema 2 checks passed. Node count remained Unavailable with General skipped; separate diagnostic/request windows verified. |
 | 1719 | Class standalone, Root only, one-second pacing, data logs on | Completed, code 0. Eight requests and 12 CSV lines; one root data log. Summary and schema 2 checks passed. Retained summary helper fingerprint matches the shipped source. |
-| 1721 | Platform Day 1 combined, Deployment Information only, one-second pacing, data logs off | Full lab collection is in progress. Final result and capture verification will be recorded before publication. |
+| 1721 | Platform Day 1 combined, Deployment Information only, one-second pacing, data logs off | Finished incomplete, code 24004. The failing query IDs were DI-107, DI-108. Verified against CSV outcomes, XML errors and error markers; no other failures were hidden. All 177 requests were attempted; 10 XML captures, zero data logs, 181 CSV lines and 126 local XML fragments. Verified all ten section totals, ten slowest requests, context/source IDs, helper identity and retained summary. |
 
 Before integrating the concurrent loop-health update, offline suites passed: Platform 2,289 tests (82 skips), TA 650 (31 skips), and
 Class 644 (33 skips). Ruff lint and formatting passed in all three. Native helper
@@ -248,6 +248,10 @@ coverage is 27 tests, including missing versus zero counts, rejected partial ans
 allowlisted context, unavailable local discovery, explicit timing units, bounded
 slowest/failure lists, helper identity and the first-request timing window. The
 existing consumer compatibility test includes the new summary alongside diagnostics.
+After rebasing onto the concurrent loop-health fixes, integration checks passed
+(Platform 24, TA 16, Class 16) and all lint/format checks still passed. The slowest
+request test compares measured CSV durations rather than assuming a fixed process
+startup time, so normal runner scheduling does not change its expected result.
 
 The three normalized standalone action bodies match, as do the helper sources.
 Normalized helper SHA-256 is

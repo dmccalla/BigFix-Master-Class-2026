@@ -460,7 +460,19 @@ def test_readable_summary_has_bounded_slowest_requests_and_distinct_timings(
     assert run["ServerEvaluationMs"] == 2.75
     assert run["EndedUtc"] and run["Status"] == "Incomplete"
     assert len(run["SlowestRequests"]) == 10
-    assert run["SlowestRequests"][0]["QueryId"] == "DI-004"
+    # Compare with measured CSV durations; process startup can exceed the fake delay.
+    with (state.parent / "diagnostics.csv").open(encoding="utf-8-sig") as stream:
+        measured = {
+            row["QueryId"]: int(row["WallTimeMs"])
+            for row in csv.DictReader(stream)
+            if row["Resource"] == "query"
+        }
+    assert [item["WallTimeMs"] for item in run["SlowestRequests"]] == sorted(
+        measured.values(), reverse=True
+    )[:10]
+    assert all(
+        measured[item["QueryId"]] == item["WallTimeMs"] for item in run["SlowestRequests"]
+    )
     assert run["Sections"]["General"]["Failures"] == 1
     assert run["FailureExamples"][0]["QueryId"] == "DI-012"
     text = summary.read_text()

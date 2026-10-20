@@ -29,6 +29,7 @@ from __future__ import annotations
 import argparse
 import csv
 import re
+import shutil
 import sys
 from datetime import datetime
 from pathlib import Path
@@ -715,6 +716,10 @@ def build_capture_summary_table(
     heading = document.add_heading("Capture Summary", level=3)
     heading.paragraph_format.space_before = Pt(8)
     heading.paragraph_format.space_after = Pt(3)
+    document.add_paragraph(
+        "Duration (s) and Throughput (lines/s) are the analyzer's own run time and "
+        "speed. They are not FillDB times."
+    )
 
     lines_processed = find_stat_value(rows, "Lines processed")
     summary_rows = [
@@ -772,6 +777,107 @@ def usable_page_width(document: DocxDocument):
     return width if width > Inches(1) else Inches(6.8)
 
 
+FILLDB_OBJECTS_HEADING = "FillDB Objects"
+FILLDB_OBJECTS_LEAD = (
+    "Health Check is the analyzer's own rating, shown as the analyzer writes it. "
+    "Rows marked Not enough data are left out of the score."
+)
+CSV_SAVED_SENTENCE = "The source CSV is saved beside this Mini Report."
+
+
+def filldb_title_paragraph(
+    rows: list[dict[str, str]], metadata: dict[str, str], source_csv_saved: bool
+) -> str:
+    """FD-07: what the capture covers and where its raw data is."""
+    sentences = []
+    start = metadata.get("start", "")
+    end = metadata.get("end", "")
+    if start and end and "Not specified" not in (start, end):
+        sentences.append(f"This analysis covers a FillDB capture from {start} to {end}.")
+    lines = find_stat_value(rows, "Lines processed")
+    if lines:
+        sentences.append(f"The analyzer processed {lines:,.0f} lines.")
+    sentences.append("FillDB writes no Excel.")
+    if source_csv_saved:
+        sentences.append(CSV_SAVED_SENTENCE)
+    return " ".join(sentences)
+
+
+def _join_names(names: list[str]) -> str:
+    return names[0] if len(names) == 1 else ", ".join(names[:-1]) + " and " + names[-1]
+
+
+def object_health_paragraph(rows: list[dict[str, str]]) -> str:
+    """FD-08: the analyzer's ratings, the Poor objects, the slowest object and
+    how many of the guide's checks the score covers."""
+    objects = object_performance_rows(rows)
+    if not objects:
+        return ""
+    counts = {"great": 0, "good": 0, "poor": 0}
+    unrated = 0
+    poor_names = []
+    for row in objects:
+        status = health_status(row.get("Health Check", ""))
+        if status in counts:
+            counts[status] += 1
+        else:
+            unrated += 1
+        if status == "poor":
+            poor_names.append(titlecase_label(row.get("FillDB Object", "")))
+
+    sentences = []
+    rated = [
+        (counts[key], label)
+        for key, label in (("great", "Great"), ("good", "Good"), ("poor", "Poor"))
+        if counts[key]
+    ]
+    if rated:
+        first_count, first_label = rated[0]
+        noun = "object" if first_count == 1 else "objects"
+        parts = [f"{first_count} {noun} {first_label}"] + [
+            f"{count} {label}" for count, label in rated[1:]
+        ]
+        sentences.append(f"The analyzer rates {_join_names(parts)}.")
+    if unrated:
+        sentences.append(
+            "1 object had too little data to rate."
+            if unrated == 1
+            else f"{unrated} objects had too little data to rate."
+        )
+    if poor_names:
+        verb = "is" if len(poor_names) == 1 else "are"
+        sentences.append(f"{_join_names(poor_names)} {verb} Poor.")
+
+    slowest = max(objects, key=lambda row: parse_number(row.get("Time (ms)", "")))
+    slowest_ms = parse_number(slowest.get("Time (ms)", ""))
+    if slowest_ms > 0:
+        sentences.append(
+            f"{titlecase_label(slowest.get('FillDB Object', ''))} takes the most time "
+            f"at {slowest_ms / 60000:,.1f} minutes."
+        )
+
+    assessed = sum(
+        1
+        for row in objects
+        if is_guide_check(row)
+        and health_status(row.get("Health Check", "")) in {"great", "good", "poor"}
+    )
+    total_checks = len(GUIDE_CHECKS)
+    if assessed == total_checks:
+        sentences.append(
+            f"The score covers the {total_checks} checks named in the NFR guide."
+        )
+    elif assessed:
+        sentences.append(
+            f"The score covers {assessed} of the {total_checks} checks named in the NFR "
+            f"guide. The other {total_checks - assessed} had too little data."
+        )
+    sentences.append(
+        "The Workload by Object chart in the Infographic shows the time for every object."
+    )
+    return " ".join(sentences)
+
+
 def add_score_method_note(document: DocxDocument) -> None:
     heading = document.add_heading("How This Score Is Calculated", level=3)
     heading.paragraph_format.space_before = Pt(0)
@@ -800,7 +906,8 @@ def add_score_method_note(document: DocxDocument) -> None:
         "This score covers the FillDB capture only.",
         "Other objects and checks without a recognized Health Check result are "
         "shown for context but are not included in the score.",
-        "Score bands: 90-100 Healthy, 70-89 Needs Attention, 0-69 Critical.",
+        "Score ranges: 90 to 100 is Healthy, 70 to 89 is Needs Attention and 0 to 69 "
+        "is Critical.",
     ):
         para = document.add_paragraph(text)
         para.paragraph_format.space_after = Pt(3)
@@ -816,6 +923,7 @@ def write_word_output(
     chart_path: Path | None = None,
     metadata: dict[str, str] | None = None,
     stamp: str = "",
+    source_csv_saved: bool = False,
 ) -> None:
     document = (
         create_stub_document_from_template(template_path) if template_path else Document()
@@ -824,6 +932,7 @@ def write_word_output(
     add_stub_front_matter(document, "FillDB Performance Analysis")
     if stamp:
         stamp_docx_document(document, stamp)
+    document.add_paragraph(filldb_title_paragraph(rows, metadata or {}, source_csv_saved))
     if chart_path:
         picture = document.add_picture(str(chart_path), width=usable_page_width(document))
         set_picture_alt_text(
@@ -838,8 +947,14 @@ def write_word_output(
         note = document.add_paragraph(assessment_note)
         note.paragraph_format.space_before = Pt(3)
         note.paragraph_format.space_after = Pt(6)
+    health = object_health_paragraph(rows)
+    if health:
+        document.add_paragraph(health)
     if chart_path:
         add_score_method_note(document)
+    # FD-09: the object table gets a heading and a lead.
+    document.add_heading(FILLDB_OBJECTS_HEADING, level=3)
+    document.add_paragraph(FILLDB_OBJECTS_LEAD)
     build_word_table(document, rows)
     build_capture_summary_table(document, rows, metadata or {})
     document.save(str(output_path))
@@ -896,6 +1011,9 @@ def main() -> int:
             dest_csv=output_path.with_suffix(".source.csv"),
             log=log.step,
         )
+        source_csv = output_path.with_suffix(".source.csv")
+        if Path(csv_path).resolve() != source_csv.resolve():
+            shutil.copy2(csv_path, source_csv)
         rows = parse_filldb_csv(csv_path)
         # When the collection window wasn't supplied, fall back to the FillDB
         # start/end the analyzer recorded, so the chart header is populated and
@@ -913,9 +1031,11 @@ def main() -> int:
             chart_path=chart_path,
             metadata=metadata,
             stamp=stamp_from_args(args),
+            source_csv_saved=source_csv.exists(),
         )
 
         log.ok("FillDB performance report built")
+        log.result("Source CSV", source_csv)
         log.detail("Rows", len(rows))
         if template_path:
             log.detail("Template", template_path)

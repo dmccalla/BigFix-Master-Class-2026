@@ -1,0 +1,85 @@
+# Copyright (c) 2026 Duncan McCalla
+# SPDX-License-Identifier: MIT
+#
+# Master Class Diagnostics Workbench
+# See the LICENSE and NOTICE files in the project root for license text and attribution.
+
+"""FillDB wording from Design's 10-20 change list, Section 6 (FD-05 to FD-10)."""
+
+from __future__ import annotations
+
+import get_filldb_performance as filldb
+
+
+def _row(name: str, health: str, time_ms: str = "100") -> dict[str, str]:
+    return {
+        "FillDB Object": f"{name}:",
+        "Count": "10",
+        "Time (ms)": time_ms,
+        "Rate/s": "1",
+        "Health Check": health,
+    }
+
+
+GUIDE = [
+    _row("Parallel DB Update (Short Batch)", "988%: Great", "3031912"),
+    _row("Parallel DB Update", "----: Not enough data."),
+    _row("Batch Rate", "988%: Great", "3031912"),
+    _row("Parallel Parsing", "236%: Great"),
+]
+
+
+def test_object_health_sample() -> None:
+    rows = [
+        *GUIDE,
+        _row("Fixlet results", "093%: Good"),
+        _row("Computer administrators", "004%: Poor"),
+        _row("Computer relay statuses", "----: Not enough data."),
+    ]
+    assert filldb.object_health_paragraph(rows) == (
+        "The analyzer rates 3 objects Great, 1 Good and 1 Poor. 2 objects had too "
+        "little data to rate. Computer Administrators is Poor. Parallel DB Update "
+        "(Short Batch) takes the most time at 50.5 minutes. The score covers 3 of the "
+        "4 checks named in the NFR guide. The other 1 had too little data. The "
+        "Workload by Object chart in the Infographic shows the time for every object."
+    )
+
+
+def test_object_health_leaves_out_zero_parts() -> None:
+    rows = [_row(name, "200%: Great") for name in filldb.GUIDE_CHECKS]
+    text = filldb.object_health_paragraph(rows)
+    assert text.startswith("The analyzer rates 4 objects Great. ")
+    assert "too little data" not in text
+    assert "Poor" not in text
+    assert "The score covers the 4 checks named in the NFR guide." in text
+
+
+def test_object_health_names_every_poor_object() -> None:
+    rows = [
+        *GUIDE,
+        _row("Computer administrators", "004%: Poor"),
+        _row("Computer roles", "010%: Poor"),
+        _row("Fixlet results", "002%: Poor"),
+    ]
+    text = filldb.object_health_paragraph(rows)
+    assert "Computer Administrators, Computer Roles and Fixlet Results are Poor." in text
+    assert "1 object had too little data to rate." in text
+
+
+def test_title_paragraph() -> None:
+    rows = [*GUIDE, {"FillDB Object": "Lines processed", "Count": "4237218"}]
+    metadata = {"start": "11-16-2025 02:56", "end": "11-17-2025 15:57"}
+    assert filldb.filldb_title_paragraph(rows, metadata, True) == (
+        "This analysis covers a FillDB capture from 11-16-2025 02:56 to "
+        "11-17-2025 15:57. The analyzer processed 4,237,218 lines. FillDB writes no "
+        f"Excel. {filldb.CSV_SAVED_SENTENCE}"
+    )
+    assert filldb.CSV_SAVED_SENTENCE not in filldb.filldb_title_paragraph(
+        rows, metadata, False
+    )
+
+
+def test_score_text_uses_ranges_not_bands() -> None:
+    source = filldb.Path(filldb.__file__).read_text(encoding="utf-8")
+    assert "Score bands" not in source
+    assert "90 to 100 is Healthy, 70 to 89 is Needs Attention and 0 to 69" in source

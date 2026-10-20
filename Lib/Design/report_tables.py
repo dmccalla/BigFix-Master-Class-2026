@@ -13,8 +13,8 @@ each page, sits at the left like the body rows and stays with the first body
 row. Code-built tables (an equal split of columns) get widths from their text.
 Tables with set widths keep their proportions.
 
-Column alignment applies to the same tables and to BigFixContent tables with a
-percent width. A column is right aligned, header and cells, when every filled
+Column alignment and the header kept with the first body row apply to the same
+tables and to BigFixContent data tables with a percent width. A column is right aligned, header and cells, when every filled
 body cell is a number, a number with a unit or a time. Every other column is
 left aligned. A percent-width table that already sets the alignment of its own
 header cells (the Check Results dashboard tables) keeps it.
@@ -309,6 +309,28 @@ def _align_cell(tc, alignment: str) -> None:
         _set(_child(p_pr, "jc", _PPR_ORDER), val=alignment)
 
 
+def _header_row_properties(header):
+    tr_pr = header.find(W + "trPr")
+    if tr_pr is None:
+        tr_pr = etree.Element(W + "trPr")
+        prex = header.find(W + "tblPrEx")
+        header.insert(1 if prex is not None else 0, tr_pr)
+    return tr_pr
+
+
+def _keep_header_with_body(tbl) -> None:
+    """Keep the header row whole and with the first body row, so a table never
+    starts at a page bottom with only its header. The style's header rule turns
+    cantSplit off, so set it on the row."""
+    rows = tbl.findall(W + "tr")
+    if len(rows) < 2:
+        return
+    tr_pr = _header_row_properties(rows[0])
+    _set(_child(tr_pr, "cantSplit", _TRPR_ORDER), val="1")
+    for paragraph in rows[0].iter(W + "p"):
+        _child(_first_child(paragraph, "pPr"), "keepNext", _PPR_ORDER)
+
+
 def _apply_layout(tbl, size_from_text: bool) -> None:
     tbl_pr = tbl.find(W + "tblPr")
     _set(_child(tbl_pr, "tblW", _TBLPR_ORDER), w=str(TEXT_WIDTH_DXA), type="dxa")
@@ -321,19 +343,8 @@ def _apply_layout(tbl, size_from_text: bool) -> None:
     if not rows or not grid:
         return
 
-    tr_pr = rows[0].find(W + "trPr")
-    if tr_pr is None:
-        tr_pr = etree.Element(W + "trPr")
-        prex = rows[0].find(W + "tblPrEx")
-        rows[0].insert(1 if prex is not None else 0, tr_pr)
+    tr_pr = _header_row_properties(rows[0])
     _child(tr_pr, "tblHeader", _TRPR_ORDER)
-    # Keep the header row whole and with the first body row, so a table never
-    # starts at a page bottom with only its header. The style's header rule
-    # turns cantSplit off, so set it on the row.
-    _set(_child(tr_pr, "cantSplit", _TRPR_ORDER), val="1")
-    if len(rows) > 1:
-        for paragraph in rows[0].iter(W + "p"):
-            _child(_first_child(paragraph, "pPr"), "keepNext", _PPR_ORDER)
     # BigFixContent centers its header row as a row, which would sit it to the
     # right of the body rows on a left-aligned table.
     _set(_child(tr_pr, "jc", _TRPR_ORDER), val="left")
@@ -368,6 +379,7 @@ def normalize_table(tbl, size_from_text: bool = True) -> bool:
         return False
     if in_scope(tbl):
         _apply_layout(tbl, size_from_text)
+    _keep_header_with_body(tbl)
     _apply_column_alignment(tbl)
     return True
 

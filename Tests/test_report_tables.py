@@ -313,3 +313,16 @@ def test_full_report_scaling_keeps_equal_template_columns() -> None:
         3600,
         3600,
     ]
+
+
+def test_percent_width_data_table_keeps_header_with_body() -> None:
+    tbl = _table(
+        "BigFixContent",
+        '<w:tblW w:w="5000" w:type="pct"/>',
+        [["Finding ID", "Area"], ["PRF-INF-02", "Storage Latency"]],
+    )
+    rt.normalize_table(tbl)
+    header, body = tbl.findall(W + "tr")
+    assert header.find(f"{W}trPr/{W}cantSplit").get(W + "val") == "1"
+    assert all(p.find(f"{W}pPr/{W}keepNext") is not None for p in header.iter(W + "p"))
+    assert all(p.find(f"{W}pPr/{W}keepNext") is None for p in body.iter(W + "p"))

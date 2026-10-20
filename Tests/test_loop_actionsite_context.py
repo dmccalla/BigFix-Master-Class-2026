@@ -111,8 +111,8 @@ def test_loop_word_explains_the_score_under_loop_health(
     assert "Score Method: test driver" not in paragraphs
     assert "Score Breakdown: test breakdown" not in paragraphs
     assert (
-        "Each device earns points for its band: 100 for Healthy, 85 for Good, 67 "
-        "for Warning and 34 for Critical. The score is the average across all "
+        "Each device earns points for its group. Healthy earns 100, Good 85, "
+        "Warning 67 and Critical 34. The score is the average across all "
         "devices." in paragraphs
     )
     assert not any("Section 04" in text for text in paragraphs)
@@ -235,49 +235,49 @@ def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
             "Subscribed sites",
             "80 total (57 external, 23 custom)",
             "Healthy",
-            "Healthy at 100 or fewer; review when over 100.",
+            "Healthy at 100 or fewer. Review when over 100.",
         ],
         [
             "Computer groups",
             "11 total (6 automatic, 5 manual)",
             "Healthy",
-            "Healthy at 100 or fewer; review when over 100.",
+            "Healthy at 100 or fewer. Review when over 100.",
         ],
         [
             "Fixlets and tasks",
             "6,709 / 36,274 relevant/total (5,701 / 34,130 fixlets, 1,008 / 2,144 tasks)",
             "Healthy",
-            "Healthy at 80,000 total or fewer; review when over 80,000.",
+            "Healthy at 80,000 total or fewer. Review when over 80,000.",
         ],
         [
             "Analyses",
             "121 / 6,702 relevant/total; 140 active",
             "Healthy",
-            "Healthy at 10,000 total or fewer and 500 active or fewer; review if either is over threshold.",
+            "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
         [
             "Properties",
             "10,342 total (877 active, 34 custom)",
             "Needs Attention",
-            "Healthy at 10,000 total or fewer and 500 active or fewer; review if either is over threshold.",
+            "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
         [
             "Master operators",
             "3",
             "Healthy",
-            "Healthy at 5 or fewer; review when over 5.",
+            "Healthy at 5 or fewer. Review when over 5.",
         ],
         [
             "Open actions issued by master operators",
             "42",
             "Needs Attention",
-            "Healthy at 25 or fewer; review when over 25.",
+            "Healthy at 25 or fewer. Review when over 25.",
         ],
         [
             "Master-operator fixlets/tasks/analyses",
             "55 total (15 fixlets, 30 tasks, 10 analyses)",
             "Needs Attention",
-            "Healthy below 50 combined; review at 50 or more.",
+            "Healthy below 50 combined. Review at 50 or more.",
         ],
     ]
 
@@ -464,7 +464,7 @@ def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> Non
     tiles = loop.context_strip_tiles(metrics, udp_summary=udp_summary)
 
     assert tiles[1]["value"] == "2 / 10"
-    assert tiles[1]["caption"] == "Machines with no UDP pings received"
+    assert tiles[1]["caption"] == "Devices that received no UDP pings."
     assert tiles[2]["value"] == "2 / 3"
     assert tiles[2]["caption"] == "relay-a"
 
@@ -836,7 +836,8 @@ def test_udp_notification_notes_explain_missing_rollup_data(
 
     paragraphs = [p.text for p in Document(str(word_output)).paragraphs if p.text.strip()]
     assert any(
-        p.startswith("NOTE: ") and "did not report a relay and/or IPv4 address" in p
+        not p.startswith("NOTE")
+        and "did not report a relay and/or IPv4 address" in p
         for p in paragraphs
     )
 

@@ -218,3 +218,14 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
     assert not any(
         "Not Set" in row for row in header_rows if row[0] in {"Relay", "Subnet"}
     )
+    # CP-23: the lead states the three check rules.
+    assert any(
+        p.text.startswith("Interval Below Average Loop counts devices with polling")
+        for p in doc.paragraphs
+    )
+    # CP-24: no Top 10 data, so the title paragraph says so.
+    assert any(
+        "This capture did not include the Top 10 evaluation data. This Mini Report "
+        "has no Top 10 Most Expensive Evaluations section." in p.text
+        for p in doc.paragraphs
+    )

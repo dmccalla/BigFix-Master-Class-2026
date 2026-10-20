@@ -195,7 +195,7 @@ def test_note_under_a_table_drops_the_spacer_and_uses_4_and_12_pt() -> None:
     body = [el for el in document.element.body if el.tag != W + "sectPr"]
     assert body[-2].tag == W + "tbl"
     note = document.paragraphs[-1]
-    assert note.text.startswith("NOTE: Showing 10 of 11 relays.")
+    assert note.text.startswith("Showing 10 of 11 relays.")
     assert note.paragraph_format.space_before.pt == 4
     assert note.paragraph_format.space_after.pt == 12
 
@@ -204,7 +204,7 @@ def test_note_after_a_paragraph_keeps_that_paragraph() -> None:
     document = Document()
     document.add_paragraph("Lead text.")
     loop.add_note_paragraph(document, "A note.")
-    assert [p.text for p in document.paragraphs] == ["Lead text.", "NOTE: A note."]
+    assert [p.text for p in document.paragraphs] == ["Lead text.", "A note."]
     assert document.paragraphs[-1].paragraph_format.space_before.pt == 4
     assert document.paragraphs[-1].paragraph_format.space_after.pt == 12
 

@@ -1575,6 +1575,58 @@ def _offender_property_key(result: str) -> tuple[str, str] | None:
     return analysis.lower(), prop.lower()
 
 
+TOP10_KINDS = (
+    ("a site evaluation", "site evaluations"),
+    ("an analysis property", "analysis properties"),
+    ("a retrieved property", "retrieved properties"),
+    ("another evaluation", "other evaluations"),
+)
+
+
+def offender_kind(result: str) -> int:
+    """Index into TOP10_KINDS for one Top 10 result."""
+    text = str(result or "").strip().lower()
+    if text.startswith("background evaluation of"):
+        return 0
+    if _offender_property_key(result) is not None:
+        return 1
+    if text.startswith("retrieved property"):
+        return 2
+    return 3
+
+
+def top10_kind_sentence(loop_offenders: list[LoopOffenderSummary]) -> str:
+    """Say what kind of content the Top 10 rows are, accounting for every row."""
+    total = len(loop_offenders)
+    counts = [0] * len(TOP10_KINDS)
+    for item in loop_offenders:
+        counts[offender_kind(item.result)] += 1
+    order = sorted(
+        (index for index, count in enumerate(counts) if count),
+        key=lambda index: -counts[index],
+    )
+
+    def phrase(index: int) -> str:
+        one, many = TOP10_KINDS[index]
+        count = counts[index]
+        return f"{count} is {one}" if count == 1 else f"{count} are {many}"
+
+    first, *rest = order
+    one, many = TOP10_KINDS[first]
+    count = counts[first]
+    if count == 1:
+        sentence = f"1 of these {total} is {one}."
+    else:
+        sentence = f"{count} of these {total} are {many}."
+    if rest:
+        parts = [phrase(index) for index in rest]
+        tail = (
+            parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
+        )
+        sentence += f" {tail[0].upper()}{tail[1:]}."
+    return sentence
+
+
 def offender_interval(result: str, summary: PropertyIntervalSummary | None) -> str:
     """Interval of a Top 10 analysis property, or why there is none."""
     key = _offender_property_key(result)
@@ -1739,19 +1791,19 @@ def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
             "Subscribed sites",
             _subscribed_sites_value(pressure),
             _status_for_thresholds([(_subscribed_sites_total(pressure), 100)]),
-            "Healthy at 100 or fewer; review when over 100.",
+            "Healthy at 100 or fewer. Review when over 100.",
         ],
         [
             "Computer groups",
             _computer_groups_value(pressure),
             _status_for_thresholds([(_computer_groups_total(pressure), 100)]),
-            "Healthy at 100 or fewer; review when over 100.",
+            "Healthy at 100 or fewer. Review when over 100.",
         ],
         [
             "Fixlets and tasks",
             _fixlets_tasks_value(pressure),
             _status_for_thresholds([(_fixlets_tasks_total(pressure), 80_000)]),
-            "Healthy at 80,000 total or fewer; review when over 80,000.",
+            "Healthy at 80,000 total or fewer. Review when over 80,000.",
         ],
         [
             "Analyses",
@@ -1762,7 +1814,7 @@ def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
                     (pressure.active_analyses_count, 500),
                 ]
             ),
-            "Healthy at 10,000 total or fewer and 500 active or fewer; review if either is over threshold.",
+            "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
         [
             "Properties",
@@ -1773,25 +1825,25 @@ def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
                     (pressure.active_properties_count, 500),
                 ]
             ),
-            "Healthy at 10,000 total or fewer and 500 active or fewer; review if either is over threshold.",
+            "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
         [
             "Master operators",
             format_optional_int(pressure.master_operator_count),
             _actionsite_status_for_value(pressure.master_operator_count, 5),
-            "Healthy at 5 or fewer; review when over 5.",
+            "Healthy at 5 or fewer. Review when over 5.",
         ],
         [
             "Open actions issued by master operators",
             format_optional_int(pressure.master_open_actions),
             _actionsite_status_for_value(pressure.master_open_actions, 25),
-            "Healthy at 25 or fewer; review when over 25.",
+            "Healthy at 25 or fewer. Review when over 25.",
         ],
         [
             "Master-operator fixlets/tasks/analyses",
             custom_value,
             custom_status,
-            "Healthy below 50 combined; review at 50 or more.",
+            "Healthy below 50 combined. Review at 50 or more.",
         ],
     ]
 
@@ -3311,7 +3363,7 @@ def calculate_metrics(
         report_start_text=format_report_date(report_start),
         report_end_text=format_report_date(report_end),
         report_span_text=format_report_span(report_start, report_end),
-        generated_at_text=f"{generated_at.month}/{generated_at.day}/{generated_at.year} {generated_at:%H:%M:%S}",
+        generated_at_text=f"{generated_at:%m-%d-%Y %H:%M:%S}",
         avg_mean_seconds=avg_mean,
         avg_median_seconds=avg_median,
         avg_max_seconds=avg_max,
@@ -4192,11 +4244,7 @@ def context_strip_tiles(
     score_total = metrics.score_total_devices
     if udp_summary:
         udp_value = count_with_denominator(udp_summary.not_receiving_count, score_total)
-        udp_detail = (
-            "No machines with no UDP pings received"
-            if udp_summary.not_receiving_count == 0
-            else "Machines with no UDP pings received"
-        )
+        udp_detail = "Devices that received no UDP pings."
 
         if udp_summary.relay_rows:
             relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
@@ -4347,7 +4395,7 @@ def client_loop_infographic_key_rows(
         [
             "Health score",
             f"{metrics.environment_score} / 100",
-            "Average of each device's band points. See Loop Health.",
+            "Average of each device's group points. See Loop Health.",
         ],
         [
             "Loop distribution",
@@ -4416,8 +4464,6 @@ def add_note_paragraph(document, text: str) -> None:
     paragraph = document.add_paragraph()
     paragraph.paragraph_format.space_before = Pt(4)
     paragraph.paragraph_format.space_after = Pt(12)
-    prefix = paragraph.add_run("NOTE: ")
-    prefix.bold = True
     paragraph.add_run(text)
 
 
@@ -4524,12 +4570,18 @@ def generate_word(
     if stamp:
         stamp_docx_document(document, stamp)
 
-    document.add_paragraph(
+    title = (
         f"This analysis covers {metrics.score_total_devices:,} BigFix Clients from "
         f"{metrics.report_start_text} to {metrics.report_end_text}. It was generated "
-        f"on {metrics.generated_at_text}. The Client Performance workbook (Excel file) "
-        "holds the per-device data behind every table."
+        f"on {metrics.generated_at_text}. The Client Performance Excel holds every "
+        "row behind the tables in this Mini Report."
     )
+    if not loop_offenders:
+        title += (
+            " This capture did not include the Top 10 evaluation data. This Mini "
+            "Report has no Top 10 Most Expensive Evaluations section."
+        )
+    document.add_paragraph(title)
 
     # Keep the executive-style PNG first so injected reports and slide decks lead
     # with the visual summary before the supporting detail tables.
@@ -4584,13 +4636,13 @@ def generate_word(
     document.add_heading("Loop Health", level=3)
     keep_with_next(
         document.add_paragraph(
-            "Each device is placed in a band by its average loop time across the "
+            "Each device is placed in a group by its average loop time across the "
             "collection period."
         )
     )
     build_word_table(
         document,
-        ["Band", "Devices / Total", "% of Total", "Rule"],
+        ["Group", "Devices / Total", "% of Total", "Rule"],
         [
             *loop_group_rows(metrics),
         ],
@@ -4604,9 +4656,8 @@ def generate_word(
 
     document.add_heading("How the Score Is Calculated", level=4)
     document.add_paragraph(
-        "Each device earns points for its band: 100 for Healthy, 85 for Good, 67 "
-        "for Warning and 34 for Critical. The score is the average across all "
-        "devices."
+        "Each device earns points for its group. Healthy earns 100, Good 85, "
+        "Warning 67 and Critical 34. The score is the average across all devices."
     )
     document.add_paragraph(
         "A score of 90 to 100 is Healthy, 70 to 89 is Warning, and 0 to 69 is Critical."
@@ -4659,7 +4710,8 @@ def generate_word(
         document.add_heading("Top 10 Most Expensive Evaluations", level=4)
         keep_with_next(
             document.add_paragraph(
-                "The slowest evaluations each device reported, averaged across the "
+                top10_kind_sentence(loop_offenders)
+                + " The slowest evaluations each device reported, averaged across the "
                 "deployment. Occurrences is how many times an evaluation appeared in "
                 "a device's Top 10. Interval is how often an analysis property is "
                 "set to run. A site evaluation is not a property and has no interval. "
@@ -4802,6 +4854,15 @@ def generate_word(
                 f"{command_polling_summary.total_devices:,} devices that reported "
                 "polling data. The last three are checks, and a device can appear "
                 "in more than one."
+            )
+        )
+        keep_with_next(
+            document.add_paragraph(
+                "Interval Below Average Loop counts devices with polling enabled and "
+                "an interval shorter than their own average loop time. Enabled with "
+                "Missing Interval counts devices with polling enabled and no "
+                "interval. No UDP and Polling Disabled/Not Set counts devices that "
+                "received no UDP pings and do not poll."
             )
         )
         build_word_table(

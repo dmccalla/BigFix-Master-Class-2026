@@ -171,3 +171,7 @@ def test_scorecard_tile_and_scoring_line(monkeypatch, tmp_path) -> None:
         "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 Critical. "
         "Points per area: Pass 100, Advisory 55, Cannot Verify 25, Fail 0."
     )
+    assert data["sourceLine"] == (
+        "Values are capture averages from Assessment by Area. Every reading is in "
+        "the Excel sheet Raw Data."
+    )

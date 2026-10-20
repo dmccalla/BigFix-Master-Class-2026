@@ -3721,6 +3721,7 @@ def generate_png(
         "dist": dist,
         "legend": legend,
         "scoringLine": LOOP_SCORING_LINE,
+        "sourceLine": LOOP_SOURCE_LINE,
         "footer": [
             {"label": "Average loop time", "value": m_s(metrics.avg_mean_seconds)},
             {
@@ -4485,6 +4486,11 @@ LOOP_SCORING_LINE = (
     "device: "
     + ", ".join(f"{group} {points}" for group, points in LOOP_GROUP_POINTS.items())
     + "."
+)
+
+# CP-25: where the Infographic's numbers live.
+LOOP_SOURCE_LINE = (
+    "Numbers from the Loop Health table. Every device is in the Excel sheet Source Data."
 )
 
 

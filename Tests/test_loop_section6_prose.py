@@ -89,3 +89,10 @@ def test_loop_scoring_line_uses_the_score_points() -> None:
         "Score ranges: 90 to 100 Healthy, 70 to 89 Warning, 0 to 69 Critical. Points per "
         "device: Healthy 100, Good 85, Warning 67, Critical 34."
     )
+
+
+def test_cp25_source_line() -> None:
+    assert loop.LOOP_SOURCE_LINE == (
+        "Numbers from the Loop Health table. Every device is in the Excel sheet "
+        "Source Data."
+    )

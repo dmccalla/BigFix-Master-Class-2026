@@ -115,6 +115,11 @@ PERFMON_SCORING_LINE = (
     )
     + "."
 )
+# PM-17: where the Infographic's values live.
+PERFMON_SOURCE_LINE = (
+    "Values are capture averages from Assessment by Area. Every reading is in "
+    "the Excel sheet Raw Data."
+)
 CHART_BG_PAGE = THEME.bg_page
 CHART_BG_CARD = THEME.bg_card
 CHART_TITLE = THEME.title
@@ -1358,6 +1363,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         },
         "findingIds": sorted(finding_ids),
         "scoringLine": PERFMON_SCORING_LINE,
+        "sourceLine": PERFMON_SOURCE_LINE,
     }
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)

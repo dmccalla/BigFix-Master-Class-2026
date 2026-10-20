@@ -438,7 +438,7 @@ def test_perfmon_scorecard_keeps_exempt_header_and_simple_metric_cards() -> None
     assert "scoreLockup(" not in section
     assert "srcHeader('PerfMon Counters'" in section
     assert "+ miniScoreScale(score, color, 'Needs Attention')" in section
-    assert "+ miniScoringLine(d.scoringLine)" in section
+    assert "+ miniScoringLine(d.scoringLine, d.sourceLine)" in section
     assert "grid-template-columns:repeat(4,1fr)" in section
     assert "srcPerfmonFindingLine(d)" in section
     assert "limit marker" not in section
@@ -795,8 +795,20 @@ def test_mini_report_infographics_carry_the_scoring_legend() -> None:
         section = html[start : html.index("\nfunction ", start + 10)]
         assert "miniScoreLockup(" in section, builder
         assert f", {middle})" in section, builder
-        assert "miniScoringLine(d.scoringLine)" in section, builder
+        assert "miniScoringLine(d.scoringLine" in section, builder
     loop = html[
         html.index("function buildLoop") : html.index("// ---- SCORING SUMMARY ----")
     ]
     assert "${l.points} pts" in loop
+
+
+def test_source_lines_sit_above_the_scoring_line() -> None:
+    """CP-25 and PM-17: where the numbers live, directly above the scoring line."""
+    html = html_charts._build_html("loop", {}, card_width=960)
+    helper = html[
+        html.index("function miniScoringLine") : html.index("// ---- LOOP ----")
+    ]
+    assert helper.index("${sourceLine}") < helper.index("${scoringLine}")
+    assert "miniScoringLine(d.scoringLine, d.sourceLine)" in html
+    perfmon = html[html.index("function buildPerfmon") :]
+    assert "miniScoringLine(d.scoringLine, d.sourceLine)" in perfmon[:3000]

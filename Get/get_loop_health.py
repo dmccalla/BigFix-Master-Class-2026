@@ -1337,7 +1337,7 @@ def _analyses_value(pressure: ActionSitePressure) -> str:
         else f"{_count_or_zero(pressure.analyses_relevant_count)} / "
         f"{pressure.analyses_total_count:,} relevant/total"
     )
-    return f"{relevant_total}; {_count_or_zero(pressure.active_analyses_count)} active"
+    return f"{relevant_total}. {_count_or_zero(pressure.active_analyses_count)} active."
 
 
 def _properties_value(pressure: ActionSitePressure) -> str:

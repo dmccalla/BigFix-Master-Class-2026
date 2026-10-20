@@ -398,8 +398,8 @@ def get_threshold(
             "warn": None,
             "label": "~= 0 increase (no packet errors/discards)",
             "note": (
-                "Packet errors and discards should approach zero per interface; "
-                "evaluated as the non-negative increase between samples"
+                "Packet errors and discards should approach zero per interface. "
+                "Evaluated as the non-negative increase between samples"
             ),
         }
 

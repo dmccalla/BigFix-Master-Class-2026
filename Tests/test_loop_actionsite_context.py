@@ -251,7 +251,7 @@ def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
         ],
         [
             "Analyses",
-            "121 / 6,702 relevant/total; 140 active",
+            "121 / 6,702 relevant/total. 140 active.",
             "Healthy",
             "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
@@ -836,8 +836,7 @@ def test_udp_notification_notes_explain_missing_rollup_data(
 
     paragraphs = [p.text for p in Document(str(word_output)).paragraphs if p.text.strip()]
     assert any(
-        not p.startswith("NOTE")
-        and "did not report a relay and/or IPv4 address" in p
+        not p.startswith("NOTE") and "did not report a relay and/or IPv4 address" in p
         for p in paragraphs
     )
 

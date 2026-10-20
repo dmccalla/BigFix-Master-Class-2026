@@ -201,8 +201,9 @@ def perfmon_score_method_note_xml() -> str:
                 "readings over the limit."
             ),
             text_paragraph_xml(
-                "Score bands: 90-100 Healthy, 70-89 Needs Attention, 0-69 Critical.",
-                bold_prefix="Score bands:",
+                "Score ranges: 90 to 100 is Healthy, 70 to 89 is Needs Attention and "
+                "0 to 69 is Critical.",
+                bold_prefix="Score ranges:",
             ),
         ]
     )
@@ -285,7 +286,7 @@ def observation_paragraph_xml(section: dict, review_level: int = 4) -> str:
                 violation_text = f"{item['violations']} readings"
                 if violation_percent is not None:
                     violation_text += f" ({violation_percent}%)"
-                details.append(f"{violation_text} above the standard")
+                details.append(f"{violation_text} over the limit")
             name = item.get("counter", "Unnamed counter")
             if details:
                 line = f"{name}: {', '.join(details)}."
@@ -360,9 +361,11 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
         if item.get("maximum") is not None:
             observed_parts.append(f"peak {item['maximum']}")
         if item.get("violations"):
-            observed_parts.append(f"{item['violations']} violation(s)")
-        if item.get("warnings"):
-            observed_parts.append(f"{item['warnings']} warning(s)")
+            observed_parts.append(f"{item['violations']} readings over")
+        if item.get("warnings") and item.get("range_floor"):
+            observed_parts.append(
+                f"{item['warnings']} readings under {item['range_floor']}%"
+            )
         observed = (
             ", ".join(observed_parts) or item.get("worst_counter", "") or "Reviewed"
         )
@@ -1085,40 +1088,65 @@ def perfmon_finding_context(section_data: dict) -> str:
     """Return the compact observed evidence behind one automated finding."""
     status = str(section_data.get("status", "")).strip()
     label = status_label(status)
+    section = re.sub(r"\s+", " ", str(section_data.get("section", ""))).strip()
+    unit = str(section_data.get("unit", ""))
+    limit = str(section_data.get("limit_text", "")).strip()
     threshold = str(section_data.get("threshold", "")).strip()
     average = _perfmon_finding_number(section_data.get("average"))
     maximum = _perfmon_finding_number(section_data.get("maximum"))
     violations = int(section_data.get("violations", 0) or 0)
     warnings = int(section_data.get("warnings", 0) or 0)
     samples = int(section_data.get("samples", 0) or 0)
+    see = f" See {section}." if section else ""
 
-    details: list[str] = []
-    if average:
-        details.append(
-            f"average {average}" + (f" against {threshold}" if threshold else "")
+    if status == "Not Available":
+        note = re.sub(r"should be <= ([^.]+)\.", r"should be \1 or less.", threshold)
+        if note and "Cannot Verify" in note:
+            return f"{label}. {note}{see}"
+        return (
+            f"{label}. No readings were recorded, so this area could not be checked "
+            f"against {limit or threshold}.{see}"
         )
-    elif threshold:
-        details.append(f"standard {threshold}")
-    if maximum:
-        details.append(f"peak {maximum}")
-    if status == "Critical" and violations:
-        reading_text = f"{violations:,} reading(s) above the standard"
-        if samples:
-            reading_text = f"{violations:,} of {samples:,} readings above the standard"
-        details.append(reading_text)
-    if status == "Warning" and warnings:
-        reading_text = f"{warnings:,} reading(s) in the warning range"
-        if samples:
-            reading_text = f"{warnings:,} of {samples:,} readings in the warning range"
-        details.append(reading_text)
 
-    if details:
-        return f"{label}: {'; '.join(details).rstrip('.')}."
+    if section_data.get("per_sample"):
+        sentences = []
+        if average:
+            sentences.append(f"Average {average} added per sample.")
+        if maximum:
+            sentences.append(f"Peak {maximum}.")
+        if violations and samples:
+            sentences.append(
+                f"{violations:,} of {samples:,} readings showed an increase."
+            )
+        return f"{label}. {' '.join(sentences)}{see}"
+
+    sentences = []
+    if average:
+        sentences.append(
+            f"Average {average}{unit}" + (f" against {limit}" if limit else "") + "."
+        )
+    if maximum:
+        sentences.append(f"Peak {maximum}{unit}.")
+    if status == "Critical" and violations:
+        if samples:
+            sentences.append(
+                f"{violations:,} of {samples:,} readings were over the limit."
+            )
+        else:
+            sentences.append(f"{violations:,} readings were over the limit.")
+    floor = str(section_data.get("range_floor", "")).strip()
+    if status == "Warning" and warnings and floor:
+        if samples:
+            sentences.append(f"{warnings:,} of {samples:,} readings were under {floor}%.")
+        else:
+            sentences.append(f"{warnings:,} readings were under {floor}%.")
+    if sentences:
+        return f"{label}. {' '.join(sentences)}{see}"
 
     observation = str(section_data.get("observation", "")).strip()
     if observation:
-        return f"{label}: {observation}"
-    return f"{label}: no observed values were available for this assessment."
+        return f"{label}. {observation}{see}"
+    return f"{label}. No observed values were available for this assessment.{see}"
 
 
 def perfmon_automated_finding_rows(observations: dict) -> list[tuple[str, str, str]]:

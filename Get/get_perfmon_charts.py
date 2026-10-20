@@ -407,7 +407,7 @@ def get_threshold(
         return {
             "type": "informational",
             "label": "No saturation; DBMS storage should support 5,000 transfers/sec",
-            "note": "No passive fail threshold; check for saturation/flatlining and DBMS storage capability for 5,000 transfers/sec",
+            "note": "No limit. Reviewed for flat-lining against 5,000 transfers per second.",
         }
 
     if "Usage_Peak" in name:
@@ -506,10 +506,48 @@ def fmt_number(value) -> str:
     if number == 0:
         return "0"
     if abs(number) >= 100:
-        return f"{number:.0f}"
+        return f"{number:,.0f}"
     if abs(number) >= 10:
         return f"{number:.1f}"
     return f"{number:.2f}"
+
+
+# Units on the average, peak and limit, by area (approved 10-20). Queue lengths,
+# Storage Operations and Network Health have none.
+AREA_UNITS = {
+    "Storage Latency": " ms",
+    "CPU Privileged Time": "%",
+    "CPU Utilization": "%",
+    "Memory Health": "%",
+}
+
+
+def is_no_limit(threshold: str) -> bool:
+    """A counter reviewed for saturation or flat-lining, with no pass or fail limit."""
+    text = str(threshold or "").strip().lower()
+    return "no passive fail" in text or text.startswith(("no saturation", "no limit"))
+
+
+def vm_range(threshold: str) -> tuple[str, str] | None:
+    """(floor, ceiling) of a virtual machine CPU range such as 50-80% (VM)."""
+    match = re.search(r"(\d+(?:\.\d+)?)\s*-\s*(\d+(?:\.\d+)?)\s*%", str(threshold or ""))
+    return (match.group(1), match.group(2)) if match else None
+
+
+def limit_phrase(threshold: str, section: str) -> str:
+    """The limit as the report states it: "a limit of 1 ms", "a limit of 10%"."""
+    text = " ".join(str(threshold or "").split())
+    floor_ceiling = vm_range(text)
+    if floor_ceiling:
+        floor, ceiling = floor_ceiling
+        return f"the virtual machine range of {floor}% to {ceiling}%"
+    numbers = re.findall(r"(?:<=|<)\s*(\d+(?:\.\d+)?)", text)
+    if not numbers:
+        return short_threshold_text(text)
+    value = numbers[-1]
+    if "physical memory" in text.lower():
+        return f"a limit of {value}% of physical memory"
+    return f"a limit of {value}{AREA_UNITS.get(section, '')}"
 
 
 def short_threshold_text(value: str) -> str:
@@ -520,7 +558,7 @@ def short_threshold_text(value: str) -> str:
         return text
     if "packet errors and discards" in text.lower():
         return "no packet-error/discard increase between samples"
-    if "no passive fail" in text.lower() or text.lower().startswith("no saturation"):
+    if is_no_limit(text):
         return text
     match = re.search(
         r"(?:<=|>=|<|>)\s*\d+(?:\.\d+)?\s*"
@@ -573,7 +611,6 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
     status = worst.get("Status", "Unknown")
     counters = [item.get("Counter", "") for item in ordered if item.get("Counter")]
     threshold = worst.get("Threshold", "the documented standard")
-    threshold_display = short_threshold_text(threshold)
     samples = int(worst.get("Samples", 0) or 0)
     violations = int(worst.get("Violations", 0) or 0)
     warnings = int(worst.get("Warnings", 0) or 0)
@@ -585,6 +622,12 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
     confidence = worst.get("Confidence", "Unknown")
     threshold_src = worst.get("ThresholdSource", "")
 
+    unit = AREA_UNITS.get(section, "")
+    limit = limit_phrase(threshold, section)
+    window = str(peak_window).replace(" - ", " to ")
+    floor_ceiling = vm_range(threshold)
+    packet = is_packet_counter(str(worst.get("Counter", "")))
+
     if status == "Not Available" and worst.get("NotScoredReason"):
         reason = str(worst["NotScoredReason"])
         result = (
@@ -594,70 +637,78 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
         )
     elif status == "Not Available":
         result = (
-            f"No samples were recorded for {worst.get('Counter', 'this counter')} "
-            f"during this capture window, so it could not be verified against "
-            f"{threshold_display}. Do not treat this area as validated."
+            f"No readings were recorded for {worst.get('Counter', 'this counter')} "
+            f"during this capture window, so it could not be checked against {limit}. "
+            "Do not treat this area as validated."
+        )
+    elif status == "Critical" and packet:
+        result = (
+            "The standard was not met for this capture window. Packet errors or "
+            "discards were added between samples. The worst counter added "
+            f"{average} per sample on average and peaked at {maximum}. "
+            f"{violations} of {samples} readings showed an increase."
         )
     elif status == "Critical":
-        metric = (
-            "had an average per-sample increase of"
-            if is_packet_counter(str(worst.get("Counter", "")))
-            else "averaged"
-        )
         result = (
-            f"The standard was not met for this capture window. The worst counter "
-            f"{metric} {average} against the standard ({threshold_display})."
+            "The standard was not met for this capture window. The worst counter "
+            f"averaged {average}{unit} against {limit}."
         )
         if samples and violations * 2 > samples:
             result += (
-                f" The average stayed over the limit for most of the capture. It "
-                f"peaked at {maximum}, with {violations} of {samples} readings "
-                f"({violation_pct}%) above the standard. Breach window: {peak_window}."
+                " The average stayed over the limit for most of the capture. It "
+                f"peaked at {maximum}{unit}, with {violations} of {samples} readings "
+                f"({violation_pct}%) over the limit. Breach window: {window}."
             )
         else:
             result += (
                 f" {violations} of {samples} readings ({violation_pct}%) were over the "
-                f"limit, in the breach window {peak_window}. They raised the average "
+                f"limit, in the breach window {window}. They raised the average "
                 f"over the limit. The other {samples - violations} readings met the "
-                f"standard. It peaked at {maximum}."
+                f"standard. It peaked at {maximum}{unit}."
             )
+    elif status == "Warning" and floor_ceiling:
+        floor, ceiling = floor_ceiling
+        result = (
+            f"The worst counter averaged {average}%, under the {floor}% floor of the "
+            f"{floor}% to {ceiling}% range the guide gives for a virtual machine, so "
+            f"this area is Advisory. It peaked at {maximum}%. {warnings} of {samples} "
+            f"readings ({warning_pct}%) were under {floor}%."
+        )
     elif status == "Warning":
         result = (
-            f"The standard was met for critical-threshold purposes, but warning-level "
-            f"activity was observed. The worst counter averaged {average} against "
-            f"{threshold_display} -- inside the critical limit but in the warning range -- "
-            f"with a peak of {maximum} and {warnings} of {samples} readings "
-            f"({warning_pct}%) in the warning range. This should be watched for "
-            f"sustained recurrence before the next capture."
+            f"The worst counter averaged {average}{unit} against {limit}, so this area "
+            f"is Advisory. It peaked at {maximum}{unit}."
         )
     elif threshold == "No threshold defined":
         result = (
-            f"No fixed NFR threshold is defined for this counter set. The captured data "
-            f"was retained for trend review; the highest observed value was {maximum} "
-            f"and the average was {average}."
+            "No limit is defined for this counter set. The data is kept for trend "
+            f"review. The highest reading was {maximum} and the average was {average}."
         )
-    elif "no passive fail" in threshold.lower() or threshold.lower().startswith(
-        "no saturation"
-    ):
-        # Counters like Disk Transfers/sec have no pass/fail limit -- they are
-        # reviewed for saturation/flat-lining. Splicing the descriptive label into
-        # "remained within {threshold}" produced an incoherent sentence.
+    elif is_no_limit(threshold):
         result = (
-            f"This counter has no pass/fail threshold; it is reviewed for saturation "
-            f"or flat-lining rather than a fixed limit. The highest observed value "
-            f"was {maximum} and the average was {average} across {samples} readings."
+            "This counter has no limit. It is reviewed for saturation or flat-lining. "
+            f"The highest reading was {maximum} and the average was {average} across "
+            f"{samples} readings."
+        )
+    elif packet:
+        result = (
+            "No packet errors or discards were added between samples across "
+            f"{samples} readings."
         )
     else:
         result = (
-            f"The standard was met for this capture window. The worst counter "
-            f"averaged {average}, within {threshold_display}, across {samples} readings "
-            f"(peak {maximum})."
+            "The standard was met for this capture window. The worst counter "
+            f"averaged {average}{unit} against {limit} across {samples} readings, "
+            f"with a peak of {maximum}{unit}."
         )
-        if violations or warnings:
+        if violations == 1:
             result += (
-                f" {violations} reading(s) briefly exceeded the standard and "
-                f"{warnings} were in the warning range, but the sustained average "
-                f"stayed within the limit."
+                " 1 reading was briefly over the limit, but the average stayed within it."
+            )
+        elif violations:
+            result += (
+                f" {violations} readings were briefly over the limit, but the average "
+                "stayed within it."
             )
 
     if confidence and confidence != "High" and status != "Not Available":
@@ -722,6 +773,11 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
         "warnings": warnings,
         "samples": samples,
         "peak_violation_window": peak_window,
+        # For the Automated Findings and Assessment by Area wording.
+        "unit": unit,
+        "limit_text": limit,
+        "range_floor": floor_ceiling[0] if floor_ceiling else "",
+        "per_sample": packet,
     }
 
 
@@ -742,12 +798,6 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
     warning = sum(1 for item in findings if item.get("Status") == "Warning")
     unavailable = sum(1 for item in findings if item.get("Status") == "Not Available")
     ok = sum(1 for item in findings if item.get("Status") == "OK")
-    unavailable_suffix = (
-        f"; {count_phrase(unavailable, 'counter')} could not be verified"
-        if unavailable
-        else ""
-    )
-    ok_verb = "was" if ok == 1 else "were"
     worst = sorted(
         findings,
         key=lambda item: (
@@ -758,34 +808,28 @@ def build_perfmon_observations(findings: list[dict], env_rows: list[dict]) -> di
         ),
     )[:3]
 
+    parts = []
     if critical:
-        posture = (
-            f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
-            f"capture window. {count_phrase(critical, 'counter')} did not "
-            f"meet the NFR standard; {count_phrase(warning, 'counter')} should be "
-            f"monitored; {count_phrase(ok, 'counter')} {ok_verb} within standard"
-            f"{unavailable_suffix}."
-        )
-    elif warning:
-        posture = (
-            f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
-            f"capture window. No counters failed the NFR standard; "
-            f"{count_phrase(warning, 'counter')} should be monitored; "
-            f"{count_phrase(ok, 'counter')} {ok_verb} within standard"
-            f"{unavailable_suffix}."
-        )
-    elif unavailable:
-        posture = (
-            f"PerfMon analysis reviewed {count_phrase(total, 'counter')} across the "
-            f"capture window. No counters failed the NFR standard; "
-            f"{count_phrase(unavailable, 'counter')} could not be verified; "
-            f"{count_phrase(ok, 'counter')} {ok_verb} within standard."
-        )
+        parts.append(f"{critical} did not meet the standard")
+    if warning:
+        parts.append(f"{warning} {'was' if warning == 1 else 'were'} Advisory")
+    if ok:
+        parts.append(f"{ok} met it")
+    if unavailable:
+        parts.append(f"{unavailable} could not be verified")
+    rollup = (
+        f"The {total} counters roll up into the {len(sections)} areas in the "
+        "Infographic. Each area takes the status of its worst counter."
+    )
+    if ok == total:
+        posture = f"All {total} counters reviewed met the standard. {rollup}"
     else:
-        posture = (
-            f"PerfMon analysis found all {count_phrase(ok, 'reviewed counter')} within the defined "
-            "NFR standards for the capture window."
+        if not critical:
+            parts.insert(0, "none failed the standard")
+        joined = (
+            parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
         )
+        posture = f"Of the {total} counters reviewed, {joined}. {rollup}"
 
     env = {row.get("Setting"): row.get("Value") for row in env_rows}
     analyzed_system = str(env.get("Analyzed System") or "Not detected")

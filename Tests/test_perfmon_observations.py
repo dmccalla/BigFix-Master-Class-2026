@@ -130,9 +130,12 @@ def test_build_perfmon_observations_uses_readable_summary_and_priority_items() -
     summary = observations["summary"]
 
     assert "counter(s)" not in " ".join(summary["lines"])
-    assert "1 counter did not meet the NFR standard" in summary["lines"][0]
-    assert "1 counter should be monitored" in summary["lines"][0]
-    assert "1 counter was within standard" in summary["lines"][0]
+    # R1: one sentence from the non-zero parts, then the roll-up.
+    assert summary["lines"][0].startswith(
+        "Of the 3 counters reviewed, 1 did not meet the standard, 1 was Advisory "
+        "and 1 met it. The 3 counters roll up into the "
+    )
+    assert "NFR" not in summary["lines"][0]
     assert summary["lines"][-1] == "Highest-priority review items:"
     assert summary["priority_items"] == [
         "PhysicalDisk_Total_Avg_Disk_ms_Transfer - Critical; peak 75.2",
@@ -173,7 +176,8 @@ def test_observation_uses_short_threshold_text_for_memory() -> None:
     observations = get_perfmon_charts.build_perfmon_observations(findings, [])
     text = observations["sections"]["Memory Health"]["observation"]
 
-    assert "(<= 5%)" in text
+    assert "averaged 8.10% against a limit of 5% of physical memory." in text
+    assert "07/01/2026 10:00 to 07/01/2026 11:00" in text
     assert "Physical memory" not in text
 
 
@@ -338,7 +342,7 @@ def test_blank_counter_is_cannot_verify_instead_of_disappearing() -> None:
     )
     assert observations["sections"]["Memory Health"]["status"] == "Not Available"
     assert (
-        "No samples were recorded"
+        "No readings were recorded"
         in observations["sections"]["Memory Health"]["observation"]
     )
     assert observations["summary"]["status_counts"]["Not Available"] == 1
@@ -831,7 +835,7 @@ def test_perfmon_observation_calls_out_affected_counters() -> None:
     assert "Affected Counters Requiring Review" in xml
     assert "Network_Interface_X710_Packets_Received_Discarded" in xml
     assert "peak 6102" in xml
-    assert "66 readings (1.39%) above the standard" in xml
+    assert "66 readings (1.39%) over the limit" in xml
     assert "Network_Interface_X710_Packets_Outbound_Discarded" not in xml
 
 
@@ -1144,43 +1148,74 @@ def test_perfmon_section_source_id_maps_counter_areas() -> None:
 def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
     observations = {
         "sections": {
+            "Storage Latency": {
+                "section": "Storage Latency",
+                "status": "Critical",
+                "average": 2.05,
+                "maximum": 40.7,
+                "violations": 4,
+                "samples": 59,
+                "unit": " ms",
+                "limit_text": "a limit of 1 ms",
+            },
             "CPU Utilization": {
                 "section": "CPU Utilization",
-                "status": "OK",
+                "status": "Warning",
+                "average": 40.3,
+                "maximum": 65.9,
+                "warnings": 33,
+                "samples": 59,
+                "unit": "%",
+                "limit_text": "the virtual machine range of 50% to 80%",
+                "range_floor": "50",
             },
+            "CPU Privileged Time": {"section": "CPU Privileged Time", "status": "OK"},
             "Network Health": {
                 "section": "Network Health",
                 "status": "Critical",
-                "average": 3.2,
-                "maximum": 11.5,
-                "violations": 12,
-                "samples": 60,
-                "threshold": "<= 1 ms",
+                "average": 0.5,
+                "maximum": 3,
+                "violations": 6,
+                "samples": 59,
+                "per_sample": True,
             },
             "Memory Health": {
                 "section": "Memory Health",
-                "status": "Warning",
-                "average": 6.1,
-                "maximum": 8.4,
-                "warnings": 7,
-                "samples": 60,
-                "threshold": "<= 5%",
+                "status": "Not Available",
+                "threshold": (
+                    "Page file in use should be <= 5% of physical memory. Physical "
+                    "memory was not supplied, so this area cannot be verified. Cannot "
+                    "Verify earns 25 points in the score."
+                ),
             },
         }
     }
 
     assert inject_perfmon_charts.perfmon_automated_finding_rows(observations) == [
         (
+            "PRF-INF-02",
+            "Storage Latency",
+            "Fail. Average 2.05 ms against a limit of 1 ms. Peak 40.7 ms. 4 of 59 "
+            "readings were over the limit. See Storage Latency.",
+        ),
+        (
+            "PRF-INF-04",
+            "CPU Utilization",
+            "Advisory. Average 40.3% against the virtual machine range of 50% to 80%. "
+            "Peak 65.9%. 33 of 59 readings were under 50%. See CPU Utilization.",
+        ),
+        (
             "PRF-INF-07",
             "Network Health",
-            "Fail: average 3.2 against <= 1 ms; peak 11.5; "
-            "12 of 60 readings above the standard.",
+            "Fail. Average 0.5 added per sample. Peak 3. 6 of 59 readings showed an "
+            "increase. See Network Health.",
         ),
         (
             "PRF-INF-09",
             "Memory Health",
-            "Advisory: average 6.1 against <= 5%; peak 8.4; "
-            "7 of 60 readings in the warning range.",
+            "Cannot Verify. Page file in use should be 5% of physical memory or less. "
+            "Physical memory was not supplied, so this area cannot be verified. Cannot "
+            "Verify earns 25 points in the score. See Memory Health.",
         ),
     ]
     xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(observations)
@@ -1190,8 +1225,8 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
     assert "Review Context" in xml
     assert "PRF-INF-07" in xml
     assert "PRF-INF-09" in xml
-    assert "12 of 60 readings above the standard" in xml
-    assert "CPU Utilization" not in xml
+    assert "4 of 59 readings were over the limit" in xml
+    assert "CPU Privileged Time" not in xml
     assert (
         inject_perfmon_charts.build_perfmon_automated_findings_table_xml(
             {"sections": {"CPU": {"section": "CPU Utilization", "status": "OK"}}}

@@ -139,4 +139,4 @@ def test_scored_observation_keeps_the_physical_memory_basis() -> None:
     observation = perfmon.observation_for_findings("Memory Health", [finding])
 
     assert observation["status"] == "Critical"
-    assert "<= 5% of physical memory" in observation["observation"]
+    assert "a limit of 5% of physical memory" in observation["observation"]

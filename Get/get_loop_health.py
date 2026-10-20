@@ -4428,6 +4428,23 @@ MINI_REPORT_ROLLUP_LIMIT = 10
 
 UNREPORTED_GROUPS = {"Not reported", "Unknown"}
 
+# The Command Polling tables in the Mini Report keep the columns that answer
+# whether polling is on and has a usable interval. Disabled, Not Set and Unknown
+# stay in the Excel sheets, which keep all 9 columns.
+POLLING_MINI_REPORT_COLUMNS = (0, 1, 2, 6, 7, 8)
+POLLING_MINI_REPORT_HEADERS = [
+    "Total Devices",
+    "Enabled",
+    "Missing Interval",
+    "Interval Below Loop",
+    "No UDP + Polling Off",
+]
+
+
+def polling_mini_report_rows(rows: list[list[str]]) -> list[list[str]]:
+    """The 9-column polling rollup rows cut to the Mini Report columns."""
+    return [[row[i] for i in POLLING_MINI_REPORT_COLUMNS] for row in rows]
+
 
 def _rollup_device_count(row: list[str]) -> int:
     """Total Devices is the second column of the polling rollups."""
@@ -4798,18 +4815,8 @@ def generate_word(
                 document,
                 "Command Polling by Relay",
                 f"Command Polling by Relay (Top {MINI_REPORT_ROLLUP_LIMIT})",
-                [
-                    "Relay",
-                    "Total Devices",
-                    "Enabled",
-                    "Disabled",
-                    "Not Set",
-                    "Unknown",
-                    "Missing Interval",
-                    "Interval Below Loop",
-                    "No UDP + Polling Off",
-                ],
-                command_polling_summary.relay_rows,
+                ["Relay", *POLLING_MINI_REPORT_HEADERS],
+                polling_mini_report_rows(command_polling_summary.relay_rows),
                 "relays",
                 "Polling by Relay",
             )
@@ -4819,18 +4826,8 @@ def generate_word(
                 document,
                 "Command Polling by Subnet",
                 f"Command Polling by Subnet (Top {MINI_REPORT_ROLLUP_LIMIT})",
-                [
-                    "Subnet",
-                    "Total Devices",
-                    "Enabled",
-                    "Disabled",
-                    "Not Set",
-                    "Unknown",
-                    "Missing Interval",
-                    "Interval Below Loop",
-                    "No UDP + Polling Off",
-                ],
-                command_polling_summary.subnet_rows,
+                ["Subnet", *POLLING_MINI_REPORT_HEADERS],
+                polling_mini_report_rows(command_polling_summary.subnet_rows),
                 "subnets",
                 "Polling by Subnet",
             )

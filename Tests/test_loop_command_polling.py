@@ -204,3 +204,17 @@ def test_command_polling_word_section_is_written(tmp_path: Path) -> None:
         for table in doc.tables
     )
     assert "Command Polling Exceptions" not in headings
+    # The Mini Report keeps 6 polling columns. Excel keeps all 9.
+    six = [
+        "Total Devices",
+        "Enabled",
+        "Missing Interval",
+        "Interval Below Loop",
+        "No UDP + Polling Off",
+    ]
+    header_rows = [[cell.text for cell in table.rows[0].cells] for table in doc.tables]
+    assert ["Relay", *six] in header_rows
+    assert ["Subnet", *six] in header_rows
+    assert not any(
+        "Not Set" in row for row in header_rows if row[0] in {"Relay", "Subnet"}
+    )

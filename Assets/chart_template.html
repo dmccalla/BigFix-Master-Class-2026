@@ -62,20 +62,20 @@
 // Read the status spine from the injected window.SPINE -- status_spine.py is the
 // single source of truth -- with a fallback copy so this template also renders
 // standalone. One edit in status_spine.py re-themes every chart (like the charts
-// own layout, the spine owns status color + word). Score bands 85/60 mirror
+// own layout, the spine owns status color + word). Score bands 90/70 mirror
 // status_spine.RATING_SCALE.
 const SPINE = window.SPINE || {
-  'Healthy':{mark:'#187A43',text:'#187A43',bg:'#D5F5E3',band:'85 to 100'},
+  'Healthy':{mark:'#187A43',text:'#187A43',bg:'#D5F5E3',band:'90 to 100'},
   'Advisory':{mark:'#B45309',text:'#B45309',bg:'#E6EFFD',band:''},
-  'Needs Attention':{mark:'#B45309',text:'#B45309',bg:'#FFF8E7',band:'60 to 84'},
-  'Critical':{mark:'#C2410C',text:'#C2410C',bg:'#FDECEA',band:'0 to 59'},
+  'Needs Attention':{mark:'#B45309',text:'#B45309',bg:'#FFF8E7',band:'70 to 89'},
+  'Critical':{mark:'#C2410C',text:'#C2410C',bg:'#FDECEA',band:'0 to 69'},
   'Not Assessed':{mark:'#0B1640',text:'#0B1640',bg:'#F0F2F5',band:''},
 };
-const bandOf = s => s>=85?'healthy':s>=60?'attention':'critical';
+const bandOf = s => s>=90?'healthy':s>=70?'attention':'critical';
 const barOf = {healthy:SPINE['Healthy'].mark,advisory:SPINE['Advisory'].mark,attention:SPINE['Needs Attention'].mark,critical:SPINE['Critical'].mark};
 const spineColor = {'Healthy':SPINE['Healthy'].mark,'Advisory':SPINE['Advisory'].mark,'Needs Attention':SPINE['Needs Attention'].mark,'Critical':SPINE['Critical'].mark};
 const spineRange = {'Healthy':SPINE['Healthy'].band,'Needs Attention':SPINE['Needs Attention'].band,'Critical':SPINE['Critical'].band};
-const tierOf = s => s>=85?'Healthy':s>=60?'Needs Attention':'Critical';
+const tierOf = s => s>=90?'Healthy':s>=70?'Needs Attention':'Critical';
 const STATUS_BG = '#F0F2F5';
 const STATUS_CLASS_WORD = {healthy:'Healthy',advisory:'Advisory',attention:'Needs Attention',critical:'Critical',notassessed:'Not Assessed'};
 const STATUS_WORD_CLASS = {'Healthy':'st-healthy','Advisory':'st-advisory','Needs Attention':'st-attention','Critical':'st-critical','Not Assessed':'st-notassessed'};
@@ -420,10 +420,10 @@ function buildLoop(d){
 
     <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 30px;">${dotSep(d.distLabel || '').toUpperCase()}</div>
     <div style="display: flex; height: 40px; margin-top: 16px; border-radius: 999px; overflow: hidden;">
-      ${(d.dist || []).map((s,i)=>{const items=d.dist || [];const first=i===0,last=i===items.length-1;const radius=items.length===1?'999px':first?'999px 0 0 999px':last?'0 999px 999px 0':'0';const width=s.width || (s.pct!=null ? `${s.pct}%` : '0%');const color=standardStatusColor(s.color || '#5B677A');const count=s.count ?? s.num ?? '';return `<div style="border-radius: ${radius}; width: ${width}; background: ${color}; display: flex; align-items: center; padding-left: 16px; color: #ffffff; font-weight: 700; font-size: 38px;">${count}</div>`;}).join('')}
+      ${(d.dist || []).map((s,i)=>{const items=d.dist || [];const first=i===0,last=i===items.length-1;const radius=items.length===1?'999px':first?'999px 0 0 999px':last?'0 999px 999px 0':'0';const width=s.width || (s.pct!=null ? `${s.pct}%` : '0%');const color=standardStatusColor(s.color || '#5B677A');const count=s.count ?? s.num ?? '';const fill=s.hatch?`repeating-linear-gradient(45deg, ${color} 0 10px, #ffffff 10px 16px)`:color;return `<div style="border-radius: ${radius}; width: ${width}; background: ${fill}; display: flex; align-items: center; padding-left: 16px; color: #ffffff; font-weight: 700; font-size: 38px;">${count}</div>`;}).join('')}
     </div>
-    <div style="display: flex; align-items: center; gap: 34px; margin-top: 16px; font-size: 38px; color: #0B1640;">
-      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span style="width: 14px; height: 14px; border-radius: 7px; background: ${l.color};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${l.count}</span></div>`).join('')}
+    <div style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 34px; row-gap: 8px; margin-top: 16px; font-size: 38px; color: #0B1640;">
+      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span style="width: 14px; height: 14px; border-radius: 7px; background: ${l.hatch?`repeating-linear-gradient(45deg, ${l.color} 0 3px, #ffffff 3px 5px)`:l.color};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${l.count}</span></div>`).join('')}
     </div>
 
     <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 36px;">LOOP TIMING</div>
@@ -758,7 +758,7 @@ function buildFilldb(d){
   const filldbStatusColor = item => {
     const label = String(item && item.label || '');
     if(/^Great\b/i.test(label)) return '#187A43';
-    if(/^Good\b/i.test(label)) return '#B45309';
+    if(/^Good\b/i.test(label)) return '#187A43';
     if(/^Poor\b/i.test(label)) return '#C2410C';
     if(/^No Data\b/i.test(label)) return '#F0F2F5';
     const key = hexKey(item && (item.color || item.dot || item.css));
@@ -786,7 +786,7 @@ function buildFilldb(d){
   const filldbLegendName = item => {
     const text = String(item && item.label || '').replace(/&middot;.*$/,'').replace(/·.*$/,'').trim();
     if(/^Great\b/i.test(text)) return 'Healthy';
-    if(/^Good\b/i.test(text)) return 'Needs Attention';
+    if(/^Good\b/i.test(text)) return 'Healthy';
     if(/^Poor\b/i.test(text)) return 'Critical';
     if(/^No Data\b/i.test(text)) return 'Not Assessed';
     return filldbDisplayLabel(text);
@@ -866,8 +866,8 @@ function buildFilldb(d){
   </div>
 
   <div style="height: 1px; background: #E3E9F1; margin: 34px 0 26px 0;"></div>
-  <div style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 38px; letter-spacing: 0.06em; text-transform: uppercase; color: #0C7E88;">Findings raised</div>
-  ${findings || `<div style="font-size: 38px; margin-top: 12px;">None raised.</div>`}
+  <div style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 38px; letter-spacing: 0.06em; text-transform: uppercase; color: #0C7E88;">${d.notHealthy ? 'Objects Not Healthy' : 'Findings raised'}</div>
+  ${d.notHealthy ? `<div style="font-size: 38px; margin-top: 12px;">${srcText(d.notHealthy)}</div>` : (findings || `<div style="font-size: 38px; margin-top: 12px;">None raised.</div>`)}
 </div>
   `;
 }
@@ -1174,9 +1174,9 @@ function buildBalance(d){
     ? `<div style="text-align:right;"><div style="font-size:56px;font-weight:700;color:${SRC_NOT_ASSESSED};line-height:1;">Not Assessed</div></div>`
     : `<div style="text-align:right;"><div style="font-size:56px;font-weight:700;color:${color};line-height:1;">${fmtCount(score)} <span style="font-size:38px;color:${SRC_INK};">/ 100</span></div><div style="font-size:44px;font-weight:700;color:${color};margin-top:8px;">${srcTier(score, d.overallTier)}</div></div>`;
   const legend = [
-    ['Healthy', SRC_HEALTHY, '85 to 100'],
-    ['Needs Attention', SRC_ATTENTION, '60 to 84'],
-    ['Critical', SRC_CRITICAL, '0 to 59'],
+    ['Healthy', SRC_HEALTHY, '90 to 100'],
+    ['Needs Attention', SRC_ATTENTION, '70 to 89'],
+    ['Critical', SRC_CRITICAL, '0 to 69'],
     ['Not Assessed', SRC_NOT_ASSESSED, '']
   ].map(([word,c,range]) => `<div style="display:flex;align-items:center;gap:10px;"><span style="width:14px;height:14px;border-radius:7px;background:${c};"></span>${word}${range?` ${SRC_DOT} ${range}`:''}</div>`).join('');
   const groups = (d.groups || []).map((g,i)=>srcBalanceGroup(g, i===0)).join('');

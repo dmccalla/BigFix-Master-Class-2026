@@ -386,7 +386,8 @@ def test_infographic_lists_one_clt01_and_names_no_data_as_critical(
     ]
     assert data["findingsLine"] == "Raises 1 High finding (2 reasons)"
     labels = [item["label"] for item in data["legend"]]
-    assert labels[-1] == "Critical over 60 min or no data"
+    assert labels[-2:] == ["Critical over 60 min", "Critical no usable data"]
+    assert data["legend"][-1]["hatch"] is True
 
 
 def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
@@ -422,7 +423,7 @@ def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
         "More than 5% of devices have no usable loop data."
     )
     assert rows["Loop distribution"][2].endswith(
-        "Critical also counts devices with no usable data."
+        "The hatched part of Critical is devices with no usable data."
     )
 
     top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")

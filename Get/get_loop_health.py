@@ -158,6 +158,10 @@ class ReportMetrics:
     healthy_threshold_seconds: float
     critical_threshold_seconds: float
     fix_first_count: int
+    avg_good: int = 0
+    avg_good_pct: float = 0.0
+    good_threshold_seconds: float = 0.0
+    avg_over_critical: int = 0
 
 
 @dataclass
@@ -3208,9 +3212,21 @@ def calculate_metrics(
     report_start: date,
     report_end: date,
     generated_at: datetime,
+    good_threshold_seconds: float | None = None,
 ) -> tuple[ReportMetrics, list[ProcessedRow]]:
     if critical_threshold_seconds <= healthy_threshold_seconds:
         raise ValueError("CriticalThreshold must be greater than HealthyThreshold.")
+    # Good runs from the healthy threshold up to this one. Without it there is no
+    # Good group.
+    good_seconds = (
+        healthy_threshold_seconds
+        if good_threshold_seconds is None
+        else good_threshold_seconds
+    )
+    if not healthy_threshold_seconds <= good_seconds <= critical_threshold_seconds:
+        raise ValueError(
+            "GoodThreshold must be between HealthyThreshold and CriticalThreshold."
+        )
 
     total_devices = len(processed)
     if total_devices == 0:
@@ -3220,21 +3236,25 @@ def calculate_metrics(
 
     total_issue_count = not_reported_count + error_count
     avg_healthy = sum(1 for r in processed if r.avg_seconds < healthy_threshold_seconds)
+    avg_good = sum(
+        1 for r in processed if healthy_threshold_seconds <= r.avg_seconds < good_seconds
+    )
     avg_warning = sum(
         1
         for r in processed
-        if healthy_threshold_seconds <= r.avg_seconds <= critical_threshold_seconds
+        if good_seconds <= r.avg_seconds <= critical_threshold_seconds
     )
-    avg_critical = (
-        sum(1 for r in processed if r.avg_seconds > critical_threshold_seconds)
-        + total_issue_count
+    avg_over_critical = sum(
+        1 for r in processed if r.avg_seconds > critical_threshold_seconds
     )
+    avg_critical = avg_over_critical + total_issue_count
 
     safe_total_rows = max(1, total_source_rows)
     score_total_devices = total_devices + total_issue_count
     safe_score_total = max(1, score_total_devices)
 
     avg_healthy_pct = avg_healthy / safe_score_total
+    avg_good_pct = avg_good / safe_score_total
     avg_warning_pct = avg_warning / safe_score_total
     avg_critical_pct = avg_critical / safe_score_total
 
@@ -3260,7 +3280,10 @@ def calculate_metrics(
     )[:fix_first_count]
 
     environment_score = round(
-        (avg_healthy_pct * 100) + (avg_warning_pct * 67) + (avg_critical_pct * 34)
+        (avg_healthy_pct * 100)
+        + (avg_good_pct * 85)
+        + (avg_warning_pct * 67)
+        + (avg_critical_pct * 34)
     )
     environment_score = max(0, min(100, environment_score))
 
@@ -3271,8 +3294,8 @@ def calculate_metrics(
     else:
         overall_status = "HEALTHY"
 
-    score_driver = "Average Loop Health Score = Healthy% x 100 + Warning% x 67 + Critical% x 34. Critical includes > 60 minutes plus Not Reported/Error rows."
-    score_breakdown = f"{pct(avg_healthy_pct, 0)} Healthy, {pct(avg_warning_pct, 0)} Warning, {pct(avg_critical_pct, 0)} Critical -> Average Loop Health Score {environment_score}"
+    score_driver = "Average Loop Health Score = Healthy% x 100 + Good% x 85 + Warning% x 67 + Critical% x 34. Critical includes > 60 minutes plus Not Reported/Error rows."
+    score_breakdown = f"{pct(avg_healthy_pct, 0)} Healthy, {pct(avg_good_pct, 0)} Good, {pct(avg_warning_pct, 0)} Warning, {pct(avg_critical_pct, 0)} Critical -> Average Loop Health Score {environment_score}"
 
     metrics = ReportMetrics(
         total_devices=total_devices,
@@ -3307,6 +3330,10 @@ def calculate_metrics(
         healthy_threshold_seconds=healthy_threshold_seconds,
         critical_threshold_seconds=critical_threshold_seconds,
         fix_first_count=fix_first_count,
+        avg_good=avg_good,
+        avg_good_pct=avg_good_pct,
+        good_threshold_seconds=good_seconds,
+        avg_over_critical=avg_over_critical,
     )
 
     return metrics, fix_first_devices
@@ -3482,7 +3509,9 @@ def generate_png(
 
     scored_total = metrics.score_total_devices
     h_min = metrics.healthy_threshold_seconds / 60.0
+    g_min = metrics.good_threshold_seconds / 60.0
     c_min = metrics.critical_threshold_seconds / 60.0
+    has_good = metrics.good_threshold_seconds > metrics.healthy_threshold_seconds
 
     def fmt_min(value: float) -> str:
         return f"{value:g}"
@@ -3521,14 +3550,21 @@ def generate_png(
 
     # Distribution: only the non-zero buckets become labelled segments; thin
     # segments get a min width + smaller number (matches the design).
+    # Devices with no usable data are Critical, drawn as a hatched part of it.
     buckets = [
-        (metrics.avg_healthy, status_spine.HEALTHY.mark),
-        (metrics.avg_warning, status_spine.NEEDS_ATTENTION.mark),
-        (metrics.avg_critical, status_spine.CRITICAL.mark),
+        (metrics.avg_healthy, status_spine.HEALTHY.mark, False),
+        (metrics.avg_good, status_spine.GOOD.mark, False),
+        (metrics.avg_warning, status_spine.NEEDS_ATTENTION.mark, False),
+        (
+            metrics.avg_critical - metrics.total_issue_count,
+            status_spine.CRITICAL.mark,
+            False,
+        ),
+        (metrics.total_issue_count, status_spine.CRITICAL.mark, True),
     ]
-    seg_total = sum(c for c, _ in buckets) or 1
+    seg_total = sum(c for c, _, _ in buckets) or 1
     dist = []
-    for cnt, color in buckets:
+    for cnt, color, hatch in buckets:
         if cnt <= 0:
             continue
         pct = cnt / seg_total * 100
@@ -3538,6 +3574,10 @@ def generate_png(
             "num": f"{cnt:,}",
             "fs": 18 if pct >= 8 else 16,
         }
+        if hatch:
+            # The hatched part carries no printed number. The legend names it.
+            seg["hatch"] = True
+            seg["count"] = ""
         if pct < 8:
             seg["minw"] = 64
         dist.append(seg)
@@ -3551,9 +3591,20 @@ def generate_png(
             if metrics.avg_healthy
             else None,
         },
+    ]
+    if has_good:
+        legend.append(
+            {
+                "color": status_spine.GOOD.mark,
+                "label": f"Good {fmt_min(h_min)} to {fmt_min(g_min)} min",
+                "count": f"{metrics.avg_good:,}",
+                "pct": round(metrics.avg_good_pct * 100, 1) if metrics.avg_good else None,
+            }
+        )
+    legend += [
         {
             "color": status_spine.NEEDS_ATTENTION.mark,
-            "label": f"Needs Attention {fmt_min(h_min)} to {fmt_min(c_min)} min",
+            "label": f"Needs Attention {fmt_min(g_min)} to {fmt_min(c_min)} min",
             "count": f"{metrics.avg_warning:,}",
             "pct": round(metrics.avg_warning_pct * 100, 1)
             if metrics.avg_warning
@@ -3561,11 +3612,16 @@ def generate_png(
         },
         {
             "color": status_spine.CRITICAL.mark,
-            "label": f"Critical over {fmt_min(c_min)} min or no data",
-            "count": f"{metrics.avg_critical:,}",
-            "pct": round(metrics.avg_critical_pct * 100, 1)
-            if metrics.avg_critical
-            else None,
+            "label": f"Critical over {fmt_min(c_min)} min",
+            "count": f"{metrics.avg_over_critical:,}",
+            "pct": None,
+        },
+        {
+            "color": status_spine.CRITICAL.mark,
+            "label": "Critical no usable data",
+            "count": f"{metrics.total_issue_count:,}",
+            "pct": None,
+            "hatch": True,
         },
     ]
 
@@ -3723,6 +3779,10 @@ def generate_excel(
             f"{metrics.avg_healthy} ({pct(metrics.avg_healthy_pct)})",
         ),
         (
+            "Average Loop Good",
+            f"{metrics.avg_good} ({pct(metrics.avg_good_pct)})",
+        ),
+        (
             "Average Loop Warning",
             f"{metrics.avg_warning} ({pct(metrics.avg_warning_pct)})",
         ),
@@ -3748,6 +3808,7 @@ def generate_excel(
             f"{metrics.total_issue_count} ({pct(metrics.total_issue_pct)})",
         ),
         ("Healthy Threshold", convert_to_hhmmss(metrics.healthy_threshold_seconds)),
+        ("Good Threshold", convert_to_hhmmss(metrics.good_threshold_seconds)),
         ("Critical Threshold", convert_to_hhmmss(metrics.critical_threshold_seconds)),
     ]
     if command_polling_summary:
@@ -3789,8 +3850,15 @@ def generate_excel(
             },
             {
                 "Basis": "Average Loop",
+                "Band": "Good",
+                "Definition": f">= {convert_to_hhmmss(metrics.healthy_threshold_seconds)} and < {convert_to_hhmmss(metrics.good_threshold_seconds)}",
+                "Count": metrics.avg_good,
+                "Percent": metrics.avg_good_pct,
+            },
+            {
+                "Basis": "Average Loop",
                 "Band": "Warning",
-                "Definition": f">= {convert_to_hhmmss(metrics.healthy_threshold_seconds)} and <= {convert_to_hhmmss(metrics.critical_threshold_seconds)}",
+                "Definition": f">= {convert_to_hhmmss(metrics.good_threshold_seconds)} and <= {convert_to_hhmmss(metrics.critical_threshold_seconds)}",
                 "Count": metrics.avg_warning,
                 "Percent": metrics.avg_warning_pct,
             },
@@ -4193,6 +4261,53 @@ def context_strip_tiles(
     ]
 
 
+def loop_group_rows(metrics: ReportMetrics) -> list[list[str]]:
+    """Loop Health table rows. No usable data is its own Critical row."""
+    total = metrics.score_total_devices
+    h_min = f"{metrics.healthy_threshold_seconds / 60:g}"
+    g_min = f"{metrics.good_threshold_seconds / 60:g}"
+    c_min = f"{metrics.critical_threshold_seconds / 60:g}"
+    safe = max(1, total)
+    rows = [
+        [
+            "Healthy",
+            count_with_denominator(metrics.avg_healthy, total),
+            pct(metrics.avg_healthy_pct),
+            f"< {h_min} minutes",
+        ]
+    ]
+    if metrics.good_threshold_seconds > metrics.healthy_threshold_seconds:
+        rows.append(
+            [
+                "Good",
+                count_with_denominator(metrics.avg_good, total),
+                pct(metrics.avg_good_pct),
+                f"{h_min}-{g_min} minutes",
+            ]
+        )
+    rows += [
+        [
+            "Warning",
+            count_with_denominator(metrics.avg_warning, total),
+            pct(metrics.avg_warning_pct),
+            f"{g_min}-{c_min} minutes",
+        ],
+        [
+            "Critical",
+            count_with_denominator(metrics.avg_over_critical, total),
+            pct(metrics.avg_over_critical / safe),
+            f"> {c_min} minutes",
+        ],
+        [
+            "Critical",
+            count_with_denominator(metrics.total_issue_count, total),
+            pct(metrics.total_issue_count / safe),
+            "No usable data",
+        ],
+    ]
+    return rows
+
+
 def client_loop_infographic_key_rows(
     metrics: ReportMetrics,
     loop_offenders: list[LoopOffenderSummary] | None = None,
@@ -4218,6 +4333,28 @@ def client_loop_infographic_key_rows(
         else "Not available"
     )
     raised = bool(loop_finding_reasons(metrics, property_intervals))
+    h_min = f"{metrics.healthy_threshold_seconds / 60:g}"
+    g_min = f"{metrics.good_threshold_seconds / 60:g}"
+    c_min = f"{metrics.critical_threshold_seconds / 60:g}"
+    if metrics.good_threshold_seconds > metrics.healthy_threshold_seconds:
+        distribution_counts = (
+            metrics.avg_healthy,
+            metrics.avg_good,
+            metrics.avg_warning,
+            metrics.avg_over_critical,
+            metrics.total_issue_count,
+        )
+        distribution_edges = (
+            f"under {h_min}, {h_min} to {g_min}, {g_min} to {c_min}, and over {c_min}"
+        )
+    else:
+        distribution_counts = (
+            metrics.avg_healthy,
+            metrics.avg_warning,
+            metrics.avg_over_critical,
+            metrics.total_issue_count,
+        )
+        distribution_edges = f"under {h_min}, {h_min} to {c_min}, and over {c_min}"
     return [
         [
             "Health score",
@@ -4226,9 +4363,9 @@ def client_loop_infographic_key_rows(
         ],
         [
             "Loop distribution",
-            f"{metrics.avg_healthy:,} · {metrics.avg_warning:,} · {metrics.avg_critical:,}",
-            "Devices averaging under 30, 30 to 60, and over 60 minutes per loop. "
-            "Critical also counts devices with no usable data.",
+            " · ".join(f"{count:,}" for count in distribution_counts),
+            f"Devices averaging {distribution_edges} minutes per loop. The hatched "
+            "part of Critical is devices with no usable data.",
         ],
         [
             "Average loop time",
@@ -4444,24 +4581,7 @@ def generate_word(
         document,
         ["Band", "Devices / Total", "% of Total", "Rule"],
         [
-            [
-                "Healthy",
-                count_with_denominator(metrics.avg_healthy, metrics.score_total_devices),
-                pct(metrics.avg_healthy_pct),
-                "< 30 minutes",
-            ],
-            [
-                "Warning",
-                count_with_denominator(metrics.avg_warning, metrics.score_total_devices),
-                pct(metrics.avg_warning_pct),
-                "30-60 minutes",
-            ],
-            [
-                "Critical",
-                count_with_denominator(metrics.avg_critical, metrics.score_total_devices),
-                pct(metrics.avg_critical_pct),
-                "> 60 minutes or no usable data",
-            ],
+            *loop_group_rows(metrics),
         ],
         {1, 2, 3},
     )
@@ -4474,8 +4594,9 @@ def generate_word(
 
     document.add_heading("How the Score Is Calculated", level=4)
     document.add_paragraph(
-        "Each device earns points for its band: 100 for Healthy, 67 for Warning and "
-        "34 for Critical. The score is the average across all devices."
+        "Each device earns points for its band: 100 for Healthy, 85 for Good, 67 "
+        "for Warning and 34 for Critical. The score is the average across all "
+        "devices."
     )
     document.add_paragraph(
         "A score of 90 to 100 is Healthy, 70 to 89 is Warning, and 0 to 69 is Critical."
@@ -4827,8 +4948,13 @@ def main() -> int:
     )
     parser.add_argument(
         "--healthy-threshold",
+        default="00:15:00",
+        help="Healthy threshold. Default: 00:15:00",
+    )
+    parser.add_argument(
+        "--good-threshold",
         default="00:30:00",
-        help="Healthy threshold. Default: 00:30:00",
+        help="Good threshold. Default: 00:30:00",
     )
     parser.add_argument(
         "--critical-threshold",
@@ -4886,6 +5012,7 @@ def main() -> int:
         input_file = resolve_existing_loop_input(args.input_file)
         output_folder = resolve_existing_folder(args.output_folder)
         healthy_seconds = parse_timespan_to_seconds(args.healthy_threshold)
+        good_seconds = parse_timespan_to_seconds(args.good_threshold)
         critical_seconds = parse_timespan_to_seconds(args.critical_threshold)
         if args.top_offenders_count < 0:
             raise ValueError("--top-offenders-count must be 0 or greater.")
@@ -5040,6 +5167,7 @@ def main() -> int:
             report_start=report_start,
             report_end=report_end,
             generated_at=generated_at,
+            good_threshold_seconds=good_seconds,
         )
         actionsite_pressure = parse_actionsite_pressure(deployment_info_folder)
         if actionsite_pressure is None:

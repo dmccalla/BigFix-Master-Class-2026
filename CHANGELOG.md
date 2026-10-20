@@ -59,6 +59,14 @@ the project release process for the steps to cut a release.
 
 ### Changed
 
+- Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.
+- Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects · M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
+- Score client loops in four groups, by Duncan's 10-19 ruling on Design's review. Healthy is under 15 minutes (100 points), Good is 15 to 30 (85), Warning is 30 to 60 (67) and Critical is over 60 or no usable data (34). The Infographic draws no usable data as a hatched part of Critical, and the Loop Health table gives it its own row. Excel adds Good rows and a Good Threshold. `--good-threshold` joins `--healthy-threshold`, whose default is now 00:15:00.
+- Use one set of score cut-offs in all three Mini Reports: 90 to 100 Healthy, 70 to 89 Needs Attention or Warning, 0 to 69 Critical. PerfMon and FillDB move from 85 and 60.
+- Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.
+- Add the Evaluation Frequency block to the sample Property_Info captures, and say in the lab guide that the Client Performance module requires the Deployment Information results.
+- Add the _BESClient_Report_MinimumAnalysisInterval rows from the 10-18 lab capture to the sample Client_Settings_Info, so the sample report shows the Minimum Analysis Interval paragraph.
+- Bring the sample Client_Loop captures to the current collector format: every CSV field quoted and UDP answers separated by ", ". Top 10 row 10 in the sample is now a Retrieved Property, a row kind the lab Top 10 has. The sample is synthetic, so the row keeps the numbers of the site evaluation it replaces.
 - Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.
 - Add the Evaluation Frequency block to the sample Property_Info captures, and say in the lab guide that the Client Performance module requires the Deployment Information results.
 - Say in the user guide what the collection tasks change on a server, which tasks change client settings, and how the Collect tasks handle credentials. Rebuild the PDF.

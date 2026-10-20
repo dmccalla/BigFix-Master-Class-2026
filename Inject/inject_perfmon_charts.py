@@ -200,7 +200,7 @@ def perfmon_score_method_note_xml() -> str:
                 "readings over the limit."
             ),
             text_paragraph_xml(
-                "Score bands: 85-100 Healthy, 60-84 Needs Attention, 0-59 Critical.",
+                "Score bands: 90-100 Healthy, 70-89 Needs Attention, 0-69 Critical.",
                 bold_prefix="Score bands:",
             ),
         ]
@@ -1289,9 +1289,9 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
             ]
         )
 
-    if score < 60:
+    if score < 70:
         score_color, cls, label = "#C5283D", "st-critical", "Critical"
-    elif score < 85:
+    elif score < 90:
         score_color, cls, label = "#A85D00", "st-attention", "Needs Attention"
     else:
         score_color, cls, label = "#1F8A5B", "st-healthy", "Healthy"

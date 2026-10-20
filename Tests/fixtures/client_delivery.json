@@ -86,7 +86,8 @@
     "slowest_avg_seconds": 3660,
     "peak_max_seconds": 5400,
     "environment_score": 56,
-    "overall_status": "CRITICAL"
+    "overall_status": "CRITICAL",
+    "avg_good": 0
   },
   "expected_frequency": [
     [

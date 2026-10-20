@@ -355,14 +355,14 @@ def get_threshold(
                 "type": "range",
                 "min": 50,
                 "critical": 80,
-                "warn": 70,
+                "warn": None,
                 "label": "50-80% (VM)",
                 "note": "50-80% (VM)",
             }
         return {
             "type": "max",
             "critical": 80,
-            "warn": 70,
+            "warn": None,
             "label": "<= 80%",
             "note": "<= 80%",
         }
@@ -371,7 +371,7 @@ def get_threshold(
         return {
             "type": "max",
             "critical": 10,
-            "warn": 8,
+            "warn": None,
             "label": "<= 10%",
             "note": "<= 10%",
         }
@@ -386,7 +386,7 @@ def get_threshold(
         return {
             "type": "max",
             "critical": 4,
-            "warn": 3,
+            "warn": None,
             "label": "<= 4",
             "note": note,
         }
@@ -395,7 +395,7 @@ def get_threshold(
         return {
             "type": "max",
             "critical": 0,
-            "warn": 0,
+            "warn": None,
             "label": "~= 0 increase (no packet errors/discards)",
             "note": (
                 "Packet errors and discards should approach zero per interface; "
@@ -424,7 +424,7 @@ def get_threshold(
         return {
             "type": "max",
             "critical": 5,
-            "warn": 4,
+            "warn": None,
             "label": "<= 5% of physical memory",
             "note": note,
         }

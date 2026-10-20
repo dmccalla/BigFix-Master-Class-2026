@@ -111,8 +111,9 @@ def test_loop_word_explains_the_score_under_loop_health(
     assert "Score Method: test driver" not in paragraphs
     assert "Score Breakdown: test breakdown" not in paragraphs
     assert (
-        "Each device earns points for its band: 100 for Healthy, 67 for Warning and "
-        "34 for Critical. The score is the average across all devices." in paragraphs
+        "Each device earns points for its band: 100 for Healthy, 85 for Good, 67 "
+        "for Warning and 34 for Critical. The score is the average across all "
+        "devices." in paragraphs
     )
     assert not any("Section 04" in text for text in paragraphs)
     assert not any(
@@ -509,7 +510,8 @@ def test_infographic_key_uses_infographic_values() -> None:
     ]
     values = {row[0]: row[1] for row in rows}
     assert values["Health score"] == "95 / 100"
-    assert values["Loop distribution"] == "8 · 2 · 0"
+    # Built with the old two thresholds, so there is no Good group.
+    assert values["Loop distribution"] == "8 · 2 · 0 · 0"
     assert values["Average loop time"] == "5m 00s"
     assert values["Slowest evaluation"] == loop.format_loop_offender_strip_seconds(42)
     assert values["Severe loops over 120 min"] == "0"

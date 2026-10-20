@@ -94,14 +94,15 @@ TABLE_STYLE_ID = "BigFixContent"
 # health tints: the FillDB chart conveys per-object health, and the Health Check
 # cell keeps its colored text.
 MUTED = "#595959"
+# NFR PRF-BIG-30: Good and Great both meet the standard, so Good is Healthy.
 STATUS_COLORS = {
     "great": "#187A43",
-    "good": "#B45309",
+    "good": "#187A43",
     "poor": "#C2410C",
 }
 STATUS_TABLE_STYLES = {
     "great": {"fill": "D5F5E3", "text": "187A43"},
-    "good": {"fill": "FFF8E7", "text": "B45309"},
+    "good": {"fill": "D5F5E3", "text": "187A43"},
     "poor": {"fill": "FDECEA", "text": "C2410C"},
     "unknown": {"fill": "F0F2F5", "text": "0B1640"},
 }
@@ -230,17 +231,42 @@ def health_status(value: str) -> str:
     return "unknown"
 
 
+# The checks NFR PRF-BIG-30 names. Only these are scored.
+GUIDE_CHECKS = (
+    "parallel db update (short batch)",
+    "parallel db update",
+    "batch rate",
+    "parallel parsing",
+)
+
+
+def is_guide_check(row: dict[str, str]) -> bool:
+    return clean_object_name(row.get("FillDB Object", "")).strip().lower() in GUIDE_CHECKS
+
+
+def objects_not_healthy(rows: list[dict[str, str]]) -> str:
+    """FD-03: name the objects the analyzer rates Poor, or None."""
+    poor = [
+        titlecase_label(row.get("FillDB Object", ""))
+        for row in object_performance_rows(rows)
+        if health_status(row.get("Health Check", "")) == "poor"
+    ]
+    return f"Critical: {', '.join(poor)}." if poor else "None."
+
+
 def filldb_assessment_note(rows: list[dict[str, str]]) -> str:
     """Explain a Not Assessed FillDB score when the capture cannot be scored."""
     scoreable = any(
         health_status(row.get("Health Check", "")) in {"great", "good", "poor"}
         for row in object_performance_rows(rows)
+        if is_guide_check(row)
     )
     if scoreable:
         return ""
     return (
-        "Not Assessed: No FillDB object in this capture had a recognized health "
-        "result, so there was not enough data to calculate a health score."
+        "Not Assessed: None of the four checks NFR PRF-BIG-30 names had a "
+        "recognized health result, so there was not enough data to calculate a "
+        "health score."
     )
 
 
@@ -404,7 +430,8 @@ def generate_filldb_chart(
 
     # Raw FillDB emits Great/Good/Poor/Unknown; the chart displays the report's
     # four standard status words.
-    C_GREAT, C_GOOD, C_POOR, C_NODATA = "#187A43", "#B45309", "#C2410C", "#0B1640"
+    C_GREAT, C_GOOD, C_POOR, C_NODATA = "#187A43", "#187A43", "#C2410C", "#0B1640"
+    C_ATTENTION = "#B45309"
     status_color = {
         "great": C_GREAT,
         "good": C_GOOD,
@@ -450,33 +477,28 @@ def generate_filldb_chart(
         for r, m in zip(ranked, times_min)
     ]
 
-    # FillDB Health Score: Great x100 + Good x67 + Poor x34.
-    scoreable = great_count + good_count + review_count
+    # FillDB Health Score, NFR PRF-BIG-30: the four named checks. Good or Great
+    # meets the standard and earns 100. Poor earns 0.
+    guide_ratings = [
+        health_status(r["Health Check"]) for r in assessed_rows if is_guide_check(r)
+    ]
+    meets = sum(1 for status in guide_ratings if status in {"great", "good"})
+    scoreable = meets + sum(1 for status in guide_ratings if status == "poor")
     if scoreable > 0:
-        score = max(
-            0,
-            min(
-                100,
-                round(
-                    (great_count / scoreable) * 100
-                    + (good_count / scoreable) * 67
-                    + (review_count / scoreable) * 34
-                ),
-            ),
-        )
-        if score >= 85:
+        score = round(meets / scoreable * 100)
+        if score >= 90:
             cls, label, color, grad = (
                 "st-healthy",
                 "Healthy",
                 C_GREAT,
                 C_GREAT,
             )
-        elif score >= 60:
+        elif score >= 70:
             cls, label, color, grad = (
                 "st-attention",
                 "Needs Attention",
-                C_GOOD,
-                C_GOOD,
+                C_ATTENTION,
+                C_ATTENTION,
             )
         else:
             cls, label, color, grad = (
@@ -495,8 +517,7 @@ def generate_filldb_chart(
         )
 
     dist_defs = [
-        ("Healthy", great_count, C_GREAT),
-        ("Needs Attention", good_count, C_GOOD),
+        ("Healthy", great_count + good_count, C_GREAT),
         ("Critical", review_count, C_POOR),
         ("Not Assessed", unknown_count, C_NODATA),
     ]
@@ -524,7 +545,11 @@ def generate_filldb_chart(
         "status": {"cls": cls, "label": label},
         "barPct": score if isinstance(score, int) else 0,
         "barColor": grad,
-        "distLabel": f"Object health &middot; {assessed_total:,} assessed",
+        "distLabel": (
+            f"Object health &middot; {assessed_total:,} objects &middot; "
+            f"{great_count + good_count + review_count:,} assessed"
+        ),
+        "notHealthy": objects_not_healthy(rows),
         "dist": dist,
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
@@ -755,25 +780,29 @@ def add_score_method_note(document: DocxDocument) -> None:
     heading.paragraph_format.space_after = Pt(3)
 
     intro = document.add_paragraph(
-        "The FillDB Health Score is based on the percentage of assessed FillDB "
-        "objects in each analyzer health band:"
+        "The FillDB Health Score is based on the share of the guide's FillDB "
+        "checks that meet the standard:"
     )
     intro.paragraph_format.space_after = Pt(3)
 
     for text in (
-        "Great: 100 points",
-        "Good: 67 points",
-        "Poor: 34 points",
+        "Great or Good: 100 points",
+        "Poor: 0 points",
     ):
         bullet = document.add_paragraph(f"- {text}")
         bullet.paragraph_format.space_after = Pt(1)
 
     for text in (
-        "Formula: Great% x 100 + Good% x 67 + Poor% x 34",
+        "The score covers the four checks named in PRF-BIG-30 FillDB Health "
+        "Check (BigFix Non-Functional Requirements: A Checklist Approach, "
+        "version 11.x.4, page 25): Parallel DB Update (Short Batch), Parallel DB "
+        "Update, Batch Rate and Parallel Parsing. The guide says each should "
+        "have a health check of Good or Great.",
+        "Formula: (Great + Good) / assessed checks x 100",
         "This score covers the FillDB capture only.",
-        "Rows without a recognized Health Check result are shown for context "
-        "but are not included in the score.",
-        "Score bands: 85-100 Healthy, 60-84 Needs Attention, 0-59 Critical.",
+        "Other objects and checks without a recognized Health Check result are "
+        "shown for context but are not included in the score.",
+        "Score bands: 90-100 Healthy, 70-89 Needs Attention, 0-69 Critical.",
     ):
         para = document.add_paragraph(text)
         para.paragraph_format.space_after = Pt(3)

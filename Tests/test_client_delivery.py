@@ -126,11 +126,12 @@ def calculated_metrics():
         len(frame),
         missing,
         errors,
-        1800,
+        900,
         3600,
         date(2026, 10, 1),
         date(2026, 10, 2),
         datetime(2026, 10, 3, 12),
+        good_threshold_seconds=1800,
     )
     return metrics
 
@@ -265,7 +266,8 @@ def test_real_report_workbook_and_chart_agree(delivered):
     data = sidecar
     assert str(data["score"]) == "56"
     assert data["barPct"] == 56
-    assert [int(segment["num"]) for segment in data["dist"]] == [1, 2, 3]
+    # Healthy, Warning, Critical over 60 and the hatched no usable data part.
+    assert [int(segment["num"]) for segment in data["dist"]] == [1, 2, 1, 2]
     with Image.open(artifact(delivered, ".png")) as image:
         assert image.width == 2250
         assert image.height >= 300

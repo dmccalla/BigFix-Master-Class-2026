@@ -17,10 +17,10 @@ Olympic medals, PASS/ADVISORY/FAIL) by construction. The guard test
 back in anyway.
 
   Level            Mark      Text      Band       Per-check
-  Healthy          #187A43   #187A43   85-100     Pass
+  Healthy          #187A43   #187A43   90-100     Pass
   Advisory         #2A6FDB   #2A6FDB   (info)     Advisory
-  Needs Attention  #B45309   #B45309   60-84      (rolls up from Fails)
-  Critical         #C2410C   #C2410C   0-59       Fail
+  Needs Attention  #B45309   #B45309   70-89      (rolls up from Fails)
+  Critical         #C2410C   #C2410C   0-69       Fail
   Not Assessed     #0B1640   #0B1640   excluded   Cannot Verify
 
 ``mark`` is the canonical spine color (dots, bars, chips, swatches). ``text`` is
@@ -44,12 +44,15 @@ class SpineLevel:
     per_check: str  # the matching per-check result term
 
 
-HEALTHY = SpineLevel("Healthy", "#187A43", "#187A43", "#D5F5E3", 85, 100, "Pass")
+HEALTHY = SpineLevel("Healthy", "#187A43", "#187A43", "#D5F5E3", 90, 100, "Pass")
 ADVISORY = SpineLevel("Advisory", "#2A6FDB", "#2A6FDB", "#E6EFFD", None, None, "Advisory")
 NEEDS_ATTENTION = SpineLevel(
-    "Needs Attention", "#B45309", "#B45309", "#FFF8E7", 60, 84, "Fail (rolled up)"
+    "Needs Attention", "#B45309", "#B45309", "#FFF8E7", 70, 89, "Fail (rolled up)"
 )
-CRITICAL = SpineLevel("Critical", "#C2410C", "#C2410C", "#FDECEA", 0, 59, "Fail")
+CRITICAL = SpineLevel("Critical", "#C2410C", "#C2410C", "#FDECEA", 0, 69, "Fail")
+# Client Performance device group between Healthy and Warning. Not a score level
+# and not in LEVELS, so FillDB's own "Good" rating keeps its mapping.
+GOOD = SpineLevel("Good", "#4F8A2B", "#4F8A2B", "#E7F2DF", None, None, "Pass")
 NOT_ASSESSED = SpineLevel(
     "Not Assessed", "#0B1640", "#0B1640", "#F0F2F5", None, None, "Cannot Verify"
 )

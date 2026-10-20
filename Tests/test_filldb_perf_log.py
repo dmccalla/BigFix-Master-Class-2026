@@ -102,7 +102,8 @@ def test_filldb_chart_payload_colors_workload_bars_by_health(
     assert captured["chart"] == "filldb"
     bars = {item["label"]: item for item in captured["data"]["bars"]}
     assert bars["Fixlet Results"]["color"] == "#187A43"
-    assert bars["Long Property Results"]["color"] == "#B45309"
+    # PRF-BIG-30: Good meets the standard, so it is Healthy green.
+    assert bars["Long Property Results"]["color"] == "#187A43"
     assert bars["Computer Administrators"]["color"] == "#C2410C"
     assert bars["Computer Administrators"]["width"] == "0.0%"
     assert all("dot" not in item for item in bars.values())
@@ -139,7 +140,9 @@ def test_filldb_word_places_score_method_note_below_chart(tmp_path: Path) -> Non
     assert "How This Score Is Calculated" in xml
     assert '<w:pStyle w:val="Heading3"/>' in xml
     assert "Formula:" in xml
-    assert "Great% x 100 + Good% x 67 + Poor% x 34" in xml
+    assert "Formula: (Great + Good) / assessed checks x 100" in xml
+    assert "PRF-BIG-30 FillDB Health Check" in xml
+    assert "version 11.x.4, page 25" in xml
     assert "Health Check" in xml
     assert "100% Great" in xml
     assert "Analyzer Baseline" not in xml
@@ -168,8 +171,9 @@ def test_filldb_word_explains_not_assessed_score_below_chart(tmp_path: Path) -> 
     document = Document(output)
     paragraphs = [paragraph.text for paragraph in document.paragraphs]
     note = (
-        "Not Assessed: No FillDB object in this capture had a recognized health "
-        "result, so there was not enough data to calculate a health score."
+        "Not Assessed: None of the four checks NFR PRF-BIG-30 names had a "
+        "recognized health result, so there was not enough data to calculate a "
+        "health score."
     )
     assert note in paragraphs
     assert paragraphs.index(note) < paragraphs.index("How This Score Is Calculated")

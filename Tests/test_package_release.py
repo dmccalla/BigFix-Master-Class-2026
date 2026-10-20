@@ -93,6 +93,7 @@ function Invoke-TestPython {
 $options = @{ AllowDevVersion = $true; AllowDirtyTree = $true }
 if ($env:KEEP_STAGING -eq '1') { $options.KeepStaging = $true }
 if ($env:VALIDATE_ONLY -eq '1') { $options.ValidateOnly = $true }
+if ($env:SKIP_LARGE -eq '1') { $options.SkipLargePerfmonSamples = $true }
 & $fixtureScript @options -OutputPath $env:PACKAGE_OUTPUT
 """
 )
@@ -123,6 +124,13 @@ def package_fixture():
     with tempfile.TemporaryDirectory(prefix="mcp-") as directory:
         root = Path(directory)
         (root / "Build").mkdir()
+        shutil.copy2(
+            SCRIPT.with_name("package_perfmon_samples.ps1"),
+            root / "Build/package_perfmon_samples.ps1",
+        )
+        samples = root / "LocalSamples/Large_Perfmon"
+        samples.mkdir(parents=True)
+        (samples / "large-fixture.blg").write_bytes(b"fixture sample bytes")
         files = [
             "README.md",
             "CHANGELOG.md",
@@ -189,6 +197,18 @@ def test_short_staging_preserves_archive_and_manifest(package_fixture, keep):
         KEEP_STAGING=str(int(keep)),
     )
     assert result.returncode == 0, result.stdout + result.stderr
+    companion = root / output / "Sample-Data-Perfmon-Large-1.0.0-dev.zip"
+    assert companion.is_file()
+    assert (
+        companion.with_suffix(".zip.sha256").read_text().split()[0]
+        == hashlib.sha256(companion.read_bytes()).hexdigest()
+    )
+    with zipfile.ZipFile(companion) as zipped:
+        manifest = json.loads(zipped.read("sample-manifest.json"))
+        captured = zipped.read("SampleData/Large_Perfmon/large-fixture.blg")
+        assert captured == b"fixture sample bytes"
+        entry = next(row for row in manifest["files"] if row["path"].endswith(".blg"))
+        assert entry["sha256"] == hashlib.sha256(captured).hexdigest()
     workspace = Path(re.search(r"TEST_WORK_ROOT=(.+)", result.stdout)[1].strip())
     try:
         assert workspace.parent.resolve() == Path(tempfile.gettempdir()).resolve()
@@ -362,3 +382,31 @@ try {
         TARGET=target,
     )
     assert result.returncode == 0, result.stdout + result.stderr
+
+
+def test_large_source_is_required_before_any_build_work(package_fixture):
+    root, _ = package_fixture
+    (root / "LocalSamples/Large_Perfmon/large-fixture.blg").unlink()
+    result = _powershell(
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
+    )
+    assert result.returncode != 0
+    assert "No BLG files" in result.stderr
+    assert "TEST_WORK_ROOT=" not in result.stdout
+    assert not (root / "output").exists()
+
+
+def test_explicit_skip_builds_only_the_main_package(package_fixture):
+    root, _ = package_fixture
+    (root / "LocalSamples/Large_Perfmon/large-fixture.blg").unlink()
+    result = _powershell(
+        BUILD_FIXTURE,
+        FIXTURE_ROOT=str(root),
+        PACKAGE_OUTPUT="output",
+        SKIP_LARGE="1",
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert (root / "output" / f"{PACKAGE}.zip").is_file()
+    assert not list((root / "output").glob("Sample-Data-Perfmon-Large*"))

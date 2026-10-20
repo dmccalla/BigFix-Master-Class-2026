@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Build a separate versioned large-Perfmon sample ZIP and SHA-256 with each release package. Keep the small default sample separate, validate external BLG inputs before staging, and record hashes and extraction paths in the companion manifest.
+
 ### Sample data
 
 - Track the Client Loop and Deployment Information demonstration inputs directly under the default sample folder. Include minimum analysis and property evaluation intervals, a Retrieved Property Top 10 example, consistent timing totals, and local test instructions.

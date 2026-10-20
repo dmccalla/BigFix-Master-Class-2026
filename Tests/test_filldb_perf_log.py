@@ -238,12 +238,16 @@ def test_filldb_table_headers_and_bodies_share_alignment(tmp_path, with_template
         (filldb_report.TABLE_WIDTHS, filldb_report.SUMMARY_TABLE_WIDTHS),
         strict=True,
     ):
-        assert table.alignment == WD_TABLE_ALIGNMENT.CENTER
+        assert table.alignment == WD_TABLE_ALIGNMENT.LEFT
         assert table.style.style_id == "BigFixContent" or not with_template
-        assert [int(col.get(qn("w:w"))) for col in table._tbl.tblGrid] == expected_widths
+        grid = [int(col.get(qn("w:w"))) for col in table._tbl.tblGrid]
+        assert sum(grid) == 10800
+        assert len(grid) == len(expected_widths)
         for row in table.rows:
-            assert [cell.width.twips for cell in row.cells] == expected_widths
-            assert row._tr.trPr.find(qn("w:jc")) is None
+            assert [cell.width.twips for cell in row.cells] == grid
+            # A row alignment other than left would shift the row off the body.
+            row_jc = row._tr.trPr.find(qn("w:jc"))
+            assert row_jc is None or row_jc.get(qn("w:val")) == "left"
         assert table.rows[0]._tr.trPr.find(qn("w:tblHeader")) is not None
 
 

@@ -186,7 +186,6 @@ def test_rollup_note_counts_only_named_relays(tmp_path: Path) -> None:
         "Top 10 Relays",
         ["Relay", "Devices"],
         rows,
-        {1},
         "relays",
         "Polling by Relay",
     )

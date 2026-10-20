@@ -39,7 +39,7 @@ if str(PROJECT_ROOT) not in sys.path:
 
 from docx import Document
 from docx.document import Document as DocxDocument
-from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
 from docx.oxml.ns import qn
@@ -65,6 +65,7 @@ from Lib.Core.input_utils import (
 from Lib.Core.input_utils import (
     resolve_output_png as shared_resolve_output_png,
 )
+from Lib.Design import report_tables
 from Lib.Themes.word_stub_utils import (
     add_stub_front_matter,
     apply_standalone_narrow_margins,
@@ -585,8 +586,6 @@ def set_table_geometry(table, widths: list[int] | None = None) -> None:
     tbl_w.set(qn("w:w"), str(sum(widths)))
     tbl_w.set(qn("w:type"), "dxa")
 
-    # Match the BigFixContent header row's alignment for the whole table.
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
     remove_child(tbl_pr, "w:tblLayout")
 
     grid = tbl.tblGrid
@@ -648,7 +647,6 @@ def set_cell_text(cell, text: str, bold: bool = False, color: str | None = None)
     cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
     paragraph = cell.paragraphs[0]
-    paragraph.alignment = WD_ALIGN_PARAGRAPH.CENTER
     paragraph.paragraph_format.space_before = Pt(6)
     paragraph.paragraph_format.space_after = Pt(6)
     paragraph.paragraph_format.line_spacing = 1
@@ -845,6 +843,7 @@ def write_word_output(
     build_word_table(document, rows)
     build_capture_summary_table(document, rows, metadata or {})
     document.save(str(output_path))
+    report_tables.normalize_docx_tables(output_path)
 
 
 def main() -> int:

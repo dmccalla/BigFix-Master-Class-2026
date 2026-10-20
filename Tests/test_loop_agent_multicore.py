@@ -127,5 +127,5 @@ def test_agent_multicore_workbook_and_word_sections_are_written(tmp_path: Path) 
     )
     assert (
         multicore_table.rows[1].cells[1].paragraphs[0].alignment
-        == WD_ALIGN_PARAGRAPH.CENTER
+        == WD_ALIGN_PARAGRAPH.RIGHT
     )

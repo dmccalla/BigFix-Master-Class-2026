@@ -87,13 +87,12 @@ from Lib.Core.input_utils import (
 from Lib.Core.input_utils import (
     resolve_existing_folder as shared_resolve_existing_folder,
 )
-from Lib.Design import status_spine
+from Lib.Design import report_tables, status_spine
 from Lib.Themes.workbook_theme import WORKBOOK_THEME, finish_openpyxl_workbook
 
 try:
     from docx import Document
-    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT, WD_TABLE_ALIGNMENT
-    from docx.enum.text import WD_ALIGN_PARAGRAPH
+    from docx.enum.table import WD_CELL_VERTICAL_ALIGNMENT
     from docx.oxml import OxmlElement
     from docx.oxml.ns import qn
     from docx.shared import Inches, Pt, RGBColor
@@ -4135,7 +4134,6 @@ def build_word_table(
     document,
     headers: list[str],
     rows: list[list[str]],
-    center_cols: set[int],
     status_col: int | None = None,
 ) -> None:
     """
@@ -4145,11 +4143,10 @@ def build_word_table(
       - light blue header with black text
       - grid borders
       - wrapped text
-      - centered numeric/status columns
+      - column alignment, width and layout from Lib.Design.report_tables
       - clean vertical alignment
     """
     table = document.add_table(rows=1, cols=len(headers))
-    table.alignment = WD_TABLE_ALIGNMENT.CENTER
     # Header fill, borders and row banding come from the shared BigFixContent
     # style (single source of truth); tblLook turns on its conditional
     # formatting. Only the semantic status-column pill keeps an inline fill.
@@ -4162,13 +4159,6 @@ def build_word_table(
         cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
         # Navy fill + white bold text come from BigFixContent's firstRow.
         set_cell_text(cell, header, bold=True)
-
-        for paragraph in cell.paragraphs:
-            paragraph.alignment = (
-                WD_ALIGN_PARAGRAPH.CENTER
-                if idx in center_cols
-                else WD_ALIGN_PARAGRAPH.LEFT
-            )
 
     for row in rows:
         cells = table.add_row().cells
@@ -4188,13 +4178,6 @@ def build_word_table(
                 )
             else:
                 set_cell_text(cell, value, bold=False, color=None)
-
-            for paragraph in cell.paragraphs:
-                paragraph.alignment = (
-                    WD_ALIGN_PARAGRAPH.CENTER
-                    if idx in center_cols
-                    else WD_ALIGN_PARAGRAPH.LEFT
-                )
 
     # Spacer after every table so the injected client-loop tables don't cram
     # together -- gives separation between consecutive tables and after the last.
@@ -4420,9 +4403,19 @@ def keep_with_next(paragraph):
 
 
 def add_note_paragraph(document, text: str) -> None:
+    # A note under a table is its caption, so the spacer build_word_table adds
+    # after the table is dropped and the note sits 4 pt under it.
+    blocks = [el for el in document.element.body if el.tag != qn("w:sectPr")]
+    if (
+        len(blocks) >= 2
+        and blocks[-2].tag == qn("w:tbl")
+        and blocks[-1].tag == qn("w:p")
+        and not "".join(blocks[-1].itertext()).strip()
+    ):
+        blocks[-1].getparent().remove(blocks[-1])
     paragraph = document.add_paragraph()
-    paragraph.paragraph_format.space_before = Pt(0)
-    paragraph.paragraph_format.space_after = Pt(3)
+    paragraph.paragraph_format.space_before = Pt(4)
+    paragraph.paragraph_format.space_after = Pt(12)
     prefix = paragraph.add_run("NOTE: ")
     prefix.bold = True
     paragraph.add_run(text)
@@ -4450,7 +4443,6 @@ def add_capped_rollup_table(
     capped_heading: str,
     headers: list[str],
     rows: list[list[str]],
-    centered_columns: set[int],
     noun: str,
     sheet: str,
 ) -> None:
@@ -4461,7 +4453,6 @@ def add_capped_rollup_table(
         document,
         headers,
         rows[:MINI_REPORT_ROLLUP_LIMIT],
-        centered_columns,
     )
     if capped:
         # Devices with no relay or no usable address are a group, not a relay or
@@ -4550,7 +4541,6 @@ def generate_word(
         client_loop_infographic_key_rows(
             metrics, loop_offenders, udp_summary, property_intervals
         ),
-        {1},
     )
 
     if include_automated_findings:
@@ -4572,7 +4562,6 @@ def generate_word(
                 document,
                 ["Finding ID", "Automated Finding"],
                 finding_rows,
-                {0},
             )
 
     document.add_heading("Loop Health", level=3)
@@ -4588,7 +4577,6 @@ def generate_word(
         [
             *loop_group_rows(metrics),
         ],
-        {1, 2, 3},
     )
     document.add_paragraph(
         "The slowest device averages "
@@ -4641,7 +4629,6 @@ def generate_word(
                 pct(metrics.total_issue_pct),
             ],
         ],
-        {1, 2},
     )
 
     if loop_offenders or actionsite_pressure or property_intervals:
@@ -4681,7 +4668,6 @@ def generate_word(
                 ]
                 for item in loop_offenders
             ],
-            {0, 1, 2, 4},
         )
 
     if actionsite_pressure:
@@ -4695,7 +4681,6 @@ def generate_word(
             document,
             ["Metric", "Value", "Status", "Basis"],
             actionsite_pressure_rows(actionsite_pressure),
-            {1, 2},
             status_col=2,
         )
 
@@ -4722,7 +4707,6 @@ def generate_word(
                 "Status",
             ],
             evaluation_frequency_rows(property_intervals),
-            {1, 2, 3, 4, 5},
             status_col=5,
         )
         document.add_paragraph(
@@ -4763,7 +4747,6 @@ def generate_word(
             document,
             ["Status", "Devices / Total", "% of Total"],
             udp_coverage_rows(udp_summary),
-            {1, 2},
         )
         for note in udp_notification_data_notes(udp_summary):
             add_note_paragraph(document, note)
@@ -4779,7 +4762,6 @@ def generate_word(
                     "% of Relay Reported Clients",
                 ],
                 udp_summary.relay_rows,
-                {1, 2},
                 "relays",
                 "UDP Issues by Relay",
             )
@@ -4791,7 +4773,6 @@ def generate_word(
                 f"Top {MINI_REPORT_ROLLUP_LIMIT} Subnets Not Receiving UDP Pings",
                 ["Subnet", "Not Receiving / Reported", "Serving Relays"],
                 udp_summary.subnet_rows,
-                {1},
                 "subnets",
                 "UDP Issues by Subnet",
             )
@@ -4810,7 +4791,6 @@ def generate_word(
             document,
             ["Status", "Devices / Total", "% of Total"],
             command_polling_coverage_rows(command_polling_summary),
-            {1, 2},
         )
 
         if command_polling_summary.relay_rows:
@@ -4830,7 +4810,6 @@ def generate_word(
                     "No UDP + Polling Off",
                 ],
                 command_polling_summary.relay_rows,
-                {1, 2, 3, 4, 5, 6, 7, 8},
                 "relays",
                 "Polling by Relay",
             )
@@ -4852,7 +4831,6 @@ def generate_word(
                     "No UDP + Polling Off",
                 ],
                 command_polling_summary.subnet_rows,
-                {1, 2, 3, 4, 5, 6, 7, 8},
                 "subnets",
                 "Polling by Subnet",
             )
@@ -4881,7 +4859,6 @@ def generate_word(
             document,
             ["Status", "Devices / Total", "% of Total"],
             fast_hash_verify_coverage_rows(fast_hash_verify_summary),
-            {1, 2},
         )
         keep_with_next(
             document.add_paragraph("Reported FastHashVerify work and sleep settings:")
@@ -4895,7 +4872,6 @@ def generate_word(
                 "Devices / Total",
             ],
             fast_hash_verify_summary.settings_rows,
-            {2, 3},
         )
 
     if agent_cpu_idle_summary:
@@ -4915,7 +4891,6 @@ def generate_word(
                 "Devices / Total",
             ],
             agent_cpu_idle_summary.settings_rows,
-            {2, 3},
         )
 
     if agent_multicore_summary:
@@ -4933,10 +4908,10 @@ def generate_word(
                 "Devices / Total",
             ],
             agent_multicore_summary.settings_rows,
-            {1},
         )
 
     document.save(str(word_output))
+    report_tables.normalize_docx_tables(word_output)
 
 
 def main() -> int:

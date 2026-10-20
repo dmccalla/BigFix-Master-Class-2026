@@ -51,6 +51,14 @@ def test_header_row_is_white_on_navy_without_contextual_spacing(
     assert "contextualSpacing" not in first_row
 
 
+def test_header_text_is_left_aligned(tmp_path: Path) -> None:
+    """Word lets the style's header alignment win over a direct left, so the
+    style itself must say left. Number columns go right per paragraph."""
+    xml = _styles_xml(build_style_template.build(tmp_path / "style.docx"))
+    header_ppr = re.search(r"<w:pPr>.*?</w:pPr>", _first_row(xml), re.S).group(0)
+    assert '<w:jc w:val="left"/>' in header_ppr
+
+
 def test_normal_carries_no_color(tmp_path: Path) -> None:
     """A color on Normal outranks the table style and hides the header text."""
     xml = _styles_xml(build_style_template.build(tmp_path / "style.docx"))

@@ -81,6 +81,7 @@ from Lib.Core.input_utils import (
     resolve_output_docx as shared_resolve_output_docx,
 )
 from Lib.Core.ooxml import splice_preserving_bookmarks
+from Lib.Design import report_tables
 from Lib.Themes.chart_theme import THEME
 
 IMAGE_REL_TYPE = (
@@ -2146,6 +2147,7 @@ def append_perfmon_capture_section(
     insert_at = find_perfmon_append_insert_point(doc_xml)
     new_doc_xml = doc_xml[:insert_at] + "\n".join(section_chunks) + doc_xml[insert_at:]
     new_doc_xml = _dedup_docpr_ids(new_doc_xml)
+    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml, size_from_text=False)
 
     write_or_replace_zip_member(
         output_path,
@@ -2342,6 +2344,7 @@ def inject_perfmon_charts(
     new_doc_xml = insert_perfmon_summary(new_doc_xml, observations)
     new_doc_xml = replace_observation_placeholders(new_doc_xml, observations)
     new_doc_xml = _dedup_docpr_ids(new_doc_xml)
+    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml, size_from_text=False)
 
     log.step("Writing output document")
 

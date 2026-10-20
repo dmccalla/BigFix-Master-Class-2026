@@ -6,19 +6,19 @@
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 """
-inject_perfmon_charts.py -- Perfmon Chart Injector
+inject_perfmon_charts.py -- PerfMon Chart Injector
 
 Python conversion of Inject-PerfmonCharts.ps1.
 
 Purpose:
-  Injects Perfmon PNG graphs produced by get_perfmon_charts.py into a Word
+  Injects PerfMon PNG graphs produced by get_perfmon_charts.py into a Word
   document.
 
 Behavior:
   - Scans the graph PNG folder for files.
-  - Maps PNG names to Perfmon template sections.
+  - Maps PNG names to PerfMon template sections.
   - Opens the Word template as a DOCX/Open XML package.
-  - Discovers placeholder images in the Perfmon appendix at runtime.
+  - Discovers placeholder images in the PerfMon appendix at runtime.
   - Replaces placeholder image paragraphs when placeholders exist.
   - Inserts chart images after section headings when no placeholder exists.
   - Replaces "Your observations go here" when perfmon_observations.json exists.
@@ -1297,7 +1297,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         score_color, cls, label = "#1F8A5B", "st-healthy", "Healthy"
 
     data = {
-        "title": "Perfmon Infrastructure Analysis",
+        "title": "PerfMon Infrastructure Analysis",
         "sub": f"{len(counters)} checks vs. thresholds · value = average · bar vs. limit marker",
         "score": score,
         "scoreColor": score_color,
@@ -1569,7 +1569,7 @@ def discover_perfmon_sections(
       - image rId -> existing media filename
 
     This mirrors the PowerShell approach:
-      - Find the first paragraph containing "Perfmon" to enter the appendix.
+      - Find the first paragraph containing "PerfMon" to enter the appendix.
       - Match sections by keyword words being present in heading text.
       - Scan image-only paragraphs before text matching/skipping.
     """
@@ -1605,7 +1605,7 @@ def discover_perfmon_sections(
             if text and is_perfmon_counters_heading(para, text):
                 in_perfmon_appendix = True
                 perfmon_heading_level = heading_level or 1
-                log.detail("Entered Perfmon appendix at", text)
+                log.detail("Entered PerfMon appendix at", text)
             continue
 
         # Inside Perfmon appendix.
@@ -1614,7 +1614,7 @@ def discover_perfmon_sections(
             and perfmon_heading_level
             and heading_level <= perfmon_heading_level
         ):
-            log.detail("Leaving Perfmon appendix at", text)
+            log.detail("Leaving PerfMon appendix at", text)
             break
 
         # Scan for images before text-based skipping. Image-only paragraphs have
@@ -1663,7 +1663,7 @@ def discover_perfmon_sections(
             log.detail("Section matched", f"'{current_section_key}' <- '{text}'")
 
     if not in_perfmon_appendix:
-        log.warn("Could not find any paragraph containing 'Perfmon' in the template.")
+        log.warn("Could not find any paragraph containing 'PerfMon' in the template.")
         log.detail("Paragraph text found in template:")
         for pm in paragraphs:
             text = paragraph_plain_text(pm.group(0))
@@ -2234,7 +2234,7 @@ def inject_perfmon_charts(
     if not injections:
         raise ValueError(
             "No chart injection targets were found. "
-            "Confirm the template contains Perfmon section headings and/or placeholder images."
+            "Confirm the template contains PerfMon section headings and/or placeholder images."
         )
 
     log.step("Injecting charts")
@@ -2371,13 +2371,13 @@ def inject_perfmon_charts(
 
 def main() -> int:
     parser = argparse.ArgumentParser(
-        description="Inject Perfmon PNG graphs into a Word document."
+        description="Inject PerfMon PNG graphs into a Word document."
     )
 
     parser.add_argument(
         "--chart-folder",
         default="",
-        help="Path or folder name containing Perfmon PNG graphs from get_perfmon_chart.py. Folder must contain .png files.",
+        help="Path or folder name containing PerfMon PNG graphs from get_perfmon_chart.py. Folder must contain .png files.",
     )
 
     parser.add_argument(

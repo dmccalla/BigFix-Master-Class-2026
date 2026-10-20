@@ -6,7 +6,7 @@
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
 """
-get_perfmon_charts.py -- Perfmon Infrastructure Analysis
+get_perfmon_charts.py -- PerfMon Infrastructure Analysis
 
 Produces:
   - Excel workbook  (findings, worst offenders, raw data, per-counter charts)
@@ -1864,7 +1864,7 @@ def resolve_output_xlsx(candidate_text: str, default_name: str) -> Path:
 
 def main() -> None:
     parser = argparse.ArgumentParser(
-        description="Perfmon Infrastructure Analysis",
+        description="PerfMon Infrastructure Analysis",
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog=__doc__,
     )
@@ -1894,7 +1894,7 @@ def main() -> None:
     add_stamp_arguments(parser)
     args = parser.parse_args()
 
-    log.title("Perfmon Infrastructure Analysis")
+    log.title("PerfMon Infrastructure Analysis")
 
     if not clean_user_path(args.input):
         print("PerfMon input file is required. Pass it with --input.", file=sys.stderr)
@@ -2106,7 +2106,7 @@ def main() -> None:
             docx_out = None
 
     # ---- Done --------------------------------------------------------------
-    log.ok("Perfmon analysis built")
+    log.ok("PerfMon analysis built")
     log.result("Excel", out_path)
     log.detail("Workbook includes")
     for sheet in [

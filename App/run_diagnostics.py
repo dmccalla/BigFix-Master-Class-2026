@@ -12,7 +12,7 @@ Runs the three analysis modules from a JSON config written by the desktop UI
 and collects their outputs under one run folder:
 
   - Client Performance Analysis   (Get/get_loop_health.py)
-  - Perfmon Infrastructure Analysis    (Get/get_perfmon_charts.py)
+  - PerfMon Infrastructure Analysis    (Get/get_perfmon_charts.py)
   - FillDB Performance Analysis        (Get/get_filldb_performance.py)
 
 Each module writes its own Mini Report, Infographic, and Excel outputs. There
@@ -1089,7 +1089,7 @@ PERFMON_SCHEMA: list[InputField] = [
     InputField(
         key="blg_path",
         kind="file",
-        label="Capture 1 Perfmon .blg File",
+        label="Capture 1 PerfMon .blg File",
         extensions={".blg"},
     ),
     InputField(
@@ -1119,7 +1119,7 @@ PERFMON_SCHEMA: list[InputField] = [
     InputField(
         key="capture2_blg_path",
         kind="file_optional",
-        label="Capture 2 Perfmon .blg File",
+        label="Capture 2 PerfMon .blg File",
         extensions={".blg"},
     ),
     InputField(
@@ -1189,7 +1189,7 @@ def _write_perfmon_mini_report(
             from docx import Document
 
             document = apply_standalone_narrow_margins(Document())
-        add_stub_front_matter(document, "Perfmon Infrastructure Analysis")
+        add_stub_front_matter(document, "PerfMon Infrastructure Analysis")
         document.save(str(base_path))
 
         run_python(
@@ -1270,7 +1270,7 @@ def run_perfmon_pipeline(
     ts: str,
     log: RunLog | None = None,
 ) -> None:
-    _print_step_header("Step: Perfmon Infrastructure Analysis", log)
+    _print_step_header("Step: PerfMon Infrastructure Analysis", log)
     capture2_blg_path = inputs.get("capture2_blg_path")
     if log:
         log.info("Capture 1 BLG", str(inputs["blg_path"]))
@@ -1378,15 +1378,15 @@ def perfmon_done(inputs: dict, ts: str) -> list[str]:
     prefix = inputs.get("_file_prefix", f"Output_{ts}")
     folder = inputs["_out_folder"]
     lines = [
-        f"Perfmon Excel       : {folder / f'{prefix}_Perfmon.xlsx'}",
-        f"Perfmon Graphs      : {folder / f'{prefix}_Perfmon_Charts'}",
-        f"Perfmon Mini Report : {folder / f'{prefix}_Perfmon_Mini_Report.docx'}",
+        f"PerfMon Excel       : {folder / f'{prefix}_Perfmon.xlsx'}",
+        f"PerfMon Graphs      : {folder / f'{prefix}_Perfmon_Charts'}",
+        f"PerfMon Mini Report : {folder / f'{prefix}_Perfmon_Mini_Report.docx'}",
     ]
     if inputs.get("capture2_blg_path"):
         lines.extend(
             [
-                f"Perfmon Capture 2 Excel  : {folder / f'{prefix}_Perfmon_Capture_2.xlsx'}",
-                f"Perfmon Capture 2 Graphs : {folder / f'{prefix}_Perfmon_Capture_2_Charts'}",
+                f"PerfMon Capture 2 Excel  : {folder / f'{prefix}_Perfmon_Capture_2.xlsx'}",
+                f"PerfMon Capture 2 Graphs : {folder / f'{prefix}_Perfmon_Capture_2_Charts'}",
             ]
         )
     return lines
@@ -1640,7 +1640,7 @@ MODULES: list[Module] = [
     Module(
         key="perfmon",
         windows_only=True,
-        label="Perfmon Infrastructure Analysis",
+        label="PerfMon Infrastructure Analysis",
         inputs_schema=PERFMON_SCHEMA,
         run=run_perfmon_pipeline,
         summary=perfmon_summary,

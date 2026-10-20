@@ -221,7 +221,7 @@ RAIL_LABELS = ["Folders", "Modules", "Build"]
 # the ones App/run_diagnostics.py prints, so progress can follow the log.
 STEP_HEADERS = {
     "loop": "Client Performance Analysis",
-    "perfmon": "Perfmon Infrastructure Analysis",
+    "perfmon": "PerfMon Infrastructure Analysis",
     "filldb": "FillDB Performance Analysis",
 }
 BROWSABLE_INPUT_KINDS = {"file", "file_optional", "folder", "folder_optional"}
@@ -4631,7 +4631,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
                 value = var.get().strip()
                 if value == DETECTING:
                     errors.append(
-                        f"Perfmon Infrastructure Analysis: wait for {label} detection to "
+                        f"PerfMon Infrastructure Analysis: wait for {label} detection to "
                         "finish, or type the value."
                     )
                 elif value and not self._positive_int_or_blank(value):

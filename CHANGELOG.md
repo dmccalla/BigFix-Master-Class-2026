@@ -61,6 +61,7 @@ the project release process for the steps to cut a release.
 
 ### Changed
 
+- Spell PerfMon in the text readers see: report titles, app labels and messages, console and log lines, and help text. File and folder names, identifiers, globs and config keys keep Perfmon.
 - Rate ActionSite size against a 10 MB soft warning (Needs Attention) and a 25 MB hard ceiling (Critical), by Duncan's 10-19 ruling. It used a "Review" word no other Contributing Factors row uses.
 - Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.
 - Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects · M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).

@@ -43,8 +43,9 @@ Each row records UTC time, a stable request ID, resource, capture filename, outc
 native CLI exit code, HTTP status when the CLI reports one, elapsed milliseconds,
 server evaluation time when the XML includes it, and the availability-failure count.
 Use request ID and the embedded task's `-QueryNumber` to find the original relevance.
-Do not log passwords, tokens, command arguments, or returned metric values in these
-diagnostic files. Metric answers remain in their normal evidence captures.
+Per-request rows exclude passwords, tokens, command arguments and returned metric
+values. JSON and text summaries include only the environment allowlist below. Other
+metric answers remain in their normal evidence captures.
 
 | Case | Behavior |
 |---|---|
@@ -69,6 +70,55 @@ parallel. A client-side timeout does not prove the server-side relevance stopped
 After a stop, review the diagnostics and retained XML, resolve the cause, and rerun
 manually when appropriate. Failed queries also append the established
 `ERROR: Query line N failed:` marker so evidence consumers can detect incomplete data.
+
+## Readable diagnostics and environment context
+
+Every run writes `Diagnostics/Deployment_Collector_<action ID>_Summary.txt`, even
+when optional data logs are off. The existing JSON state is schema version 2 and
+retains its original counters and exit code. CSV columns and row counts are unchanged.
+The summary is refreshed as requests complete, on normal completion, and on a
+collector-controlled stop. A Running snapshot is not proof of completion. An external
+action interruption or inaccessible diagnostic storage can leave the last snapshot.
+
+The summary includes selected sections, planned/attempted requests, pacing and log
+settings, UTC start/update/end, collection-window duration, summed request wall time,
+section totals, up to ten slowest query IDs and twenty failure examples. The CSV
+retains every request. Scheduled pacing is an estimate, not a measured duration;
+the next pause might not execute if an action is interrupted. Request wall time
+excludes PowerShell startup, response classification, pacing and data-log conversion.
+The diagnostic window starts at initialization and excludes earlier backup/setup.
+In Day 1 it can include selected dashboard modules; their selection is recorded. A
+separate Deployment Information window starts at its first API request and includes
+later pacing, local captures and log conversion, excluding earlier initialization,
+login and dashboard modules. Until a request starts, that window is unavailable. Returned server evaluation durations are converted
+only when their units are recognized. Report parsed/unrecognized counts; do not treat
+an absent duration as a zero-duration query.
+
+Reuse successful answers from DI-014/015/016 for computer, active-computer and relay
+counts; DI-020 or DI-030 for server version counts; DI-033/034/035 for reported root
+CPU, RAM and OS. Record the source ID. Reject a partial Result accompanied by Error.
+Missing, skipped, blank or failed answers remain null/Unavailable; a real zero remains
+zero. Root values can describe multiple root servers in a deployment.
+
+At initialization, read a local allowlist of OS-reported CPU model/socket/core/thread
+counts, RAM GiB, manufacturer/model and OS caption/version/architecture. A VM describes
+its assigned resources. This uses three local
+[`Get-CimInstance` reads](https://learn.microsoft.com/en-us/powershell/module/cimcmdlets/get-ciminstance?view=powershell-5.1),
+each with a three-second operation timeout. There are no new BigFix API requests.
+Missing local context adds a context note, not a collection failure. Never copy entire
+CIM objects, hardware-analysis results, host identities, serial/processor IDs, license
+information, credentials or arbitrary metric answers into the new JSON context or
+text summary. Existing CSV capture filenames retain their established naming.
+Review deployment context before sharing it outside its authorized audience.
+
+Store the normalized helper SHA-256, shipped query-contract SHA-256, client version
+and observed server-version counts for repeated measurements. Engine identity/version,
+database/storage performance, concurrent load and cache state are explicitly unknown;
+do not infer them. These diagnostics support runtime estimates and later comparisons
+with matching versions, query sets, sections, pacing and log settings. The shipped
+query fingerprint describes the tested task; custom ActionScript edits need their
+own comparison identity. They do not
+establish deployment rankings. Automatic aggregation or uploading is not added.
 
 ## BigFix action results
 
@@ -176,4 +226,33 @@ Information only; it does not claim a new dashboard runtime validation.
 
 These results verify the collector and retained output contract. They do not remove
 the three existing query-engine limitations or establish production capacity.
-Human readable diagnostic summaries and cross-deployment baselines are deferred.
+Readable summaries and environment context are included. Cross-deployment aggregation
+and benchmarking remain separate work.
+
+## Diagnostics follow-up validation, 2026-10-19 Eastern
+
+Standalone validation preceded the combined update, on the same allowlisted BFROOT1
+target. No collection actions overlapped. One second was an explicit lab override;
+the shipped five-second default and the original request/capture contracts remain.
+
+| Action | Coverage | Result |
+|---|---|---|
+| 1715 | Platform standalone, General and Root, five-second pacing, data logs off | Completed, code 0. All 34 requests succeeded; 38 CSV lines. Counts, server versions, root hardware, readable summary and XML client values verified. This first run preceded the separate first-request window refinement. |
+| 1717 | TA standalone, Root only, one-second pacing, data logs off | Completed, code 0. Eight requests and 12 CSV lines; root values retained, zero data logs. Summary and schema 2 checks passed. Node count remained Unavailable with General skipped; separate diagnostic/request windows verified. |
+| 1719 | Class standalone, Root only, one-second pacing, data logs on | Completed, code 0. Eight requests and 12 CSV lines; one root data log. Summary and schema 2 checks passed. Retained summary helper fingerprint matches the shipped source. |
+| 1721 | Platform Day 1 combined, Deployment Information only, one-second pacing, data logs off | Full lab collection is in progress. Final result and capture verification will be recorded before publication. |
+
+Before integrating the concurrent loop-health update, offline suites passed: Platform 2,289 tests (82 skips), TA 650 (31 skips), and
+Class 644 (33 skips). Ruff lint and formatting passed in all three. Native helper
+coverage is 27 tests, including missing versus zero counts, rejected partial answers,
+allowlisted context, unavailable local discovery, explicit timing units, bounded
+slowest/failure lists, helper identity and the first-request timing window. The
+existing consumer compatibility test includes the new summary alongside diagnostics.
+
+The three normalized standalone action bodies match, as do the helper sources.
+Normalized helper SHA-256 is
+`33b40e34cde423ea9e3bd628750f5e1f6dd7bd3fd43627d070343d524d1e5c5a`.
+The preserved query/literal/client-value contracts remain 177/113/13, with no added
+BigFix API queries. All 104 combined dashboard query commands remain unchanged.
+Get, Inject, customer report prose, templates and client-performance code were not
+changed by this follow-up.

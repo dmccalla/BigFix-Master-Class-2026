@@ -5,6 +5,7 @@
 from __future__ import annotations
 
 import csv
+import hashlib
 import json
 import shutil
 import subprocess
@@ -51,6 +52,26 @@ class FakeIem {
         }
         if (kind == "large") {
             Console.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BESAPI><Query><Result><Answer type=\"string\">" + new string('x', 2000000) + "</Answer></Result></Query></BESAPI>"); return 0;
+        }
+
+        if (kind == "slow") System.Threading.Thread.Sleep(800);
+        string labelled = null;
+        if (kind == "nodes" || kind == "partial-nodes") labelled = "Number of Computers: 42";
+        if (kind == "zero-relays") labelled = "Number of Relays: 0";
+        if (kind == "license-secret") labelled = "License Site Number: PRIVATE_LICENSE";
+        if (kind == "active-nodes") labelled = "Number of Active Computers: 32";
+        if (kind == "server-versions") labelled = "BES Server Version Counts: 11.0.6--2";
+        if (kind == "blank-versions") labelled = "BES Server Version Counts: ";
+        if (kind == "server-cpu") labelled = "BES Server CPU: Lab CPU";
+        if (kind == "server-ram") labelled = "BES Server RAM: 64 GB";
+        if (kind == "server-os") labelled = "BES Server OS: Lab OS";
+        if (kind == "hardware-secret") labelled = "BES Server Hardware Information: PRIVATE_HARDWARE";
+        if (labelled != null) {
+            string error = kind == "partial-nodes" ? "<Error>Unsupported operation</Error>" : "";
+            Console.WriteLine("<?xml version=\"1.0\"?><BESAPI><Query><Result><Answer type=\"string\">" + labelled + "</Answer></Result>" + error + "</Query></BESAPI>"); return 0;
+        }
+        if (kind == "seconds" || kind == "no-unit") {
+            Console.WriteLine("<?xml version=\"1.0\"?><BESAPI><Query><Result/><Evaluation><Time>" + (kind == "seconds" ? "0.5s" : "0.5") + "</Time></Evaluation></Query></BESAPI>"); return 0;
         }
         string answer = kind == "empty" ? "" : "<Answer type=\"string\">PRIVATE_METRIC &amp; 401</Answer>";
         Console.WriteLine("<?xml version=\"1.0\" encoding=\"UTF-8\"?><BESAPI><Query><Result>" + answer + "</Result><Evaluation><Time>0.25ms</Time></Evaluation></Query></BESAPI>");
@@ -155,6 +176,8 @@ def test_authentication_failure_stops_immediately(collector, response):
     assert call("Request", response) == 24002
     assert json.loads(state.read_text())["Requests"] == 1
     assert "AuthenticationFailure" in capture.read_text()
+    assert json.loads(state.read_text())["Run"]["Status"] == "Stopped"
+    assert "24002" in state.with_name("state_Summary.txt").read_text()
     assert not Path(str(state) + ".response.xml").exists()
 
 
@@ -175,6 +198,8 @@ def test_three_consecutive_availability_failures_stop(collector, response):
     data = json.loads(state.read_text())
     assert data["Requests"] == 3  # No automatic retries.
     assert data["ConsecutiveAvailabilityFailures"] == 3
+    assert data["Run"]["Status"] == "Stopped"
+    assert "24003" in state.with_name("state_Summary.txt").read_text()
 
 
 @pytest.mark.parametrize("query_response", ["query-error", "query-error-partial"])
@@ -235,3 +260,275 @@ def test_native_response_bytes_and_existing_capture_are_preserved(
     )
     assert call("Request", response) == 0
     assert capture.read_bytes() == prefix + expected + b"\n"
+
+
+CONTEXT_WRAPPER = r"""
+param($Helper, $ArgumentsFile, $HardwareMode)
+function Get-CimInstance {
+    param($ClassName, $Property, $OperationTimeoutSec, $ErrorAction)
+    if ($HardwareMode -eq 'Unavailable') { throw 'PRIVATE_EXCEPTION PRIVATE_HOST' }
+    switch ($ClassName) {
+        'Win32_ComputerSystem' { [pscustomobject]@{ Manufacturer='Lab vendor'; Model='Lab VM'; TotalPhysicalMemory=68719476736; Name='PRIVATE_HOST'; SerialNumber='PRIVATE_SERIAL' } }
+        'Win32_Processor' {
+            [pscustomobject]@{ Name='Lab CPU'; NumberOfCores=8; NumberOfLogicalProcessors=16; ProcessorId='PRIVATE_CPU_ID' }
+            [pscustomobject]@{ Name='Lab CPU'; NumberOfCores=8; NumberOfLogicalProcessors=16; ProcessorId='PRIVATE_CPU_ID' }
+        }
+        'Win32_OperatingSystem' { [pscustomobject]@{ Caption='Lab OS'; Version='10.0.12345'; OSArchitecture='64-bit'; RegisteredUser='PRIVATE_OWNER' } }
+        default { throw 'Unexpected CIM class' }
+    }
+}
+$bound = @{}
+(Get-Content -LiteralPath $ArgumentsFile -Raw | ConvertFrom-Json).PSObject.Properties | ForEach-Object { $bound[$_.Name] = $_.Value }
+& $Helper @bound
+exit $LASTEXITCODE
+"""
+
+
+@pytest.fixture
+def context_collector(tmp_path, fake_iem):
+    wrapper = tmp_path / "context-wrapper.ps1"
+    wrapper.write_text(CONTEXT_WRAPPER, encoding="utf-8")
+    sequence = 0
+
+    def create(
+        *,
+        hardware="Available",
+        selected="General=true;Root=true",
+        logs="0",
+        task_type="Standalone",
+        other_modules="",
+    ):
+        nonlocal sequence
+        sequence += 1
+        directory = tmp_path / str(sequence)
+        directory.mkdir()
+        state = directory / "state.json"
+        csv_path = directory / "diagnostics.csv"
+        capture = directory / "General_Info_PRIVATE_HOST.xml"
+        summary = directory / "state_Summary.txt"
+        arguments_file = directory / "arguments.json"
+
+        def call(mode, response=None, *, number=1):
+            arguments = {
+                "Mode": mode,
+                "StateFile": str(state),
+                "CsvFile": str(csv_path),
+                "Capture": str(capture),
+            }
+            if mode == "Init":
+                arguments.update(
+                    SelectedSections=selected,
+                    PauseSeconds=5,
+                    DataLogs=logs,
+                    ClientVersion="11.0.test",
+                    TaskType=task_type,
+                    OtherModules=other_modules,
+                )
+            if response:
+                arguments.update(
+                    IemPath=str(fake_iem),
+                    Resource="query",
+                    EncodedRelevance=response,
+                    QueryNumber=number,
+                )
+            arguments_file.write_text(json.dumps(arguments), encoding="utf-8")
+            result = subprocess.run(
+                [
+                    "powershell.exe",
+                    "-NoProfile",
+                    "-NonInteractive",
+                    "-ExecutionPolicy",
+                    "Bypass",
+                    "-File",
+                    str(wrapper),
+                    str(HELPER),
+                    str(arguments_file),
+                    hardware,
+                ],
+                capture_output=True,
+                text=True,
+                timeout=30,
+            )
+            assert not result.stdout and not result.stderr, (result.stdout, result.stderr)
+            return result.returncode
+
+        assert call("Init") == 0
+        return call, state, summary, capture
+
+    return create
+
+
+def test_context_reuses_only_successful_aggregate_answers_and_preserves_zero(
+    context_collector,
+):
+    call, state, summary, capture = context_collector()
+    for number, response in (
+        (14, "nodes"),
+        (16, "zero-relays"),
+        (15, "active-nodes"),
+        (20, "server-versions"),
+        (30, "blank-versions"),
+        (33, "server-cpu"),
+        (34, "server-ram"),
+        (35, "server-os"),
+        (3, "license-secret"),
+        (36, "hardware-secret"),
+    ):
+        assert call("Request", response, number=number) == 0
+    assert call("Finish") == 0
+    data = json.loads(state.read_text())
+    environment = data["Environment"]
+    assert environment["Deployment"]["ComputerCount"] == 42
+    assert environment["Deployment"]["RelayCount"] == 0
+    assert environment["Deployment"]["ActiveComputerCount"] == 32
+    assert environment["Deployment"]["ServerVersionCounts"] == "11.0.6--2"
+    assert environment["Sources"]["ServerVersionCounts"] == "DI-020"
+    assert environment["Deployment"]["RootServersReportedRam"] == "64 GB"
+    assert environment["Sources"]["ComputerCount"] == "DI-014"
+    local = environment["LocalRootHardware"]
+    assert (local["CpuSockets"], local["CpuCores"], local["LogicalProcessors"]) == (
+        2,
+        16,
+        32,
+    )
+    assert local["OsReportedMemoryGiB"] == 64
+    assert local["CpuModel"] == "Lab CPU"
+    assert data["Run"]["PlannedRequests"] == 34
+    assert "RelayCount: 0; source: DI-016" in summary.read_text()
+    assert "ActiveComputerCount: 32" in summary.read_text()
+    for text in (state.read_text(), summary.read_text()):
+        for private in (
+            "PRIVATE_HOST",
+            "PRIVATE_SERIAL",
+            "PRIVATE_CPU_ID",
+            "PRIVATE_OWNER",
+            "PRIVATE_LICENSE",
+            "PRIVATE_HARDWARE",
+            "PRIVATE_METRIC",
+        ):
+            assert private not in text
+    assert "PRIVATE_LICENSE" in capture.read_text()
+    assert "PRIVATE_HARDWARE" in capture.read_text()
+
+
+@pytest.mark.parametrize("response", ["partial-nodes", "empty", "forbidden"])
+def test_missing_or_failed_node_answers_do_not_become_zero(context_collector, response):
+    call, state, summary, _ = context_collector()
+    assert call("Request", response, number=14) == 0
+    expected = 0 if response == "empty" else 24004
+    assert call("Finish") == expected
+    data = json.loads(state.read_text())
+    assert data["Environment"]["Deployment"]["ComputerCount"] is None
+    assert "ComputerCount: Unavailable" in summary.read_text()
+    assert data["Run"]["Status"] == ("Completed" if expected == 0 else "Incomplete")
+
+
+def test_unavailable_local_context_does_not_fail_collection(context_collector):
+    call, state, summary, _ = context_collector(
+        hardware="Unavailable", selected="Root=true"
+    )
+    assert call("Request", "success", number=29) == 0
+    assert call("Finish") == 0
+    data = json.loads(state.read_text())
+    assert data["Errors"] == 0
+    assert data["Run"]["SelectedSections"] == ["Root"]
+    assert data["Run"]["PlannedRequests"] == 8
+    assert len(data["Environment"]["DiscoveryWarnings"]) == 3
+    assert all(
+        value is None for value in data["Environment"]["LocalRootHardware"].values()
+    )
+    assert "PRIVATE_EXCEPTION" not in summary.read_text()
+    assert "Local computer hardware unavailable" in summary.read_text()
+
+
+def test_readable_summary_has_bounded_slowest_requests_and_distinct_timings(
+    context_collector,
+):
+    call, state, summary, _ = context_collector(logs="1")
+    running = summary.read_text()
+    assert "Status: Running" in running and "Completion has not been confirmed" in running
+    for number in range(1, 12):
+        assert call("Request", "slow" if number == 4 else "success", number=number) == 0
+    assert call("Request", "query-error", number=12) == 0
+    assert call("Finish") == 24004
+    data = json.loads(state.read_text())
+    run = data["Run"]
+    assert run["PlannedRequests"] == 36  # The two optional admin calls.
+    assert run["PausesScheduled"] == data["Requests"] == 12
+    assert run["ElapsedMs"] >= run["RequestWallTimeMs"] > run["ServerEvaluationMs"]
+    assert run["ParsedEvaluationCount"] == 11
+    assert run["ServerEvaluationMs"] == 2.75
+    assert run["EndedUtc"] and run["Status"] == "Incomplete"
+    assert len(run["SlowestRequests"]) == 10
+    assert run["SlowestRequests"][0]["QueryId"] == "DI-004"
+    assert run["Sections"]["General"]["Failures"] == 1
+    assert run["FailureExamples"][0]["QueryId"] == "DI-012"
+    text = summary.read_text()
+    assert "estimated scheduled pacing" in text
+    assert "not a measured delay" in text
+    assert "Request wall time includes CLI execution" in text
+    assert "not end-to-end request time" in text
+    assert "DI-012 | General | QueryFailure" in text
+    assert len(run["HelperSha256"]) == len(run["QueryContractSha256"]) == 64
+    assert (
+        run["HelperSha256"]
+        == hashlib.sha256(HELPER.read_text(encoding="utf-8").encode("utf-8")).hexdigest()
+    )
+
+
+@pytest.mark.parametrize(
+    "response,expected,parsed,unparsed", [("seconds", 500, 1, 0), ("no-unit", 0, 0, 1)]
+)
+def test_server_evaluation_units_are_explicit(
+    context_collector, response, expected, parsed, unparsed
+):
+    call, state, _, _ = context_collector()
+    assert call("Request", response) == 0
+    assert call("Finish") == 0
+    run = json.loads(state.read_text())["Run"]
+    assert run["ServerEvaluationMs"] == expected
+    assert run["ParsedEvaluationCount"] == parsed
+    assert run["UnparsedEvaluationCount"] == unparsed
+
+
+@pytest.mark.parametrize("logs,expected", [("0", 177), ("1", 179)])
+def test_complete_plan_includes_only_selected_admin_requests(
+    context_collector, logs, expected
+):
+    selected = ";".join(
+        f"{section}=true"
+        for section in (
+            "General",
+            "Root",
+            "Relays",
+            "RelayAffiliation",
+            "Clients",
+            "ClientSettings",
+            "Operators",
+            "Content",
+            "Properties",
+            "Actions",
+        )
+    )
+    call, state, _, _ = context_collector(selected=selected, logs=logs)
+    assert call("Finish") == 0
+    assert json.loads(state.read_text())["Run"]["PlannedRequests"] == expected
+
+
+def test_combined_request_window_starts_after_initialization(context_collector):
+    call, state, summary, _ = context_collector(
+        task_type="Day1", other_modules="Overview=true;HealthDashboard=false"
+    )
+    initial = json.loads(state.read_text())["Run"]
+    assert initial["FirstRequestUtc"] is None
+    assert initial["RequestWindowMs"] is None
+    assert initial["OtherSelectedModules"] == ["Overview"]
+    assert call("Request", "success") == 0
+    assert call("Finish") == 0
+    run = json.loads(state.read_text())["Run"]
+    assert run["FirstRequestUtc"]
+    assert run["ElapsedMs"] > run["RequestWindowMs"] >= run["RequestWallTimeMs"]
+    assert "Other selected Day 1 modules: Overview" in summary.read_text()
+    assert (
+        "excludes earlier initialization/login/dashboard modules" in summary.read_text()
+    )

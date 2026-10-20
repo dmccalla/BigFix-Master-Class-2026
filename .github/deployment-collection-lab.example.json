@@ -131,6 +131,16 @@
               "name": "Collector diagnostics contain no failure category",
               "query": "not exists lines whose (it contains \",%22AuthenticationFailure%22,\" or it contains \",%22PermissionFailure%22,\" or it contains \",%22AvailabilityFailure%22,\" or it contains \",%22RequestFailure%22,\" or it contains \",%22QueryFailure%22,\" or it contains \",%22LocalCollectorFailure%22,\" or it contains \",%22LoginFailed%22,\" or it contains \",%22Incomplete%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
               "equals": "True"
+            },
+            {
+              "name": "Readable diagnostic summary exists",
+              "query": "exists files whose (name of it ends with \"_Summary.txt\" and size of it > 0) of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\"",
+              "equals": "True"
+            },
+            {
+              "name": "Diagnostic context schema is recorded",
+              "query": "exists lines whose (it contains \"%22SchemaVersion%22:  2\" or it contains \"%22SchemaVersion%22: 2\") of files whose (name of it ends with \".json\") of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\"",
+              "equals": "True"
             }
           ]
         }
@@ -257,6 +267,16 @@
             {
               "name": "Collector diagnostics contain no failure category",
               "query": "not exists lines whose (it contains \",%22AuthenticationFailure%22,\" or it contains \",%22PermissionFailure%22,\" or it contains \",%22AvailabilityFailure%22,\" or it contains \",%22RequestFailure%22,\" or it contains \",%22QueryFailure%22,\" or it contains \",%22LocalCollectorFailure%22,\" or it contains \",%22LoginFailed%22,\" or it contains \",%22Incomplete%22,\") of ((files of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\")) whose (name of it starts with \"Deployment_Collector_\" and name of it ends with \".csv\")",
+              "equals": "True"
+            },
+            {
+              "name": "Readable diagnostic summary exists",
+              "query": "exists files whose (name of it ends with \"_Summary.txt\" and size of it > 0) of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\"",
+              "equals": "True"
+            },
+            {
+              "name": "Diagnostic context schema is recorded",
+              "query": "exists lines whose (it contains \"%22SchemaVersion%22:  2\" or it contains \"%22SchemaVersion%22: 2\") of files whose (name of it ends with \".json\") of folder \"C:\\BigFix_Master_Class\\Platform\\Results\\Deployment_Information\\Diagnostics\"",
               "equals": "True"
             }
           ]

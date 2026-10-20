@@ -17,6 +17,9 @@ the project release process for the steps to cut a release.
 
 ### Deployment collection
 
+- Add an always-written deployment diagnostics summary with runtime totals, slowest query IDs, failure examples, selected settings and version fingerprints.
+- Reuse deployment counts and root details in diagnostic context and collect a local hardware allowlist without adding BigFix API queries. Keep missing context distinct from zero and preserve XML/log consumers.
+
 - Use the standard form-encoded Session Relevance route for lab preflight checks. Explorer-only JSON requests could return HTTP 503 while the collector's normal route was healthy. Keep normal engine selection and test the request contract.
 
 - Record per-request timings and failure categories in CSV/JSON diagnostics, stop on rejected authentication or three consecutive availability failures, and report distinct BigFix action exit codes. Preserve partial XML evidence, distinguish permission and relevance errors from outages, and document the policy in the collection design and task descriptions.

@@ -30,6 +30,8 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Read the active analyses count in Contributing Factors. The Deployment Information capture writes "Number of Activated Analyses", which the report did not match, so it always showed 0 active and never checked the 500 limit.
+- Count only named relays and subnets in the Top 10 notes. Devices with no relay or no usable address were counted as one more relay or subnet.
 - Leave the collection span out of the Client Performance Infographic header when no report dates were given. It read "Not provided collection".
 - Label a Retrieved Property in the Top 10 Interval column as Not collected. It said Not a property, but retrieved properties have intervals that the Property_Info capture does not list. Site evaluations still read Not a property.
 - Read a UDP notifications .xml capture chosen as the input. It has no header row, so the report said Not collected. It is now split the way the collector splits it and gives the same counts as the collector's CSV.

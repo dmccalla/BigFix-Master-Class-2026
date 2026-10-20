@@ -157,3 +157,32 @@ def test_infographic_header_names_a_span_only_when_dates_were_given(
         metrics.report_span_text = span
         loop.generate_png(metrics, tmp_path / "loop.png")
         assert captured["meta"] == expected
+
+
+def test_activated_analyses_count_is_read(tmp_path: Path) -> None:
+    # The Deployment Information task writes "Activated", as the lab capture shows.
+    (tmp_path / "Content_Info_BFROOT1_10-19-2026_1444.log").write_text(
+        "CONTENT INFORMATION\n"
+        "Number of Analyses: 33 / 4404\n"
+        "Number of Properties: 7261\n"
+        "Number of Actived Properties: 265\n"
+        "Number of Activated Analyses: 33\n",
+        encoding="utf-8",
+    )
+
+    pressure = loop.parse_actionsite_pressure(tmp_path)
+
+    assert pressure.active_analyses_count == 33
+
+
+def test_rollup_note_counts_only_named_relays(tmp_path: Path) -> None:
+    from docx import Document
+
+    rows = [[f"relay{i:02d}", "1"] for i in range(11)] + [["Not reported", "77"]]
+    document = Document()
+    loop.add_capped_rollup_table(
+        document, "Relays", "Top 10 Relays", ["Relay", "Devices"], rows, {1}, "relays"
+    )
+
+    text = "\n".join(p.text for p in document.paragraphs)
+    assert "Showing 10 of 11 relays." in text

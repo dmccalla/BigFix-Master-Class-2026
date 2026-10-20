@@ -1121,7 +1121,7 @@ def parse_actionsite_pressure(folder: Path | None) -> ActionSitePressure | None:
         active_analyses_count=_first_int_from_latest_file(
             folder,
             content_patterns,
-            r"Number of Active Analyses\s*:\s*([\d,]+)",
+            r"Number of Activ(?:ated|ed|e) Analyses\s*:\s*([\d,]+)",
         ),
         properties_count=_first_int_from_latest_file(
             folder,
@@ -4305,6 +4305,9 @@ def add_note_paragraph(document, text: str) -> None:
 MINI_REPORT_ROLLUP_LIMIT = 10
 
 
+UNREPORTED_GROUPS = {"Not reported", "Unknown"}
+
+
 def add_capped_rollup_table(
     document,
     heading: str,
@@ -4324,9 +4327,12 @@ def add_capped_rollup_table(
         centered_columns,
     )
     if capped:
+        # Devices with no relay or no usable address are a group, not a relay or
+        # subnet, so they are not counted in the note.
+        named = sum(1 for row in rows if str(row[0]) not in UNREPORTED_GROUPS)
         add_note_paragraph(
             document,
-            f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {len(rows):,} {noun}. "
+            f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {named:,} {noun}. "
             "The full list is in the workbook.",
         )
 

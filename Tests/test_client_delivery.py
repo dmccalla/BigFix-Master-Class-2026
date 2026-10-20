@@ -338,3 +338,25 @@ def test_real_chart_has_no_script_errors_or_clipped_text(delivered):
             assert not problems, problems
         finally:
             browser.close()
+
+
+def test_known_answers_cover_current_client_setting_columns():
+    frame = pd.DataFrame(CASE["loop_rows"], columns=CASE["loop_headers"])
+    computer, maximum, average = loop.auto_detect_columns(frame)
+    rows, missing, errors = loop.process_rows(frame, computer, maximum, average)
+    assert (missing, errors) == (1, 1)
+    expected = CASE["expected_client_settings"]
+    polling = loop.analyze_command_polling(rows)
+    assert polling.enabled_count == expected["polling_enabled_reporting"]
+    assert polling.interval_below_loop_count == expected["polling_below_loop"]
+    assert (
+        loop.analyze_fast_hash_verify(rows).disabled_count
+        == expected["fast_hash_disabled_reporting"]
+    )
+    assert [row.agent_total_physical_cpu_core_count for row in rows] == expected[
+        "physical_cores_reporting"
+    ]
+    assert all(row.agent_cpu_work_idle == expected["cpu_idle_work"] for row in rows)
+    assert all(row.agent_cpu_sleep_idle == expected["cpu_idle_sleep"] for row in rows)
+    assert loop.analyze_agent_multicore(rows).total_devices == 4
+    assert loop.analyze_agent_cpu_idle(rows).total_devices == 4

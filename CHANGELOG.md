@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Extend the synthetic delivery dataset to the full current client schema, including polling, UDP, FastHashVerify, CPU idle, multicore and core counts, while retaining property interval, retrieved-property and missing-value cases.
+
 - Verify the default demonstration data with current Client Performance, PerfMon and FillDB report builds. Record capture provenance, current-field coverage and input hashes without changing original capture dates.
 
 - Build a separate versioned large-Perfmon sample ZIP and SHA-256 with each release package. Keep the small default sample separate, validate external BLG inputs before staging, and record hashes and extraction paths in the companion manifest.

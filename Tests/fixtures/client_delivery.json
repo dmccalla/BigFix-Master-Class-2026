@@ -1,40 +1,117 @@
 {
-  "case": "client-delivery-v1",
+  "case": "client-delivery-v2",
   "loop_headers": [
     "Computer Name",
     "Platform Health Check - Maximum Cycle Minutes",
-    "Platform Health Check - Average Cycle Minutes"
+    "Platform Health Check - Average Cycle Minutes",
+    "Platform Health Check - Last UDP Ping",
+    "Platform Health Check - Receiving UDP Pings",
+    "Platform Health Check - Command Polling Enabled",
+    "Platform Health Check - Command Polling Minutes",
+    "Platform Health Check - FastHashVerify Enabled",
+    "Platform Health Check - FastHashVerify Work ms",
+    "Platform Health Check - FastHashVerify Sleep ms",
+    "Platform Health Check - Agent Multicore Scaling Enabled",
+    "Platform Health Check - Agent CPU Work Idle",
+    "Platform Health Check - Agent CPU Sleep Idle",
+    "Platform Health Check - Agent Total Physical CPU Core Count"
   ],
   "loop_rows": [
     [
       "QA-FAST",
       "20",
-      "10"
+      "10",
+      "2026-10-01 12:00:00 -0400",
+      "True",
+      "1",
+      "20",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "8"
     ],
     [
       "QA-30",
       "45",
-      "30"
+      "30",
+      "2026-10-01 12:00:00 -0400",
+      "True",
+      "1",
+      "40",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "4"
     ],
     [
       "QA-60",
       "75",
-      "60"
+      "60",
+      "2026-10-01 12:00:00 -0400",
+      "False",
+      "1",
+      "70",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "2"
     ],
     [
       "QA-SLOW",
       "90",
-      "61"
+      "61",
+      "2026-10-01 12:00:00 -0400",
+      "Not Reported",
+      "1",
+      "80",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "16"
     ],
     [
       "QA-MISSING",
       "<not reported>",
-      "<not reported>"
+      "<not reported>",
+      "2026-10-01 12:00:00 -0400",
+      "Not Reported",
+      "1",
+      "Not Set",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "Not Reported"
     ],
     [
       "QA-ERROR",
       "<error>",
-      "<error>"
+      "<error>",
+      "2026-10-01 12:00:00 -0400",
+      "Not Reported",
+      "1",
+      "Not Set",
+      "0",
+      "20",
+      "60",
+      "On",
+      "10",
+      "480",
+      "Not Reported"
     ]
   ],
   "properties": [
@@ -178,8 +255,8 @@
   "udp_answers": [
     "QA-FAST, 10.0.0.1, relay-a:52311, True",
     "QA-30, 10.0.0.2, relay-a:52311, True",
-    "QA-45, 10.0.0.3, relay-b:52311, False",
-    "QA-90, 10.0.0.4, relay-b:52311, Not Reported"
+    "QA-60, 10.0.0.3, relay-b:52311, False",
+    "QA-SLOW, 10.0.0.4, relay-b:52311, Not Reported"
   ],
   "minimum_analysis_interval_rows": [
     [
@@ -208,5 +285,18 @@
       "25.0%"
     ]
   ],
-  "expected_minimum_analysis_interval": "3 devices set _BESClient_Report_MinimumAnalysisInterval. 1 device sets it to 60 minutes and 2 devices set it to 60 seconds (no value set). A device with this setting runs its analyses at most once per that interval."
+  "expected_minimum_analysis_interval": "3 devices set _BESClient_Report_MinimumAnalysisInterval. 1 device sets it to 60 minutes and 2 devices set it to 60 seconds (no value set). A device with this setting runs its analyses at most once per that interval.",
+  "expected_client_settings": {
+    "polling_enabled_reporting": 4,
+    "polling_below_loop": 0,
+    "fast_hash_disabled_reporting": 4,
+    "physical_cores_reporting": [
+      "8",
+      "4",
+      "2",
+      "16"
+    ],
+    "cpu_idle_work": "10",
+    "cpu_idle_sleep": "480"
+  }
 }

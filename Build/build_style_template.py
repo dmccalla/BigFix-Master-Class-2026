@@ -116,8 +116,12 @@ TABLE_STYLE_XML = f"""
 HEADINGS = {
     1: dict(size=24, color=NAVY, before=240, after=180, keep=True),
     2: dict(size=18, color=SLATE, before=240, after=None, keep=True),
-    3: dict(size=14, color=NAVY, before=60, after=60, keep=False, line=276),
-    4: dict(size=14, color=BLUE, before=200, after=None, keep=True),
+    # H3, H4 and H5 follow Design's 10-20 change list, Section 1: 16, 14 and
+    # 12 pt, so each level is smaller than the one above. No border, no new
+    # font and no change to Normal.
+    3: dict(size=16, color=NAVY, before=360, after=120, keep=True, line=276),
+    4: dict(size=14, color=BLUE, before=240, after=80, keep=True),
+    5: dict(size=12, color=SLATE, before=200, after=40, keep=True),
 }
 NORMAL_SPACING = (120, 120)
 

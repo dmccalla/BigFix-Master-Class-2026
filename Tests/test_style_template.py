@@ -65,3 +65,19 @@ def test_shipped_template_matches_the_builder(tmp_path: Path) -> None:
     shipped = _styles_xml(SHIPPED)
     assert _style(shipped, "BigFixContent") == _style(built, "BigFixContent")
     assert _style(shipped, "Normal") == _style(built, "Normal")
+
+
+def test_heading_levels_step_down_with_no_border(tmp_path: Path) -> None:
+    """Design 10-20, Section 1: H3, H4 and H5 are 16, 14 and 12 pt, no border."""
+    xml = _styles_xml(build_style_template.build(tmp_path / "style.docx"))
+    for style_id, half_points, before, after in (
+        ("Heading3", "32", "360", "120"),
+        ("Heading4", "28", "240", "80"),
+        ("Heading5", "24", "200", "40"),
+    ):
+        style = _style(xml, style_id)
+        assert f'<w:sz w:val="{half_points}"/>' in style
+        assert f'w:before="{before}"' in style and f'w:after="{after}"' in style
+        assert "<w:keepNext/>" in style
+        assert "<w:pBdr>" not in style
+    assert "<w:color " not in _style(xml, "Normal")

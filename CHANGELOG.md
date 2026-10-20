@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+### Sample data
+
+- Track the Client Loop and Deployment Information demonstration inputs directly under the default sample folder. Include minimum analysis and property evaluation intervals, a Retrieved Property Top 10 example, consistent timing totals, and local test instructions.
+
 ### Documentation
 
 - Add Docs/Reference/Guide_Versions.md. It records the NFR guide (11.x.4) edition the thresholds are built against, the value each check takes from them, and the house values neither guide states.

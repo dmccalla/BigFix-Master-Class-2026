@@ -1,0 +1,945 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;CLIENT SETTINGS INFORMATION&quot;)">
+		<Result>
+			<Answer type="string">CLIENT SETTINGS INFORMATION</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.08ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.073ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Wed, 30 Sep 2026 08:29:35 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.078ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Report Version: 1.0&quot;)">
+		<Result>
+			<Answer type="string">Report Version: 1.0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.059ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.075ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;//===== ROOT SERVER AND RELAY SETTINGS ==================================&quot;)">
+		<Result>
+			<Answer type="string">//===== ROOT SERVER AND RELAY SETTINGS ==================================</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.037ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Description: Unique client settings specified on relays (limited to _BESClient_Relay, _Enterprise Server, _BESGather and _BESRelay prefix settings)&quot;)">
+		<Result>
+			<Answer type="string">Description: Unique client settings specified on relays (limited to _BESClient_Relay, _Enterprise Server, _BESGather and _BESRelay prefix settings)</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.07ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Column Headers: Setting Name, Setting Value, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Column Headers: Setting Name, Setting Value, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.296ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.108ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">_BESRelay_Comm_Authenticating </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESRelay_Diagnostics_Enable </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_GatherMirror_ClientActionSiteFolder </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Client\\__BESData\actionsite</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_HttpLogDirectoryPath </Answer>
+			<Answer type="string"> </Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_LogFilePath </Answer>
+			<Answer type="string"> /var/log/BESRelay.log</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_LogFilePath </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Relay\logfile.txt</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_MaxConnections </Answer>
+			<Answer type="string"> 5120</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_PortNumber </Answer>
+			<Answer type="string"> 52311</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_ServerRootPath </Answer>
+			<Answer type="string"> /var/opt/BESRelay/wwwrootbes</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_HTTPServer_ServerRootPath </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_HealthCheck_Enable </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_HealthCheck_EnableAtStartup </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_HealthCheck_IntervalMinutes </Answer>
+			<Answer type="string"> 30</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESRelay_Log_Verbose </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_PostResults_ParentRelayURL </Answer>
+			<Answer type="string"> http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/PostResults.exe</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESRelay_PostResults_ResultTimeLimit </Answer>
+			<Answer type="string"> 3</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_UploadManager_BufferDirectory </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Relay\UploadManagerData\BufferDir</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_UploadManager_CleanupHours </Answer>
+			<Answer type="string"> 120</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_BESRelay_UploadManager_ParentRelayHost </Answer>
+			<Answer type="string"> http://BFROOT1.dmc.lab:52311</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESGather_Comm_ParentRelayURL </Answer>
+			<Answer type="string"> http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/BESGatherMirror.exe</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESGather_Comm_UseUrlMoniker </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESGather_Download_CacheLimitMB </Answer>
+			<Answer type="string"> 102400</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESGather_Download_CacheLimitMB </Answer>
+			<Answer type="string"> 512000</Answer>
+			<Answer type="string">8</Answer>
+			<Answer type="string">_BESGather_Download_CheckInternetFlag </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">24</Answer>
+			<Answer type="string">_BESGather_Download_CheckParentFlag </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">16</Answer>
+			<Answer type="string">_Enterprise Server_ClientRegister_BatchCount </Answer>
+			<Answer type="string"> 100</Answer>
+			<Answer type="string">2</Answer>
+			<Answer type="string">_Enterprise Server_ClientRegister_BatchDelay </Answer>
+			<Answer type="string"> 1000</Answer>
+			<Answer type="string">2</Answer>
+			<Answer type="string">_Enterprise Server_ClientRegister_ParentRelayURL </Answer>
+			<Answer type="string"> http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/clientregister.exe</Answer>
+			<Answer type="string">3</Answer>
+			<Answer type="string">_Enterprise Server_ClientRegister_UDPMessagePort </Answer>
+			<Answer type="string"> 52311</Answer>
+			<Answer type="string">3</Answer>
+		</Result>
+		<Evaluation>
+			<Time>20.158ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.071ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;//===== CLIENT SETTINGS ==================================&quot;)">
+		<Result>
+			<Answer type="string">//===== CLIENT SETTINGS ==================================</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.077ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Description: Unique client settings specified on clients (non-relays, limited to _BESClient_ prefix settings excluding archive manager settings, _BESClient_Emsg, _BESClient_SecureRegistration, _BESClient_ActionManager, _BESClinet_Actionarchiver, _BESClient_Diagnostics_Password settings. Also contains a special section for ICMP control settings.&quot;)">
+		<Result>
+			<Answer type="string">Description: Unique client settings specified on clients (non-relays, limited to _BESClient_ prefix settings excluding archive manager settings, _BESClient_Emsg, _BESClient_SecureRegistration, _BESClient_ActionManager, _BESClinet_Actionarchiver, _BESClient_Diagnostics_Password settings. Also contains a special section for ICMP control settings.</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.092ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Column Headers: Setting Name, Setting Value, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Column Headers: Setting Name, Setting Value, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.123ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.07ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(substrings separated by &quot;|&quot; of (((item 0 of it) as string) &amp; &quot;|&quot; &amp; (item 1 of it as string))) of ((it,multiplicity of it) of unique values of((name of it | &quot;No-Name-Err-Trap&quot;) &amp;&quot; | &quot;&amp; (value of it | &quot;No-Val-Err-Trap&quot;)) of client settings whose ((name of it as lowercase Starts with(&quot;_BESClient&quot;as lowercase)) AND (NOT (name of it as lowercase starts with (&quot;_BESClient_ArchiveManager&quot;) as lowercase) AND (NOT (name of it as lowercase starts with (&quot;_BESClient_ActionManager&quot;) as lowercase)) AND (NOT (name of it as lowercase starts with (&quot;_BESClient_EMsg&quot;) as lowercase)) AND (NOT (name of it as lowercase starts with (&quot;_BESClient_SecureRegistration&quot;) as lowercase)) AND (NOT (name of it as lowercase starts with (&quot;_BESRelay_Diagnostics_Password &quot;) as lowercase)) )) of bes computers whose(NOT relay server flag of it))">
+		<Result>
+			<Answer type="string">_BESClient_ACCEPTED_enabled </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">544</Answer>
+			<Answer type="string">_BESClient_Comm_CommandPollEnable </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">619</Answer>
+			
+			
+			
+			<Answer type="string">_BESClient_Comm_CommandPollIntervalSeconds </Answer>
+			<Answer type="string"> 3600</Answer>
+			<Answer type="string">619</Answer>
+			<Answer type="string">_BESClient_DRAFT_enabled </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">362</Answer>
+			<Answer type="string">_BESClient_Download_Direct </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">181</Answer>
+			<Answer type="string">_BESClient_Download_DirectRecovery </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">181</Answer>
+			<Answer type="string">_BESClient_Download_Direct_Domainlist </Answer>
+			<Answer type="string"> *.adobe.com;*.apple.com;*.microsoft.com;*.bigfix.com;*.windowsupdate.com;*.ibm.com;*.google.com;*.mozilla.org</Answer>
+			<Answer type="string">181</Answer>
+			<Answer type="string">_BESClient_Download_DownloadsCacheLimitMB </Answer>
+			<Answer type="string"> 10240</Answer>
+			<Answer type="string">1812</Answer>
+			<Answer type="string">_BESClient_Download_FastHashVerify </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">495</Answer>
+			<Answer type="string">_BESClient_Download_NormalStageDiskLimitMB </Answer>
+			<Answer type="string"> 10240</Answer>
+			<Answer type="string">1812</Answer>
+			<Answer type="string">_BESClient_Download_PreCacheStageDiskLimitMB </Answer>
+			<Answer type="string"> 10240</Answer>
+			<Answer type="string">1812</Answer>
+			<Answer type="string">_BESClient_Download_PreCacheStageEnabled </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">1812</Answer>
+			<Answer type="string">_BESClient_JobThread_DebugOutPath </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Client\__BESData\__Global\Logs\dd.log</Answer>
+			<Answer type="string">181</Answer>
+			<Answer type="string">_BESClient_LastShutdown_Reason </Answer>
+			<Answer type="string"> Service manager shutdown request</Answer>
+			<Answer type="string">1631</Answer>
+			<Answer type="string">_BESClient_LastShutdown_Reason </Answer>
+			<Answer type="string"> Service manager stop request</Answer>
+			<Answer type="string">362</Answer>
+			<Answer type="string">_BESClient_Log_Days </Answer>
+			<Answer type="string"> 30</Answer>
+			<Answer type="string">1993</Answer>
+			<Answer type="string">_BESClient_RelaySelect_ResistFailureIntervalSeconds </Answer>
+			<Answer type="string"> 21600</Answer>
+			<Answer type="string">181</Answer>
+			<Answer type="string">_BESClient_Report_MinimumAnalysisInterval </Answer>
+			<Answer type="string"> 1800</Answer>
+			<Answer type="string">1</Answer>
+			<Answer type="string">_BESClient_Report_MinimumAnalysisInterval </Answer>
+			<Answer type="string"> 600</Answer>
+			<Answer type="string">2</Answer>
+			<Answer type="string">_BESClient_Report_MinimumInterval </Answer>
+			<Answer type="string"> 3600</Answer>
+			<Answer type="string">181</Answer><Answer type="string">_BESClient_Resource_ScaleWorkTimeWithCPUCores </Answer><Answer type="string"> 1</Answer><Answer type="string">495</Answer>
+			<Answer type="string">_BESClient_Resource_SleepFastHashVerify </Answer>
+			<Answer type="string"> 60</Answer>
+			<Answer type="string">495</Answer>
+			<Answer type="string">_BESClient_Resource_SleepIdle </Answer>
+			<Answer type="string"> 400</Answer>
+			<Answer type="string">2477</Answer>
+			<Answer type="string">_BESClient_Resource_WorkFastHashVerify </Answer>
+			<Answer type="string"> 20</Answer>
+			<Answer type="string">495</Answer>
+			<Answer type="string">_BESClient_Resource_WorkIdle </Answer>
+			<Answer type="string"> 100</Answer>
+			<Answer type="string">2477</Answer>
+			<Answer type="string">_BESClient_Upgrade_UTF8Settings </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">1993</Answer>
+			<Answer type="string">_BESClient_UploadManager_BufferDirectory </Answer>
+			<Answer type="string"> C:\Program Files (x86)\BigFix Enterprise\BES Client\__BESData\__Global\Upload</Answer>
+			<Answer type="string">1993</Answer>
+			<Answer type="string">_BESClient_UsageManager_EnableAppUsageSummary </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">1268</Answer>
+			<Answer type="string">_BESClient_UsageManager_EnableAppUsageSummaryApps </Answer>
+			<Answer type="string"> -:noapp:</Answer>
+			<Answer type="string">1268</Answer>
+			<Answer type="string">_BESClient_UsageManager_EnableAppUsageSummaryPath </Answer>
+			<Answer type="string"> 1</Answer>
+			<Answer type="string">1268</Answer>
+			<Answer type="string">_BESClient_WindowsOS_EnableSupersededEval </Answer>
+			<Answer type="string"> 0</Answer>
+			<Answer type="string">362</Answer>
+		</Result>
+		<Evaluation>
+			<Time>14.421ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.084ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;//===== ICMP CONTROLS ==================================&quot;)">
+		<Result>
+			<Answer type="string">//===== ICMP CONTROLS ==================================</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.125ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.044ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_Automatic, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_Automatic, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.053ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Tuple>
+				<Answer type="string">__RelaySelect_Automatic = 1</Answer>
+				<Answer type="string">2400</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">__RelaySelect_Automatic = 0</Answer>
+				<Answer type="string">137</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>11.551ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_MaximumTTLToPing, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_MaximumTTLToPing, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.105ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MaximumTTLToPing&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MaximumTTLToPing&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Undefined</Answer>
+				<Answer type="string">2400</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>14.339ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_IntervalSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_IntervalSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.107ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_IntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_IntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Undefined</Answer>
+				<Answer type="string">2400</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>9.302ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_MaxRetryIntervalSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_MaxRetryIntervalSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.096ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MaxRetryIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MaxRetryIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Undefined</Answer>
+				<Answer type="string">2400</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>7.338ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_MinRetryIntervalSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_MinRetryIntervalSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.056ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MinRetryIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MinRetryIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Undefined</Answer>
+				<Answer type="string">2400</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>8.951ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_RelaySelect_ResistFailureIntervalSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_RelaySelect_ResistFailureIntervalSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.09ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_ResistFailureIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_ResistFailureIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Undefined</Answer>
+				<Answer type="string">2219</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">21600</Answer>
+				<Answer type="string">181</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>9.878ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESCient_Report_MinimumInterval, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESCient_Report_MinimumInterval, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.079ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose (name of it as lowercase = ((&quot;_BESClient_Report_MinimumInterval&quot;) as lowercase) and exist value of it) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Report_MinimumInterval&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">2356</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">3600</Answer>
+				<Answer type="string">181</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>10.15ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Resource_InterruptSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Resource_InterruptSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.077ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose (name of it as lowercase = ((&quot;_BESClient_Resource_InterruptSeconds&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_InterruptSeconds&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">2537</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>10.706ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.062ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;//===== COMMAND POLLING ==================================&quot;)">
+		<Result>
+			<Answer type="string">//===== COMMAND POLLING ==================================</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.126ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.084ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Comm_CommandPollEnable, Number of Machines &quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Comm_CommandPollEnable, Number of Machines </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.077ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Comm_CommandPollInterval&quot;)as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Comm_CommandPollInterval&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">1918</Answer><Answer type="string">1</Answer><Answer type="string">619</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>11.319ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Comm_CommandPollIntervalSeconds, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Comm_CommandPollIntervalSeconds, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.094ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Comm_CommandPollIntervalSeconds&quot;)as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Comm_CommandPollIntervalSeconds&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">1918</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">3600</Answer>
+				<Answer type="string">619</Answer>
+			</Tuple>
+			<Tuple>
+				
+				
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>6.511ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.079ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;//===== CLIENT CPU USAGE ==================================&quot;)">
+		<Result>
+			<Answer type="string">//===== CLIENT CPU USAGE ==================================</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.082ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.075ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Resource_WorkNormal, Number of Machines &quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Resource_WorkNormal, Number of Machines </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.083ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_WorkNormal&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_WorkNormal&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">2537</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>11.236ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Resource_SleepNormal, Number of Machines &quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Resource_SleepNormal, Number of Machines </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.092ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_SleepNormal&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_SleepNormal&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">2537</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>17.144ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Resource_SleepIdle, Number of Machines &quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Resource_SleepIdle, Number of Machines </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.063ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_SleepIdle&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_SleepIdle&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">60</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">400</Answer>
+				<Answer type="string">2477</Answer>
+			</Tuple>
+			<Tuple>
+				
+				
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>12.401ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Value of _BESClient_Resource_WorkIdle, Number of Machines &quot;)">
+		<Result>
+			<Answer type="string">Value of _BESClient_Resource_WorkIdle, Number of Machines </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.058ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_WorkIdle&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_WorkIdle&quot; as lowercase)) of bes computers))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Default</Answer>
+				<Answer type="string">60</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">100</Answer>
+				<Answer type="string">2477</Answer>
+			</Tuple>
+			<Tuple>
+				
+				
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>10.475ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

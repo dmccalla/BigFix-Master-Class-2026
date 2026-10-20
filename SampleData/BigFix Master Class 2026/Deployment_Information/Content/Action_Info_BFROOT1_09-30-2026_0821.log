@@ -1,0 +1,167 @@
+ACTION INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:38:10 -0400
+Report Version: 1.0
+ 
+Number of Open Top Level Actions: 10
+Number of Open Actions: 10
+Number of Actions: 623
+Number of Actions by Current State: (Expired: 571); (Open: 10); (Stopped: 42)
+Number of Actions per Site: ActionSite--1, BES Support--20, Bethesda--5, BigFix Platform Health Audit Dev--82, BigFix Platform Health Audit QA--4, BigFix Settings--8, BigFix Workbench Dev--38, BigFix Workbench Test--213, Enterprise Security--1, Performance and Config Analysis--4, Server Automation--2, Software Distribution--1, Staples--2, Updates for Windows Applications Extended--2
+Large multiple action group in open state with greater than 100 component actions: 0
+Large multiple action group in open state with greater than 250 component actions: 0
+Large multiple action group in open state with greater than 500 component actions: 0
+Open actions targeting method specified: (By Computer ID: 4); (By Property: 6)
+Number of actions with multiple flag specified: 4
+Number of actions with single flag specified: 619
+Number of open actions associated to content that has since been superseded: 0
+Number of open actions issued by master operators: 10
+Number of open actions issued by non master operators: 0
+ 
+//===== ACTIONS BY ISSUER (ALL)  ==================================
+Column Headers: Name of Issuer, Number of Actions
+ 
+bigfix
+355
+workbench
+268
+ 
+//===== ACTIONS BY ISSUER (OPEN)  ==================================
+Column Headers: Name of Issuer, Number of Actions
+ 
+bigfix
+10
+ 
+//===== ACTIONS BY DATE  ==================================
+Column Headers: Timeframe, State, # of Actions In State
+ 
+Actions issued Today
+Expired
+2
+Actions issued Today
+Open
+4
+Actions issued Today
+Stopped
+23
+Actions issued less than 7 days ago
+Expired
+268
+Actions issued less than 7 days ago
+Open
+4
+Actions issued less than 7 days ago
+Stopped
+40
+Actions issued less than 15 days ago
+Expired
+387
+Actions issued less than 15 days ago
+Open
+5
+Actions issued less than 15 days ago
+Stopped
+41
+Actions issued less than 30 days ago
+Expired
+481
+Actions issued less than 30 days ago
+Open
+5
+Actions issued less than 30 days ago
+Stopped
+41
+Actions issued less than 60 days ago
+Expired
+571
+Actions issued less than 60 days ago
+Open
+10
+Actions issued less than 60 days ago
+Stopped
+42
+Actions issued less than 90 days ago
+Expired
+571
+Actions issued less than 90 days ago
+Open
+10
+Actions issued less than 90 days ago
+Stopped
+42
+All Time Action issue state
+Expired
+571
+All Time Action issue state
+Open
+10
+All Time Action issue state
+Stopped
+42
+ 
+//===== ACTIONS BY SOURCE ==================================
+Column Headers: Site Name, State, # of Actions In State
+ 
+BES Support
+Open
+1
+BigFix Settings
+Open
+5
+Performance and Config Analysis
+Open
+3
+Bethesda
+Stopped
+1
+BigFix Workbench Dev
+Stopped
+3
+BigFix Workbench Test
+Stopped
+20
+Performance and Config Analysis
+Stopped
+1
+Staples
+Stopped
+1
+ActionSite
+Expired
+1
+BES Support
+Expired
+19
+Bethesda
+Expired
+4
+BigFix Platform Health Audit Dev
+Expired
+82
+BigFix Platform Health Audit QA
+Expired
+4
+BigFix Settings
+Expired
+3
+BigFix Workbench Dev
+Expired
+35
+BigFix Workbench Test
+Expired
+193
+Enterprise Security
+Expired
+1
+Server Automation
+Expired
+2
+Software Distribution
+Expired
+1
+Staples
+Expired
+1
+Updates for Windows Applications Extended
+Expired
+2

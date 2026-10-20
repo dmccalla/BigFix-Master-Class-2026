@@ -1,0 +1,259 @@
+CLIENT SETTINGS INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:29:35 -0400
+Report Version: 1.0
+ 
+//===== ROOT SERVER AND RELAY SETTINGS ==================================
+Description: Unique client settings specified on relays (limited to _BESClient_Relay, _Enterprise Server, _BESGather and _BESRelay prefix settings)
+Column Headers: Setting Name, Setting Value, Number of Machines
+ 
+_BESRelay_Comm_Authenticating 
+ 0
+24
+_BESRelay_Diagnostics_Enable 
+ 1
+8
+_BESRelay_GatherMirror_ClientActionSiteFolder 
+ C:\Program Files (x86)\BigFix Enterprise\BES Client\\__BESData\actionsite
+16
+_BESRelay_HTTPServer_HttpLogDirectoryPath 
+ 
+16
+_BESRelay_HTTPServer_LogFilePath 
+ /var/log/BESRelay.log
+8
+_BESRelay_HTTPServer_LogFilePath 
+ C:\Program Files (x86)\BigFix Enterprise\BES Relay\logfile.txt
+16
+_BESRelay_HTTPServer_MaxConnections 
+ 5120
+8
+_BESRelay_HTTPServer_PortNumber 
+ 52311
+24
+_BESRelay_HTTPServer_ServerRootPath 
+ /var/opt/BESRelay/wwwrootbes
+8
+_BESRelay_HTTPServer_ServerRootPath 
+ C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\
+16
+_BESRelay_HealthCheck_Enable 
+ 1
+8
+_BESRelay_HealthCheck_EnableAtStartup 
+ 1
+8
+_BESRelay_HealthCheck_IntervalMinutes 
+ 30
+8
+_BESRelay_Log_Verbose 
+ 0
+16
+_BESRelay_PostResults_ParentRelayURL 
+ http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/PostResults.exe
+24
+_BESRelay_PostResults_ResultTimeLimit 
+ 3
+16
+_BESRelay_UploadManager_BufferDirectory 
+ C:\Program Files (x86)\BigFix Enterprise\BES Relay\UploadManagerData\BufferDir
+16
+_BESRelay_UploadManager_CleanupHours 
+ 120
+16
+_BESRelay_UploadManager_ParentRelayHost 
+ http://BFROOT1.dmc.lab:52311
+24
+_BESGather_Comm_ParentRelayURL 
+ http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/BESGatherMirror.exe
+24
+_BESGather_Comm_UseUrlMoniker 
+ 0
+24
+_BESGather_Download_CacheLimitMB 
+ 102400
+8
+_BESGather_Download_CacheLimitMB 
+ 512000
+8
+_BESGather_Download_CheckInternetFlag 
+ 0
+24
+_BESGather_Download_CheckParentFlag 
+ 1
+16
+_Enterprise Server_ClientRegister_BatchCount 
+ 100
+2
+_Enterprise Server_ClientRegister_BatchDelay 
+ 1000
+2
+_Enterprise Server_ClientRegister_ParentRelayURL 
+ http://BFROOT1.dmc.lab:52311/cgi-bin/bfenterprise/clientregister.exe
+3
+_Enterprise Server_ClientRegister_UDPMessagePort 
+ 52311
+3
+ 
+//===== CLIENT SETTINGS ==================================
+Description: Unique client settings specified on clients (non-relays, limited to _BESClient_ prefix settings excluding archive manager settings, _BESClient_Emsg, _BESClient_SecureRegistration, _BESClient_ActionManager, _BESClinet_Actionarchiver, _BESClient_Diagnostics_Password settings. Also contains a special section for ICMP control settings.
+Column Headers: Setting Name, Setting Value, Number of Machines
+ 
+_BESClient_ACCEPTED_enabled 
+ 1
+544
+_BESClient_Comm_CommandPollEnable 
+ 1
+619
+_BESClient_Comm_CommandPollIntervalSeconds 
+ 3600
+619
+_BESClient_DRAFT_enabled 
+ 1
+362
+_BESClient_Download_Direct 
+ 0
+181
+_BESClient_Download_DirectRecovery 
+ 1
+181
+_BESClient_Download_Direct_Domainlist 
+ *.adobe.com;*.apple.com;*.microsoft.com;*.bigfix.com;*.windowsupdate.com;*.ibm.com;*.google.com;*.mozilla.org
+181
+_BESClient_Download_DownloadsCacheLimitMB 
+ 10240
+1812
+_BESClient_Download_FastHashVerify 
+ 1
+495
+_BESClient_Download_NormalStageDiskLimitMB 
+ 10240
+1812
+_BESClient_Download_PreCacheStageDiskLimitMB 
+ 10240
+1812
+_BESClient_Download_PreCacheStageEnabled 
+ 1
+1812
+_BESClient_JobThread_DebugOutPath 
+ C:\Program Files (x86)\BigFix Enterprise\BES Client\__BESData\__Global\Logs\dd.log
+181
+_BESClient_LastShutdown_Reason 
+ Service manager shutdown request
+1631
+_BESClient_LastShutdown_Reason 
+ Service manager stop request
+362
+_BESClient_Log_Days 
+ 30
+1993
+_BESClient_RelaySelect_ResistFailureIntervalSeconds 
+ 21600
+181
+_BESClient_Report_MinimumAnalysisInterval 
+ 1800
+1
+_BESClient_Report_MinimumAnalysisInterval 
+ 600
+2
+_BESClient_Report_MinimumInterval 
+ 3600
+181
+_BESClient_Resource_ScaleWorkTimeWithCPUCores 
+ 1
+495
+_BESClient_Resource_SleepFastHashVerify 
+ 60
+495
+_BESClient_Resource_SleepIdle 
+ 400
+2477
+_BESClient_Resource_WorkFastHashVerify 
+ 20
+495
+_BESClient_Resource_WorkIdle 
+ 100
+2477
+_BESClient_Upgrade_UTF8Settings 
+ 1
+1993
+_BESClient_UploadManager_BufferDirectory 
+ C:\Program Files (x86)\BigFix Enterprise\BES Client\__BESData\__Global\Upload
+1993
+_BESClient_UsageManager_EnableAppUsageSummary 
+ 1
+1268
+_BESClient_UsageManager_EnableAppUsageSummaryApps 
+ -:noapp:
+1268
+_BESClient_UsageManager_EnableAppUsageSummaryPath 
+ 1
+1268
+_BESClient_WindowsOS_EnableSupersededEval 
+ 0
+362
+ 
+//===== ICMP CONTROLS ==================================
+ 
+Value of _BESClient_RelaySelect_Automatic, Number of Machines
+__RelaySelect_Automatic = 1
+2400
+__RelaySelect_Automatic = 0
+137
+Value of _BESClient_RelaySelect_MaximumTTLToPing, Number of Machines
+Undefined
+2400
+Value of _BESClient_RelaySelect_IntervalSeconds, Number of Machines
+Undefined
+2400
+Value of _BESClient_RelaySelect_MaxRetryIntervalSeconds, Number of Machines
+Undefined
+2400
+Value of _BESClient_RelaySelect_MinRetryIntervalSeconds, Number of Machines
+Undefined
+2400
+Value of _BESClient_RelaySelect_ResistFailureIntervalSeconds, Number of Machines
+Undefined
+2219
+21600
+181
+Value of _BESCient_Report_MinimumInterval, Number of Machines
+Default
+2356
+3600
+181
+Value of _BESClient_Resource_InterruptSeconds, Number of Machines
+Default
+2537
+ 
+//===== COMMAND POLLING ==================================
+ 
+Value of _BESClient_Comm_CommandPollEnable, Number of Machines 
+Default
+1918
+1
+619
+Value of _BESClient_Comm_CommandPollIntervalSeconds, Number of Machines
+Default
+1918
+3600
+619
+ 
+//===== CLIENT CPU USAGE ==================================
+ 
+Value of _BESClient_Resource_WorkNormal, Number of Machines 
+Default
+2537
+Value of _BESClient_Resource_SleepNormal, Number of Machines 
+Default
+2537
+Value of _BESClient_Resource_SleepIdle, Number of Machines 
+Default
+60
+400
+2477
+Value of _BESClient_Resource_WorkIdle, Number of Machines 
+Default
+60
+100
+2477

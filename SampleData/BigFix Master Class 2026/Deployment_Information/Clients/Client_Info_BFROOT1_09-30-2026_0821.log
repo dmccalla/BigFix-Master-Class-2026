@@ -1,0 +1,25 @@
+CLIENT INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:28:00 -0400
+Report Version: 1.0
+ 
+BES Client Version Counts: 11.0.6.137--556, 11.0.7.0--1981
+Operating System Counts: Linux Red Hat Enterprise 9.2 (5.14.0-284.11.1.el9_2.x86_64)--181, Win11 10.0.22621.6060 (22H2)--181, Win11 10.0.22631.6649 (23H2)--181, Win11 10.0.26200.7840 (25H2)--181, Win2019 10.0.17763.3650 (1809)--181, Win2019 10.0.17763.3770 (1809)--181, Win2019 10.0.17763.8389 (1809)--181, Win2019 10.0.17763.9247 (1809)--181, Win2022 10.0.20348.4648 (21H2)--184, Win2022 10.0.20348.5139 (21H2)--181, Win2022 10.0.20348.5256 (21H2)--181, Win2025 10.0.26100.1742 (24H2)--181, Win2025 10.0.26100.33296 (24H2)--181, Win2025 10.0.26100.7462 (24H2)--181
+Operating System Type Counts: Server--1813, Workstation--543
+Number of Subnets: 25
+Number of Subnets With Over One Computer: 25
+Average Number of Computers per Subnet: 101
+Maximum Number of Computers per Subnet: 137
+Number of Unlocked Computers: 2537
+Operating System Language Counts: English (United States)--2537
+Latest Computer Report Time timestamp: Wed, 30 Sep 2026 08:27:50 -0400
+Earliest Computer Report Time timestamp: Sun, 16 Aug 2026 07:38:09 -0400
+Number of machines reported within the last 24 hours: 2477
+Number of machines reported within the last 1 hours: 2477
+Number of machines reported within the last 15 minutes: 2410
+Number of Computers Using Automatic Relay Selection: 2400
+Number of Computers Using Manual Relay Selection: 137
+Distances to Relays: 0--137, 1--2400
+Average Distance to Relays: 1
+Number of Clients with Unknown Relay Distance: 0
+Maximum Distance to Relays: 1

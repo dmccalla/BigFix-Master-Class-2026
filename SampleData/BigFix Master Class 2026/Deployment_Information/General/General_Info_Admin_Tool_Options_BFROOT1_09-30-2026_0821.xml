@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<SystemOptions Resource="https://BFROOT1:52311/api/admin/options">
+		<MinimumRefreshSeconds>15</MinimumRefreshSeconds>
+		<DefaultFixletVisibility>Visible</DefaultFixletVisibility>
+	</SystemOptions>
+</BESAPI>
+

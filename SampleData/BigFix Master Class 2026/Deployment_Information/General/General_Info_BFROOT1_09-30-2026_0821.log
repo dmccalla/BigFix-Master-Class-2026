@@ -1,0 +1,33 @@
+GENERAL DEPLOYMENT INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:21:38 -0400
+Report Version: 1.0
+ 
+Deployment Age: 45
+License Site Number: 152281063
+License Registrar Number: 0
+License Start Date: Thu, 13 Aug 2026 15:46:10 -0400
+License Expiration Date: Sun, 10 Aug 2036 15:46:10 -0400
+License Expiration State: Unrestricted
+License Organization: HCL_Tech_Sales
+License Gather URL: http://BFROOT1.dmc.lab:52311/cgi-bin/bfgather.exe/actionsite
+License Evaluation: False
+License Maximum Seat Count: 999999
+License Seat Count State: Unrestricted
+Number of BES Servers: 1
+Number of Computers: 2537
+Number of Active Computers: 2477
+Number of Relays: 24
+Number of Console Computers: 6
+BES Client Version Counts: 11.0.6.137--556, 11.0.7.0--1981
+BES Api Version Counts: 
+BES Server Version Counts: 11.0.6.137--1
+BES Relay Version Counts: 11.0.6.137--24
+Using Efficient MIME?: True
+Number of Unmanaged Assets: 0
+Number of Scan Points: 0
+Number of Unmanaged Asset Sources: 0
+Cache Latency Metric: 00:00:56
+Actionsite Size: 4189 KB 
+passwordComplexityDescription, ( Passwords must contain 8 characters or more, both uppercase and lowercase letters, and at least 1 digit. )passwordComplexityRegex, ( (?=.*[[:lower:]])(?=.*[[:upper:]])(?=.*[[:digit:]]).{8,} ) 
+MinimumRefreshSeconds, 15DefaultFixletVisibility, Visible 

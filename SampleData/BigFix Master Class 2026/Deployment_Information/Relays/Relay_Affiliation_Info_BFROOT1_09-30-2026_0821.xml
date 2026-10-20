@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;RELAY AFFILIATION INFORMATION&quot;)">
+		<Result>
+			<Answer type="string">RELAY AFFILIATION INFORMATION</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.061ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.08ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Wed, 30 Sep 2026 08:27:24 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.157ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Report Version: 1.0&quot;)">
+		<Result>
+			<Answer type="string">Report Version: 1.0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.047ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.078ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;_BESClient_Register_Affiliation_SeekList, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">_BESClient_Register_Affiliation_SeekList, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.088ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Default, 2537</Answer>
+		</Result>
+		<Evaluation>
+			<Time>25.629ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.073ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;_BESRelay_Register_Affiliation_Advertisementlist, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">_BESRelay_Register_Affiliation_Advertisementlist, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.076ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Default, 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>23.526ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

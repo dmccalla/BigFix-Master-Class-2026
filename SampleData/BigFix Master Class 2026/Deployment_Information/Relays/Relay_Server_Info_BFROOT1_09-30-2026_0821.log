@@ -1,0 +1,85 @@
+RELAY SERVER INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:24:46 -0400
+Report Version: 1.0
+ 
+BES Relay Version Counts: 11.0.6.137--24
+Number of Active BES Relays: 24
+Number of Computers Using Automatic Relay Selection: 2400
+Number of Computers Using Manual Relay Selection: 137
+Average Number of Clients per Relay: 100
+Maximum Number of Clients per Relay: 100
+Minimum Number of Clients per Relay: 100
+Distances to Relays: 0--137, 1--2400
+Average Distance to Relays: 1
+Number of Clients with Unknown Relay Distance: 0
+Maximum Distance to Relays: 1
+Latest relay Report Time timestamp: Wed, 30 Sep 2026 08:25:06 -0400
+Number of relays reported within the last 24 hours: 24
+Number of relays reported within the last 1 hours: 24
+Number of relays reported within the last 15 minutes: 24
+Number of relays that have not reported within the last 1 hour: 0
+Number of relays that have not reported within the last 1 day: 0
+Number of relays that have not reported within the last 1 day: 0
+Number of Relays with over 1000 Clients: 0
+ 
+Current Actionsite Version: 230
+Relays with Stale Actionsite Versions (based upon BES Health Checks::Actionsite Version) - Version, Relay Name
+BFRELAY017.dmc.lab - 226
+ 
+Relay Server Aggregation Statistics (Total Child Count) - Relay Name, Number of Machines
+BES Root Server, 161
+BFRELAY001.dmc.lab:52311, 100
+BFRELAY002.dmc.lab:52311, 100
+BFRELAY003.dmc.lab:52311, 100
+BFRELAY004.dmc.lab:52311, 100
+BFRELAY005.dmc.lab:52311, 100
+BFRELAY006.dmc.lab:52311, 100
+BFRELAY007.dmc.lab:52311, 100
+BFRELAY008.dmc.lab:52311, 100
+BFRELAY009.dmc.lab:52311, 100
+BFRELAY010.dmc.lab:52311, 100
+BFRELAY011.dmc.lab:52311, 100
+BFRELAY012.dmc.lab:52311, 100
+BFRELAY013.dmc.lab:52311, 100
+BFRELAY014.dmc.lab:52311, 100
+BFRELAY015.dmc.lab:52311, 100
+BFRELAY016.dmc.lab:52311, 100
+BFRELAY017.dmc.lab:52311, 100
+BFRELAY018.dmc.lab:52311, 100
+BFRELAY019.dmc.lab:52311, 100
+BFRELAY020.dmc.lab:52311, 100
+BFRELAY021.dmc.lab:52311, 100
+BFRELAY022.dmc.lab:52311, 100
+BFRELAY023.dmc.lab:52311, 100
+BFRELAY024.dmc.lab:52311, 100
+ 
+Relay Server Aggregation Statistics (Client Child Count) - Relay Name, Number of Machines
+BES Root Server, 137
+BFRELAY001.dmc.lab:52311, 100
+BFRELAY002.dmc.lab:52311, 100
+BFRELAY003.dmc.lab:52311, 100
+BFRELAY004.dmc.lab:52311, 100
+BFRELAY005.dmc.lab:52311, 100
+BFRELAY006.dmc.lab:52311, 100
+BFRELAY007.dmc.lab:52311, 100
+BFRELAY008.dmc.lab:52311, 100
+BFRELAY009.dmc.lab:52311, 100
+BFRELAY010.dmc.lab:52311, 100
+BFRELAY011.dmc.lab:52311, 100
+BFRELAY012.dmc.lab:52311, 100
+BFRELAY013.dmc.lab:52311, 100
+BFRELAY014.dmc.lab:52311, 100
+BFRELAY015.dmc.lab:52311, 100
+BFRELAY016.dmc.lab:52311, 100
+BFRELAY017.dmc.lab:52311, 100
+BFRELAY018.dmc.lab:52311, 100
+BFRELAY019.dmc.lab:52311, 100
+BFRELAY020.dmc.lab:52311, 100
+BFRELAY021.dmc.lab:52311, 100
+BFRELAY022.dmc.lab:52311, 100
+BFRELAY023.dmc.lab:52311, 100
+BFRELAY024.dmc.lab:52311, 100
+ 
+Relay Server Aggregation Statistics (Relay Child Count) - Relay Name, Number of Machines
+BES Root Server, 24

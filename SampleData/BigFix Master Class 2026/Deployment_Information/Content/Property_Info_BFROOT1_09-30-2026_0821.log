@@ -1,0 +1,2215 @@
+PROPERTY INFORMATION
+ 
+Report Generated: Wed, 30 Sep 2026 08:36:57 -0400
+Report Version: 1.0
+ 
+Number of Properties: 7224
+Number of Custom Properties: 0
+Number of Active Properties: 244
+Number of Activated Analysis: 32
+Number of Property Activations sourced within custom sites: 47
+Number of Property Activations sourced from opsite content: 0
+Number of Property Activations sourced from actionsite content: 0
+Number of Property Activations sourced from external site content: 197
+//===== Custom BES Properties with frequent evaluations (sub 15 minutes) ================
+Column Headers: Property Name, Source Analysis Site Name, Property ID, Issued By, Evaluation Interval
+ 
+//===== Active Properties by Evaluation Interval ================
+Column Headers: Property Name, Source Analysis Name, Source Analysis Site Name, Site ID, Analysis ID, Property ID, Issued By, Evaluation Interval, Content Source
+ 
+BES Client Version
+BES Component Versions
+BES Support
+1
+204
+1
+bigfix
+no-val
+External
+BES Relay Version
+BES Component Versions
+BES Support
+1
+204
+2
+bigfix
+no-val
+External
+BES Console Version
+BES Component Versions
+BES Support
+1
+204
+3
+bigfix
+no-val
+External
+BES Server Version
+BES Component Versions
+BES Support
+1
+204
+4
+bigfix
+no-val
+External
+BES API Version
+BES Component Versions
+BES Support
+1
+204
+5
+bigfix
+no-val
+External
+BES Web Reports Version
+BES Component Versions
+BES Support
+1
+204
+6
+bigfix
+no-val
+External
+BES Client Deploy Tool Version
+BES Component Versions
+BES Support
+1
+204
+7
+bigfix
+no-val
+External
+BES WebUI Version
+BES Component Versions
+BES Support
+1
+204
+8
+bigfix
+no-val
+External
+BES Plugin Portal Version
+BES Component Versions
+BES Support
+1
+204
+9
+bigfix
+no-val
+External
+BES Plugins Versions
+BES Component Versions
+BES Support
+1
+204
+10
+bigfix
+no-val
+External
+BES Explorer Version
+BES Component Versions
+BES Support
+1
+204
+11
+bigfix
+no-val
+External
+BES Relay Installed Status
+BES Relay Status
+BES Support
+1
+205
+1
+bigfix
+no-val
+External
+BES Client's Parent Relay
+BES Relay Status
+BES Support
+1
+205
+3
+bigfix
+no-val
+External
+BES Relay's Parent Relay
+BES Relay Status
+BES Support
+1
+205
+4
+bigfix
+no-val
+External
+Manual Selection Status
+BES Relay Status
+BES Support
+1
+205
+5
+bigfix
+no-val
+External
+Installed Applications - Windows
+Application Information (Windows)
+BES Inventory and License
+1
+1038
+12
+bigfix
+00:00:00
+External
+BES Relay Drive Info
+BES Relay Cache Information
+BES Support
+1
+227
+2
+bigfix
+1 day
+External
+BES Relay Used Action Cache
+BES Relay Cache Information
+BES Support
+1
+227
+3
+bigfix
+1 day
+External
+BES Relay Used Download Cache
+BES Relay Cache Information
+BES Support
+1
+227
+4
+bigfix
+1 day
+External
+BES Health Checks::Actionsite Size
+BES Health Checks Analysis
+BES Support
+1
+582
+1
+bigfix
+00:15:00
+External
+BES Health Checks::Actionsite Version
+BES Health Checks Analysis
+BES Support
+1
+582
+2
+bigfix
+no-val
+External
+BES Health Checks::BES Relay Free Disk Space
+BES Health Checks Analysis
+BES Support
+1
+582
+3
+bigfix
+no-val
+External
+BES Health Checks::FillDB Log File Size
+BES Health Checks Analysis
+BES Support
+1
+582
+4
+bigfix
+01:00:00
+External
+BES Health Checks::Gather Status Failures
+BES Health Checks Analysis
+BES Support
+1
+582
+5
+bigfix
+01:00:00
+External
+BES Health Checks::Number of Files in FillDB Bufferdir
+BES Health Checks Analysis
+BES Support
+1
+582
+6
+bigfix
+no-val
+External
+BES Health Checks::SQL Server Agent Status
+BES Health Checks Analysis
+BES Support
+1
+582
+8
+bigfix
+no-val
+External
+BES Health Checks::WebReports SSL Configuration
+BES Health Checks Analysis
+BES Support
+1
+582
+9
+bigfix
+no-val
+External
+PeerNest Enabled
+PeerNest Clients Status
+BES Support
+1
+3666
+1
+bigfix
+no-val
+External
+PeerNest Priority
+PeerNest Clients Status
+BES Support
+1
+3666
+2
+bigfix
+no-val
+External
+PeerNest Is Passive
+PeerNest Clients Status
+BES Support
+1
+3666
+3
+bigfix
+no-val
+External
+Client Subnet Address
+PeerNest Clients Status
+BES Support
+1
+3666
+4
+bigfix
+no-val
+External
+Client Certificate Expiration Date
+Client Certificate Information
+BES Support
+1
+5142
+2
+bigfix
+1 day
+External
+Client Certificate Overall Validity
+Client Certificate Information
+BES Support
+1
+5142
+3
+bigfix
+1 day
+External
+Client Certificate Expires In
+Client Certificate Information
+BES Support
+1
+5142
+4
+bigfix
+1 day
+External
+Restart needed
+Pending Restart information for Windows
+BES Support
+1
+5990
+1
+bigfix
+no-val
+External
+BESPendingRestart
+Pending Restart information for Windows
+BES Support
+1
+5990
+2
+bigfix
+no-val
+External
+PendingFileRenameOperations
+Pending Restart information for Windows
+BES Support
+1
+5990
+3
+bigfix
+no-val
+External
+RebootRequired
+Pending Restart information for Windows
+BES Support
+1
+5990
+4
+bigfix
+no-val
+External
+RebootPending
+Pending Restart information for Windows
+BES Support
+1
+5990
+5
+bigfix
+no-val
+External
+UpdateExeVolatile
+Pending Restart information for Windows
+BES Support
+1
+5990
+6
+bigfix
+no-val
+External
+BESPendingRestartExclusions
+Pending Restart information for Windows
+BES Support
+1
+5990
+7
+bigfix
+no-val
+External
+Full Operating System Name and Service Pack Level - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+1
+bigfix
+1 day
+External
+OS Version Number - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+2
+bigfix
+1 day
+External
+OS Type - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+3
+bigfix
+1 day
+External
+OS Product ID - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+4
+bigfix
+1 day
+External
+OS Product Key - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+5
+bigfix
+1 day
+External
+OS Installation Date - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+6
+bigfix
+1 day
+External
+Uptime - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+7
+bigfix
+1 day
+External
+OS Language - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+8
+bigfix
+1 day
+External
+System Language - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+9
+bigfix
+1 day
+External
+User Language - Windows
+Operating System Information (Windows)
+BES Inventory and License
+3093
+16
+10
+bigfix
+1 day
+External
+Current Size of RAM
+Random Access Memory (RAM) Properties (Windows)
+BES Inventory and License
+3093
+18
+1
+bigfix
+1 day
+External
+Maximum RAM Installable
+Random Access Memory (RAM) Properties (Windows)
+BES Inventory and License
+3093
+18
+2
+bigfix
+1 day
+External
+Number of Used RAM Slots / Total Number of RAM Slots
+Random Access Memory (RAM) Properties (Windows)
+BES Inventory and License
+3093
+18
+3
+bigfix
+1 day
+External
+Number of Free RAM Slots
+Random Access Memory (RAM) Properties (Windows)
+BES Inventory and License
+3093
+18
+5
+bigfix
+1 day
+External
+Connected USB Devices - Windows
+USB Devices Detection (Windows)
+BES Inventory and License
+3093
+22
+1
+bigfix
+01:00:00
+External
+DHCP Servers - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+1
+bigfix
+1 day
+External
+DNS Servers - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+2
+bigfix
+1 day
+External
+Domain/Workgroup - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+3
+bigfix
+1 day
+External
+PPP Enabled - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+4
+bigfix
+1 day
+External
+MAC Addresses - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+5
+bigfix
+1 day
+External
+Subnet Masks - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+6
+bigfix
+1 day
+External
+Wireless SSID - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+7
+bigfix
+1 day
+External
+Wireless Encryption Status - Windows
+Network Information (Windows)
+BES Inventory and License
+3093
+33
+8
+bigfix
+1 day
+External
+Installed Applications - Windows
+Application Information (Windows)
+BES Inventory and License
+3093
+34
+1
+bigfix
+1 day
+External
+Services - Windows
+Application Information (Windows)
+BES Inventory and License
+3093
+34
+2
+bigfix
+1 day
+External
+Computer Manufacturer - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+1
+bigfix
+1 day
+External
+Computer Model - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+2
+bigfix
+1 day
+External
+Identifying Number - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+3
+bigfix
+1 day
+External
+Laptop - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+4
+bigfix
+1 day
+External
+Brand String of CPU - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+5
+bigfix
+1 day
+External
+Number of Processors - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+6
+bigfix
+1 day
+External
+Number of Fixed Drives - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+8
+bigfix
+1 day
+External
+Disk Drives - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+9
+bigfix
+1 day
+External
+CD-ROM - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+10
+bigfix
+1 day
+External
+Network Adapter - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+11
+bigfix
+1 day
+External
+Video Controller - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+12
+bigfix
+1 day
+External
+Sound Device - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+13
+bigfix
+1 day
+External
+Monitor - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+14
+bigfix
+1 day
+External
+Screen Resolution - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+15
+bigfix
+1 day
+External
+IDE/SATA Devices - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+16
+bigfix
+1 day
+External
+SCSI Devices - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+17
+bigfix
+1 day
+External
+Number of Processor Cores - Windows
+Hardware Information (Windows)
+BES Inventory and License
+3093
+35
+18
+bigfix
+1 day
+External
+Version - VMWare Workstation
+VMWare Workstation Information (Windows)
+BES Inventory and License
+3093
+40
+1
+bigfix
+12:00:00
+External
+Product ID - VMWare Workstation
+VMWare Workstation Information (Windows)
+BES Inventory and License
+3093
+40
+2
+bigfix
+12:00:00
+External
+Serial Number - VMWare Workstation
+VMWare Workstation Information (Windows)
+BES Inventory and License
+3093
+40
+3
+bigfix
+12:00:00
+External
+License Type - VMWare Workstation
+VMWare Workstation Information (Windows)
+BES Inventory and License
+3093
+40
+4
+bigfix
+12:00:00
+External
+License Version - VMWare Workstation
+VMWare Workstation Information (Windows)
+BES Inventory and License
+3093
+40
+5
+bigfix
+12:00:00
+External
+Base Board - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+1
+bigfix
+1 day
+External
+Laptop - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+2
+bigfix
+1 day
+External
+Brand String of CPU - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+3
+bigfix
+1 day
+External
+Number of Processors - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+4
+bigfix
+1 day
+External
+Hard Disks - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+5
+bigfix
+1 day
+External
+RAID - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+8
+bigfix
+1 day
+External
+CD-ROM - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+9
+bigfix
+1 day
+External
+Network Adapters - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+11
+bigfix
+1 day
+External
+Video Controller - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+12
+bigfix
+1 day
+External
+Sound Device - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+13
+bigfix
+1 day
+External
+FireWire (IEEE 1394) - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+14
+bigfix
+1 day
+External
+All Devices - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+15
+bigfix
+1 day
+External
+Number of Processor Cores - Linux
+Hardware Information (Linux)
+BES Inventory and License
+3093
+305
+16
+bigfix
+1 day
+External
+Number of Installed Packages - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+1
+bigfix
+1 day
+External
+Packages Installed - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+2
+bigfix
+1 day
+External
+Runlevel 3 Services - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+3
+bigfix
+1 day
+External
+Runlevel 5 Services - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+4
+bigfix
+1 day
+External
+Multi-user target (Runlevel 2,3,4) Services - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+5
+bigfix
+1 day
+External
+Graphical target (Runlevel 5) Services - Linux
+Application Information (Linux)
+BES Inventory and License
+3093
+306
+6
+bigfix
+1 day
+External
+Update Interval (Seconds)
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+1
+bigfix
+no-val
+External
+Plan engine console log level
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+2
+bigfix
+no-val
+External
+Plan specific console log level
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+3
+bigfix
+no-val
+External
+Ignore errors and run all actions (standard steps)
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+4
+bigfix
+no-val
+External
+Ignore errors and run all actions (failure steps)
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+5
+bigfix
+no-val
+External
+Non-reporting limit (HH:MM)
+Configure the Automation Plan Engine Analysis
+Server Automation
+8366
+150
+6
+bigfix
+no-val
+External
+Notification Service Compatible
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+1
+bigfix
+no-val
+External
+Notification Service Enabled
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+2
+bigfix
+no-val
+External
+Notification Email Address list
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+3
+bigfix
+no-val
+External
+Include Global Recipients
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+4
+bigfix
+no-val
+External
+Notification Default Message
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+5
+bigfix
+no-val
+External
+Include Summary
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+6
+bigfix
+no-val
+External
+Notification Email Sender Address
+Notification Service Settings for Server Automation
+Server Automation
+8366
+159
+7
+bigfix
+no-val
+External
+State
+Plan Engine Instance information
+Server Automation
+8366
+180
+3
+bigfix
+00:05:00
+External
+PID
+Plan Engine Instance information
+Server Automation
+8366
+180
+4
+bigfix
+no-val
+External
+PE Version
+Plan Engine Instance information
+Server Automation
+8366
+180
+6
+bigfix
+no-val
+External
+# of Threads
+Plan Engine Instance information
+Server Automation
+8366
+180
+7
+bigfix
+no-val
+External
+Time Since Last Log Update
+Plan Engine Instance information
+Server Automation
+8366
+180
+8
+bigfix
+00:05:00
+External
+PE Reporting Threshold
+Plan Engine Instance information
+Server Automation
+8366
+180
+9
+bigfix
+no-val
+External
+Installed Windows Applications List
+Installed Windows Applications
+BigFix Inventory
+16240
+5
+1
+bigfix
+1 day
+External
+Application Usage
+Application Usage Statistics
+BigFix Inventory
+16240
+10
+1
+bigfix
+1 day
+External
+Application Usage by Path
+Application Usage Statistics
+BigFix Inventory
+16240
+10
+2
+bigfix
+1 day
+External
+Operating System
+Environment Information
+BigFix Inventory
+16240
+13
+1
+bigfix
+1 day
+External
+System Locale
+Environment Information
+BigFix Inventory
+16240
+13
+2
+bigfix
+1 day
+External
+Free Disk Space
+Environment Information
+BigFix Inventory
+16240
+13
+3
+bigfix
+1 day
+External
+BFI Version
+Environment Information
+BigFix Inventory
+16240
+13
+4
+bigfix
+1 day
+External
+BigFix Server Version
+Environment Information
+BigFix Inventory
+16240
+13
+5
+bigfix
+1 day
+External
+MSSQL Version
+Environment Information
+BigFix Inventory
+16240
+13
+6
+bigfix
+1 day
+External
+DB2 Version
+Environment Information
+BigFix Inventory
+16240
+13
+7
+bigfix
+1 day
+External
+WAS Version
+Environment Information
+BigFix Inventory
+16240
+13
+8
+bigfix
+1 day
+External
+Installed Unix Packages List
+Installed UNIX Packages
+BigFix Inventory
+16240
+32
+1
+bigfix
+1 day
+External
+Time of Last Scan Attempt
+Detailed Hardware Information
+BigFix Inventory
+16240
+39
+1
+bigfix
+1 day
+External
+Status of Scan
+Detailed Hardware Information
+BigFix Inventory
+16240
+39
+2
+bigfix
+1 day
+External
+Time of Last Successful Scan
+Detailed Hardware Information
+BigFix Inventory
+16240
+39
+3
+bigfix
+1 day
+External
+Detailed Hardware Scan Output
+Detailed Hardware Information
+BigFix Inventory
+16240
+39
+4
+bigfix
+1 day
+External
+Time of Last Scan Attempt
+Software Scan Status
+BigFix Inventory
+16240
+55
+1
+bigfix
+01:00:00
+External
+Status of Catalog-based Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+2
+bigfix
+01:00:00
+External
+Time of Last Successful Catalog-based Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+3
+bigfix
+01:00:00
+External
+Status of File System Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+4
+bigfix
+01:00:00
+External
+Time of Last Successful File System Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+5
+bigfix
+01:00:00
+External
+Status of Scan for Software Identification Tag Files
+Software Scan Status
+BigFix Inventory
+16240
+55
+6
+bigfix
+01:00:00
+External
+Time of Last Successful Scan for Software Identification Tag Files
+Software Scan Status
+BigFix Inventory
+16240
+55
+7
+bigfix
+01:00:00
+External
+Status of Scan for Package Data
+Software Scan Status
+BigFix Inventory
+16240
+55
+8
+bigfix
+01:00:00
+External
+Time of Last Successful Scan for Package Data
+Software Scan Status
+BigFix Inventory
+16240
+55
+9
+bigfix
+01:00:00
+External
+Scanner Catalog Version
+Software Scan Status
+BigFix Inventory
+16240
+55
+10
+bigfix
+01:00:00
+External
+Low on Disk Space
+Software Scan Status
+BigFix Inventory
+16240
+55
+11
+bigfix
+01:00:00
+External
+Clock Out of Sync
+Software Scan Status
+BigFix Inventory
+16240
+55
+12
+bigfix
+01:00:00
+External
+Is archive size exceeded?
+Software Scan Status
+BigFix Inventory
+16240
+55
+13
+bigfix
+01:00:00
+External
+Status of Resource Utilization Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+14
+bigfix
+01:00:00
+External
+Time of Last Successful Resource Utilization Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+15
+bigfix
+01:00:00
+External
+Status of Scan for Application Usage Statistics
+Software Scan Status
+BigFix Inventory
+16240
+55
+16
+bigfix
+01:00:00
+External
+Time of Last Successful Scan for Application Usage Statistics
+Software Scan Status
+BigFix Inventory
+16240
+55
+17
+bigfix
+01:00:00
+External
+Status of Scan for Application Usage Statistics with Path
+Software Scan Status
+BigFix Inventory
+16240
+55
+18
+bigfix
+01:00:00
+External
+Time of Last Successful Scan for Application Usage Statistics with Path
+Software Scan Status
+BigFix Inventory
+16240
+55
+19
+bigfix
+01:00:00
+External
+Total Time of Last Successful Software Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+20
+bigfix
+01:00:00
+External
+Scan Disabled
+Software Scan Status
+BigFix Inventory
+16240
+55
+30
+bigfix
+01:00:00
+External
+Continuous Discovery Processing
+Software Scan Status
+BigFix Inventory
+16240
+55
+31
+bigfix
+01:00:00
+External
+Status of MCP Servers Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+32
+bigfix
+01:00:00
+External
+Time of Last Successful MCP Servers Scan
+Software Scan Status
+BigFix Inventory
+16240
+55
+33
+bigfix
+01:00:00
+External
+Libraries Prerequisite Passed
+Scanner Information
+BigFix Scanner
+16617
+19
+1
+bigfix
+1 day
+External
+Scanner Version
+Scanner Information
+BigFix Scanner
+16617
+19
+2
+bigfix
+1 day
+External
+Scanner Exploiters
+Scanner Information
+BigFix Scanner
+16617
+19
+3
+bigfix
+1 day
+External
+Scanner Install Path
+Scanner Information
+BigFix Scanner
+16617
+19
+4
+bigfix
+1 day
+External
+Scan Disabled
+Scanner Information
+BigFix Scanner
+16617
+19
+5
+bigfix
+1 day
+External
+Cache Settings
+Scanner Information
+BigFix Scanner
+16617
+19
+6
+bigfix
+1 day
+External
+Cache Folder
+Scanner Information
+BigFix Scanner
+16617
+19
+7
+bigfix
+1 day
+External
+Scan Results Output Folder
+Scanner Information
+BigFix Scanner
+16617
+19
+8
+bigfix
+01:00:00
+External
+Capacity Scan Results Exist
+Scanner Information
+BigFix Scanner
+16617
+19
+9
+bigfix
+01:00:00
+External
+Scanner Build Date
+Scanner Information
+BigFix Scanner
+16617
+19
+10
+bigfix
+1 day
+External
+Cache Optimization
+Scanner Information
+BigFix Scanner
+16617
+19
+11
+bigfix
+1 day
+External
+Cache3 State
+Scanner Information
+BigFix Scanner
+16617
+19
+12
+bigfix
+1 day
+External
+HCL BigFix Wrapper
+Scanner Information
+BigFix Scanner
+16617
+19
+13
+bigfix
+1 day
+External
+Global Cache Provider
+Scanner Information
+BigFix Scanner
+16617
+19
+14
+bigfix
+1 day
+External
+Scanner Service Status
+Scanner Information
+BigFix Scanner
+16617
+19
+15
+bigfix
+06:00:00
+External
+FS Cache Status
+Scanner Information
+BigFix Scanner
+16617
+19
+16
+bigfix
+06:00:00
+External
+FS Cache Timestamp
+Scanner Information
+BigFix Scanner
+16617
+19
+17
+bigfix
+06:00:00
+External
+Wscan CPU Utilization Threshold
+Scanner Information
+BigFix Scanner
+16617
+19
+18
+bigfix
+06:00:00
+External
+User Session Collector
+Scanner Information
+BigFix Scanner
+16617
+19
+19
+bigfix
+06:00:00
+External
+Browser Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+20
+bigfix
+06:00:00
+External
+Event Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+21
+bigfix
+06:00:00
+External
+FS Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+22
+bigfix
+06:00:00
+External
+Package Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+23
+bigfix
+06:00:00
+External
+FS RealTime Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+24
+bigfix
+06:00:00
+External
+Process Monitor
+Scanner Information
+BigFix Scanner
+16617
+19
+25
+bigfix
+06:00:00
+External
+Operating System
+Excluded Directories
+BigFix Scanner
+16617
+62
+3
+bigfix
+01:00:00
+External
+Excluded Directories
+Excluded Directories
+BigFix Scanner
+16617
+62
+4
+bigfix
+01:00:00
+External
+Excluded Directories (semicolon separated)
+Excluded Directories
+BigFix Scanner
+16617
+62
+5
+bigfix
+01:00:00
+External
+File Scan Statistics (Scanner Service)
+File Scan Statistics - Scanner Service
+BigFix Scanner
+16617
+111
+1
+bigfix
+04:00:00
+External
+Scanner DB Size MB
+File Scan Statistics - Scanner Service
+BigFix Scanner
+16617
+111
+2
+bigfix
+04:00:00
+External
+Scanner DB WAL Size MB
+File Scan Statistics - Scanner Service
+BigFix Scanner
+16617
+111
+3
+bigfix
+04:00:00
+External
+Last Cumulative Update Installed
+Last Windows Patches Installed
+Staples
+2299764711
+675
+1
+bigfix
+01:00:00
+Custom
+Last Servicing Stack Update Installed
+Last Windows Patches Installed
+Staples
+2299764711
+675
+2
+bigfix
+01:00:00
+Custom
+Platform Health Check -- TcpTimedWaitDelay
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+1
+bigfix
+1 day
+Custom
+Platform Health Check -- _BESRelay_HTTPServer_MaxConnections
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+33
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Version
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+34
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Status
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+35
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Authentication
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+36
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Directory
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+37
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Logical Processors
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+38
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Physical Sockets
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+39
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Cores Per Socket
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+40
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay CPU Description
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+41
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay CPU Max Clock (MHz)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+42
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Physical Memory (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+43
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Download Cache (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+44
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Is Virtual
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+45
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Drive Total (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+46
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Drive Free (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Test
+2299764711
+1190
+47
+bigfix
+1 day
+Custom
+Platform Health Check -- TcpTimedWaitDelay
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+1
+bigfix
+1 day
+Custom
+Platform Health Check -- _BESRelay_HTTPServer_MaxConnections
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+33
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Version
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+34
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Status
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+35
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Authentication
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+36
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Directory
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+37
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Logical Processors
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+38
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Physical Sockets
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+39
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Cores Per Socket
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+40
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay CPU Description
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+41
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay CPU Max Clock (MHz)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+42
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Physical Memory (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+43
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Download Cache (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+44
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Is Virtual
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+45
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Drive Total (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+46
+bigfix
+1 day
+Custom
+Platform Health Check -- Relay Server Drive Free (MB)
+BigFix Platform Health Check -- Relay Server Capacity Data (2.0)
+BigFix Workbench Dev
+2299764711
+1199
+47
+bigfix
+1 day
+Custom
+Platform Health Check - Client Version
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+1
+bigfix
+1 day
+Custom
+Platform Health Check - Maximum Cycle Minutes
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+3
+bigfix
+1 day
+Custom
+Platform Health Check - Average Cycle Minutes
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+4
+bigfix
+1 day
+Custom
+Platform Health Check - Top 10 Slow Evaluations
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+30
+bigfix
+1 day
+Custom
+Platform Health Check - Evaluations Slower than 1 Minute
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+31
+bigfix
+1 day
+Custom
+Platform Health Check - Evaluations Slower than 15 Minutes
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+32
+bigfix
+1 day
+Custom
+Platform Health Check - Last UDP Ping
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+33
+bigfix
+1 day
+Custom
+Platform Health Check - Receiving UDP Pings
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+34
+bigfix
+1 day
+Custom
+Platform Health Check - Command Polling Enabled
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+35
+bigfix
+1 day
+Custom
+Platform Health Check - Command Polling Minutes
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+36
+bigfix
+1 day
+Custom
+Platform Health Check - FastHashVerify Enabled
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+37
+bigfix
+1 day
+Custom
+Platform Health Check - FastHashVerify Work ms
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+38
+bigfix
+1 day
+Custom
+Platform Health Check - FastHashVerify Sleep ms
+BigFix Master Class -- Client Performance Counters - Basic (2.0)
+Performance and Config Analysis
+2299764711
+1496
+39
+bigfix
+1 day
+Custom

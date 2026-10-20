@@ -1,0 +1,485 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;RELAY SERVER INFORMATION&quot;)">
+		<Result>
+			<Answer type="string">RELAY SERVER INFORMATION</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.062ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.098ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Wed, 30 Sep 2026 08:24:46 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.088ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Report Version: 1.0&quot;)">
+		<Result>
+			<Answer type="string">Report Version: 1.0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.054ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.098ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Relay Version Counts: &quot; &amp; concatenation &quot;, &quot; of (it as string) of (it &amp; &quot;--&quot; &amp; (multiplicity of it as string)) of unique values of values whose (it contains &quot;.&quot;) of results whose (not error flag of it and exists value of it) of bes property whose (name of it = &quot;BES Relay Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string">
+		<Result>
+			<Answer type="string">BES Relay Version Counts: 11.0.6.137--24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>47.402ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Active BES Relays: &quot; &amp; number of computers of results from (bes properties &quot;Last Report Time&quot; whose (reserved flag of it)) whose (exists value of it and (now - value of it as time) &lt; 1 * day) of (computers of results whose (exists value of it AND value of it as lowercase contains &quot;yes&quot;) of bes properties &quot;BES Relay Service Installed&quot; whose (reserved flag of it)) as string">
+		<Result>
+			<Answer type="string">Number of Active BES Relays: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.763ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Computers Using Automatic Relay Selection: &quot; &amp; number of results whose (exists value of it AND value of it = &quot;Automatic&quot;) of bes properties &quot;BES Relay Selection Method&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">Number of Computers Using Automatic Relay Selection: 2400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.744ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Computers Using Manual Relay Selection: &quot; &amp; number of results whose (exists value of it AND value of it = &quot;Manual&quot;) of bes properties &quot;BES Relay Selection Method&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">Number of Computers Using Manual Relay Selection: 137</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2.113ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Average Number of Clients per Relay: &quot; &amp; (if (exists it as integer) then it as integer else 0) of mean of multiplicities of unique values of values of results whose (exists value of it and value of it != &quot;BES Root Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">Average Number of Clients per Relay: 100</Answer>
+		</Result>
+		<Evaluation>
+			<Time>4.42ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Maximum Number of Clients per Relay: &quot; &amp; ((if (exists results whose (exists value of it and value of it != &quot;BES Root Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it)) then (maximum of multiplicities of unique values of values of results whose (exists value of it and value of it != &quot;BES Root Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it)) else 0) as string)">
+		<Result>
+			<Answer type="string">Maximum Number of Clients per Relay: 100</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2.884ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Minimum Number of Clients per Relay: &quot; &amp; ((if (exists results whose (exists value of it and value of it != &quot;BES Root Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it)) then (minimum of multiplicities of unique values of values of results whose (exists value of it and value of it != &quot;BES Root Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it)) else 0) as string)">
+		<Result>
+			<Answer type="string">Minimum Number of Clients per Relay: 100</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2.299ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Distances to Relays: &quot; &amp; concatenation &quot;, &quot; of (it &amp; &quot;--&quot; &amp; (multiplicity of it as string)) of (unique values of ((values of results whose (exists value of it) of bes properties &quot;Distance to BES Relay&quot; whose (reserved flag of it));(&quot;255--&quot; &amp; (number of results whose (error flag of it) of bes properties &quot;Distance to BES Relay&quot; whose (reserved flag of it)) as string))) as string">
+		<Result>
+			<Answer type="string">Distances to Relays: 0--137, 1--2400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>10.055ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Average Distance to Relays: &quot; &amp; mean of (it as integer) of (values whose (exists it as integer) of results whose (exists value of it) of bes properties &quot;Distance to BES Relay&quot; whose (reserved flag of it)) as integer as string">
+		<Result>
+			<Answer type="string">Average Distance to Relays: 1</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.998ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Clients with Unknown Relay Distance: &quot; &amp; (number of results whose (error flag of it) of bes properties &quot;Distance to BES Relay&quot; whose (reserved flag of it)) as string">
+		<Result>
+			<Answer type="string">Number of Clients with Unknown Relay Distance: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.894ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Maximum Distance to Relays: &quot; &amp; maximum of (it as integer) of (values whose (exists it as integer) of results whose (exists value of it) of bes properties &quot;Distance to BES Relay&quot; whose (reserved flag of it)) as string">
+		<Result>
+			<Answer type="string">Maximum Distance to Relays: 1</Answer>
+		</Result>
+		<Evaluation>
+			<Time>4.29ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Latest relay Report Time timestamp: &quot; &amp; maximum of (last report time of it) of bes computers whose (relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Latest relay Report Time timestamp: Wed, 30 Sep 2026 08:25:06 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.628ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays reported within the last 24 hours: &quot; &amp; number of bes computers whose (last report time of it &gt; (now - (24* hour)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays reported within the last 24 hours: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.46ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays reported within the last 1 hours: &quot; &amp; number of bes computers whose (last report time of it &gt; (now - (1* hour)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays reported within the last 1 hours: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.271ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays reported within the last 15 minutes: &quot; &amp; number of bes computers whose (last report time of it &gt; (now - (15 * minute)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays reported within the last 15 minutes: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.239ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays that have not reported within the last 1 hour: &quot; &amp; number of bes computers whose (last report time of it &lt; (now - (60 * minute)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays that have not reported within the last 1 hour: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.208ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays that have not reported within the last 1 day: &quot; &amp; number of bes computers whose (last report time of it &lt; (now - (1440 * minute)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays that have not reported within the last 1 day: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.44ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of relays that have not reported within the last 1 day: &quot; &amp; number of bes computers whose (last report time of it &lt; (now - (10080 * minute)) and relay server flag of it) as string">
+		<Result>
+			<Answer type="string">Number of relays that have not reported within the last 1 day: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.245ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Relays with over 1000 Clients: &quot; &amp; number of (item 0 of it) of ((it, multiplicity of it) of unique values of (relay servers of it) of bes computers whose (exist relay server of it)) whose (item 1 of it &gt; 1000) as string">
+		<Result>
+			<Answer type="string">Number of Relays with over 1000 Clients: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.38ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.046ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Current Actionsite Version: &quot; &amp; (maximum of ((values of results from (bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot;)) of bes computers whose (root server flag of it = TRUE)) as integer) as string)">
+		<Result>
+			<Answer type="string">Current Actionsite Version: 230</Answer>
+		</Result>
+		<Evaluation>
+			<Time>25.255ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relays with Stale Actionsite Versions (based upon BES Health Checks::Actionsite Version) - Version, Relay Name&quot;)">
+		<Result>
+			<Answer type="string">Relays with Stale Actionsite Versions (based upon BES Health Checks::Actionsite Version) - Version, Relay Name</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.082ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(concatenation &quot;&quot; of ((name of computer of item 1 of it &amp; &quot; - &quot; &amp; value of item 1 of it)) of (maximum of ((values of results from (bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot;)) of bes computers whose (root server flag of it = TRUE)) as integer) , results whose (exists value of it) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; )) whose (value of item 1 of it as integer &lt; item 0 of it as integer))">
+		<Result>
+			<Answer type="string">BFRELAY017.dmc.lab - 226</Answer>
+		</Result>
+		<Evaluation>
+			<Time>51.906ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.107ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relay Server Aggregation Statistics (Total Child Count) - Relay Name, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Relay Server Aggregation Statistics (Total Child Count) - Relay Name, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.052ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((it, multiplicity of it) of unique values of (relay server of it) of bes computers whose (exist relay server of it)) as string">
+		<Result>
+			<Answer type="string">BES Root Server, 161</Answer><Answer type="string">BFRELAY001.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY002.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY003.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY004.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY005.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY006.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY007.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY008.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY009.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY010.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY011.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY012.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY013.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY014.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY015.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY016.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY017.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY018.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY019.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY020.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY021.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY022.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY023.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY024.dmc.lab:52311, 100</Answer>
+			
+			
+		</Result>
+		<Evaluation>
+			<Time>0.682ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.09ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relay Server Aggregation Statistics (Client Child Count) - Relay Name, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Relay Server Aggregation Statistics (Client Child Count) - Relay Name, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.075ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((it, multiplicity of it) of unique values of (relay server of it) of bes computers whose (exist relay server of it AND not relay server flag of it)) as string">
+		<Result>
+			<Answer type="string">BES Root Server, 137</Answer><Answer type="string">BFRELAY001.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY002.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY003.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY004.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY005.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY006.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY007.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY008.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY009.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY010.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY011.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY012.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY013.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY014.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY015.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY016.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY017.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY018.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY019.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY020.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY021.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY022.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY023.dmc.lab:52311, 100</Answer><Answer type="string">BFRELAY024.dmc.lab:52311, 100</Answer>
+			
+			
+		</Result>
+		<Evaluation>
+			<Time>0.397ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.277ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relay Server Aggregation Statistics (Relay Child Count) - Relay Name, Number of Machines&quot;)">
+		<Result>
+			<Answer type="string">Relay Server Aggregation Statistics (Relay Child Count) - Relay Name, Number of Machines</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.073ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(item 0 of it, item 1 of it as string) of ((it, multiplicity of it) of unique values of (relay server of it) of bes computers whose (exist relay server of it AND relay server flag of it)) as string">
+		<Result>
+			<Answer type="string">BES Root Server, 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.35ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

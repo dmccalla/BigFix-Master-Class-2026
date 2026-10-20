@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<AdminField Resource="https://BFROOT1:52311/api/admin/field/passwordComplexityDescription">
+		<Name>passwordComplexityDescription</Name>
+		<Value>Passwords must contain 8 characters or more, both uppercase and lowercase letters, and at least 1 digit.</Value>
+	</AdminField>
+	<AdminField Resource="https://BFROOT1:52311/api/admin/field/passwordComplexityRegex">
+		<Name>passwordComplexityRegex</Name>
+		<Value>(?=.*[[:lower:]])(?=.*[[:upper:]])(?=.*[[:digit:]]).{8,}</Value>
+	</AdminField>
+</BESAPI>
+

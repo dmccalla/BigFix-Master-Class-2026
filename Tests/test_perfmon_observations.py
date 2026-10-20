@@ -15,6 +15,7 @@ from zipfile import ZipFile
 import get_perfmon_charts
 import inject_perfmon_charts
 import pandas as pd
+import pytest
 from docx import Document
 
 _TINY_PNG = (
@@ -1542,3 +1543,47 @@ def test_scorecard_counts_cannot_verify_apart_from_critical(
         "warning": 0,
         "cannotVerify": 1,
     }
+
+
+@pytest.mark.parametrize(("area_level", "expected"), [(4, 5), (3, 4)])
+def test_affected_counters_heading_sits_one_level_below_its_area(
+    area_level: int, expected: int
+) -> None:
+    """The Full Report areas are Heading 4 and the Mini Report areas Heading 3.
+    A counter heading under an area matches the same area and must not reset
+    the level."""
+    doc_xml = (
+        "<w:document><w:body>"
+        '<w:p><w:pPr><w:pStyle w:val="Heading1"/></w:pPr>'
+        "<w:r><w:t>PerfMon Counters Analysis</w:t></w:r></w:p>"
+        f'<w:p><w:pPr><w:pStyle w:val="Heading{area_level}"/></w:pPr>'
+        "<w:r><w:t>Storage Latency</w:t></w:r></w:p>"
+        f'<w:p><w:pPr><w:pStyle w:val="Heading{area_level + 1}"/></w:pPr>'
+        "<w:r><w:t>Avg. Disk sec/Transfer (By Drive / Physical)</w:t></w:r></w:p>"
+        "<w:p><w:r><w:t>Observation: Your observations go here.</w:t></w:r></w:p>"
+        "</w:body></w:document>"
+    )
+    observations = {
+        "sections": {
+            "Storage Latency": {
+                "status": "Critical",
+                "observation": "The standard was not met for this capture window.",
+                "counters_detail": [
+                    {
+                        "counter": "PhysicalDisk_Total_Avg_Disk_ms_Transfer",
+                        "status": "Critical",
+                        "average": 2.05,
+                    }
+                ],
+            }
+        }
+    }
+
+    updated = inject_perfmon_charts.replace_observation_placeholders(
+        doc_xml, observations
+    )
+
+    assert (
+        f'<w:pStyle w:val="Heading{expected}"/></w:pPr><w:r><w:rPr><w:b/></w:rPr>'
+        "<w:t>Affected Counters Requiring Review</w:t>"
+    ) in updated

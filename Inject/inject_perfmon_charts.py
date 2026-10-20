@@ -255,8 +255,12 @@ def status_paragraph_xml(status: str, label: str, text: str) -> str:
     )
 
 
-def observation_paragraph_xml(section: dict) -> str:
-    """Render an observation paragraph from one section of perfmon_observations.json."""
+def observation_paragraph_xml(section: dict, review_level: int = 4) -> str:
+    """Render an observation paragraph from one section of perfmon_observations.json.
+
+    ``review_level`` is the heading level for Affected Counters Requiring Review,
+    one below the area heading it belongs to.
+    """
     status = section.get("status", "Not Available")
     observation = section.get("observation", "").strip()
     xml = status_paragraph_xml(status, "Observation", observation)
@@ -266,7 +270,9 @@ def observation_paragraph_xml(section: dict) -> str:
         if item.get("status", "Not Available") not in {"OK", ""}
     ]
     if review_items:
-        xml += heading_paragraph_xml("Affected Counters Requiring Review", level=4)
+        xml += heading_paragraph_xml(
+            "Affected Counters Requiring Review", level=review_level
+        )
         for item in review_items:
             item_status = item.get("status", "Not Available")
             details = []
@@ -1453,6 +1459,7 @@ def replace_observation_placeholders(doc_xml: str, observations: dict) -> str:
     in_perfmon_appendix = False
     perfmon_heading_level = 0
     current_section_key: str | None = None
+    current_section_level = 3
 
     for pm in get_document_paragraphs(doc_xml):
         para = pm.group(0)
@@ -1474,8 +1481,11 @@ def replace_observation_placeholders(doc_xml: str, observations: dict) -> str:
 
         if text and is_perfmon_section_heading_candidate(para, text):
             matched_key = perfmon_section_key_for_text(text)
-            if matched_key:
+            # The area heading starts a section. A counter heading under it can
+            # match the same area, so only the first match sets the level.
+            if matched_key and matched_key != current_section_key:
                 current_section_key = matched_key
+                current_section_level = heading_level or current_section_level
 
         if not re.search(r"Your\s+observations\s+go\s+here", text, flags=re.IGNORECASE):
             continue
@@ -1493,7 +1503,7 @@ def replace_observation_placeholders(doc_xml: str, observations: dict) -> str:
             (
                 pm.start(),
                 pm.end(),
-                observation_paragraph_xml(section),
+                observation_paragraph_xml(section, current_section_level + 1),
                 section_key,
             )
         )
@@ -2140,7 +2150,7 @@ def append_perfmon_capture_section(
             section_chunks.append(heading_paragraph_xml(section, level=3))
             section_data = observations.get("sections", {}).get(section, {})
             if section_data:
-                section_chunks.append(observation_paragraph_xml(section_data))
+                section_chunks.append(observation_paragraph_xml(section_data, 4))
             for png in pngs:
                 section_chunks.append(_append_png(zf, png))
 

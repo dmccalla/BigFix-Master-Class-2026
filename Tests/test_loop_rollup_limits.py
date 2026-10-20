@@ -132,17 +132,21 @@ def test_report_caps_rollups_and_says_so(tmp_path: Path) -> None:
     notes = [p.text for p in doc.paragraphs if p.text.startswith("NOTE: Showing")]
 
     capped = {
-        f"UDP Notification Issues by Relay (Top {LIMIT})": "relays",
-        f"Top {LIMIT} Subnets Not Receiving UDP Pings": "subnets",
-        f"Command Polling by Relay (Top {LIMIT})": "relays",
-        f"Command Polling by Subnet (Top {LIMIT})": "subnets",
+        f"UDP Notification Issues by Relay (Top {LIMIT})": "UDP Issues by Relay",
+        f"Top {LIMIT} Subnets Not Receiving UDP Pings": "UDP Issues by Subnet",
+        f"Command Polling by Relay (Top {LIMIT})": "Polling by Relay",
+        f"Command Polling by Subnet (Top {LIMIT})": "Polling by Subnet",
     }
     for heading in capped:
         assert heading in headings
         assert len(_table_after(doc, heading).rows) == LIMIT + 1  # header + top rows
-    expected = f"NOTE: Showing {LIMIT} of {LIMIT + 5:,} relays. The full list is in the workbook."
-    assert notes.count(expected) == 2
-    assert notes.count(expected.replace("relays", "subnets")) == 2
+    for sheet in capped.values():
+        noun = "relay" if sheet.endswith("Relay") else "subnet"
+        expected = (
+            f"NOTE: Showing {LIMIT} of {LIMIT + 5:,} {noun}s. "
+            f"Every {noun} is in the Excel sheet {sheet}."
+        )
+        assert sum(n.startswith(expected) for n in notes) == 1
 
 
 def test_report_keeps_short_rollups_whole(tmp_path: Path) -> None:

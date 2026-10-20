@@ -194,9 +194,10 @@ def perfmon_score_method_note_xml() -> str:
                 bold_prefix="Formula:",
             ),
             text_paragraph_xml(
-                "The counter-area status is based on the average observed value, "
-                "so the score reflects sustained behavior rather than a single "
-                "short spike."
+                "Each area takes the status of its worst counter, judged on that "
+                "counter's average. A few high readings can raise an average over "
+                "the limit. Each area section gives the peak and the number of "
+                "readings over the limit."
             ),
             text_paragraph_xml(
                 "Score bands: 85-100 Healthy, 60-84 Needs Attention, 0-59 Critical.",
@@ -278,13 +279,17 @@ def observation_paragraph_xml(section: dict) -> str:
                 if violation_percent is not None:
                     violation_text += f" ({violation_percent}%)"
                 details.append(f"{violation_text} above the standard")
-            if not details:
-                details.append("no samples were available for verification")
-            xml += status_paragraph_xml(
-                item_status,
-                "Counter",
-                f"{item.get('counter', 'Unnamed counter')}: {', '.join(details)}.",
-            )
+            name = item.get("counter", "Unnamed counter")
+            if details:
+                line = f"{name}: {', '.join(details)}."
+            elif item.get("not_scored_reason"):
+                line = (
+                    f"{name}. It was not compared with the limit because "
+                    f"{item['not_scored_reason']}."
+                )
+            else:
+                line = f"{name}: no samples were available for verification."
+            xml += status_paragraph_xml(item_status, "Counter", line)
     return xml
 
 
@@ -1101,7 +1106,7 @@ def perfmon_finding_context(section_data: dict) -> str:
         details.append(reading_text)
 
     if details:
-        return f"{label}: {'; '.join(details)}."
+        return f"{label}: {'; '.join(details).rstrip('.')}."
 
     observation = str(section_data.get("observation", "")).strip()
     if observation:
@@ -1252,7 +1257,12 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         if not name:
             continue
         status = str(section_data.get("status", "")).strip().lower()
-        res = "pass" if status in ("ok", "pass", "passed", "healthy") else "fail"
+        if status in ("ok", "pass", "passed", "healthy"):
+            res = "pass"
+        elif status in ("not available", "cannot verify"):
+            res = "cannot"
+        else:
+            res = "fail"
         if res != "pass":
             if status in ("warning", "warn", "advisory", "needs attention"):
                 findings_summary["warning"] += 1
@@ -1265,7 +1275,10 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
                 finding_ids.append(source_id)
         thr = section_data.get("threshold", "")
         avg_raw = section_data.get("average")
-        avg_display = fmt_value(avg_raw) + unit_for(thr)
+        if res == "cannot" and avg_raw is None:
+            avg_display = "Not supplied" if name == "Memory Health" else "No data"
+        else:
+            avg_display = fmt_value(avg_raw) + unit_for(thr)
         counters.append(
             [
                 name,

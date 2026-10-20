@@ -418,8 +418,8 @@ def get_threshold(
             f"root server)."
             if memory_gb > 0
             else "Page file in use should be <= 5% of physical memory. "
-            "Physical memory of the analyzed system was not supplied, so this "
-            "counter is not scored."
+            "Physical memory was not supplied, so this area cannot be verified. "
+            "Cannot Verify earns 25 points in the score."
         )
         return {
             "type": "max",
@@ -586,10 +586,11 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
     threshold_src = worst.get("ThresholdSource", "")
 
     if status == "Not Available" and worst.get("NotScoredReason"):
+        reason = str(worst["NotScoredReason"])
         result = (
-            f"{worst.get('Counter', 'This counter')} was not scored because the "
-            f"{worst['NotScoredReason']}. PRF-INF-09 measures page file use against "
-            f"physical memory. Do not treat this area as validated."
+            f"{reason[:1].upper()}{reason[1:]}, so this area cannot be verified. "
+            "Cannot Verify earns 25 points in the score. PRF-INF-09 measures page "
+            "file use against physical memory."
         )
     elif status == "Not Available":
         result = (
@@ -605,11 +606,21 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
         )
         result = (
             f"The standard was not met for this capture window. The worst counter "
-            f"{metric} {average} against the standard ({threshold_display}) -- the sustained "
-            f"average, not a transient spike, is over the limit. It peaked at "
-            f"{maximum}, with {violations} of {samples} readings ({violation_pct}%) "
-            f"above the standard. Breach window: {peak_window}."
+            f"{metric} {average} against the standard ({threshold_display})."
         )
+        if samples and violations * 2 > samples:
+            result += (
+                f" The average stayed over the limit for most of the capture. It "
+                f"peaked at {maximum}, with {violations} of {samples} readings "
+                f"({violation_pct}%) above the standard. Breach window: {peak_window}."
+            )
+        else:
+            result += (
+                f" {violations} of {samples} readings ({violation_pct}%) were over the "
+                f"limit, in the breach window {peak_window}. They raised the average "
+                f"over the limit. The other {samples - violations} readings met the "
+                f"standard. It peaked at {maximum}."
+            )
     elif status == "Warning":
         result = (
             f"The standard was met for critical-threshold purposes, but warning-level "
@@ -697,6 +708,7 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
                 "sample_start": item.get("SampleStart", ""),
                 "sample_end": item.get("SampleEnd", ""),
                 "peak_violation_window": item.get("PeakViolationWindow", ""),
+                "not_scored_reason": item.get("NotScoredReason", ""),
             }
             for item in ordered
         ],

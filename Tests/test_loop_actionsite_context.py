@@ -379,11 +379,15 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
 
     doc = Document(str(word_output))
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
-    assert "Devices that did not report usable loop data count as Critical." in paragraphs
-    assert (
-        "A high count here points to a visibility problem as much as a performance "
-        "problem."
-    ) in paragraphs
+    assert any(
+        p.endswith(
+            "reported no usable loop data. They count as Critical in the table and "
+            "in the score. When more than 5% of devices have no usable data, CLT-01 "
+            "gives it as a reason."
+        )
+        for p in paragraphs
+    )
+    assert not any("visibility problem" in p for p in paragraphs)
 
     offender_tables = [
         table
@@ -436,7 +440,7 @@ def test_context_strip_tiles_feed_chart_data_with_missing_udp_fallback() -> None
             "muted": True,
         },
         {
-            "label": "Relay w/ Most UDP Issues",
+            "label": "Relay With Most UDP Issues",
             "value": "Not collected",
             "caption": "",
             "muted": True,
@@ -460,7 +464,7 @@ def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> Non
 
     assert tiles[1]["value"] == "2 / 10"
     assert tiles[1]["caption"] == "Machines with no UDP pings received"
-    assert tiles[2]["value"] == "2"
+    assert tiles[2]["value"] == "2 / 3"
     assert tiles[2]["caption"] == "relay-a"
 
 
@@ -500,7 +504,7 @@ def test_infographic_key_uses_infographic_values() -> None:
         "Severe loops over 120 min",
         "Devices reporting",
         "No UDP pings received",
-        "Relay w/ Most UDP Issues",
+        "Relay With Most UDP Issues",
         "Findings raised",
     ]
     values = {row[0]: row[1] for row in rows}
@@ -511,7 +515,7 @@ def test_infographic_key_uses_infographic_values() -> None:
     assert values["Severe loops over 120 min"] == "0"
     assert values["Devices reporting"] == "10 / 10"
     assert values["No UDP pings received"] == "2 / 10"
-    assert values["Relay w/ Most UDP Issues"] == "relay-a"
+    assert values["Relay With Most UDP Issues"] == "2 / 3 on relay-a"
     assert values["Findings raised"] == "None raised"
 
 

@@ -364,7 +364,7 @@ function normalizedLoopContext(d){
     context.push({label:'No UDP Pings Received', value:'Not available', caption:'No UDP rollup recorded'});
   }
   if(!context.some(c=>/relay(?:s)?\s+(?:w\/\s+most|with)\s+udp issues/i.test(c.label || ''))){
-    context.push({label:'Relay w/ Most UDP Issues', value:'Not available', caption:'No relay rollup recorded'});
+    context.push({label:'Relay With Most UDP Issues', value:'Not available', caption:'No relay rollup recorded'});
   }
   return context.slice(0,3);
 }
@@ -1209,8 +1209,8 @@ function buildPerfmon(d){
   const cards = (d.counters || []).map(([name,peak,thr,res])=>`
     <div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
       <div style="font-size:38px;font-weight:700;letter-spacing:0.04em;">${srcText(name).toUpperCase()}</div>
-      <div style="font-size:64px;font-weight:700;color:${res==='fail'?SRC_CRITICAL:SRC_HEALTHY};margin-top:10px;">${srcText(peak)}</div>
-      <div style="font-size:38px;margin-top:8px;">${srcText(srcPerfmonCaption(name, thr))}</div>
+      <div style="font-size:64px;font-weight:700;color:${res==='fail'?SRC_CRITICAL:res==='cannot'?SRC_INK:SRC_HEALTHY};margin-top:10px;">${srcText(peak)}</div>
+      <div style="font-size:38px;margin-top:8px;">${srcText(res==='cannot'?(/memory/i.test(name)?'Cannot verify without physical memory.':'Cannot verify.'):srcPerfmonCaption(name, thr))}</div>
     </div>`).join('');
   return srcHeader('PerfMon Counters', `${(d.counters || []).length} checks against thresholds &middot; values are capture averages`, right)
     + srcScoreBar(score, color)

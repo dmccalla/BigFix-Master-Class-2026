@@ -37,6 +37,7 @@ the project release process for the steps to cut a release.
 
 ### Fixed
 
+- Correct the Mini Report wording Design's 10-19 review found inaccurate (CP-01, CP-03, CP-05 to CP-09, CP-12, PM-01 to PM-04, PM-06, FD-02). Minimum Analysis Interval states each value without comparing it to the deployment average. The Top 10 relay and subnet notes name their Excel sheet and count the devices with no relay or address. Excel Health Summary shows Devices Scored and Devices Reporting. PerfMon calls a failure sustained only when most readings were over the limit and says Memory Health earns 25 points as Cannot Verify. FillDB counts lines processed.
 - Read the active analyses count in Contributing Factors. The Deployment Information capture writes "Number of Activated Analyses", which the report did not match, so it always showed 0 active and never checked the 500 limit.
 - Count only named relays and subnets in the Top 10 notes. Devices with no relay or no usable address were counted as one more relay or subnet.
 - Leave the collection span out of the Client Performance Infographic header when no report dates were given. It read "Not provided collection".

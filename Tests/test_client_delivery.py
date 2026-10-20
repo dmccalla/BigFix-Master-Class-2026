@@ -215,7 +215,8 @@ def test_real_report_workbook_and_chart_agree(delivered):
             for row in workbook["Health Summary"].iter_rows(values_only=True)
             if row[0] is not None
         }
-        assert summary["Total Devices"] == 4
+        assert summary["Devices Scored"] == 6
+        assert summary["Devices Reporting"] == 4
         assert summary["Overall Status"] == "CRITICAL"
         assert summary["Average Loop Health Score"] == "56 / 100"
         frequencies = list(

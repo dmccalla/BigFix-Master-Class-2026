@@ -512,7 +512,7 @@ def generate_filldb_chart(
         if c > 0
     ]
 
-    meta = f"{format_count(total_rows)} reports parsed"
+    meta = f"{format_count(total_rows)} lines processed"
     if metadata.get("duration") and metadata["duration"] != "Not specified":
         meta += f" &middot; capture {metadata['duration']}"
 

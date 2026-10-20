@@ -1679,39 +1679,24 @@ def minimum_analysis_interval_effect(
     return "No change at the average loop time"
 
 
-def minimum_analysis_interval_paragraph(
-    rows: list[MinimumAnalysisInterval], average_loop_seconds: float
-) -> str:
+def minimum_analysis_interval_paragraph(rows: list[MinimumAnalysisInterval]) -> str:
     total = sum(row.devices for row in rows)
-    loop = format_minutes_seconds(average_loop_seconds)
-    above = [
-        r for r in rows if r.seconds is not None and r.seconds > average_loop_seconds
-    ]
-    below = [
-        r for r in rows if r.seconds is not None and r.seconds <= average_loop_seconds
-    ]
-    unreadable = sum(r.devices for r in rows if r.seconds is None)
+    readable = [row for row in rows if row.seconds is not None]
+    unreadable = sum(row.devices for row in rows if row.seconds is None)
     sentences = [f"{_device_count(total)} set {MINIMUM_ANALYSIS_INTERVAL_SETTING}."]
-    for row in above:
-        sentences.append(
-            f"On {_device_count(row.devices)} it is {_minimum_analysis_value(row)}, "
-            f"longer than the {loop} average loop time, so analyses there run at "
-            f"most once every {_seconds_in_words(row.seconds or 0)}."
+    if readable:
+        parts = [
+            f"{_device_count(row.devices)} {'sets' if row.devices == 1 else 'set'} it "
+            f"to {_minimum_analysis_value(row)}"
+            for row in readable
+        ]
+        listed = (
+            parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
         )
-    if below:
-        count = sum(r.devices for r in below)
-        subject = f"The other {_device_count(count)}" if above else _device_count(count)
-        values = {_minimum_analysis_value(r) for r in below}
-        if len(values) == 1:
-            sentences.append(
-                f"{subject} use {values.pop()}, which is shorter than the "
-                f"{'loop' if above else f'{loop} average loop time'} and changes nothing."
-            )
-        else:
-            sentences.append(
-                f"{subject} use shorter values than the "
-                f"{'loop' if above else f'{loop} average loop time'}, which change nothing."
-            )
+        sentences.append(listed[0].upper() + listed[1:] + ".")
+        sentences.append(
+            "A device with this setting runs its analyses at most once per that interval."
+        )
     if unreadable:
         verb = "has" if unreadable == 1 else "have"
         sentences.append(
@@ -3715,7 +3700,8 @@ def generate_excel(
     stamp: str = "",
 ) -> None:
     metrics_rows = [
-        ("Total Devices", metrics.total_devices),
+        ("Devices Scored", metrics.score_total_devices),
+        ("Devices Reporting", metrics.total_devices),
         ("Overall Status", metrics.overall_status),
         ("Average Loop Health Score", f"{metrics.environment_score} / 100"),
         ("Score Method", metrics.score_driver),
@@ -3811,7 +3797,7 @@ def generate_excel(
             {
                 "Basis": "Average Loop",
                 "Band": "Critical",
-                "Definition": f"> {convert_to_hhmmss(metrics.critical_threshold_seconds)}",
+                "Definition": f"> {convert_to_hhmmss(metrics.critical_threshold_seconds)} or no usable data",
                 "Count": metrics.avg_critical,
                 "Percent": metrics.avg_critical_pct,
             },
@@ -4158,7 +4144,7 @@ def context_strip_tiles(
 
         if udp_summary.relay_rows:
             relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
-            relay_value = str(relay_count).split("/", 1)[0].strip()
+            relay_value = str(relay_count).strip()
             relay_detail = relay_name
         else:
             relay_value = "None"
@@ -4199,7 +4185,7 @@ def context_strip_tiles(
             "muted": udp_muted,
         },
         {
-            "label": "Relay w/ Most UDP Issues",
+            "label": "Relay With Most UDP Issues",
             "value": relay_value,
             "caption": relay_detail,
             "muted": relay_muted,
@@ -4218,9 +4204,9 @@ def client_loop_infographic_key_rows(
     tiles = {tile["label"]: str(tile["value"]) for tile in context}
     # The relay tile shows the affected count large and the relay name beneath
     # it. The key names the relay, because that is what the tile identifies.
-    relay_tile = next(t for t in context if t["label"] == "Relay w/ Most UDP Issues")
+    relay_tile = next(t for t in context if t["label"] == "Relay With Most UDP Issues")
     relay_name = (
-        str(relay_tile["caption"])
+        f"{relay_tile['value']} on {relay_tile['caption']}"
         if udp_summary and udp_summary.relay_rows
         else str(relay_tile["value"])
     )
@@ -4271,7 +4257,7 @@ def client_loop_infographic_key_rows(
             "Devices that receive no UDP notifications from their relay.",
         ],
         [
-            "Relay w/ Most UDP Issues",
+            "Relay With Most UDP Issues",
             relay_name,
             "Relay with the most devices that receive no UDP notifications.",
         ],
@@ -4308,6 +4294,14 @@ MINI_REPORT_ROLLUP_LIMIT = 10
 UNREPORTED_GROUPS = {"Not reported", "Unknown"}
 
 
+def _rollup_device_count(row: list[str]) -> int:
+    """Total Devices is the second column of the polling rollups."""
+    try:
+        return int(str(row[1]).replace(",", "").split("/", 1)[0])
+    except (IndexError, ValueError):
+        return 0
+
+
 def add_capped_rollup_table(
     document,
     heading: str,
@@ -4316,6 +4310,7 @@ def add_capped_rollup_table(
     rows: list[list[str]],
     centered_columns: set[int],
     noun: str,
+    sheet: str,
 ) -> None:
     """Write a worst-first rollup table, keeping only the top rows in the report."""
     capped = len(rows) > MINI_REPORT_ROLLUP_LIMIT
@@ -4330,11 +4325,17 @@ def add_capped_rollup_table(
         # Devices with no relay or no usable address are a group, not a relay or
         # subnet, so they are not counted in the note.
         named = sum(1 for row in rows if str(row[0]) not in UNREPORTED_GROUPS)
-        add_note_paragraph(
-            document,
+        note = (
             f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {named:,} {noun}. "
-            "The full list is in the workbook.",
+            f"Every {noun[:-1]} is in the Excel sheet {sheet}."
         )
+        unreported = sum(
+            _rollup_device_count(row) for row in rows if str(row[0]) in UNREPORTED_GROUPS
+        )
+        if unreported:
+            missing = "a relay" if noun == "relays" else "a usable address"
+            note += f" {_device_count(unreported)} did not report {missing}."
+        add_note_paragraph(document, note)
 
 
 def generate_word(
@@ -4483,7 +4484,11 @@ def generate_word(
     document.add_heading("Reporting Issues", level=4)
     keep_with_next(
         document.add_paragraph(
-            "Devices that did not report usable loop data count as Critical."
+            f"{_device_count(metrics.total_issue_count)} "
+            f"({pct(metrics.total_issue_pct)}) reported no usable loop data. They "
+            "count as Critical in the table and in the score. When more than "
+            f"{NO_DATA_PCT_LIMIT:g}% of devices have no usable data, CLT-01 gives it "
+            "as a reason."
         )
     )
     build_word_table(
@@ -4512,16 +4517,12 @@ def generate_word(
         ],
         {1, 2},
     )
-    document.add_paragraph(
-        "A high count here points to a visibility problem as much as a performance "
-        "problem."
-    )
 
     if loop_offenders or actionsite_pressure or property_intervals:
         document.add_heading("Loop Cost", level=3)
         document.add_paragraph(
-            "These tables show where loop time goes. They add context and do not "
-            "change the score."
+            "These sections show what the Client evaluates in each loop. They do "
+            "not change the score. Evaluation Frequency can add a reason to CLT-01."
         )
 
     if loop_offenders:
@@ -4580,8 +4581,8 @@ def generate_word(
                 "properties. Each one has an evaluation interval that sets how often "
                 "the Client re-evaluates it. A property set to every report runs on "
                 "every loop. So does a property with no interval, because BigFix "
-                "evaluates it every report. The guideline is 6 hours or longer unless "
-                "the data must be current."
+                "evaluates it every report. This Mini Report rates 6 hours or longer "
+                "as Healthy."
             )
         )
         build_word_table(
@@ -4620,9 +4621,7 @@ def generate_word(
             )
         if minimum_analysis_interval:
             document.add_paragraph(
-                minimum_analysis_interval_paragraph(
-                    minimum_analysis_interval, metrics.avg_mean_seconds
-                )
+                minimum_analysis_interval_paragraph(minimum_analysis_interval)
             )
 
     if udp_summary or command_polling_summary:
@@ -4656,6 +4655,7 @@ def generate_word(
                 udp_summary.relay_rows,
                 {1, 2},
                 "relays",
+                "UDP Issues by Relay",
             )
 
         if udp_summary.subnet_rows:
@@ -4667,6 +4667,7 @@ def generate_word(
                 udp_summary.subnet_rows,
                 {1},
                 "subnets",
+                "UDP Issues by Subnet",
             )
 
     if command_polling_summary:
@@ -4705,6 +4706,7 @@ def generate_word(
                 command_polling_summary.relay_rows,
                 {1, 2, 3, 4, 5, 6, 7, 8},
                 "relays",
+                "Polling by Relay",
             )
 
         if command_polling_summary.subnet_rows:
@@ -4726,6 +4728,7 @@ def generate_word(
                 command_polling_summary.subnet_rows,
                 {1, 2, 3, 4, 5, 6, 7, 8},
                 "subnets",
+                "Polling by Subnet",
             )
 
     if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:
@@ -4744,8 +4747,8 @@ def generate_word(
             document.add_paragraph(
                 "FastHashVerify lets the Client use more CPU while it checks the hash "
                 "of a downloaded file, which shortens verification for large patches. "
-                "It is off by default. When it is on, the documented defaults are "
-                "20 ms work and 60 ms sleep, about 25% of one CPU core while hashing."
+                "It is off by default. When it is on, 20 ms work and 60 ms sleep is "
+                "a configured duty cycle of 25% while hashing."
             )
         )
         build_word_table(

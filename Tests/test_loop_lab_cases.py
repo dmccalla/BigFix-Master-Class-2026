@@ -181,8 +181,18 @@ def test_rollup_note_counts_only_named_relays(tmp_path: Path) -> None:
     rows = [[f"relay{i:02d}", "1"] for i in range(11)] + [["Not reported", "77"]]
     document = Document()
     loop.add_capped_rollup_table(
-        document, "Relays", "Top 10 Relays", ["Relay", "Devices"], rows, {1}, "relays"
+        document,
+        "Relays",
+        "Top 10 Relays",
+        ["Relay", "Devices"],
+        rows,
+        {1},
+        "relays",
+        "Polling by Relay",
     )
 
     text = "\n".join(p.text for p in document.paragraphs)
-    assert "Showing 10 of 11 relays." in text
+    assert (
+        "Showing 10 of 11 relays. Every relay is in the Excel sheet Polling by "
+        "Relay. 77 devices did not report a relay."
+    ) in text

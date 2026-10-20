@@ -207,5 +207,5 @@
       "25.0%"
     ]
   ],
-  "expected_minimum_analysis_interval": "3 devices set _BESClient_Report_MinimumAnalysisInterval. On 1 device it is 60 minutes, longer than the 40m 15s average loop time, so analyses there run at most once every 60 minutes. The other 2 devices use 60 seconds (no value set), which is shorter than the loop and changes nothing."
+  "expected_minimum_analysis_interval": "3 devices set _BESClient_Report_MinimumAnalysisInterval. 1 device sets it to 60 minutes and 2 devices set it to 60 seconds (no value set). A device with this setting runs its analyses at most once per that interval."
 }

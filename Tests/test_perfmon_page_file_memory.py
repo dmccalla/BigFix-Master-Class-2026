@@ -100,8 +100,13 @@ def test_not_scored_observation_names_the_reason() -> None:
     observation = perfmon.observation_for_findings("Memory Health", [finding])
 
     assert observation["status"] == "Not Available"
-    assert perfmon.MEMORY_NOT_SUPPLIED in observation["observation"]
+    assert perfmon.MEMORY_NOT_SUPPLIED in observation["observation"].lower()
     assert "No samples were recorded" not in observation["observation"]
+    assert observation["observation"].startswith(
+        "Physical memory was not supplied, so this area cannot be verified. "
+        "Cannot Verify earns 25 points in the score."
+    )
+    assert "not scored" not in observation["observation"]
 
 
 def test_commit_limit_is_collected_but_never_charted(tmp_path) -> None:

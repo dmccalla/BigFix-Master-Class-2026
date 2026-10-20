@@ -109,20 +109,20 @@ def test_paragraph_names_the_value_above_the_loop() -> None:
         loop.MinimumAnalysisInterval("600", 600, 2),
     ]
 
-    assert loop.minimum_analysis_interval_paragraph(rows, 1519) == (
-        f"3 devices set {SETTING}. On 1 device it is 30 minutes, longer than the "
-        "25m 19s average loop time, so analyses there run at most once every 30 "
-        "minutes. The other 2 devices use 10 minutes, which is shorter than the "
-        "loop and changes nothing."
+    assert loop.minimum_analysis_interval_paragraph(rows) == (
+        f"3 devices set {SETTING}. 1 device sets it to 30 minutes and 2 devices "
+        "set it to 10 minutes. A device with this setting runs its analyses at "
+        "most once per that interval."
     )
 
 
 def test_paragraph_when_every_value_is_below_the_loop() -> None:
     rows = [loop.MinimumAnalysisInterval("", 60, 4)]
 
-    assert loop.minimum_analysis_interval_paragraph(rows, 1519) == (
-        f"4 devices set {SETTING}. 4 devices use 60 seconds (no value set), "
-        "which is shorter than the 25m 19s average loop time and changes nothing."
+    assert loop.minimum_analysis_interval_paragraph(rows) == (
+        f"4 devices set {SETTING}. 4 devices set it to 60 seconds (no value set). "
+        "A device with this setting runs its analyses at most once per that "
+        "interval."
     )
 
 

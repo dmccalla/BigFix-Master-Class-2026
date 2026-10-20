@@ -76,3 +76,9 @@ def test_mini_report_never_calls_the_loop_groups_bands() -> None:
     assert "placed in a band" not in source
     assert "band points" not in source
     assert '["Band", "Devices / Total"' not in source
+
+
+def test_excel_health_summary_calls_the_loop_groups_groups() -> None:
+    source = loop.Path(loop.__file__).read_text(encoding="utf-8")
+    assert '"Band": "Healthy"' not in source
+    assert '"Group": "Healthy"' in source

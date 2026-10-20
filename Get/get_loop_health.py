@@ -3899,28 +3899,28 @@ def generate_excel(
         [
             {
                 "Basis": "Average Loop",
-                "Band": "Healthy",
+                "Group": "Healthy",
                 "Definition": f"< {convert_to_hhmmss(metrics.healthy_threshold_seconds)}",
                 "Count": metrics.avg_healthy,
                 "Percent": metrics.avg_healthy_pct,
             },
             {
                 "Basis": "Average Loop",
-                "Band": "Good",
+                "Group": "Good",
                 "Definition": f">= {convert_to_hhmmss(metrics.healthy_threshold_seconds)} and < {convert_to_hhmmss(metrics.good_threshold_seconds)}",
                 "Count": metrics.avg_good,
                 "Percent": metrics.avg_good_pct,
             },
             {
                 "Basis": "Average Loop",
-                "Band": "Warning",
+                "Group": "Warning",
                 "Definition": f">= {convert_to_hhmmss(metrics.good_threshold_seconds)} and <= {convert_to_hhmmss(metrics.critical_threshold_seconds)}",
                 "Count": metrics.avg_warning,
                 "Percent": metrics.avg_warning_pct,
             },
             {
                 "Basis": "Average Loop",
-                "Band": "Critical",
+                "Group": "Critical",
                 "Definition": f"> {convert_to_hhmmss(metrics.critical_threshold_seconds)} or no usable data",
                 "Count": metrics.avg_critical,
                 "Percent": metrics.avg_critical_pct,

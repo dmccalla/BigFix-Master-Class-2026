@@ -13,7 +13,7 @@ the project release process for the steps to cut a release.
 
 ### Documentation
 
-- Add Docs/Reference/Guide_Versions.md. It records the NFR guide (11.x.4) and Capacity Planning guide (11.x.12) editions the thresholds and sizing figures are built against, the value each check takes from them, and the house values neither guide states.
+- Add Docs/Reference/Guide_Versions.md. It records the NFR guide (11.x.4) edition the thresholds are built against, the value each check takes from them, and the house values neither guide states.
 
 ### Deployment collection
 

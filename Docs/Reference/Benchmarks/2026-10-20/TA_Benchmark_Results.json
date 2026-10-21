@@ -1,0 +1,1861 @@
+{
+  "measurement_date_local": "2026-10-20",
+  "timezone": "America/New_York",
+  "measured_product": "TA Health Check",
+  "mc_separately_benchmarked": false,
+  "mc_reuse_basis": "Equivalent three-module implementation as specified by the product owner; reassess applicability after processing, dependency or packaging changes.",
+  "code_commit": "bfe6615deaf89b75c6c46615311906872e5dd3fb",
+  "hardware": {
+    "captured_utc": "2026-10-20T22:16:23.7354995Z",
+    "system": {
+      "Manufacturer": "LENOVO",
+      "Model": "21DDS1XW00",
+      "TotalPhysicalMemory": 68370358272,
+      "NumberOfProcessors": 1,
+      "NumberOfLogicalProcessors": 20,
+      "HypervisorPresent": true
+    },
+    "os": {
+      "Caption": "Microsoft Windows 11 Enterprise",
+      "Version": "10.0.26200",
+      "BuildNumber": "26200",
+      "OSArchitecture": "64-bit",
+      "TotalVisibleMemoryKiB": 66767928,
+      "FreePhysicalMemoryKiB": 37359412,
+      "LastBootUpTime": "2026-10-14T15:14:39.5010890Z"
+    },
+    "cpu": [
+      {
+        "Name": "12th Gen Intel(R) Core(TM) i9-12900H",
+        "Manufacturer": "GenuineIntel",
+        "NumberOfCores": 14,
+        "NumberOfLogicalProcessors": 20,
+        "MaxClockSpeed": 2500,
+        "CurrentClockSpeed": 2500,
+        "L2CacheSize": 11776,
+        "L3CacheSize": 24576
+      }
+    ],
+    "memory_modules": [
+      {
+        "Capacity": 34359738368,
+        "Speed": 4800,
+        "ConfiguredClockSpeed": 4800,
+        "Manufacturer": "Samsung",
+        "PartNumber": "M425R4GA3BB0-CQKOD  ",
+        "FormFactor": 12
+      },
+      {
+        "Capacity": 34359738368,
+        "Speed": 4800,
+        "ConfiguredClockSpeed": 4800,
+        "Manufacturer": "Samsung",
+        "PartNumber": "M425R4GA3BB0-CQKOD  ",
+        "FormFactor": 12
+      }
+    ],
+    "disks": [
+      {
+        "Model": "WD PC SN810 SDCQNRZ-2T00-1001",
+        "MediaType": "Fixed hard disk media",
+        "InterfaceType": "SCSI",
+        "Size": 2048407280640
+      }
+    ],
+    "physical_disks": [
+      {
+        "FriendlyName": "WD PC SN810 SDCQNRZ-2T00-1001",
+        "MediaType": "SSD",
+        "BusType": "NVMe",
+        "Size": 2048408248320,
+        "HealthStatus": "Healthy"
+      }
+    ],
+    "volumes": [
+      {
+        "DeviceID": "C:",
+        "FileSystem": "NTFS",
+        "Size": 2046020284416,
+        "FreeSpace": 423237337088
+      },
+      {
+        "DeviceID": "G:",
+        "FileSystem": "FAT32",
+        "Size": 2046020284416,
+        "FreeSpace": 402075467776
+      }
+    ],
+    "power_plan": [
+      "Power Scheme GUID: 381b4222-f694-41f0-9685-ff5bb260df2e  (Balanced)"
+    ],
+    "graphics": [
+      {
+        "Name": "NVIDIA GeForce RTX 3080 Ti Laptop GPU",
+        "DriverVersion": "32.0.15.9647",
+        "VideoProcessor": "NVIDIA GeForce RTX 3080 Ti Laptop GPU"
+      },
+      {
+        "Name": "Intel(R) Iris(R) Xe Graphics",
+        "DriverVersion": "32.0.101.7085",
+        "VideoProcessor": "Intel(R) Iris(R) Xe Graphics Family"
+      }
+    ]
+  },
+  "method": {
+    "date": "2026-10-20",
+    "ordered_sizes_k": [
+      50,
+      100,
+      150,
+      200,
+      250,
+      300
+    ],
+    "order": "All main builder runs, followed by TA runs; no concurrent benchmark builds.",
+    "sampling": "Windows job accounting plus one-second system and live process-tree samples.",
+    "baseline_seconds": 15,
+    "source_snapshots": {
+      "hc": "C:\\Temp\\B20\\src\\hc\\Report Builder",
+      "ta": "C:\\Temp\\B20\\src\\ta"
+    },
+    "repetitions": 1,
+    "limits": "One workstation, one measured pass per product/size, warm filesystem caches possible, no CPU/RAM limits imposed."
+  },
+  "runtime": {
+    "executable": "C:\\Users\\duncan.mccalla\\Documents\\_Code\\TA Health Check\\.venv\\Scripts\\python.exe",
+    "python": "3.13.14 (tags/v3.13.14:fd17997, Jun 10 2026, 13:03:48) [MSC v.1944 64 bit (AMD64)]",
+    "platform": "Windows-11-10.0.26200-SP0",
+    "packages": {
+      "arrow": "1.4.0",
+      "ast_serialize": "0.11.2",
+      "attrs": "26.1.0",
+      "bandit": "1.9.4",
+      "boolean.py": "5.0",
+      "CacheControl": "0.14.4",
+      "certifi": "2026.7.22",
+      "chardet": "5.2.0",
+      "charset-normalizer": "3.5.1",
+      "colorama": "0.4.6",
+      "contourpy": "1.4.0",
+      "customtkinter": "6.0.0",
+      "cycler": "0.12.1",
+      "cyclonedx-bom": "7.4.0",
+      "cyclonedx-python-lib": "11.12.0",
+      "darkdetect": "0.8.0",
+      "defusedxml": "0.7.1",
+      "et_xmlfile": "2.0.0",
+      "filelock": "4.0.3",
+      "fonttools": "4.66.0",
+      "fqdn": "1.5.1",
+      "greenlet": "3.5.6",
+      "idna": "3.20",
+      "iniconfig": "2.3.0",
+      "isoduration": "20.11.0",
+      "jsonpointer": "3.1.1",
+      "jsonschema": "4.26.0",
+      "jsonschema-specifications": "2025.9.1",
+      "kiwisolver": "1.5.1",
+      "lark": "1.3.1",
+      "librt": "0.15.0",
+      "license-expression": "30.4.4",
+      "lxml": "6.1.3",
+      "markdown-it-py": "4.2.0",
+      "matplotlib": "3.11.2",
+      "mdurl": "0.1.2",
+      "msgpack": "1.2.2",
+      "mypy": "2.3.1",
+      "mypy_extensions": "1.1.0",
+      "numpy": "2.5.3",
+      "openpyxl": "3.1.5",
+      "packageurl-python": "0.17.6",
+      "packaging": "26.3",
+      "pandas": "3.0.6",
+      "pathspec": "1.1.1",
+      "pillow": "12.3.0",
+      "pip": "26.2.1",
+      "pip_api": "0.0.35",
+      "pip_audit": "2.10.1",
+      "pip-licenses": "5.5.5",
+      "pip-requirements-parser": "32.0.1",
+      "platformdirs": "4.11.12",
+      "playwright": "1.63.0",
+      "pluggy": "1.6.0",
+      "prettytable": "3.18.0",
+      "pyee": "13.0.1",
+      "Pygments": "2.21.0",
+      "pyparsing": "3.3.3",
+      "pytest": "9.1.1",
+      "python-dateutil": "2.9.0.post0",
+      "python-docx": "1.2.0",
+      "PyYAML": "6.0.3",
+      "py-serializable": "2.1.0",
+      "referencing": "0.37.0",
+      "requests": "2.34.2",
+      "rfc3339-validator": "0.1.4",
+      "rfc3986-validator": "0.1.1",
+      "rfc3987-syntax": "1.1.0",
+      "rich": "15.0.0",
+      "rpds-py": "2026.6.3",
+      "ruff": "0.16.8",
+      "six": "1.17.0",
+      "sortedcontainers": "2.4.0",
+      "stevedore": "5.9.1",
+      "tomli": "2.4.1",
+      "tomli_w": "1.2.0",
+      "typing_extensions": "4.16.0",
+      "tzdata": "2026.4",
+      "uri-template": "1.3.0",
+      "urllib3": "2.8.0",
+      "vulture": "2.16",
+      "wcwidth": "0.9.1",
+      "webcolors": "25.10.0",
+      "xlrd": "2.0.2",
+      "xlsxwriter": "3.2.9"
+    }
+  },
+  "runs": [
+    {
+      "product": "ta",
+      "endpoints": 50000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:18:49.829167+00:00",
+      "ended_utc": "2026-10-20T23:21:11.507322+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 136.28865490003955,
+        "cpu_seconds": 142.390625,
+        "cpu_average_core_equivalents": 1.0447723994666755,
+        "cpu_average_percent_machine": 5.223861997333377,
+        "peak_tree_commit_gib": 1.6827545166015625,
+        "peak_tree_private_sampled_gib": 1.6827545166015625,
+        "peak_tree_working_set_sum_sampled_gib": 1.1393280029296875,
+        "min_available_ram_gib": 35.93004608154297,
+        "baseline_available_ram_gib": 36.982398986816406,
+        "baseline_cpu_percent": 23.968363773200675,
+        "system_cpu_p95_percent": 39.56386292834891,
+        "system_commit_peak_gib": 33.8917121887207,
+        "system_commit_peak_percent": 48.12464392024594,
+        "system_page_reads_p95_per_sec": 90.7828112024792,
+        "system_disk_queue_p95": 0.054574690605976896,
+        "tree_read_gib": 0.9960661605000496,
+        "tree_write_gib": 0.23999865539371967,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 396.1983337402344,
+        "available_disk_after_gib": 396.181339263916,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 547582.6063888,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 121.07880740007386,
+          "peak_live_private_sampled_gib": 1.6827545166015625
+        },
+        {
+          "monotonic": 547590.4187464,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 7.811606500064954,
+          "peak_live_private_sampled_gib": 0.8047676086425781
+        },
+        {
+          "monotonic": 547596.4260258,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 6.006519899936393,
+          "peak_live_private_sampled_gib": 0.4200172424316406
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.2786303999600932,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 49030,
+        "combined_report": null,
+        "output_bytes": 16040891,
+        "output_files": [
+          {
+            "path": "B50_20261020_191850\\B50_20261020_191850_RunLog.txt",
+            "bytes": 18958
+          },
+          {
+            "path": "B50_20261020_191850\\B50_20261020_191850_Run_Diagnostics.json",
+            "bytes": 2009
+          },
+          {
+            "path": "B50_20261020_191850\\B50_20261020_191850_Run_Manifest.json",
+            "bytes": 4208
+          },
+          {
+            "path": "B50_20261020_191850\\Client_Loop\\B50_20261020_191850_Client_Loop.chartdata.json",
+            "bytes": 3067
+          },
+          {
+            "path": "B50_20261020_191850\\Client_Loop\\B50_20261020_191850_Client_Loop.docx",
+            "bytes": 324237
+          },
+          {
+            "path": "B50_20261020_191850\\Client_Loop\\B50_20261020_191850_Client_Loop.png",
+            "bytes": 295159
+          },
+          {
+            "path": "B50_20261020_191850\\Client_Loop\\B50_20261020_191850_Client_Loop.xlsx",
+            "bytes": 4867450
+          },
+          {
+            "path": "B50_20261020_191850\\FillDB_Performance\\B50_20261020_191850_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B50_20261020_191850\\FillDB_Performance\\B50_20261020_191850_FillDB_Performance.docx",
+            "bytes": 277503
+          },
+          {
+            "path": "B50_20261020_191850\\FillDB_Performance\\B50_20261020_191850_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B50_20261020_191850\\FillDB_Performance\\B50_20261020_191850_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon.xlsx",
+            "bytes": 414814
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25374
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B50_20261020_191850\\Perfmon\\B50_20261020_191850_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\50k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 22.23837209302325,
+          "max": 70.95015576323988,
+          "mean": 30.257389921579932
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 963.5260941338034,
+          "mean": 35.85642477662026
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 1307.9991536945934,
+          "mean": 59.22144324166626
+        },
+        "system_disk_queue_length": {
+          "min": 0.004363518714810031,
+          "max": 0.1321682582729754,
+          "mean": 0.022515609023483103
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 5357564.533533054,
+          "mean": 220409.30692430295
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 130857.1195240296,
+          "max": 21384328.10715962,
+          "mean": 3271379.6979259527
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 60.0,
+          "max": 99.0,
+          "mean": 75.94890510948905
+        }
+      }
+    },
+    {
+      "product": "ta",
+      "endpoints": 100000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:21:26.838766+00:00",
+      "ended_utc": "2026-10-20T23:25:50.418983+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 258.520527799963,
+        "cpu_seconds": 263.15625,
+        "cpu_average_core_equivalents": 1.0179317373343133,
+        "cpu_average_percent_machine": 5.089658686671567,
+        "peak_tree_commit_gib": 2.6509475708007812,
+        "peak_tree_private_sampled_gib": 2.6509475708007812,
+        "peak_tree_working_set_sum_sampled_gib": 2.1068077087402344,
+        "min_available_ram_gib": 34.77052307128906,
+        "baseline_available_ram_gib": 36.895721435546875,
+        "baseline_cpu_percent": 23.72033231569472,
+        "system_cpu_p95_percent": 44.73067915690867,
+        "system_commit_peak_gib": 35.576114654541016,
+        "system_commit_peak_percent": 50.51641652927229,
+        "system_page_reads_p95_per_sec": 123.7482218677878,
+        "system_disk_queue_p95": 0.06806223803481352,
+        "tree_read_gib": 1.1902604969218373,
+        "tree_write_gib": 0.4284886624664068,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 396.060733795166,
+        "available_disk_after_gib": 396.04044342041016,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 547860.9335006,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 242.40469080000184,
+          "peak_live_private_sampled_gib": 2.6509475708007812
+        },
+        {
+          "monotonic": 547873.2287616,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 12.294452000060119,
+          "peak_live_private_sampled_gib": 0.8261032104492188
+        },
+        {
+          "monotonic": 547875.7263558,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 2.4967125999974087,
+          "peak_live_private_sampled_gib": 0.4129600524902344
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.3098600000375882,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 97978,
+        "combined_report": null,
+        "output_bytes": 20855290,
+        "output_files": [
+          {
+            "path": "B100_20261020_192127\\B100_20261020_192127_RunLog.txt",
+            "bytes": 19152
+          },
+          {
+            "path": "B100_20261020_192127\\B100_20261020_192127_Run_Diagnostics.json",
+            "bytes": 2011
+          },
+          {
+            "path": "B100_20261020_192127\\B100_20261020_192127_Run_Manifest.json",
+            "bytes": 4253
+          },
+          {
+            "path": "B100_20261020_192127\\Client_Loop\\B100_20261020_192127_Client_Loop.chartdata.json",
+            "bytes": 3089
+          },
+          {
+            "path": "B100_20261020_192127\\Client_Loop\\B100_20261020_192127_Client_Loop.docx",
+            "bytes": 326497
+          },
+          {
+            "path": "B100_20261020_192127\\Client_Loop\\B100_20261020_192127_Client_Loop.png",
+            "bytes": 297408
+          },
+          {
+            "path": "B100_20261020_192127\\Client_Loop\\B100_20261020_192127_Client_Loop.xlsx",
+            "bytes": 9677072
+          },
+          {
+            "path": "B100_20261020_192127\\FillDB_Performance\\B100_20261020_192127_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B100_20261020_192127\\FillDB_Performance\\B100_20261020_192127_FillDB_Performance.docx",
+            "bytes": 277503
+          },
+          {
+            "path": "B100_20261020_192127\\FillDB_Performance\\B100_20261020_192127_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B100_20261020_192127\\FillDB_Performance\\B100_20261020_192127_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon.xlsx",
+            "bytes": 414815
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25378
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B100_20261020_192127\\Perfmon\\B100_20261020_192127_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\100k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 17.936874518860655,
+          "max": 65.84043377226956,
+          "mean": 31.541188305927164
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 1154.31164781125,
+          "mean": 52.73178384247588
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 2359.4329180299083,
+          "mean": 109.17296136854458
+        },
+        "system_disk_queue_length": {
+          "min": 0.0034600735898285954,
+          "max": 0.13007461411607002,
+          "mean": 0.0262455073979708
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 9664237.232250504,
+          "mean": 432504.5652749725
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 20440.8496406832,
+          "max": 22549572.615347225,
+          "mean": 3362087.2468124446
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 60.0,
+          "max": 100.0,
+          "mean": 76.84169884169884
+        }
+      }
+    },
+    {
+      "product": "ta",
+      "endpoints": 150000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:26:05.813732+00:00",
+      "ended_utc": "2026-10-20T23:32:22.612273+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 371.7363044000231,
+        "cpu_seconds": 380.359375,
+        "cpu_average_core_equivalents": 1.0231967405333047,
+        "cpu_average_percent_machine": 5.115983702666523,
+        "peak_tree_commit_gib": 3.677043914794922,
+        "peak_tree_private_sampled_gib": 3.677043914794922,
+        "peak_tree_working_set_sum_sampled_gib": 3.129955291748047,
+        "min_available_ram_gib": 33.45543670654297,
+        "baseline_available_ram_gib": 36.681156158447266,
+        "baseline_cpu_percent": 24.756803503654726,
+        "system_cpu_p95_percent": 42.8235294117647,
+        "system_commit_peak_gib": 36.81731033325195,
+        "system_commit_peak_percent": 52.27885625910071,
+        "system_page_reads_p95_per_sec": 94.8191135770291,
+        "system_disk_queue_p95": 0.054221882219325016,
+        "tree_read_gib": 1.3818555856123567,
+        "tree_write_gib": 0.6161432163789868,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 395.86491775512695,
+        "available_disk_after_gib": 395.8365173339844,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 548257.4289589,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 359.9224594000261,
+          "peak_live_private_sampled_gib": 3.677043914794922
+        },
+        {
+          "monotonic": 548265.6098593,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 8.180124500067905,
+          "peak_live_private_sampled_gib": 0.8209762573242188
+        },
+        {
+          "monotonic": 548268.2261665,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 2.615360000054352,
+          "peak_live_private_sampled_gib": 0.4254188537597656
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.37159529991913587,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 146988,
+        "combined_report": null,
+        "output_bytes": 25672207,
+        "output_files": [
+          {
+            "path": "B150_20261020_192606\\B150_20261020_192606_RunLog.txt",
+            "bytes": 19159
+          },
+          {
+            "path": "B150_20261020_192606\\B150_20261020_192606_Run_Diagnostics.json",
+            "bytes": 2010
+          },
+          {
+            "path": "B150_20261020_192606\\B150_20261020_192606_Run_Manifest.json",
+            "bytes": 4253
+          },
+          {
+            "path": "B150_20261020_192606\\Client_Loop\\B150_20261020_192606_Client_Loop.chartdata.json",
+            "bytes": 3089
+          },
+          {
+            "path": "B150_20261020_192606\\Client_Loop\\B150_20261020_192606_Client_Loop.docx",
+            "bytes": 331263
+          },
+          {
+            "path": "B150_20261020_192606\\Client_Loop\\B150_20261020_192606_Client_Loop.png",
+            "bytes": 302763
+          },
+          {
+            "path": "B150_20261020_192606\\Client_Loop\\B150_20261020_192606_Client_Loop.xlsx",
+            "bytes": 14483861
+          },
+          {
+            "path": "B150_20261020_192606\\FillDB_Performance\\B150_20261020_192606_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B150_20261020_192606\\FillDB_Performance\\B150_20261020_192606_FillDB_Performance.docx",
+            "bytes": 277503
+          },
+          {
+            "path": "B150_20261020_192606\\FillDB_Performance\\B150_20261020_192606_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B150_20261020_192606\\FillDB_Performance\\B150_20261020_192606_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon.xlsx",
+            "bytes": 414816
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25378
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B150_20261020_192606\\Perfmon\\B150_20261020_192606_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\150k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 22.003154574132488,
+          "max": 78.2642689601251,
+          "mean": 32.055297212092086
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 1968.2134034633766,
+          "mean": 52.04084136066791
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 2060.7268767483747,
+          "mean": 75.22472965925712
+        },
+        "system_disk_queue_length": {
+          "min": 0.004855523593532636,
+          "max": 0.28796284351694573,
+          "mean": 0.02588990427048398
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 8412124.618391305,
+          "mean": 294688.95103546017
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 44929.380021224184,
+          "max": 21359541.542566955,
+          "mean": 3671272.392860416
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 55.0,
+          "max": 100.0,
+          "mean": 80.71236559139786
+        }
+      }
+    },
+    {
+      "product": "ta",
+      "endpoints": 200000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:32:38.068043+00:00",
+      "ended_utc": "2026-10-20T23:40:58.047819+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 494.917072600103,
+        "cpu_seconds": 495.796875,
+        "cpu_average_core_equivalents": 1.001777676399957,
+        "cpu_average_percent_machine": 5.008888381999785,
+        "peak_tree_commit_gib": 4.5895233154296875,
+        "peak_tree_private_sampled_gib": 4.5895233154296875,
+        "peak_tree_working_set_sum_sampled_gib": 4.041755676269531,
+        "min_available_ram_gib": 32.438961029052734,
+        "baseline_available_ram_gib": 36.38240432739258,
+        "baseline_cpu_percent": 27.837613733853548,
+        "system_cpu_p95_percent": 38.89751552795031,
+        "system_commit_peak_gib": 37.59995651245117,
+        "system_commit_peak_percent": 53.39017717672725,
+        "system_page_reads_p95_per_sec": 99.84028549529317,
+        "system_disk_queue_p95": 0.056694439595899836,
+        "tree_read_gib": 1.5773145630955696,
+        "tree_write_gib": 0.8055950421839952,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 395.6058654785156,
+        "available_disk_after_gib": 395.57591247558594,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 548769.5309946,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 479.76242209994234,
+          "peak_live_private_sampled_gib": 4.5895233154296875
+        },
+        {
+          "monotonic": 548781.3323483,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 11.80056450003758,
+          "peak_live_private_sampled_gib": 0.8319168090820312
+        },
+        {
+          "monotonic": 548783.8615326,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 2.528386399964802,
+          "peak_live_private_sampled_gib": 0.4207954406738281
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.4325771000003442,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 195969,
+        "combined_report": null,
+        "output_bytes": 30470672,
+        "output_files": [
+          {
+            "path": "B200_20261020_193238\\B200_20261020_193238_RunLog.txt",
+            "bytes": 19161
+          },
+          {
+            "path": "B200_20261020_193238\\B200_20261020_193238_Run_Diagnostics.json",
+            "bytes": 2010
+          },
+          {
+            "path": "B200_20261020_193238\\B200_20261020_193238_Run_Manifest.json",
+            "bytes": 4253
+          },
+          {
+            "path": "B200_20261020_193238\\Client_Loop\\B200_20261020_193238_Client_Loop.chartdata.json",
+            "bytes": 3092
+          },
+          {
+            "path": "B200_20261020_193238\\Client_Loop\\B200_20261020_193238_Client_Loop.docx",
+            "bytes": 325410
+          },
+          {
+            "path": "B200_20261020_193238\\Client_Loop\\B200_20261020_193238_Client_Loop.png",
+            "bytes": 297013
+          },
+          {
+            "path": "B200_20261020_193238\\Client_Loop\\B200_20261020_193238_Client_Loop.xlsx",
+            "bytes": 19293926
+          },
+          {
+            "path": "B200_20261020_193238\\FillDB_Performance\\B200_20261020_193238_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B200_20261020_193238\\FillDB_Performance\\B200_20261020_193238_FillDB_Performance.docx",
+            "bytes": 277504
+          },
+          {
+            "path": "B200_20261020_193238\\FillDB_Performance\\B200_20261020_193238_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B200_20261020_193238\\FillDB_Performance\\B200_20261020_193238_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon.xlsx",
+            "bytes": 414813
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25378
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B200_20261020_193238\\Perfmon\\B200_20261020_193238_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\200k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 19.59798994974874,
+          "max": 71.02229054573405,
+          "mean": 29.892027557401033
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 5896.335942541884,
+          "mean": 67.51630654333796
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 7419.356320654414,
+          "mean": 95.57731992756642
+        },
+        "system_disk_queue_length": {
+          "min": 0.0032143124634873396,
+          "max": 0.8031850451600898,
+          "mean": 0.026603947094901565
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 30393774.172330804,
+          "mean": 380781.0121715953
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 20446.56985828171,
+          "max": 20012459.7775753,
+          "mean": 3342350.7048699055
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 63.0,
+          "max": 100.0,
+          "mean": 76.38383838383838
+        }
+      }
+    },
+    {
+      "product": "ta",
+      "endpoints": 250000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:41:13.550173+00:00",
+      "ended_utc": "2026-10-20T23:51:34.783788+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 616.1709231999703,
+        "cpu_seconds": 619.4375,
+        "cpu_average_core_equivalents": 1.0053014134179934,
+        "cpu_average_percent_machine": 5.026507067089967,
+        "peak_tree_commit_gib": 5.46209716796875,
+        "peak_tree_private_sampled_gib": 5.46209716796875,
+        "peak_tree_working_set_sum_sampled_gib": 4.911434173583984,
+        "min_available_ram_gib": 31.293209075927734,
+        "baseline_available_ram_gib": 36.213233947753906,
+        "baseline_cpu_percent": 27.742537357330328,
+        "system_cpu_p95_percent": 42.89008455034589,
+        "system_commit_peak_gib": 38.597232818603516,
+        "system_commit_peak_percent": 54.80626282198574,
+        "system_page_reads_p95_per_sec": 90.8479205809475,
+        "system_disk_queue_p95": 0.042578687209464935,
+        "tree_read_gib": 1.7716339537873864,
+        "tree_write_gib": 0.9951879698783159,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 395.28993225097656,
+        "available_disk_after_gib": 395.25427627563477,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 549406.2879029,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 601.1017598999897,
+          "peak_live_private_sampled_gib": 5.46209716796875
+        },
+        {
+          "monotonic": 549417.7675735,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 11.478920500027016,
+          "peak_live_private_sampled_gib": 0.8286323547363281
+        },
+        {
+          "monotonic": 549420.2580889,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 2.4897068000864238,
+          "peak_live_private_sampled_gib": 0.517333984375
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.47871269995812327,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 244968,
+        "combined_report": null,
+        "output_bytes": 35284731,
+        "output_files": [
+          {
+            "path": "B250_20261020_194113\\B250_20261020_194113_RunLog.txt",
+            "bytes": 19161
+          },
+          {
+            "path": "B250_20261020_194113\\B250_20261020_194113_Run_Diagnostics.json",
+            "bytes": 2011
+          },
+          {
+            "path": "B250_20261020_194113\\B250_20261020_194113_Run_Manifest.json",
+            "bytes": 4253
+          },
+          {
+            "path": "B250_20261020_194113\\Client_Loop\\B250_20261020_194113_Client_Loop.chartdata.json",
+            "bytes": 3083
+          },
+          {
+            "path": "B250_20261020_194113\\Client_Loop\\B250_20261020_194113_Client_Loop.docx",
+            "bytes": 327805
+          },
+          {
+            "path": "B250_20261020_194113\\Client_Loop\\B250_20261020_194113_Client_Loop.png",
+            "bytes": 299423
+          },
+          {
+            "path": "B250_20261020_194113\\Client_Loop\\B250_20261020_194113_Client_Loop.xlsx",
+            "bytes": 24103189
+          },
+          {
+            "path": "B250_20261020_194113\\FillDB_Performance\\B250_20261020_194113_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B250_20261020_194113\\FillDB_Performance\\B250_20261020_194113_FillDB_Performance.docx",
+            "bytes": 277501
+          },
+          {
+            "path": "B250_20261020_194113\\FillDB_Performance\\B250_20261020_194113_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B250_20261020_194113\\FillDB_Performance\\B250_20261020_194113_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon.xlsx",
+            "bytes": 414815
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25378
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B250_20261020_194113\\Perfmon\\B250_20261020_194113_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\250k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 18.89149102263856,
+          "max": 67.66325727773406,
+          "mean": 31.723810820791762
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 1807.537411031211,
+          "mean": 41.912661757656124
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 2376.761899588001,
+          "mean": 65.75529040212248
+        },
+        "system_disk_queue_length": {
+          "min": 0.0016616989768699132,
+          "max": 0.23814146005080078,
+          "mean": 0.021690349370540575
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 9735216.740712453,
+          "mean": 253440.634341314
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 53137.60131949861,
+          "max": 21901911.500037223,
+          "mean": 3621740.2871709317
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 62.0,
+          "max": 100.0,
+          "mean": 76.50487012987013
+        }
+      }
+    },
+    {
+      "product": "ta",
+      "endpoints": 300000,
+      "attempt": 1,
+      "code_commit": "bfe6615",
+      "started_utc": "2026-10-20T23:51:50.358551+00:00",
+      "ended_utc": "2026-10-21T00:04:02.754632+00:00",
+      "exit_code": 0,
+      "timed_out": false,
+      "metrics": {
+        "elapsed_seconds": 727.3325232000789,
+        "cpu_seconds": 728.046875,
+        "cpu_average_core_equivalents": 1.0009821529728633,
+        "cpu_average_percent_machine": 5.0049107648643165,
+        "peak_tree_commit_gib": 6.65716552734375,
+        "peak_tree_private_sampled_gib": 6.645259857177734,
+        "peak_tree_working_set_sum_sampled_gib": 6.092578887939453,
+        "min_available_ram_gib": 30.68903350830078,
+        "baseline_available_ram_gib": 35.968536376953125,
+        "baseline_cpu_percent": 26.746211744084633,
+        "system_cpu_p95_percent": 38.66666666666667,
+        "system_commit_peak_gib": 39.60173416137695,
+        "system_commit_peak_percent": 56.232607680846804,
+        "system_page_reads_p95_per_sec": 40.93773779458821,
+        "system_disk_queue_p95": 0.06719091760651054,
+        "tree_read_gib": 1.9662711890414357,
+        "tree_write_gib": 1.1845939280465245,
+        "tree_total_processes": 50,
+        "process_sampling_misses": 0,
+        "available_disk_before_gib": 394.91297149658203,
+        "available_disk_after_gib": 394.87432861328125,
+        "ac_power_states": [
+          1
+        ]
+      },
+      "module_timings": [
+        {
+          "monotonic": 550153.3551683,
+          "module": "loop",
+          "event": "end",
+          "result": "completed",
+          "seconds": 711.3231806000695,
+          "peak_live_private_sampled_gib": 6.645259857177734
+        },
+        {
+          "monotonic": 550165.2784357,
+          "module": "perfmon",
+          "event": "end",
+          "result": "completed",
+          "seconds": 11.9224640999455,
+          "peak_live_private_sampled_gib": 0.8287200927734375
+        },
+        {
+          "monotonic": 550167.7532276,
+          "module": "filldb",
+          "event": "end",
+          "result": "completed",
+          "seconds": 2.4738011000445113,
+          "peak_live_private_sampled_gib": 0.39554595947265625
+        }
+      ],
+      "selected_modules": [
+        "loop",
+        "perfmon",
+        "filldb"
+      ],
+      "preparation_seconds_excluded": 0.5416197000304237,
+      "telemetry_sample_interval_seconds": 1,
+      "unavailable_pdh_counters": {},
+      "verification": {
+        "passed": true,
+        "docx_count": 3,
+        "xlsx_count": 2,
+        "png_count": 23,
+        "loop_source_rows": 293975,
+        "combined_report": null,
+        "output_bytes": 40094286,
+        "output_files": [
+          {
+            "path": "B300_20261020_195150\\B300_20261020_195150_RunLog.txt",
+            "bytes": 19161
+          },
+          {
+            "path": "B300_20261020_195150\\B300_20261020_195150_Run_Diagnostics.json",
+            "bytes": 2008
+          },
+          {
+            "path": "B300_20261020_195150\\B300_20261020_195150_Run_Manifest.json",
+            "bytes": 4253
+          },
+          {
+            "path": "B300_20261020_195150\\Client_Loop\\B300_20261020_195150_Client_Loop.chartdata.json",
+            "bytes": 3084
+          },
+          {
+            "path": "B300_20261020_195150\\Client_Loop\\B300_20261020_195150_Client_Loop.docx",
+            "bytes": 328848
+          },
+          {
+            "path": "B300_20261020_195150\\Client_Loop\\B300_20261020_195150_Client_Loop.png",
+            "bytes": 300368
+          },
+          {
+            "path": "B300_20261020_195150\\Client_Loop\\B300_20261020_195150_Client_Loop.xlsx",
+            "bytes": 28910758
+          },
+          {
+            "path": "B300_20261020_195150\\FillDB_Performance\\B300_20261020_195150_FillDB_Performance.chartdata.json",
+            "bytes": 2995
+          },
+          {
+            "path": "B300_20261020_195150\\FillDB_Performance\\B300_20261020_195150_FillDB_Performance.docx",
+            "bytes": 277501
+          },
+          {
+            "path": "B300_20261020_195150\\FillDB_Performance\\B300_20261020_195150_FillDB_Performance.png",
+            "bytes": 256318
+          },
+          {
+            "path": "B300_20261020_195150\\FillDB_Performance\\B300_20261020_195150_FillDB_Performance.source.csv",
+            "bytes": 1198
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon.xlsx",
+            "bytes": 414815
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Mini_Report.docx",
+            "bytes": 4639859
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Discarded.png",
+            "bytes": 98473
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Outbound_Errors.png",
+            "bytes": 97065
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Discarded.png",
+            "bytes": 99032
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Network_Interface_Intel_R_I350_Gigabit_Network_Connection_Packets_Received_Errors.png",
+            "bytes": 97826
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Paging_File_Total_Usage_Peak.png",
+            "bytes": 69006
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.chartdata.json",
+            "bytes": 1624
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PerfMon_Counters_Analysis_Scorecard.png",
+            "bytes": 220939
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\perfmon_observations.json",
+            "bytes": 25378
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_0_C_Avg_Disk_ms_Transfer.png",
+            "bytes": 259804
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_0_C_Current_Disk_Queue_Length.png",
+            "bytes": 257900
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_0_C_Disk_Transfers_sec.png",
+            "bytes": 339116
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_1_D_Avg_Disk_ms_Transfer.png",
+            "bytes": 225149
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_1_D_Current_Disk_Queue_Length.png",
+            "bytes": 251926
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_1_D_Disk_Transfers_sec.png",
+            "bytes": 333996
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_2_E_Avg_Disk_ms_Transfer.png",
+            "bytes": 301324
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_2_E_Current_Disk_Queue_Length.png",
+            "bytes": 313962
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_2_E_Disk_Transfers_sec.png",
+            "bytes": 336465
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_Total_Avg_Disk_ms_Transfer.png",
+            "bytes": 228650
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_Total_Current_Disk_Queue_Length.png",
+            "bytes": 260779
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\PhysicalDisk_Total_Disk_Transfers_sec.png",
+            "bytes": 297094
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Processor_Total_Privileged_Time.png",
+            "bytes": 295859
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\Processor_Total_Processor_Time.png",
+            "bytes": 254383
+          },
+          {
+            "path": "B300_20261020_195150\\Perfmon\\B300_20261020_195150_Perfmon_Charts\\System_Processor_Queue_Length.png",
+            "bytes": 267370
+          }
+        ]
+      },
+      "valid": true,
+      "notes": [
+        "Fresh Python process and fresh private input copy; Windows file cache is not flushed.",
+        "Measured build includes engine input discovery, data analysis, chart rendering, Excel and Word output.",
+        "Human module selection, consultant review pauses, output verification and opening Word are excluded.",
+        "Working-set sum can double-count shared pages; job peak commit is separately recorded.",
+        "System paging and disk counters include background applications."
+      ],
+      "evidence_folder": "C:\\Temp\\B20\\ta\\300k\\a01",
+      "background_system_metrics": {
+        "system_cpu_percent": {
+          "min": 18.455598455598455,
+          "max": 57.043343653250766,
+          "mean": 28.503531772246383
+        },
+        "system_page_reads_per_sec": {
+          "min": 0.0,
+          "max": 4029.5327428474543,
+          "mean": 36.55119773884086
+        },
+        "system_pages_input_per_sec": {
+          "min": 0.0,
+          "max": 4033.524355272266,
+          "mean": 52.672702542893774
+        },
+        "system_disk_queue_length": {
+          "min": 0.000508582656553274,
+          "max": 0.5255289440879726,
+          "mean": 0.02687501983774724
+        },
+        "system_disk_read_bytes_per_sec": {
+          "min": 0.0,
+          "max": 16513140.936949188,
+          "mean": 206386.38649512845
+        },
+        "system_disk_write_bytes_per_sec": {
+          "min": 4088.4159883416264,
+          "max": 64106405.49573337,
+          "mean": 3067320.282975774
+        },
+        "system_cpu_percent_max_frequency": {
+          "min": 62.0,
+          "max": 100.0,
+          "mean": 76.84869325997249
+        }
+      }
+    }
+  ],
+  "interpretation": [
+    "These are source-Python production-engine builds, not packaged executable or UI responsiveness benchmarks.",
+    "Each size has one measured run per product. Caches were not flushed. Ascending size and product order may affect timings.",
+    "Input copies are prepared outside the timer and can warm the filesystem cache. Cold storage reads and network-share performance are not measured.",
+    "Main builder runs 15 supported modules and creates a combined Word report. TA runs its three module pipelines. Total runtimes represent different scopes.",
+    "PerfMon, activity logs, SQL and hardware examples remain fixed; endpoint records and UDP/setting distributions grow.",
+    "The fixed PerfMon fixture has 360 readings and 232 counters. Longer or larger PerfMon captures, larger logs and larger property catalogues can require additional time and memory.",
+    "The supplied friendly Top 10 CSV is used, as selected by the ordinary folder discovery. Raw timing XML aggregation is not part of these builds.",
+    "Peak job commit includes all descendant processes and is kernel tracked. Live private memory and working-set sums are sampled once per second.",
+    "Elapsed wall time includes process startup and up to one second of completion-polling granularity. Preparation/copying, baseline sampling and output verification are excluded.",
+    "System CPU, paging, disk and available memory include other applications. Background workload was measured, not controlled.",
+    "A single 64 GB workstation establishes observed usage and runtime, not a validated minimum hardware specification."
+  ],
+  "note": "No new benchmark runs were performed while preparing this report. Main Report Builder measurements are not included in these TA runs.",
+  "measured_product_version": "1.0",
+  "mc_reuse_product_version": "2.1",
+  "version_label_source": "Product versions supplied by the product owner; MC reuses TA measurements and was not separately benchmarked."
+}

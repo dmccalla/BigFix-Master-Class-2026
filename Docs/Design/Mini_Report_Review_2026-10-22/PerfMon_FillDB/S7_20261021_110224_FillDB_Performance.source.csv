@@ -1,0 +1,50 @@
+FillDB Object,Count,Time (ms),Rate/s,Health Check
+
+Fixlet results:,1021932,439062,2328,093%: Good
+
+action results:,88953,49436,1799,360%: Great
+
+short property results:,15491643,1417112,10932,2186%: Great
+
+long property results:,1822795,1304706,1397,140%: Great
+
+computer administrators:,601,8906,67,004%: Poor
+
+computer roles:,19879,5062,3927,393%: Great
+
+computer sequences:,1496322,17405,85971,8597%: Great
+
+computer properties:,1496271,1071013,1397,140%: Great
+
+computer sites subscription:,1243,217,5728,----: Not enough data.
+
+computer relay statuses:,77,45,1711,----: Not enough data.
+
+dynamic computer groups:,1982,382,5188,519%: Great
+
+Parallel DB Update (Short Batch):,1496466,3031912,494,988%: Great
+
+Parallel DB Update:,0,0,0,----: Not enough data.
+
+Batch Rate:,1496466,3031912,494,988%: Great
+
+Parallel Parsing:,1496466,1267825,1180,236%: Great
+
+
+Statistic,Value
+
+Lines processed:,4237218
+
+Duration (s):,68.54
+
+Throughput (lines/s):,61821.1
+
+FillDB start time:,2025-11-16 02:56:11-05:00
+
+FillDB end time:,2025-11-17 15:57:07-05:00
+
+FillDB duration (hh:mm:ss):,"1 day, 13:00:56"
+
+FillDB parsing threads:,3
+
+FillDB database threads:,3

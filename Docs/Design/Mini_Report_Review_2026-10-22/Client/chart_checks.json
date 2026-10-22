@@ -1,0 +1,86 @@
+{
+  "content_refresh": {
+    "width": 2250,
+    "height": 1623,
+    "text": "MINIMUM ANALYSIS REFRESH INTERVAL\nCONFIGURED\n3 / 2,477\n10 minutes: 2 devices | 30 minutes: 1 device\nNOT SET\n2,474 / 2,477\n99.9% of devices\n_BESClient_Report_MinimumAnalysisInterval\nCONTENT COUNTS\nFixlets and tasks\n2,659 relevant / 46,193 total\nAnalyses\n32 active / 4,400 total\nProperties\n244 active / 7,224 total\nEach bar uses its own total. The filled part shows relevant or active content, not its share of loop time.\nSUBSCRIBED SITES\n42 external\n14 custom\nMASTER OPERATOR CONTENT\n12 fixlets\n8 tasks\n3 analyses\nACTIONSITE SIZE\n4.1 MB\n4,189 KB\nMASTER OPERATORS\n1\n10 open actions\nCOMPUTER GROUPS\n1\n1 automatic | 0 manual",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "cpu_idle": {
+    "width": 2250,
+    "height": 166,
+    "text": "2,477 / 2,477 devices\n20.0% configured duty cycle\n100 ms work\n400 ms sleep",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "evaluation_costs": {
+    "width": 2250,
+    "height": 2062,
+    "text": "Client Evaluation Costs\nTop 10 most expensive evaluations\nAVERAGE EVALUATION TIME\nEvaluation\nAvg time\nOccurrences\n1\nDISA STIG Checklist for Windows 2022\n104.3 s\n1,458\n2\nInstalled Applications \u00b7 Windows (analysis: Application Information (Windows))\n68.4 s\n1,288\n3\nBigFix Inventory\n46.9 s\n1,211\n4\nactionsite\n40.1 s\n542\n5\nEnterprise Security\n35.5 s\n335\n6\nUpdates for Windows Applications Extended\n30.7 s\n311\n7\nPatching Support\n30.2 s\n219\n8\nDISA STIG Checklist for Windows 11\n29.5 s\n187\n9\nBES Asset Discovery\n26.8 s\n177\n10\nBES Relay Service Installed (actionsite.13:Evaluate Property 1)\n22.6 s\n98\nSite evaluation\nProperty evaluation\n8 of these 10 are site evaluations. 1 is an analysis property and 1 is a retrieved property. These are the slowest evaluations each device reported, averaged across the deployment. Occurrences is how many times an evaluation appeared in a device's Top 10.\nEVALUATION FREQUENCY \u00b7 244 ACTIVE PROPERTIES\nExternal\nCustom\nThe evaluation frequency graphic covers the 244 active properties. Each one has an evaluation interval that sets how often the Client re-evaluates it. A property set to every report runs on every loop. So does a property with no interval, because BigFix evaluates it every report. This analysis rates 6 hours or longer as Healthy.\nEvery report\n49 properties\nUnder 15 minutes\n2 properties\n15 minutes to 1 hour\n1 property\n1 hour to 6 hours\n37 properties\n6 hours or longer\n155 properties\nCONTEXT\nEvaluation frequency does not change the loop health score. External property intervals may be outside customer control.",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif",
+      "Aptos, sans-serif"
+    ],
+    "overflow": []
+  },
+  "fasthash": {
+    "width": 2250,
+    "height": 516,
+    "text": "Enabled: 495 / 2,477 (20.0%)\nNot Set: 1,982 / 2,477 (80.0%)\nDisabled: 0 (0.0%) | Unknown: 0 (0.0%)\nReported FastHashVerify work and sleep settings:\n495 / 2,477 devices\n25.0% configured duty cycle\n20 ms work\n60 ms sleep\nWork, sleep and duty cycle Not Set: 1,982 / 2,477 devices.",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "guidance_map": {
+    "width": 2250,
+    "height": 447,
+    "text": "1\nStop improper use of Master Operator accounts\nContributing Factors: ActionSite size, master operators, their open actions and their content.\n2\nAdjust client CPU usage settings\nCPU Settings: CPU Idle Settings and Multicore CPU Scaling.\n3\nReduce content load and fix expensive content\nLoop Cost: Top 10 Most Expensive Evaluations and Evaluation Frequency.\n4\nIf UDP is blocked, set Command Polling\nNotification and Polling: UDP Notification Coverage and Command Polling.",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "loop_groups": {
+    "width": 2250,
+    "height": 401,
+    "text": "2,537 devices | Bars show the percentage of all devices\nHealthy | < 15 minutes\n826\n32.6%\nGood | 15-30 minutes\n1,074\n42.3%\nWarning | 30-60 minutes\n420\n16.6%\nCritical | > 60 minutes\n157\n6.2%\nCritical | No usable data\n60\n2.4%",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "multicore": {
+    "width": 2250,
+    "height": 248,
+    "text": "2,477 devices\nOn\n495 / 2,477\nNot Applicable\n496 / 2,477\nNot Set\n1,486 / 2,477",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  },
+  "notification_polling": {
+    "width": 2250,
+    "height": 1960,
+    "text": "UDP NOTIFICATION COVERAGE \u00b7 2,400 RECORDS\n2,208 receiving \u00b7 92.0%\n192 not receiving \u00b7 8.0%\n0 not reported or error among these 2,400 records.\nCOMMAND POLLING \u00b7 2,477 RECORDS\n619 enabled \u00b7 25.0%\n1,858 not set \u00b7 75.0%\n0 disabled \u00b7 0 unknown. Not Set alone does not establish a notification problem.\nREPORTED POLLING CHECKS\nNO UDP AND POLLING DISABLED/NOT SET\n161\n6.5% of 2,477 devices\nINTERVAL BELOW AVERAGE LOOP\n39\n1.6% of 2,477 devices\nENABLED WITH MISSING INTERVAL\n0\n0.0% of 2,477 devices\nThese checks can overlap. Their counts should not be added.\nUDP NOTIFICATION ISSUES BY RELAY \u00b7 TOP 10\nBars show the percentage not receiving UDP among each relay\u2019s reported clients.\nBFRELAY017.dmc.lab\n27.0% \u00b7 27 / 100\nBFRELAY001.dmc.lab\n9.0% \u00b7 9 / 100\nBFRELAY002.dmc.lab\n9.0% \u00b7 9 / 100\nBFRELAY003.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY004.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY005.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY006.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY007.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY008.dmc.lab\n7.0% \u00b7 7 / 100\nBFRELAY009.dmc.lab\n7.0% \u00b7 7 / 100\nSUPPORTING DETAIL\nShowing 10 of 24 relays. Complete relay and subnet detail remains in the workbook.",
+    "fontFamilies": [
+      "Aptos, Arial, sans-serif",
+      "Aptos, sans-serif"
+    ],
+    "overflow": []
+  },
+  "overview": {
+    "width": 2250,
+    "height": 1699,
+    "text": "Client Loop Health Score\n2,537 devices scored \u00b7 6 days collection \u00b7 2,477 reporting\nRaises 1 High finding (2 reasons)\n83/100\nWARNING\nCritical\n0 to 69\nWarning\n70 to 89\nHealthy\n90 to 100\nLOOP DISTRIBUTION \u00b7 2,537 DEVICES SCORED\nHealthy\nunder 15 min\n826\nGood\n15 to 30 min\n1,074\nWarning\n30 to 60 min\n420\nCritical\nover 60 min\n157\nCritical\nno usable data\n60\nLOOP TIMING\nAVERAGE LOOP TIME\n25m 19s\nAcross 2,477 reporting devices\nSLOWEST EVALUATION\n104.3 s\nDISA STIG Checklist for Windows 2022\nDEVICES AVERAGING OVER 120 MIN\n0\nNone recorded\nREPORTING COVERAGE\nDEVICES REPORTING\n2,477/2,537\n60 have no usable loop data\nNO UDP PINGS RECEIVED\n192/2,400\nDevices that received no UDP pings.\nRELAY WITH MOST UDP ISSUES\n27/100\nBFRELAY017.dmc.lab\nFINDINGS RAISED\nCLT-01 \u00b7 High. The client loop health score is below 90. 51 active properties are set to every report or to under 15 minutes.",
+    "fontFamilies": [
+      "\"HCLTech Roobert\"",
+      "Aptos, Arial, sans-serif"
+    ],
+    "overflow": []
+  }
+}

@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Clarify Client Performance loop averages, UDP coverage populations, property classifications and tiny nonzero percentages. Preserve scoring and finding rules.
+
 - Apply Design's 10-20 change list and review fixes. Loop Health takes in Reporting Issues, Evaluation Frequency comes before Contributing Factors, and PerfMon opens with Capture Summary and closes with Assessment by Area.
 
 - Lay out every report table by one rule. Cell and table properties are written in schema order, each header takes its column's alignment, number columns are right aligned, and widths come from Design's fixed sets, the template's proportions or the measured method.

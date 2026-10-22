@@ -1,0 +1,29 @@
+MINI REPORT REVIEW HANDOFF - 2026-10-22
+
+State of this checkpoint
+The Client Performance accuracy fixes in Get/get_loop_health.py and its regression tests are production source changes. The Platform template also contains the approved guidance/query corrections. Scoring and finding rules have not changed.
+
+The files in this design folder are review references, not installed generator output. The expanded chart layouts, approved chart fonts, NOTE/TIP formatting and new heading hierarchy still need production integration. Do not assume pulling this commit changes those live report layouts.
+
+Client Performance
+Client/ contains the current nine-page mini-report, its Word source, the matching full-report section PDF, supporting demonstration workbook and validation records. These supersede the earlier Temp review PDFs.
+Latest hierarchy: major client section headings are 20 pt HCLTech Roobert with a thin teal rule. Subheadings are 12 pt Aptos with more separation. No filled section header boxes.
+All nine chart images use approved fonts. Multicore order is On, Not Applicable, Not Set, with matching legend order. Counts are unchanged. NOTE/TIP callouts reuse the full template's icons, colors and border treatment.
+Client/charts/ holds the chart PNGs and HTML reference definitions. Font binaries are deliberately omitted from HTML. Rendering HTML requires the approved fonts to be available locally.
+The full review source document's other sections were not part of this Client review, so only the Client section PDF is included here.
+
+Production accuracy fixes
+The two-hour tile explicitly measures averages. UDP coverage uses its own population. Tiny nonzero percentages display as less than 0.1 percent. Property custom-flag counts remain distinct from source-site classifications. Source and capture notes also appear in the workbook. External property intervals may be outside customer control. The example query uses a strict under-15-minute boundary and true active-analysis flags.
+The wording table was approved by Duncan before these wording changes.
+
+Validation and limits
+The current Client mini-report and matching full-report section were rendered and visually checked. They remain nine pages and preserve wording, data and scoring.
+The Platform template's modified content was checked through rendered review output and XML comparisons. Native Microsoft Word export was attempted previously but stalled. Native Word verification of the production template remains outstanding; do not represent it as completed.
+The focused Client regression checks passed immediately before this checkpoint. Exact results are in commit_validation.json.
+
+PerfMon and FillDB
+PerfMon_FillDB/ contains the readability review prototypes already discussed, their supporting evidence and validation records. They are not production layout changes. PerfMon display outlier caps were retained, along with actual peak labels and the existing score. FillDB scoring was also preserved.
+The later Design review PDF has been read but its proposed changes have not been implemented. Remaining discussion includes Memory strip scoring wording, the scope of the FillDB score, overlapping time counts, captions/alt text, duplicate single-disk plots, VM input provenance and RAM input documentation. Any methodology/scoring question requires a separate decision. Do not silently change scoring or remove PerfMon display caps.
+
+Concurrent work
+Deployment collection task/helper/test edits in the working copies belong to the other agent and are intentionally excluded from this checkpoint. No CI/CD changes are included.

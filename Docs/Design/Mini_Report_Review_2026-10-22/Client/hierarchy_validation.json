@@ -1,0 +1,180 @@
+{
+  "BigFix_Health_Check_Client_Performance_Heading_Hierarchy_Review_20261022.docx": {
+    "text_and_data_preserved": true,
+    "changed_package_parts": [
+      "word/document.xml",
+      "word/styles.xml"
+    ],
+    "headings": [
+      {
+        "text": "How the Score Is Calculated",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Why Client Loop Speed Matters",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Action Latency",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Operational Efficiency",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Optimal Performance Targets",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Loop Health",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Loop Cost",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Content and Refresh Settings",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Minimum Analysis Refresh Interval",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Contributing Factors",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "CPU Settings",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "CPU Idle Settings",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Multicore CPU Scaling",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "FastHashVerify",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Notification and Polling",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Four Starting Points for Reviewing Loop Speed",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "1. Stop improper use of Master Operator (MO) accounts",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "2. Adjust client CPU usage settings",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "3. Reduce content load and fix expensive content",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "4. If UDP is blocked, set Command Polling",
+        "style": "ClientReviewSubsection"
+      }
+    ]
+  },
+  "Client_Performance_Mini_Report_Heading_Hierarchy_Review_20261022.docx": {
+    "text_and_data_preserved": true,
+    "changed_package_parts": [
+      "word/document.xml",
+      "word/styles.xml"
+    ],
+    "headings": [
+      {
+        "text": "How the Score Is Calculated",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Why Client Loop Speed Matters",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Action Latency",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Operational Efficiency",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Optimal Performance Targets",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Loop Health",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Loop Cost",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Content and Refresh Settings",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Minimum Analysis Refresh Interval",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Contributing Factors",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "CPU Settings",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "CPU Idle Settings",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Multicore CPU Scaling",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "FastHashVerify",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "Notification and Polling",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "Four Starting Points for Reviewing Loop Speed",
+        "style": "ClientReviewSection"
+      },
+      {
+        "text": "1. Stop improper use of Master Operator (MO) accounts",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "2. Adjust client CPU usage settings",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "3. Reduce content load and fix expensive content",
+        "style": "ClientReviewSubsection"
+      },
+      {
+        "text": "4. If UDP is blocked, set Command Polling",
+        "style": "ClientReviewSubsection"
+      }
+    ]
+  }
+}

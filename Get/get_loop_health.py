@@ -519,7 +519,10 @@ def format_report_span(start_value: date | None, end_value: date | None) -> str:
 
 
 def pct(value: float, decimals: int = 1) -> str:
-    return f"{value * 100:.{decimals}f}%"
+    rendered = f"{value * 100:.{decimals}f}"
+    if value > 0 and float(rendered) == 0:
+        return f"<{10 ** -decimals:.{decimals}f}%"
+    return f"{rendered}%"
 
 
 def clean_user_path(value: str | None) -> str:
@@ -1370,7 +1373,7 @@ def _properties_value(pressure: ActionSitePressure) -> str:
         pressure.properties_count,
         [
             f"{_count_or_zero(pressure.active_properties_count)} active",
-            f"{_count_or_zero(pressure.custom_properties_count)} custom",
+            f"{_count_or_zero(pressure.custom_properties_count)} custom-flagged",
         ],
     )
 
@@ -1380,6 +1383,15 @@ def _properties_value(pressure: ActionSitePressure) -> str:
 # ---------------------------------------------------------------------------
 
 PROPERTY_INTERVAL_SECTION = "Active Properties by Evaluation Interval"
+PROPERTY_SOURCE_NOTE = (
+    "The custom-flagged count uses the BigFix property custom flag. "
+    "Evaluation Frequency groups active analysis properties by source site. "
+    "These are different classifications."
+)
+CONTENT_CAPTURE_NOTE = (
+    "Content counts come from a separate deployment capture. Its timestamp is "
+    "shown with the counts and may differ from the client loop collection period."
+)
 PROPERTY_INTERVAL_WIDTH = 9
 PROPERTY_INTERVAL_FREQUENT_MINUTES = 15.0
 PROPERTY_INTERVAL_GUIDELINE_MINUTES = 360.0
@@ -1562,7 +1574,7 @@ def evaluation_frequency_rows(summary: PropertyIntervalSummary) -> list[list[str
             [
                 band,
                 count_with_denominator(entry["total"], total),
-                f"{share:.1f}%",
+                pct(share / 100),
                 f"{entry['custom']:,}",
                 f"{entry['external']:,}",
                 interval_band_status(band),
@@ -2581,13 +2593,14 @@ def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary |
             [
                 relay,
                 f"{failing_count:,} / {reported_count:,}",
-                f"{pct_value * 100:.1f}%",
+                pct(pct_value),
             ]
         )
     relay_rows.sort(
         key=lambda row: (
             -int(row[1].split("/", 1)[0].replace(",", "").strip()),
-            -float(row[2].rstrip("%")),
+            -int(row[1].split("/", 1)[0].replace(",", "").strip())
+            / max(int(row[1].split("/", 1)[1].replace(",", "").strip()), 1),
             row[0].casefold(),
         )
     )
@@ -3202,7 +3215,7 @@ def fast_hash_verify_coverage_rows(
     denominator = max(total, 1)
 
     def percent(count: int) -> str:
-        return f"{count / denominator * 100:.1f}%"
+        return pct(count / denominator)
 
     return [
         [
@@ -3755,7 +3768,7 @@ def generate_png(
                 "caption": slow_detail,
             },
             {
-                "label": "Severe loops over 120 min",
+                "label": "Devices averaging over 120 min",
                 "value": f"{metrics.avg_over_120:,}",
                 "caption": "None recorded" if metrics.avg_over_120 == 0 else "",
                 "color": (
@@ -4006,6 +4019,12 @@ def generate_excel(
                 columns=["Metric", "Value", "Status", "Basis"],
             )
             pressure_df.to_excel(writer, sheet_name="Contributing Factors", index=False)
+            source_notes = [PROPERTY_SOURCE_NOTE]
+            if actionsite_pressure.content_captured:
+                source_notes.append(CONTENT_CAPTURE_NOTE)
+            pd.DataFrame({"Note": source_notes}).to_excel(
+                writer, sheet_name="Data Notes", index=False
+            )
         if property_intervals:
             pd.DataFrame(
                 evaluation_frequency_rows(property_intervals),
@@ -4275,7 +4294,9 @@ def context_strip_tiles(
 ) -> list[dict[str, object]]:
     score_total = metrics.score_total_devices
     if udp_summary:
-        udp_value = count_with_denominator(udp_summary.not_receiving_count, score_total)
+        udp_value = count_with_denominator(
+            udp_summary.not_receiving_count, udp_summary.total_devices
+        )
         udp_detail = "Devices that received no UDP pings."
 
         if udp_summary.relay_rows:
@@ -4446,7 +4467,7 @@ def client_loop_infographic_key_rows(
             "Top entry in Top 10 Most Expensive Evaluations.",
         ],
         [
-            "Severe loops over 120 min",
+            "Devices averaging over 120 min",
             f"{metrics.avg_over_120:,}",
             "Devices with an average loop time over 120 minutes.",
         ],
@@ -4729,7 +4750,7 @@ def generate_word(
         keep_with_next(
             document.add_paragraph(
                 top10_kind_sentence(loop_offenders)
-                + " The slowest evaluations each device reported, averaged across the "
+                + " These are the slowest evaluations each device reported, averaged across the "
                 "deployment. Occurrences is how many times an evaluation appeared in "
                 "a device's Top 10. Interval is how often an analysis property is "
                 "set to run. A site evaluation is not a property and has no interval. "
@@ -4783,9 +4804,10 @@ def generate_word(
             status_col=5,
         )
         document.add_paragraph(
-            "Custom properties are the customer's own content and can be changed "
-            "directly. External properties come from external content sites and are tuned by "
-            "deactivating or re-activating the analysis."
+            "Evaluation Frequency labels analysis properties from custom, operator "
+            "and master sites as Custom, and those from external sites as External. "
+            "External property intervals may be outside customer control. "
+            "Review changes with the content owner."
         )
         not_set = sum(
             1 for item in property_intervals.properties if item.interval_minutes is None
@@ -4820,6 +4842,9 @@ def generate_word(
             actionsite_pressure_rows(actionsite_pressure),
             status_col=2,
         )
+        document.add_paragraph(PROPERTY_SOURCE_NOTE)
+        if actionsite_pressure.content_captured:
+            document.add_paragraph(CONTENT_CAPTURE_NOTE)
 
     if udp_summary or command_polling_summary:
         document.add_heading("Notification and Polling", level=3)

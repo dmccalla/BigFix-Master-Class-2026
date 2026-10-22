@@ -258,7 +258,7 @@ def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
         ],
         [
             "Properties",
-            "10,342 total (877 active, 34 custom)",
+            "10,342 total (877 active, 34 custom-flagged)",
             "Needs Attention",
             "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
@@ -450,7 +450,7 @@ def test_context_strip_tiles_feed_chart_data_with_missing_udp_fallback() -> None
     ]
 
 
-def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> None:
+def test_context_strip_tiles_use_udp_population_and_relay_count() -> None:
     metrics = _sample_loop_metrics()
     udp_summary = loop.UdpNotificationSummary(
         source_file=Path("udp.csv"),
@@ -464,7 +464,7 @@ def test_context_strip_tiles_use_total_machines_for_udp_and_relay_count() -> Non
 
     tiles = loop.context_strip_tiles(metrics, udp_summary=udp_summary)
 
-    assert tiles[1]["value"] == "2 / 10"
+    assert tiles[1]["value"] == "2 / 4"
     assert tiles[1]["caption"] == "Devices that received no UDP pings."
     assert tiles[2]["value"] == "2 / 3"
     assert tiles[2]["caption"] == "relay-a"
@@ -503,7 +503,7 @@ def test_infographic_key_uses_infographic_values() -> None:
         "Loop distribution",
         "Average loop time",
         "Slowest evaluation",
-        "Severe loops over 120 min",
+        "Devices averaging over 120 min",
         "Devices reporting",
         "No UDP pings received",
         "Relay With Most UDP Issues",
@@ -515,9 +515,9 @@ def test_infographic_key_uses_infographic_values() -> None:
     assert values["Loop distribution"] == "8 · 2 · 0 · 0"
     assert values["Average loop time"] == "5m 00s"
     assert values["Slowest evaluation"] == loop.format_loop_offender_strip_seconds(42)
-    assert values["Severe loops over 120 min"] == "0"
+    assert values["Devices averaging over 120 min"] == "0"
     assert values["Devices reporting"] == "10 / 10"
-    assert values["No UDP pings received"] == "2 / 10"
+    assert values["No UDP pings received"] == "2 / 4"
     assert values["Relay With Most UDP Issues"] == "2 / 3 on relay-a"
     assert values["Findings raised"] == "None raised"
 

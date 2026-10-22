@@ -21,7 +21,8 @@ Behavior:
   - Discovers placeholder images in the PerfMon appendix at runtime.
   - Replaces placeholder image paragraphs when placeholders exist.
   - Inserts chart images after section headings when no placeholder exists.
-  - Replaces "Your observations go here" when perfmon_observations.json exists.
+  - Replaces each area's "Your observations go here" when
+    perfmon_observations.json exists. The General Observations placeholder stays.
   - Adds a short PerfMon infrastructure summary when observations are available.
   - Writes a new output .docx.
 
@@ -406,7 +407,7 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
 
 
 def build_perfmon_hardware_context_xml(observations: dict) -> str:
-    """Build the supplied hardware context shown before the PerfMon summary."""
+    """Build the Hardware / Context table that closes the Capture Summary."""
     environment = observations.get("environment", {})
     if not environment:
         return ""
@@ -456,8 +457,7 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
         return ""
 
     widths = [3000, 6800]
-    xml = heading_paragraph_xml("PerfMon Hardware Context", level=3)
-    xml += (
+    xml = (
         "<w:tbl><w:tblPr>"
         '<w:tblStyle w:val="BigFixContent"/>'
         '<w:tblW w:w="5000" w:type="pct"/>'
@@ -929,10 +929,13 @@ def find_perfmon_summary_insert_point(doc_xml: str) -> int | None:
     return None
 
 
-def replace_general_observations_placeholder(
+def insert_after_general_observations_placeholder(
     doc_xml: str, summary_xml: str
 ) -> tuple[str, bool]:
-    """Replace the generic General Observations placeholder with summary XML."""
+    """Insert summary XML after the General Observations placeholder.
+
+    The placeholder is the consultant's space, so it stays in the report.
+    """
     paragraphs = get_document_paragraphs(doc_xml)
     appendix_index: int | None = None
 
@@ -967,7 +970,6 @@ def replace_general_observations_placeholder(
     if general_index is None:
         return doc_xml, False
 
-    placeholder_start: int | None = None
     placeholder_end: int | None = None
 
     for following in paragraphs[general_index + 1 :]:
@@ -976,22 +978,13 @@ def replace_general_observations_placeholder(
         if text and is_heading_paragraph(para):
             break
         if re.search(r"Your\s+observations\s+go\s+here", text, flags=re.IGNORECASE):
-            placeholder_start = following.start()
             placeholder_end = following.end()
             break
 
-    if placeholder_start is None or placeholder_end is None:
+    if placeholder_end is None:
         return doc_xml, False
 
-    doc_xml, moved_bookmarks = splice_preserving_bookmarks(
-        doc_xml,
-        placeholder_start,
-        placeholder_end,
-        summary_xml,
-    )
-    if moved_bookmarks:
-        log.detail("Bookmark boundary markers preserved", moved_bookmarks)
-    return doc_xml, True
+    return doc_xml[:placeholder_end] + summary_xml + doc_xml[placeholder_end:], True
 
 
 def load_perfmon_observations(chart_folder: Path) -> dict:
@@ -1454,28 +1447,30 @@ def ensure_png_content_type(content_types_xml: str) -> str:
 
 
 def build_summary_xml(observations: dict) -> str:
+    """Capture Summary: the counter sentence and the capture line, then the
+    Hardware / Context table. The priority list stays in Excel Worst Offenders."""
     summary = observations.get("summary", {})
-    lines = summary.get("lines", [])
-    xml = build_perfmon_hardware_context_xml(observations)
-    if not lines and not xml:
+    lines = [
+        str(line)
+        for line in summary.get("lines", [])
+        if line
+        and not str(line).strip().casefold().startswith("highest-priority review items")
+    ]
+    hardware_xml = build_perfmon_hardware_context_xml(observations)
+    if not lines and not hardware_xml:
         return ""
-    priority_items = [str(item) for item in summary.get("priority_items", []) if item]
-    if lines:
-        xml += heading_paragraph_xml("PerfMon Review Summary", level=3)
+    xml = heading_paragraph_xml("Capture Summary", level=3)
     for line in lines:
-        line_text = str(line)
-        if line_text.strip().casefold().startswith("highest-priority review items"):
-            xml += heading_paragraph_xml("Priority Review Items", level=4)
-            for item in priority_items:
-                xml += bullet_paragraph_xml(item)
-            if not priority_items:
-                xml += text_paragraph_xml("No priority review items were identified.")
-        else:
-            xml += text_paragraph_xml(line_text)
-    if observations.get("sections"):
-        xml += heading_paragraph_xml("Assessment by Area", level=4)
-    xml += build_perfmon_summary_table_xml(observations)
-    return xml
+        xml += text_paragraph_xml(line)
+    return xml + hardware_xml
+
+
+def build_assessment_by_area_xml(observations: dict, level: int) -> str:
+    """Assessment by Area, the reference table that closes each capture."""
+    table_xml = build_perfmon_summary_table_xml(observations)
+    if not table_xml:
+        return ""
+    return heading_paragraph_xml("Assessment by Area", level=level) + table_xml
 
 
 def insert_perfmon_summary(doc_xml: str, observations: dict) -> str:
@@ -1487,8 +1482,10 @@ def insert_perfmon_summary(doc_xml: str, observations: dict) -> str:
     summary_xml = build_summary_xml(observations)
     if not summary_xml:
         return doc_xml
-    doc_xml, replaced = replace_general_observations_placeholder(doc_xml, summary_xml)
-    if replaced:
+    doc_xml, inserted = insert_after_general_observations_placeholder(
+        doc_xml, summary_xml
+    )
+    if inserted:
         log.step("Inserting PerfMon infrastructure summary")
         return doc_xml
     insert_at = find_perfmon_summary_insert_point(doc_xml)
@@ -1497,6 +1494,51 @@ def insert_perfmon_summary(doc_xml: str, observations: dict) -> str:
         return doc_xml[:insert_at] + summary_xml + doc_xml[insert_at:]
     log.warn("Could not find PerfMon heading for summary insertion.")
     return doc_xml
+
+
+def perfmon_area_heading_level(doc_xml: str) -> int | None:
+    """Heading level of the first area heading in the PerfMon section."""
+    in_perfmon = False
+    perfmon_level = 0
+    for pm in get_document_paragraphs(doc_xml):
+        para = pm.group(0)
+        text = paragraph_plain_text(para)
+        if not text or is_toc_or_field_paragraph(para, text):
+            continue
+        level = paragraph_heading_level(para)
+        if not in_perfmon:
+            if is_perfmon_counters_heading(para, text):
+                in_perfmon = True
+                perfmon_level = level or 1
+            continue
+        if level and level <= perfmon_level:
+            return None
+        if level and perfmon_section_key_for_text(text):
+            return level
+    return None
+
+
+def insert_perfmon_assessment(doc_xml: str, observations: dict) -> str:
+    """Put Assessment by Area at the end of the PerfMon section."""
+    if not observations or not observations.get("sections"):
+        return doc_xml
+    if any(
+        paragraph_plain_text(pm.group(0)) == "Assessment by Area"
+        for pm in get_document_paragraphs(doc_xml)
+    ):
+        return doc_xml
+    level = perfmon_area_heading_level(doc_xml)
+    if level is None:
+        log.warn(
+            "Could not find a PerfMon area heading. Assessment by Area not inserted."
+        )
+        return doc_xml
+    assessment_xml = build_assessment_by_area_xml(observations, level)
+    if not assessment_xml:
+        return doc_xml
+    log.step("Inserting PerfMon Assessment by Area")
+    insert_at = find_perfmon_append_insert_point(doc_xml)
+    return doc_xml[:insert_at] + assessment_xml + doc_xml[insert_at:]
 
 
 def replace_observation_placeholders(doc_xml: str, observations: dict) -> str:
@@ -2184,12 +2226,14 @@ def append_perfmon_capture_section(
     with zipfile.ZipFile(output_path, "a", zipfile.ZIP_DEFLATED) as zf:
         if scorecard_path and scorecard_path.exists():
             section_chunks.append(_append_png(zf, scorecard_path))
-            section_chunks.append(perfmon_score_method_note_xml())
 
         if include_automated_findings:
             findings_xml = build_perfmon_automated_findings_table_xml(observations)
             if findings_xml:
                 section_chunks.append(findings_xml)
+
+        if scorecard_path and scorecard_path.exists():
+            section_chunks.append(perfmon_score_method_note_xml())
 
         summary_xml = build_summary_xml(observations)
         if summary_xml:
@@ -2203,10 +2247,14 @@ def append_perfmon_capture_section(
             for png in pngs:
                 section_chunks.append(_append_png(zf, png))
 
+        assessment_xml = build_assessment_by_area_xml(observations, level=3)
+        if assessment_xml:
+            section_chunks.append(assessment_xml)
+
     insert_at = find_perfmon_append_insert_point(doc_xml)
     new_doc_xml = doc_xml[:insert_at] + "\n".join(section_chunks) + doc_xml[insert_at:]
     new_doc_xml = _dedup_docpr_ids(new_doc_xml)
-    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml, size_from_text=False)
+    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml)
 
     write_or_replace_zip_member(
         output_path,
@@ -2402,8 +2450,9 @@ def inject_perfmon_charts(
     # Repair any duplicate wp:docPr id values accumulated by prior injection steps
     new_doc_xml = insert_perfmon_summary(new_doc_xml, observations)
     new_doc_xml = replace_observation_placeholders(new_doc_xml, observations)
+    new_doc_xml = insert_perfmon_assessment(new_doc_xml, observations)
     new_doc_xml = _dedup_docpr_ids(new_doc_xml)
-    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml, size_from_text=False)
+    new_doc_xml = report_tables.normalize_document_xml(new_doc_xml)
 
     log.step("Writing output document")
 

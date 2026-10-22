@@ -761,7 +761,7 @@ function buildOverview(d){
   const ratios = d.ratios.map(c=>`
     <div style="min-width:0;${card}padding:15px 20px;">
       <div style="display:grid;grid-template-columns:minmax(0,1fr) 74px;align-items:baseline;gap:10px;margin-bottom:7px;"><span class="metricLabel" style="font-size:15px;font-weight:700;color:#0B1640;">${c.label}</span><span class="num metricCaption" style="font-size:14px;color:#0B1640;">${c.pctLabel}</span></div>
-      <div class="num metricCaption" style="font-size:15.5px;color:#0B1640;margin-bottom:8px;"><strong style="color:#0B1640;">${fmtCount(c.val)}</strong> of ${fmtCount(c.of)} relevant</div>
+      <div class="num metricCaption" style="font-size:15.5px;color:#0B1640;margin-bottom:8px;"><strong style="color:#0B1640;">${fmtCount(c.val)}</strong> relevant of ${fmtCount(c.of)} total</div>
       <div style="height:6px;border-radius:3px;background:#F0F2F5;overflow:hidden;"><div style="height:100%;width:${c.width};background:#F0F2F5;border-radius:3px;"></div></div>
     </div>`).join('');
   const activity = d.activity.map(a=>`
@@ -860,7 +860,6 @@ function buildFilldb(d){
       ${value}
     </div>`;
   }).join('');
-  const findings = (d.findings || []).map(f=>`<div style="font-size: 38px; margin-top: 12px;"><strong style="color: ${f.color || '#C2410C'};">${srcText(f.id)}</strong> ${filldbDot} ${srcText(f.text || '')}</div>`).join('');
   return `
 <div style="width: 2250px; background: #ffffff; border: 1px solid #E3E9F1; border-radius: 14px; padding: 44px 48px 48px 48px;">
   <div style="display: flex; align-items: flex-start; justify-content: space-between;">
@@ -889,9 +888,6 @@ function buildFilldb(d){
     ${workloadRows}
   </div>
 
-  <div style="height: 1px; background: #E3E9F1; margin: 34px 0 26px 0;"></div>
-  <div style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 38px; letter-spacing: 0.06em; text-transform: uppercase; color: #0C7E88;">${d.notHealthy ? 'Objects Not Healthy' : 'Findings raised'}</div>
-  ${d.notHealthy ? `<div style="font-size: 38px; margin-top: 12px;">${srcText(d.notHealthy)}</div>` : (findings || `<div style="font-size: 38px; margin-top: 12px;">None raised.</div>`)}
   ${miniScoringLine(d.scoringLine)}
 </div>
   `;
@@ -1119,7 +1115,7 @@ function srcPerfmonFindingLine(d){
     parts.push(`<span><strong style="color:${SRC_CRITICAL};">${fmtCount(critical)}</strong> critical</span>`);
   }
   if(warning){
-    parts.push(`<span><strong style="color:${SRC_ATTENTION};">${fmtCount(warning)}</strong> warning</span>`);
+    parts.push(`<span><strong style="color:${SRC_ATTENTION};">${fmtCount(warning)}</strong> advisory</span>`);
   }
   if(cannotVerify){
     parts.push(`<span><strong style="color:#000032;">${fmtCount(cannotVerify)}</strong> cannot verify</span>`);
@@ -1274,7 +1270,7 @@ function buildDashboard(d){
     + srcEyebrow(`Status distribution &middot; ${fmtCount(d.distTot)} checks`, 30)
     + `<div style="display:flex;height:40px;margin-top:16px;border-radius:999px;overflow:hidden;">${dist}</div>`
     + `<div style="display:flex;align-items:center;gap:34px;margin-top:16px;font-size:38px;">${legend}</div>`
-    + srcEyebrow('Section health &middot; failed and needs-attention first', 36)
+    + srcEyebrow('Section Health &middot; Failed and Needs Attention First', 36)
     + `<div style="display:flex;flex-direction:column;gap:14px;margin-top:16px;">${rows}</div>`
     + srcFooter('Findings raised', srcDashboardFindingLine(d));
 }
@@ -1369,7 +1365,7 @@ function buildOverview(d){
   const ratios = (d.ratios || []).map(c=>`
     <div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:38px;font-weight:700;letter-spacing:0.04em;">${srcText(c.label).toUpperCase()}</span><span style="font-size:38px;font-weight:700;">${srcText(c.pctLabel)}</span></div>
-      <div style="font-size:38px;margin-top:10px;"><span style="font-weight:700;">${fmtCount(c.val)}</span> of ${fmtCount(c.of)} relevant</div>
+      <div style="font-size:38px;margin-top:10px;"><span style="font-weight:700;">${fmtCount(c.val)}</span> relevant of ${fmtCount(c.of)} total</div>
       <div style="height:40px;border-radius:999px;background:${SRC_TRACK};margin-top:12px;overflow:hidden;"><div style="width:${c.width};height:100%;border-radius:999px;background:${SRC_TEAL};"></div></div>
     </div>`).join('');
   const activity = (d.activity || []).map(a=>`

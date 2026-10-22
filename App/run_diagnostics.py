@@ -59,6 +59,11 @@ for folder in (PROJECT_ROOT, APP_DIR, GET_DIR):
         sys.path.insert(0, str(folder))
 
 from Lib.Core.besapi_capture import sample_capture_lines
+from Lib.Core.build_provenance import (
+    build_commit,
+    provenance_comment,
+    set_document_comments,
+)
 from Lib.Core.input_utils import (
     DEFAULT_WORK_DIR,
     clean_user_path,
@@ -1953,6 +1958,8 @@ def main() -> int:
             "Style template",
             str(context.style_template) if context.style_template else "(blank document)",
         )
+        commit = build_commit(PROJECT_ROOT)
+        log.info("Build commit", commit)
         log.section("Inputs")
         for mod in context.selected:
             log.inputs(mod.label, mod.summary(context.module_inputs[mod.key]))
@@ -1981,6 +1988,15 @@ def main() -> int:
         for mod in context.selected:
             for line in mod.done(context.module_inputs[mod.key], ts):
                 log.info(line)
+        comment = provenance_comment(commit, context.style_template)
+        for report in sorted(run_folder.rglob(f"{file_prefix}_*.docx")):
+            try:
+                stamped = set_document_comments(report, comment)
+            except (OSError, ValueError) as exc:
+                log.warning(f"Could not set the Comments property: {exc}")
+                continue
+            if stamped:
+                log.info("Comments property", f"{report.name}: {comment}")
         _write_run_manifest(run_folder, file_prefix, context, log)
         _write_run_diagnostics(
             run_folder, file_prefix, diagnostics, log, result="completed"

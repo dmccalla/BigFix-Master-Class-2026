@@ -72,6 +72,7 @@ import pandas as pd
 
 import Lib.Core.report_log as log
 from Lib.Core.besapi_capture import read_capture_or_log_text, sample_capture_lines
+from Lib.Core.capture_time import capture_time_text
 from Lib.Core.document_stamp import (
     add_stamp_arguments,
     stamp_docx_document,
@@ -187,6 +188,8 @@ class ActionSitePressure:
     master_operator_tasks: int | None = None
     master_operator_fixlets_tasks_total: int | None = None
     master_operator_analyses: int | None = None
+    # MM-DD-YYYY HH:MM of the Content_Info capture the relevant counts come from.
+    content_captured: str = ""
 
 
 @dataclass
@@ -757,6 +760,18 @@ def _first_int_pair_from_latest_file(
     return None, None
 
 
+def _content_capture_time(folder: Path, patterns: list[str]) -> str:
+    """The Report Generated time of the Content_Info capture that holds the
+    relevant counts, as MM-DD-YYYY HH:MM, or "" when it cannot be read."""
+    for path in _candidate_files(folder, patterns):
+        text = read_capture_or_log_text(path)
+        if not re.search(r"Number of Fixlets\s*:", text, flags=re.IGNORECASE):
+            continue
+        match = re.search(r"Report Generated\s*:\s*([^\r\n]+)", text, re.IGNORECASE)
+        return capture_time_text(match.group(1)) if match else ""
+    return ""
+
+
 def _actionsite_size_kb_from_deployment_info(folder: Path) -> int | None:
     for path in _candidate_files(
         folder,
@@ -1165,6 +1180,7 @@ def parse_actionsite_pressure(folder: Path | None) -> ActionSitePressure | None:
             content_patterns,
             r"Total Number of Master Operator Analyses\s*:\s*([\d,]+)",
         ),
+        content_captured=_content_capture_time(folder, content_patterns),
     )
 
 
@@ -1314,17 +1330,26 @@ def _fixlets_tasks_relevant_total(pressure: ActionSitePressure) -> int | None:
     return _sum_if_any(pressure.fixlets_relevant_count, pressure.tasks_relevant_count)
 
 
+def _content_as_of(pressure: ActionSitePressure) -> str:
+    """Names the capture behind a relevant count, which the Deployment Overview
+    can show from a different capture (Duncan, 10-21)."""
+    if not pressure.content_captured:
+        return ""
+    return f", as of the {pressure.content_captured} capture"
+
+
 def _fixlets_tasks_value(pressure: ActionSitePressure) -> str:
     total = _fixlets_tasks_total(pressure)
     relevant = _fixlets_tasks_relevant_total(pressure)
     if total is None:
         return "Not detected"
     return (
-        f"{_count_or_zero(relevant)} / {total:,} relevant/total "
-        f"({_count_or_zero(pressure.fixlets_relevant_count)} / "
-        f"{_count_or_zero(pressure.fixlets_total_count)} fixlets, "
-        f"{_count_or_zero(pressure.tasks_relevant_count)} / "
-        f"{_count_or_zero(pressure.tasks_total_count)} tasks)"
+        f"{_count_or_zero(relevant)} relevant of {total:,} total"
+        f"{_content_as_of(pressure)}. "
+        f"Fixlets: {_count_or_zero(pressure.fixlets_relevant_count)} relevant of "
+        f"{_count_or_zero(pressure.fixlets_total_count)}. "
+        f"Tasks: {_count_or_zero(pressure.tasks_relevant_count)} relevant of "
+        f"{_count_or_zero(pressure.tasks_total_count)}."
     )
 
 
@@ -1334,8 +1359,8 @@ def _analyses_value(pressure: ActionSitePressure) -> str:
     relevant_total = (
         "not detected"
         if pressure.analyses_total_count is None
-        else f"{_count_or_zero(pressure.analyses_relevant_count)} / "
-        f"{pressure.analyses_total_count:,} relevant/total"
+        else f"{_count_or_zero(pressure.analyses_relevant_count)} relevant of "
+        f"{pressure.analyses_total_count:,} total{_content_as_of(pressure)}"
     )
     return f"{relevant_total}. {_count_or_zero(pressure.active_analyses_count)} active."
 
@@ -3522,7 +3547,7 @@ def loop_finding_reasons(
                 "Medium",
                 f"{metrics.total_issue_count:,} of {metrics.score_total_devices:,} "
                 f"devices ({pct(metrics.total_issue_pct)}) {verb} no usable loop data",
-                "Reporting Issues",
+                "Loop Health",
             )
         )
     return reasons
@@ -4675,6 +4700,13 @@ def generate_word(
         "longest single loop any device reported is "
         f"{format_duration_for_report(metrics.peak_max_seconds)}."
     )
+    document.add_paragraph(
+        f"{_device_count(metrics.total_issue_count)} "
+        f"({pct(metrics.total_issue_pct)}) reported no usable loop data. They "
+        "count as Critical in the table and in the score. When more than "
+        f"{NO_DATA_PCT_LIMIT:g}% of devices have no usable data, CLT-01 gives it "
+        "as a reason."
+    )
 
     document.add_heading("How the Score Is Calculated", level=4)
     document.add_paragraph(
@@ -4683,42 +4715,6 @@ def generate_word(
     )
     document.add_paragraph(
         "A score of 90 to 100 is Healthy, 70 to 89 is Warning, and 0 to 69 is Critical."
-    )
-
-    document.add_heading("Reporting Issues", level=4)
-    keep_with_next(
-        document.add_paragraph(
-            f"{_device_count(metrics.total_issue_count)} "
-            f"({pct(metrics.total_issue_pct)}) reported no usable loop data. They "
-            "count as Critical in the table and in the score. When more than "
-            f"{NO_DATA_PCT_LIMIT:g}% of devices have no usable data, CLT-01 gives it "
-            "as a reason."
-        )
-    )
-    build_word_table(
-        document,
-        ["Status", "Devices / Total", "% of Total"],
-        [
-            [
-                "Not Reported",
-                count_with_denominator(
-                    metrics.not_reported_count, metrics.score_total_devices
-                ),
-                pct(metrics.not_reported_pct),
-            ],
-            [
-                "Error",
-                count_with_denominator(metrics.error_count, metrics.score_total_devices),
-                pct(metrics.error_pct),
-            ],
-            [
-                "Total Issues",
-                count_with_denominator(
-                    metrics.total_issue_count, metrics.score_total_devices
-                ),
-                pct(metrics.total_issue_pct),
-            ],
-        ],
     )
 
     if loop_offenders or actionsite_pressure or property_intervals:
@@ -4759,20 +4755,6 @@ def generate_word(
                 ]
                 for item in loop_offenders
             ],
-        )
-
-    if actionsite_pressure:
-        document.add_heading("Contributing Factors", level=4)
-        keep_with_next(
-            document.add_paragraph(
-                "Deployment-wide counts that add work to every Client loop."
-            )
-        )
-        build_word_table(
-            document,
-            ["Metric", "Value", "Status", "Basis"],
-            actionsite_pressure_rows(actionsite_pressure),
-            status_col=2,
         )
 
     if property_intervals:
@@ -4824,6 +4806,20 @@ def generate_word(
             document.add_paragraph(
                 minimum_analysis_interval_paragraph(minimum_analysis_interval)
             )
+
+    if actionsite_pressure:
+        document.add_heading("Contributing Factors", level=4)
+        keep_with_next(
+            document.add_paragraph(
+                "Deployment-wide counts that add work to every Client loop."
+            )
+        )
+        build_word_table(
+            document,
+            ["Metric", "Value", "Status", "Basis"],
+            actionsite_pressure_rows(actionsite_pressure),
+            status_col=2,
+        )
 
     if udp_summary or command_polling_summary:
         document.add_heading("Notification and Polling", level=3)

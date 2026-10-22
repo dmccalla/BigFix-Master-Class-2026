@@ -100,6 +100,7 @@ def test_filldb_chart_payload_colors_workload_bars_by_health(
     )
 
     assert captured["chart"] == "filldb"
+    assert "notHealthy" not in captured["data"]
     bars = {item["label"]: item for item in captured["data"]["bars"]}
     assert bars["Fixlet Results"]["color"] == "#187A43"
     # PRF-BIG-30: Good meets the standard, so it is Healthy green.
@@ -498,3 +499,15 @@ def test_ensure_analysis_csv_raises_when_no_logs(tmp_path):
         assert "No FillDB performance logs" in str(exc)
     else:
         raise AssertionError("expected ValueError for empty folder")
+
+
+def test_filldb_infographic_has_no_objects_not_healthy_block() -> None:
+    """Design, 10-21: no FillDB graphic names an unhealthy object."""
+    from Lib.Design import html_charts
+
+    html = html_charts._build_html("filldb", {})
+    builder = html[html.index("function buildFilldb") :]
+    builder = builder[: builder.index("\n}\n")]
+    assert "Objects Not Healthy" not in builder
+    assert "notHealthy" not in builder
+    assert "miniScoringLine(d.scoringLine)" in builder

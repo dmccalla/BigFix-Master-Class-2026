@@ -4,28 +4,33 @@
 # Master Class Diagnostics Workbench
 # See the LICENSE and NOTICE files in the project root for license text and attribution.
 
-"""One layout rule for report tables (Design change list 10-20, Section 2).
+"""One layout rule for report tables (Design change list 10-20, Section 2, and
+the 10-20 build handoff, Part 3).
 
 Layout applies to tables styled BigFixContent whose width is dxa or auto:
-10800 dxa wide (the 7.5 in text area at 0.5 in margins) with the grid scaled to
-match, left aligned, no indent, fixed layout, and a header row that repeats on
-each page, sits at the left like the body rows and stays with the first body
-row. Code-built tables (an equal split of columns) get widths from their text.
-Tables with set widths keep their proportions.
+10800 dxa wide (the 7.5 in text area at 0.5 in margins), left aligned, no
+indent, fixed layout, and a header row that repeats on each page, sits at the
+left like the body rows and stays with the first body row. Column widths come
+from Design: a table with known columns takes its fixed widths, a template
+table keeps the proportions of its own widths, and every other table is
+measured from its text.
 
 Column alignment and the header kept with the first body row apply to the same
-tables and to BigFixContent data tables with a percent width. A column is right aligned, header and cells, when every filled
-body cell is a number, a number with a unit or a time. Every other column is
-left aligned. A percent-width table that already sets the alignment of its own
-header cells (the Check Results dashboard tables) keeps it.
+tables and to BigFixContent data tables with a percent width. A column is right
+aligned, header and cells, when every filled body cell is a number, a number
+with a unit or a time. Every other column is left aligned. A percent-width
+table that sets the alignment of its own cells (the Check Results dashboard
+tables) keeps it, and each header takes the alignment of its column.
 
 Tables with no style and tables in any other style are left alone. Tell the
 groups apart by style, width type and the table's own formatting, never by the
-section a table sits in.
+section a table sits in. The cell and table properties of every table are
+written in schema order, because Word misdraws shading out of order.
 """
 
 from __future__ import annotations
 
+import math
 import re
 import zipfile
 from pathlib import Path
@@ -66,7 +71,7 @@ _NUMBER = r"[-+]?(?:\d{1,3}(?:,\d{3})+|\d+)(?:\.\d+)?"
 _UNITS = (
     "%|ms|s|sec|secs|second|seconds|min|mins|minute|minutes|h|hr|hrs|hour|hours|"
     "day|days|b|bytes|kb|mb|gb|tb|kb/s|mb/s|gb/s|/s|lines/s|ops/s|mbps|gbps|"
-    "mhz|ghz"
+    "mhz|ghz|core|cores"
 )
 _NUMBER_CELL = re.compile(
     rf"(?:{_NUMBER}\s?(?:{_UNITS})?"  # 1,234  12.3 MB  45%
@@ -147,102 +152,168 @@ def aligns_columns(tbl) -> bool:
     return _width_type(tbl) == "pct" and not _sets_own_header_alignment(tbl)
 
 
-# Aptos 11 pt character widths in twips, rounded up, used to size code-built
-# columns. Bold runs about 10% wider. A cell also loses its left and right
-# margins (113 dxa each in BigFixContent), plus a little room for rounding.
-_NARROW = set(".,:;'|!il1()[] ")
-_CELL_PADDING_DXA = 290
-_BOLD = 1.1
+# Fixed widths for tables with known columns (build handoff, Part 3B and
+# Appendix A), keyed by the header row. Each set adds up to 10800.
+_COMMAND_POLLING = (
+    "Total Devices",
+    "Enabled",
+    "Missing Interval",
+    "Interval Below Loop",
+    "No UDP + Polling Off",
+)
+FIXED_WIDTHS: dict[tuple[str, ...], tuple[int, ...]] = {
+    ("Version", "Date", "Notes"): (1200, 1800, 7800),
+    ("Area", "Findings", "Source IDs"): (3000, 3000, 4800),
+    ("Source ID", "Description", "Impact", "Suggested Remediation"): (
+        1500,
+        3224,
+        1163,
+        4913,
+    ),
+    ("Group", "Devices / Total", "% of Total", "Rule"): (1900, 1900, 1700, 5300),
+    (
+        "Rank",
+        "Average Eval Time (Seconds)",
+        "Occurrences",
+        "Evaluation",
+        "Interval",
+    ): (1000, 1700, 1700, 4900, 1500),
+    (
+        "Interval",
+        "Properties / Active",
+        "% of Active",
+        "Custom",
+        "External",
+        "Status",
+    ): (2400, 1900, 1400, 1300, 1400, 2400),
+    ("Metric", "Value", "Status", "Basis"): (2400, 2600, 1300, 4500),
+    ("Status", "Devices / Total", "% of Total"): (5400, 2700, 2700),
+    ("Relay", "Not Receiving / Reported", "% of Relay Reported Clients"): (
+        4200,
+        3200,
+        3400,
+    ),
+    ("Subnet", "Not Receiving / Reported", "Serving Relays"): (2800, 2800, 5200),
+    ("Relay", *_COMMAND_POLLING): (3000, 1300, 1300, 1700, 1700, 1800),
+    ("Subnet", *_COMMAND_POLLING): (3000, 1300, 1300, 1700, 1700, 1800),
+    ("Multicore CPU Scaling Enabled", "Devices / Total"): (7000, 3800),
+    ("Infographic tile", "Value", "What it means"): (2600, 2200, 6000),
+    ("Resource", "Required", "Observed", "Short by", "Basis"): (
+        1300,
+        1300,
+        1900,
+        1300,
+        5000,
+    ),
+    ("Setting Name", "Value", "Number of Machines"): (6400, 2200, 2200),
+    ("Timeframe", "State", "Count"): (6400, 2200, 2200),
+    ("Site", "State", "Count"): (6400, 2200, 2200),
+    ("FillDB Object", "Count", "Time (ms)", "Rate/s", "Health Check"): (
+        3270,
+        1490,
+        1390,
+        1220,
+        3430,
+    ),
+    ("Statistic", "Value"): (6980, 3820),
+}
+
+# Template tables keep the proportions of their own widths (Design, 10-20).
+KEEP_PROPORTIONS: frozenset[tuple[str, ...]] = frozenset(
+    {
+        ("Infrastructure", "Operational Maturity"),
+        ("Reader", "Start Here", "Purpose"),
+        ("ID", "Check Instructions", "Notes and Findings"),
+        ("Resource Name", "Description"),
+    }
+)
+
+# Columns whose cells never wrap: a Source ID must not break at its hyphen.
+NO_WRAP_COLUMNS: dict[tuple[str, ...], tuple[int, ...]] = {
+    ("Source ID", "Description", "Impact", "Suggested Remediation"): (0,),
+}
+
+# Design's method for tables built from data (build handoff, Part 3B): about
+# 105 twips per character of Aptos 11 pt, header words bold (about 10% wider)
+# and 226 twips of cell margins.
+_CHAR_DXA = 105
+_HEADER_BOLD = 1.1
+_CELL_MARGINS_DXA = 226
+_LEAST_COLUMN_DXA = 1000
+_MOST_FLOOR_DXA = 2600
+_WORD_CAP = 22
+_TEXT_CAP = 70
+_SHARE_BASE = 150
 
 
-def _text_dxa(text: str, bold: bool = False) -> int:
-    width = 0
-    for char in text:
-        if char in _NARROW:
-            width += 65
-        elif char.isupper() or char in "%@&wmWM":
-            width += 150
-        elif char.isdigit():
-            width += 125
-        else:
-            width += 120
-    return round(width * (_BOLD if bold else 1))
+def _cell_words(tc) -> str:
+    return " ".join("".join(tc.itertext()).split())
 
 
-def _column_text(rows: list, count: int) -> list[tuple[int, int, int]]:
-    """(longest header word, longest word, longest single-line text) per column,
-    in twips, cell margins included."""
+def header_key(rows: list) -> tuple[str, ...]:
+    """The header row's cell text, used to look up a table's fixed widths."""
+    if not rows:
+        return ()
+    return tuple(_cell_words(tc) for tc in rows[0].findall(W + "tc"))
+
+
+def measured_widths(rows: list, count: int) -> list[int]:
+    """Column widths from the text, by Design's method (Part 3B).
+
+    Each column gets its least width: its longest header word (bold) or its
+    longest body word (capped at 22 characters), never below 1000 or above
+    2600. Its natural width comes from the 80th percentile length of its body
+    cells (capped at 70 characters). The rest of the width is shared in
+    proportion to natural minus least, plus 150, rounded to 10, and the widest
+    column takes up the difference so the total is exactly 10800.
+    """
     heads = [0] * count
+    for tc, column, span in _row_cells(rows[0]):
+        if span == 1 and column < count:
+            heads[column] = max(
+                (len(word) for word in _cell_words(tc).split()), default=0
+            )
     words = [0] * count
-    lines = [0] * count
-    for index, tr in enumerate(rows):
-        bold = index == 0
+    lengths: list[list[int]] = [[] for _ in range(count)]
+    for tr in rows[1:]:
         for tc, column, span in _row_cells(tr):
             if span != 1 or column >= count:
                 continue
-            for paragraph in tc.iter(W + "p"):
-                text = " ".join("".join(paragraph.itertext()).split())
-                if not text:
-                    continue
-                longest = max(_text_dxa(word, bold) for word in text.split())
-                if bold:
-                    heads[column] = max(heads[column], longest)
-                words[column] = max(words[column], longest)
-                lines[column] = max(lines[column], _text_dxa(text, bold))
-    return [
-        (
-            head + _CELL_PADDING_DXA,
-            word + _CELL_PADDING_DXA,
-            max(line, word) + _CELL_PADDING_DXA,
+            text = _cell_words(tc)
+            words[column] = max(
+                words[column],
+                max((min(len(word), _WORD_CAP) for word in text.split()), default=0),
+            )
+            lengths[column].append(min(len(text), _TEXT_CAP))
+    least: list[float] = []
+    natural: list[float] = []
+    for column in range(count):
+        floor = (
+            max(heads[column] * _CHAR_DXA * _HEADER_BOLD, words[column] * _CHAR_DXA)
+            + _CELL_MARGINS_DXA
         )
-        for head, word, line in zip(heads, words, lines, strict=True)
+        floor = min(max(floor, _LEAST_COLUMN_DXA), _MOST_FLOOR_DXA)
+        ordered = sorted(lengths[column]) or [0]
+        p80 = ordered[max(0, math.ceil(0.8 * len(ordered)) - 1)]
+        least.append(floor)
+        natural.append(max(p80 * _CHAR_DXA + _CELL_MARGINS_DXA, floor))
+    spare = TEXT_WIDTH_DXA - sum(least)
+    weights = [nat - low + _SHARE_BASE for low, nat in zip(least, natural, strict=True)]
+    widths = [
+        round((low + spare * weight / sum(weights)) / 10) * 10
+        for low, weight in zip(least, weights, strict=True)
     ]
+    widest = widths.index(max(widths))
+    widths[widest] += TEXT_WIDTH_DXA - sum(widths)
+    return widths
 
 
-def _share(floor: list[int], want: list[int]) -> list[int]:
-    """Give each column its floor, then split what is left by how much more
-    each column wants."""
-    spare = TEXT_WIDTH_DXA - sum(floor)
-    extra = [max(goal - least, 0) for goal, least in zip(want, floor, strict=True)]
-    if not sum(extra):
-        return [least + spare // len(floor) for least in floor]
-    return [
-        least + round(spare * more / sum(extra))
-        for least, more in zip(floor, extra, strict=True)
-    ]
-
-
-def _content_widths(rows: list, count: int) -> list[int]:
-    """Column widths that add up to the text width, sized from the text.
-
-    Every column gets its longest word when the table can hold them all, so
-    nothing breaks mid-word. When it cannot, header words still stay whole and
-    Word breaks a long cell value where its column ends. No hidden break
-    characters are added, because readers copy names such as relays into
-    searches. The rest of the width goes to the columns whose text would wrap.
-    """
-    needs = _column_text(rows, count)
-    heads = [head for head, _, _ in needs]
-    words = [word for _, word, _ in needs]
-    lines = [line for _, _, line in needs]
-    if sum(lines) <= TEXT_WIDTH_DXA:
-        total = sum(lines)
-        return [round(width * TEXT_WIDTH_DXA / total) for width in lines]
-    if sum(words) <= TEXT_WIDTH_DXA:
-        return _share(words, lines)
-    if sum(heads) <= TEXT_WIDTH_DXA:
-        return _share(heads, words)
-    total = sum(heads)
-    return [round(width * TEXT_WIDTH_DXA / total) for width in heads]
-
-
-def _layout_grid(tbl, rows: list, size_from_text: bool) -> list[int]:
+def _layout_grid(tbl, rows: list) -> list[int]:
     """Set the grid to the text width and return it.
 
-    In a Mini Report build a table whose columns are an equal split was built by
-    code with no widths of its own, so its widths come from its text. Every other
-    table keeps the proportions of its widths. The Full Report only scales, so a
-    template table with equal columns (Document Control) keeps them.
+    A table with known columns takes its fixed widths. A template table keeps
+    the proportions of its own widths. Every other table is measured from its
+    text.
     """
     grid = tbl.find(W + "tblGrid")
     if grid is None:
@@ -252,13 +323,16 @@ def _layout_grid(tbl, rows: list, size_from_text: bool) -> list[int]:
     widths = [int(col.get(W + "w", "0") or 0) for col in cols]
     if not widths:
         return []
-    total = sum(widths)
-    if size_from_text and len(widths) > 1 and max(widths) - min(widths) <= 1:
-        scaled = _content_widths(rows, len(widths))
-    elif total <= 0:
-        scaled = [TEXT_WIDTH_DXA // len(widths)] * len(widths)
+    key = header_key(rows)
+    fixed = FIXED_WIDTHS.get(key)
+    if fixed is not None and len(fixed) == len(widths):
+        scaled = list(fixed)
+    elif key in KEEP_PROPORTIONS and sum(widths) > 0:
+        scaled = [round(width * TEXT_WIDTH_DXA / sum(widths)) for width in widths]
+    elif len(rows) > 1:
+        scaled = measured_widths(rows, len(widths))
     else:
-        scaled = [round(width * TEXT_WIDTH_DXA / total) for width in widths]
+        scaled = [TEXT_WIDTH_DXA // len(widths)] * len(widths)
     scaled[-1] += TEXT_WIDTH_DXA - sum(scaled)
     for col, width in zip(cols, scaled, strict=True):
         col.set(W + "w", str(width))
@@ -293,11 +367,12 @@ def _number_columns(rows: list, column_count: int) -> set[int]:
     for tr in rows[1:]:
         for tc, column, span in _row_cells(tr):
             text = _cell_text(tc)
-            if not text:
+            # A cell merged across columns, such as a host label row, belongs
+            # to no single column, so it does not decide any column.
+            if not text or span > 1:
                 continue
-            covered = range(column, column + span)
-            if span > 1 or not is_number_cell(text):
-                words.update(covered)
+            if not is_number_cell(text):
+                words.add(column)
             else:
                 filled[column] = filled.get(column, 0) + 1
     return {col for col in range(column_count) if filled.get(col) and col not in words}
@@ -331,7 +406,7 @@ def _keep_header_with_body(tbl) -> None:
         _child(_first_child(paragraph, "pPr"), "keepNext", _PPR_ORDER)
 
 
-def _apply_layout(tbl, size_from_text: bool) -> None:
+def _apply_layout(tbl) -> None:
     tbl_pr = tbl.find(W + "tblPr")
     _set(_child(tbl_pr, "tblW", _TBLPR_ORDER), w=str(TEXT_WIDTH_DXA), type="dxa")
     _set(_child(tbl_pr, "jc", _TBLPR_ORDER), val="left")
@@ -339,7 +414,7 @@ def _apply_layout(tbl, size_from_text: bool) -> None:
     _set(_child(tbl_pr, "tblLayout", _TBLPR_ORDER), type="fixed")
 
     rows = tbl.findall(W + "tr")
-    grid = _layout_grid(tbl, rows, size_from_text)
+    grid = _layout_grid(tbl, rows)
     if not rows or not grid:
         return
 
@@ -349,11 +424,14 @@ def _apply_layout(tbl, size_from_text: bool) -> None:
     # right of the body rows on a left-aligned table.
     _set(_child(tr_pr, "jc", _TRPR_ORDER), val="left")
 
-    for tr in rows:
+    no_wrap = NO_WRAP_COLUMNS.get(header_key(rows), ())
+    for index, tr in enumerate(rows):
         for tc, column, span in _row_cells(tr):
             tc_pr = _first_child(tc, "tcPr")
             width = sum(grid[column : column + span])
             _set(_child(tc_pr, "tcW", _TCPR_ORDER), w=str(width), type="dxa")
+            if index and span == 1 and column in no_wrap:
+                _child(tc_pr, "noWrap", _TCPR_ORDER)
 
 
 def _apply_column_alignment(tbl) -> None:
@@ -368,20 +446,88 @@ def _apply_column_alignment(tbl) -> None:
             _align_cell(tc, "right" if column in numbers and span == 1 else "left")
 
 
-def normalize_table(tbl, size_from_text: bool = True) -> bool:
-    """Apply the rule to one table. False when the table is left alone.
+_SAME_ALIGNMENT = {"start": "left", "end": "right"}
 
-    ``size_from_text`` sizes equal-split columns from their text. The Mini Report
-    builders that create those tables pass True. Steps that work on a whole report
-    they did not build (the Full Report, the PerfMon injector) pass False.
-    """
-    if not aligns_columns(tbl):
+
+def _header_follows_column(tbl) -> bool:
+    """A table that aligns its own cells (the Check Results dashboard tables)
+    keeps them, and each header cell takes the alignment of its column, so a
+    centered header never sits over left-aligned cells. True when a header
+    cell changed."""
+    rows = tbl.findall(W + "tr")
+    if len(rows) < 2:
         return False
+    found: dict[int, set[str]] = {}
+    for tr in rows[1:]:
+        for tc, column, span in _row_cells(tr):
+            if span != 1:
+                continue
+            for paragraph in tc.findall(W + "p"):
+                jc = paragraph.find(f"{W}pPr/{W}jc")
+                value = jc.get(W + "val", "left") if jc is not None else "left"
+                found.setdefault(column, set()).add(_SAME_ALIGNMENT.get(value, value))
+    changed = False
+    for tc, column, span in _row_cells(rows[0]):
+        values = found.get(column, set())
+        if span != 1 or len(values) != 1:
+            continue
+        want = next(iter(values))
+        have = set()
+        for paragraph in tc.findall(W + "p"):
+            jc = paragraph.find(f"{W}pPr/{W}jc")
+            value = jc.get(W + "val", "left") if jc is not None else "left"
+            have.add(_SAME_ALIGNMENT.get(value, value))
+        if have != {want}:
+            _align_cell(tc, want)
+            changed = True
+    return changed
+
+
+def normalize_table(tbl) -> bool:
+    """Apply the rule to one table. False when the table is left alone."""
+    width_type = _width_type(tbl)
+    if width_type is None:
+        return False
+    if not aligns_columns(tbl):
+        return _header_follows_column(tbl)
     if in_scope(tbl):
-        _apply_layout(tbl, size_from_text)
+        _apply_layout(tbl)
     _keep_header_with_body(tbl)
     _apply_column_alignment(tbl)
     return True
+
+
+def _put_in_order(parent, order: list[str]) -> bool:
+    """Sort the children of ``parent`` into schema order. True when it moved any.
+
+    Children the order does not name keep their places after the named ones.
+    """
+    rank = {name: index for index, name in enumerate(order)}
+    children = list(parent)
+
+    def place(element) -> int:
+        if not isinstance(element.tag, str):
+            return len(order)
+        return rank.get(etree.QName(element).localname, len(order))
+
+    ordered = sorted(children, key=place)
+    if ordered == children:
+        return False
+    for element in children:
+        parent.remove(element)
+    parent.extend(ordered)
+    return True
+
+
+def order_table_properties(root) -> int:
+    """Write every table's tblPr and every cell's tcPr in schema order. Returns
+    the number of property sets that moved."""
+    moved = 0
+    for tbl_pr in root.iter(W + "tblPr"):
+        moved += _put_in_order(tbl_pr, _TBLPR_ORDER)
+    for tc_pr in root.iter(W + "tcPr"):
+        moved += _put_in_order(tc_pr, _TCPR_ORDER)
+    return moved
 
 
 def _serialize(root) -> bytes:
@@ -398,22 +544,23 @@ def _serialize(root) -> bytes:
     return etree.tostring(root, xml_declaration=True, encoding="UTF-8", standalone=True)
 
 
-def normalize_report_tables(root, size_from_text: bool = True) -> int:
-    """Apply the rule to every top-level table under ``root``. Returns the count."""
+def normalize_report_tables(root) -> int:
+    """Apply the rule to every top-level table under ``root`` and put every
+    table's properties in schema order. Returns the count of changes."""
     changed = 0
     for tbl in list(root.iter(W + "tbl")):
         if any(ancestor.tag == W + "tbl" for ancestor in tbl.iterancestors()):
             continue
-        changed += normalize_table(tbl, size_from_text)
-    return changed
+        changed += normalize_table(tbl)
+    return changed + order_table_properties(root)
 
 
-def normalize_docx_tables(docx_path: Path, size_from_text: bool = True) -> int:
+def normalize_docx_tables(docx_path: Path) -> int:
     """Rewrite ``word/document.xml`` of a saved .docx with the rule applied."""
     docx_path = Path(docx_path)
     with zipfile.ZipFile(docx_path) as zin:
         root = etree.fromstring(zin.read("word/document.xml"))
-        changed = normalize_report_tables(root, size_from_text)
+        changed = normalize_report_tables(root)
         if not changed:
             return 0
         data = _serialize(root)
@@ -426,9 +573,9 @@ def normalize_docx_tables(docx_path: Path, size_from_text: bool = True) -> int:
     return changed
 
 
-def normalize_document_xml(document_xml: str, size_from_text: bool = True) -> str:
+def normalize_document_xml(document_xml: str) -> str:
     """Return ``word/document.xml`` text with the rule applied."""
     root = etree.fromstring(document_xml.encode("utf-8"))
-    if not normalize_report_tables(root, size_from_text):
+    if not normalize_report_tables(root):
         return document_xml
     return _serialize(root).decode("utf-8")

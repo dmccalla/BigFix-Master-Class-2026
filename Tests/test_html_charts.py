@@ -502,8 +502,9 @@ def test_filldb_workload_bars_encode_health_without_dots() -> None:
     assert "width: 320px; white-space: nowrap; font-size: 38px" in section
     assert "font-size: 38px" in section
     assert "Bar length is minutes. Color is health." in section
-    assert "Findings raised" in section
-    assert "None raised." in section
+    # Design, 10-21: the Objects Not Healthy block and its slot are gone.
+    assert "Findings raised" not in section
+    assert "Objects Not Healthy" not in section
     assert "filldbDisplayLabel(b.label) !== 'Batch Rate'" in section
     assert (
         "else mount.className = (d.chart==='loop' || d.chart==='filldb') ? '' : 'card';"
@@ -710,7 +711,9 @@ def test_dashboard_section_health_rows_have_non_wrapping_label_and_count_columns
     assert 'data-single-line="object-label"' in section
     assert "width:440px;font-size:38px;flex:0 0 auto;" in section
     assert "width:500px;font-size:38px;text-align:right;flex:0 0 auto;" in section
-    assert "failed and needs-attention first" in html
+    # Build handoff Part 1.2: no hyphen in "Needs Attention".
+    assert "Section Health &middot; Failed and Needs Attention First" in html
+    assert "needs-attention" not in html.lower()
 
 
 def test_chart_template_marks_cells_for_rendered_single_line_validation() -> None:

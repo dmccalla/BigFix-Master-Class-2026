@@ -38,7 +38,7 @@ def test_object_health_sample() -> None:
     ]
     assert filldb.object_health_paragraph(rows) == (
         "The analyzer rates 3 objects Great, 1 Good and 1 Poor. 2 objects had too "
-        "little data to rate. Computer Administrators is Poor. Parallel DB Update "
+        "little data to rate. Parallel DB Update "
         "(Short Batch) takes the most time at 50.5 minutes. The score covers 3 of the "
         "4 checks named in the NFR guide. The other 1 had too little data. The "
         "Workload by Object chart in the Infographic shows the time for every object."
@@ -54,7 +54,8 @@ def test_object_health_leaves_out_zero_parts() -> None:
     assert "The score covers the 4 checks named in the NFR guide." in text
 
 
-def test_object_health_names_every_poor_object() -> None:
+def test_object_health_names_no_poor_object() -> None:
+    """Design, 10-21: the counts stay, and no object is named as Poor."""
     rows = [
         *GUIDE,
         _row("Computer administrators", "004%: Poor"),
@@ -62,7 +63,10 @@ def test_object_health_names_every_poor_object() -> None:
         _row("Fixlet results", "002%: Poor"),
     ]
     text = filldb.object_health_paragraph(rows)
-    assert "Computer Administrators, Computer Roles and Fixlet Results are Poor." in text
+    assert "3 Poor" in text
+    assert "is Poor" not in text and "are Poor" not in text
+    for name in ("Computer Administrators", "Computer Roles", "Fixlet Results"):
+        assert name not in text
     assert "1 object had too little data to rate." in text
 
 

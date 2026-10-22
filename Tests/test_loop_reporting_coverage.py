@@ -77,7 +77,7 @@ def test_missing_data_reason_names_the_devices_and_the_share() -> None:
     [reason] = loop.loop_finding_reasons(_metrics(94, 6))
     assert reason.impact == "Medium"
     assert reason.text == "6 of 100 devices (6.0%) have no usable loop data"
-    assert reason.section == "Reporting Issues"
+    assert reason.section == "Loop Health"
     [single] = loop.loop_finding_reasons(_metrics(10, 1))
     assert single.text == "1 of 11 devices (9.1%) has no usable loop data"
 
@@ -157,7 +157,7 @@ def test_word_report_lists_every_reason_in_one_row(tmp_path: Path) -> None:
         "CLT-01",
         "High.\n"
         "The client loop health score is below 90. See Loop Health.\n"
-        "6 of 100 devices (6.0%) have no usable loop data. See Reporting Issues.",
+        "6 of 100 devices (6.0%) have no usable loop data. See Loop Health.",
     ]
     key = next(t for t in doc.tables if t.cell(0, 0).text == "Infographic tile")
     rows = {row.cells[0].text: [c.text for c in row.cells] for row in key.rows}
@@ -167,4 +167,14 @@ def test_word_report_lists_every_reason_in_one_row(tmp_path: Path) -> None:
         "Critical in the distribution and the score."
     )
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Reporting Issues" in headings
+    assert "Reporting Issues" not in headings
+    assert not any(r.cells[0].text == "Not Reported" for t in doc.tables for r in t.rows)
+    # The CP-12 sentence follows the slowest-device sentence under Loop Health.
+    paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
+    slowest = next(
+        i for i, p in enumerate(paragraphs) if p.startswith("The slowest device averages")
+    )
+    assert paragraphs[slowest + 1].startswith(
+        "6 devices (6.0%) reported no usable loop data."
+    )
+    assert paragraphs[slowest + 2] == "How the Score Is Calculated"

@@ -43,7 +43,7 @@
 <DIV class=hc-body style="BORDER-TOP: #dce6f0 1px solid; MARGIN-TOP: 6px; PADDING-TOP: 8px">
 <DIV class=hc-sec>Description</DIV>
 <DIV style="FONT-SIZE: 14px; MARGIN-BOTTOM: 6px"><FONT color=#000000 size=2>This Fixlet sets <TT>_BESClient_Resource_ScaleWorkTimeWithCPUCores</TT> to <TT>1</TT>. In BigFix 11.0.7 and later, the client uses this setting when scaling its work time with the available CPU cores.</FONT></DIV>
-<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>The action does not change <TT>_BESClient_Resource_WorkIdle</TT> or <TT>_BESClient_Resource_SleepIdle</TT>. Those settings remain independently reported by the Agent Performance Counters analysis.</FONT></DIV>
+<DIV style="FONT-SIZE: 14px"><FONT color=#000000 size=2>The action does not change <TT>_BESClient_Resource_WorkIdle</TT> or <TT>_BESClient_Resource_SleepIdle</TT>. Those settings remain independently reported by the Client Performance Counters analysis.</FONT></DIV>
 <DIV class=hc-sec>Deployment Notes</DIV>
 <UL>
 <LI><FONT color=#000000 size=2>This Fixlet can only be run by Master Operators.</FONT> 

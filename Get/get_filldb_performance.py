@@ -246,16 +246,6 @@ def is_guide_check(row: dict[str, str]) -> bool:
     return clean_object_name(row.get("FillDB Object", "")).strip().lower() in GUIDE_CHECKS
 
 
-def objects_not_healthy(rows: list[dict[str, str]]) -> str:
-    """FD-03: name the objects the analyzer rates Poor, or None."""
-    poor = [
-        titlecase_label(row.get("FillDB Object", ""))
-        for row in object_performance_rows(rows)
-        if health_status(row.get("Health Check", "")) == "poor"
-    ]
-    return f"Critical: {', '.join(poor)}." if poor else "None."
-
-
 def filldb_assessment_note(rows: list[dict[str, str]]) -> str:
     """Explain a Not Assessed FillDB score when the capture cannot be scored."""
     scoreable = any(
@@ -410,7 +400,7 @@ def calculate_capture_duration(start_value: str, end_value: str) -> str:
 def build_capture_metadata(start_value: str, end_value: str) -> dict[str, str]:
     duration = calculate_capture_duration(start_value, end_value)
     return {
-        "generated": datetime.now().strftime("%m/%d/%Y %H:%M"),
+        "generated": datetime.now().strftime("%m-%d-%Y %H:%M"),
         "start": format_metadata_date(start_value),
         "end": format_metadata_date(end_value),
         "duration": duration if duration else "Not specified",
@@ -551,7 +541,6 @@ def generate_filldb_chart(
             f"Object health &middot; {assessed_total:,} objects &middot; "
             f"{great_count + good_count + review_count:,} assessed"
         ),
-        "notHealthy": objects_not_healthy(rows),
         "dist": dist,
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
@@ -813,22 +802,20 @@ def _join_names(names: list[str]) -> str:
 
 
 def object_health_paragraph(rows: list[dict[str, str]]) -> str:
-    """FD-08: the analyzer's ratings, the Poor objects, the slowest object and
-    how many of the guide's checks the score covers."""
+    """FD-08: the analyzer's ratings, the slowest object and how many of the
+    guide's checks the score covers. No object is named as unhealthy (Design,
+    10-21)."""
     objects = object_performance_rows(rows)
     if not objects:
         return ""
     counts = {"great": 0, "good": 0, "poor": 0}
     unrated = 0
-    poor_names = []
     for row in objects:
         status = health_status(row.get("Health Check", ""))
         if status in counts:
             counts[status] += 1
         else:
             unrated += 1
-        if status == "poor":
-            poor_names.append(titlecase_label(row.get("FillDB Object", "")))
 
     sentences = []
     rated = [
@@ -849,10 +836,6 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
             if unrated == 1
             else f"{unrated} objects had too little data to rate."
         )
-    if poor_names:
-        verb = "is" if len(poor_names) == 1 else "are"
-        sentences.append(f"{_join_names(poor_names)} {verb} Poor.")
-
     slowest = max(objects, key=lambda row: parse_number(row.get("Time (ms)", "")))
     slowest_ms = parse_number(slowest.get("Time (ms)", ""))
     if slowest_ms > 0:

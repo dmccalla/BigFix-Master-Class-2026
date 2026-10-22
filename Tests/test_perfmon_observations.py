@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import inspect
 import json
+import re
 from collections import OrderedDict
 from pathlib import Path
 from zipfile import ZipFile
@@ -628,7 +629,9 @@ def test_insert_perfmon_summary_adds_simple_status_table() -> None:
         },
     }
 
-    updated = inject_perfmon_charts.insert_perfmon_summary(doc_xml, observations)
+    summary = inject_perfmon_charts.insert_perfmon_summary(doc_xml, observations)
+    assert "Assessment by Area" not in summary
+    updated = inject_perfmon_charts.build_assessment_by_area_xml(observations, 4)
 
     assert "<w:tbl>" in updated
     assert "Area" in updated
@@ -664,6 +667,48 @@ def test_insert_perfmon_summary_adds_summary_after_perfmon_heading() -> None:
     assert updated.index(
         "PerfMon analysis found all counters within standard."
     ) < updated.index("Storage Queue Depth")
+
+
+def test_general_observations_placeholder_stays_above_capture_summary() -> None:
+    """The General Observations placeholder is the consultant's space (Design,
+    10-20). It stays, and Capture Summary follows it."""
+    placeholder = (
+        "Your observations go here. If you have multiple perfmon results be sure "
+        "to not the server’s name and role."
+    )
+    doc_xml = (
+        "<w:document><w:body>"
+        '<w:p><w:pPr><w:pStyle w:val="Heading2"/></w:pPr><w:r><w:t>PerfMon Counters Analysis</w:t></w:r></w:p>'
+        '<w:p><w:pPr><w:pStyle w:val="Heading3"/></w:pPr><w:r><w:t>General Observations</w:t></w:r></w:p>'
+        f"<w:p><w:r><w:t>{placeholder}</w:t></w:r></w:p>"
+        '<w:p><w:pPr><w:pStyle w:val="Heading4"/></w:pPr><w:r><w:t>Storage Queue Depth</w:t></w:r></w:p>'
+        "<w:p><w:r><w:t>Observation: Your observations go here.</w:t></w:r></w:p>"
+        "</w:body></w:document>"
+    )
+    observations = {
+        "summary": {"lines": ["PerfMon analysis found all counters within standard."]},
+        "sections": {
+            "Storage Queue Depth": {
+                "status": "OK",
+                "observation": "The standard was met throughout the sample window.",
+            }
+        },
+    }
+
+    updated = inject_perfmon_charts.insert_perfmon_summary(doc_xml, observations)
+    updated = inject_perfmon_charts.replace_observation_placeholders(
+        updated, observations
+    )
+
+    assert updated.count(placeholder) == 1
+    assert (
+        updated.index("General Observations")
+        < updated.index(placeholder)
+        < updated.index("Capture Summary")
+        < updated.index("Storage Queue Depth")
+    )
+    assert "The standard was met throughout the sample window." in updated
+    assert "Observation: Your observations go here." not in updated
 
 
 def test_insert_perfmon_summary_skips_toc_perfmon_entry() -> None:
@@ -749,7 +794,7 @@ def test_insert_perfmon_summary_ignores_root_server_check_perfmon_text() -> None
     ) < updated.index("Storage Queue Depth")
 
 
-def test_perfmon_summary_renders_priority_items_as_bullets() -> None:
+def test_capture_summary_leaves_priority_items_to_excel() -> None:
     observations = {
         "summary": {
             "lines": [
@@ -769,12 +814,13 @@ def test_perfmon_summary_renders_priority_items_as_bullets() -> None:
 
     xml = inject_perfmon_charts.build_summary_xml(observations)
 
-    assert "PerfMon Review Summary" in xml
-    assert "Priority Review Items" in xml
-    assert "Highest-priority review items:" not in xml
-    assert "• " in xml
-    assert "PhysicalDisk_Total_Avg_Disk_ms_Transfer - Critical; peak 75.2" in xml
-    assert "Paging_File_Total_Usage_Peak - Critical; peak 88.2" in xml
+    assert "Capture Summary" in xml
+    assert "PerfMon Review Summary" not in xml
+    assert "Priority Review Items" not in xml
+    assert "Highest-priority review items" not in xml
+    assert "• " not in xml
+    assert "PhysicalDisk_Total_Avg_Disk_ms_Transfer" not in xml
+    assert "Sample window: 2026-06-01 to 2026-06-02 across 1440 samples." in xml
 
 
 def test_perfmon_summary_renders_supplied_hardware_context() -> None:
@@ -798,7 +844,12 @@ def test_perfmon_summary_renders_supplied_hardware_context() -> None:
 
     xml = inject_perfmon_charts.build_summary_xml(observations)
 
-    assert "PerfMon Hardware Context" in xml
+    assert "PerfMon Hardware Context" not in xml
+    assert (
+        xml.index("Capture Summary")
+        < xml.index("PerfMon analysis completed.")
+        < xml.index("Hardware / Context")
+    )
     assert "BFTEST01" not in xml
     assert "Capture Window" not in xml
     assert "1390" not in xml
@@ -1622,3 +1673,116 @@ def test_affected_counters_heading_sits_one_level_below_its_area(
         f'<w:pStyle w:val="Heading{expected}"/></w:pPr><w:r><w:rPr><w:b/></w:rPr>'
         "<w:t>Affected Counters Requiring Review</w:t>"
     ) in updated
+
+
+def _heading_at(doc_xml: str, text: str, level: int) -> int:
+    match = re.search(
+        rf'Heading{level}"/>(?:(?!</w:p>).)*<w:t>{re.escape(text)}</w:t>',
+        doc_xml,
+        flags=re.DOTALL,
+    )
+    assert match, (text, level)
+    return match.start()
+
+
+def test_append_capture_follows_the_section_7_order(monkeypatch, tmp_path: Path) -> None:
+    chart_folder = tmp_path / "charts"
+    chart_folder.mkdir()
+    (chart_folder / "Processor_Total_Processor_Time.png").write_bytes(_TINY_PNG)
+    (chart_folder / "perfmon_observations.json").write_text(
+        json.dumps(
+            {
+                "environment": {
+                    "Analyzed System": "BFSQL01",
+                    "Logical Processor Count": 8,
+                    "Logical Processor Source": "Parameter Supplied",
+                },
+                "summary": {
+                    "lines": [
+                        "Of the 1 counters reviewed, 1 did not meet the standard.",
+                        "Analyzed system: BFSQL01.",
+                        "Highest-priority review items:",
+                    ],
+                    "priority_items": ["Processor_Total_Processor_Time - Critical"],
+                },
+                "sections": {
+                    "CPU Utilization": {
+                        "section": "CPU Utilization",
+                        "status": "Critical",
+                        "observation": "CPU utilization was over the limit.",
+                    }
+                },
+            }
+        ),
+        encoding="utf-8",
+    )
+    scorecard = tmp_path / "scorecard.png"
+    scorecard.write_bytes(_TINY_PNG)
+    template = tmp_path / "template.docx"
+    output = tmp_path / "output.docx"
+    doc = Document()
+    doc.add_heading("PerfMon Counters Analysis", level=1)
+    doc.add_heading("Next Section", level=1)
+    doc.save(str(template))
+    monkeypatch.setattr(
+        inject_perfmon_charts,
+        "render_perfmon_scorecard",
+        lambda _observations, _output_path: scorecard,
+    )
+
+    inject_perfmon_charts.append_perfmon_capture_section(
+        chart_folder, template, output, include_automated_findings=True
+    )
+
+    with ZipFile(output) as zf:
+        doc_xml = zf.read("word/document.xml").decode("utf-8")
+    positions = [
+        _heading_at(doc_xml, "Automated Findings", 3),
+        doc_xml.index("How This Score Is Calculated"),
+        _heading_at(doc_xml, "Capture Summary", 3),
+        doc_xml.index("Of the 1 counters reviewed"),
+        doc_xml.index("Analyzed system: BFSQL01."),
+        doc_xml.index("Hardware / Context"),
+        _heading_at(doc_xml, "CPU Utilization", 3),
+        _heading_at(doc_xml, "Assessment by Area", 3),
+        doc_xml.index("Next Section"),
+    ]
+    assert positions == sorted(positions)
+    for gone in (
+        "Priority Review Items",
+        "Processor_Total_Processor_Time - Critical",
+        "PerfMon Hardware Context",
+        "PerfMon Review Summary",
+    ):
+        assert gone not in doc_xml
+
+
+def test_full_report_puts_assessment_by_area_after_the_last_area() -> None:
+    def heading(text: str, level: int) -> str:
+        return inject_perfmon_charts.heading_paragraph_xml(text, level=level)
+
+    doc_xml = (
+        "<w:document><w:body>"
+        + heading("PerfMon Counters Analysis", 2)
+        + heading("General Observations", 3)
+        + heading("Storage Queue Depth", 4)
+        + "<w:p><w:r><w:t>First area.</w:t></w:r></w:p>"
+        + heading("Memory Health", 4)
+        + "<w:p><w:r><w:t>Last area.</w:t></w:r></w:p>"
+        + heading("Client Performance Analysis", 2)
+        + "</w:body></w:document>"
+    )
+    observations = {
+        "sections": {"Memory Health": {"status": "OK", "threshold": "<= 70%"}}
+    }
+
+    updated = inject_perfmon_charts.insert_perfmon_assessment(doc_xml, observations)
+
+    assert (
+        updated.index("Last area.")
+        < _heading_at(updated, "Assessment by Area", 4)
+        < updated.index("Client Performance Analysis")
+    )
+    assert "<w:tbl>" in updated
+    again = inject_perfmon_charts.insert_perfmon_assessment(updated, observations)
+    assert again.count("Assessment by Area") == 1

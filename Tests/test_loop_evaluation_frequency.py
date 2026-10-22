@@ -283,8 +283,8 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
         "Loop Health",
         "Loop Cost",
         "Top 10 Most Expensive Evaluations",
-        "Contributing Factors",
         "Evaluation Frequency",
+        "Contributing Factors",
     ]
     assert "Cost of Repeated Evaluations" not in headings
     assert [h for h in headings if h in order] == order

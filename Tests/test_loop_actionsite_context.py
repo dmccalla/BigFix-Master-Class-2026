@@ -245,13 +245,14 @@ def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:
         ],
         [
             "Fixlets and tasks",
-            "6,709 / 36,274 relevant/total (5,701 / 34,130 fixlets, 1,008 / 2,144 tasks)",
+            "6,709 relevant of 36,274 total. Fixlets: 5,701 relevant of 34,130. "
+            "Tasks: 1,008 relevant of 2,144.",
             "Healthy",
             "Healthy at 80,000 total or fewer. Review when over 80,000.",
         ],
         [
             "Analyses",
-            "121 / 6,702 relevant/total. 140 active.",
+            "121 relevant of 6,702 total. 140 active.",
             "Healthy",
             "Healthy at 10,000 total or fewer and 500 active or fewer. Review if either is over threshold.",
         ],
@@ -367,7 +368,6 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
         "Reading the Infographic",
         "Loop Health",
         "How the Score Is Calculated",
-        "Reporting Issues",
         "Loop Cost",
         "Top 10 Most Expensive Evaluations",
         "Contributing Factors",
@@ -377,6 +377,7 @@ def test_loop_word_orders_diagnostic_sections_from_design_response(
         "Top Subnets Not Receiving UDP Pings",
     ]
     assert [h for h in headings if h in order] == order
+    assert "Reporting Issues" not in headings
 
     doc = Document(str(word_output))
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
@@ -907,3 +908,38 @@ def test_discovers_udp_notification_csv_near_client_loop_input(
     )
 
     assert loop.discover_udp_notifications_file(loop_csv) == udp_csv.resolve()
+
+
+def test_relevant_counts_name_the_content_capture(tmp_path: Path) -> None:
+    """Duncan, 10-21: only the counts that differ from the Deployment Overview
+    name their capture. Every other row is unchanged."""
+    deploy = tmp_path / "Deployment_Information"
+    deploy.mkdir()
+    (deploy / "Content_Info_BFROOT1_06-14-2026_1445.log").write_text(
+        "\n".join(
+            [
+                "CONTENT INFORMATION",
+                "Report Generated: Sun, 14 Jun 2026 14:50:23 -0400",
+                "Number of External Sites: 57",
+                "Number of Custom Sites: 23",
+                "Number of Fixlets: 5701 / 34130",
+                "Number of Tasks: 1008 / 2144",
+                "Number of Analyses: 121 / 6702",
+                "Number of Activated Analyses: 140",
+            ]
+        ),
+        encoding="utf-8",
+    )
+
+    pressure = loop.parse_actionsite_pressure(deploy)
+    values = {row[0]: row[1] for row in loop.actionsite_pressure_rows(pressure)}
+
+    assert pressure.content_captured == "06-14-2026 14:50"
+    assert values["Fixlets and tasks"] == (
+        "6,709 relevant of 36,274 total, as of the 06-14-2026 14:50 capture. "
+        "Fixlets: 5,701 relevant of 34,130. Tasks: 1,008 relevant of 2,144."
+    )
+    assert values["Analyses"] == (
+        "121 relevant of 6,702 total, as of the 06-14-2026 14:50 capture. 140 active."
+    )
+    assert values["Subscribed sites"] == "80 total (57 external, 23 custom)"

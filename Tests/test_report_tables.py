@@ -8,6 +8,9 @@
 
 from __future__ import annotations
 
+import re
+import zipfile
+
 import get_loop_health as loop
 import pytest
 from docx import Document
@@ -56,6 +59,8 @@ def _jc(element) -> str | None:
         "00:12:34",
         "1:05",
         "104.261",
+        "2 cores",
+        "16 cores",
     ],
 )
 def test_number_cells(value: str) -> None:
@@ -68,7 +73,6 @@ def test_number_cells(value: str) -> None:
         "Not Set",
         "CLT-01",
         "6.7 MB (6,851 KB)",
-        "2 cores",
         "10-20-2026",
         "11.0.6.137",
         "4 readings over",
@@ -143,14 +147,6 @@ def _center_header(tbl: etree._Element) -> etree._Element:
 @pytest.mark.parametrize(
     "tbl",
     [
-        # The Check Results dashboard: percent width, centers its own cells.
-        _center_header(
-            _table(
-                "BigFixContent",
-                '<w:tblW w:w="5000" w:type="pct"/>',
-                [["Section", "Passed"], ["Server", "12"]],
-            )
-        ),
         _table(None, '<w:tblW w:w="10795" w:type="dxa"/>', [["A", "B"], ["x", "1"]]),
         _table("TableGridLight", "", [["A", "B"], ["x", "1"]]),
     ],
@@ -210,7 +206,8 @@ def test_note_after_a_paragraph_keeps_that_paragraph() -> None:
 
 
 def test_code_built_columns_are_sized_from_their_text() -> None:
-    # An equal split is what python-docx gives a code-built table.
+    """Design's method (Part 3B): every column gets its least width and the
+    rest is shared by how much text each column holds."""
     tbl = _table(
         "BigFixContent",
         "",
@@ -222,9 +219,10 @@ def test_code_built_columns_are_sized_from_their_text() -> None:
     rt.normalize_table(tbl)
     grid = [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")]
     assert sum(grid) == 10800
-    # The relay name fits on one line, so it never breaks mid-word.
-    assert grid[0] >= rt._text_dxa("BFRELAY017.dmc.lab") + rt._CELL_PADDING_DXA
+    # The relay name decides the widest column, and no column is under 1000.
     assert grid[0] == max(grid)
+    assert grid[0] >= len("BFRELAY017.dmc.lab") * rt._CHAR_DXA + rt._CELL_MARGINS_DXA
+    assert min(grid) >= rt._LEAST_COLUMN_DXA
 
 
 def test_long_text_wraps_at_words_not_mid_word() -> None:
@@ -237,12 +235,17 @@ def test_long_text_wraps_at_words_not_mid_word() -> None:
     rt.normalize_table(tbl)
     grid = [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")]
     assert sum(grid) == 10800
-    assert grid[1] >= rt._text_dxa("Occurrences", bold=True) + rt._CELL_PADDING_DXA - 1
+    header_word = len("Occurrences") * rt._CHAR_DXA * rt._HEADER_BOLD
+    assert grid[1] >= header_word + rt._CELL_MARGINS_DXA - 10
     assert grid[2] > grid[0] + grid[1]
 
 
-def test_set_widths_keep_their_proportions() -> None:
-    tbl = _table("BigFixContent", "", [["A", "B"], ["x", "y"]])
+def test_template_tables_keep_their_proportions() -> None:
+    tbl = _table(
+        "BigFixContent",
+        "",
+        [["Resource Name", "Description"], ["BigFix Forum", "Community answers"]],
+    )
     cols = tbl.find(W + "tblGrid").findall(W + "gridCol")
     cols[0].set(W + "w", "1000")
     cols[1].set(W + "w", "3000")
@@ -259,28 +262,23 @@ def test_header_row_stays_with_the_first_body_row() -> None:
     assert all(p.find(f"{W}pPr/{W}keepNext") is None for p in body.iter(W + "p"))
 
 
-def test_header_words_stay_whole_when_a_table_cannot_fit_every_word() -> None:
+def test_command_polling_tables_take_their_fixed_widths() -> None:
     headers = [
         "Relay",
         "Total Devices",
         "Enabled",
-        "Disabled",
-        "Not Set",
-        "Unknown",
         "Missing Interval",
         "Interval Below Loop",
         "No UDP + Polling Off",
     ]
     name = "bfrelay-east-01.corp.example.com"
-    tbl = _table(
-        "BigFixContent", "", [headers, [name, "100", "25", "0", "75", "0", "0", "0", "6"]]
-    )
+    tbl = _table("BigFixContent", "", [headers, [name, "100", "25", "0", "0", "6"]])
     rt.normalize_table(tbl)
     grid = [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")]
-    assert sum(grid) == 10800
+    assert grid == [3000, 1300, 1300, 1700, 1700, 1800]
     for header, width in zip(headers, grid, strict=True):
-        longest = max(rt._text_dxa(word, bold=True) for word in header.split())
-        assert width >= longest + rt._CELL_PADDING_DXA - 1, header
+        longest = max(len(word) for word in header.split())
+        assert width >= longest * rt._CHAR_DXA * rt._HEADER_BOLD + 226, header
     # The name is left as it is. Word breaks it where the column ends.
     assert name in "".join(tbl.itertext())
 
@@ -299,19 +297,17 @@ def test_empty_text_keeps_open_and_close_tags() -> None:
     assert "<w:t/>" not in out and 'preserve"/>' not in out
 
 
-def test_full_report_scaling_keeps_equal_template_columns() -> None:
-    """Document Control is a template table with equal columns. Only a Mini Report
-    build sizes equal columns from their text."""
+def test_document_control_version_table_takes_its_fixed_widths() -> None:
     tbl = _table(
         "BigFixContent",
         "",
         [["Version", "Date", "Notes"], ["1.0", "10-20-2026", "Initial Draft"]],
     )
-    rt.normalize_table(tbl, size_from_text=False)
+    rt.normalize_table(tbl)
     assert [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")] == [
-        3600,
-        3600,
-        3600,
+        1200,
+        1800,
+        7800,
     ]
 
 
@@ -326,3 +322,131 @@ def test_percent_width_data_table_keeps_header_with_body() -> None:
     assert header.find(f"{W}trPr/{W}cantSplit").get(W + "val") == "1"
     assert all(p.find(f"{W}pPr/{W}keepNext") is not None for p in header.iter(W + "p"))
     assert all(p.find(f"{W}pPr/{W}keepNext") is None for p in body.iter(W + "p"))
+
+
+def test_measured_widths_follow_designs_method() -> None:
+    """Part 3B by hand. Floors: ID 1000 (the minimum) and Description 1496.5
+    (11 letters at 105 x 1.1 plus 226). Naturals: 1000 and 1591 (the 80th
+    percentile body text, "Disk is full!", 13 characters at 105 plus 226).
+    The spare 8303.5 is shared 150 : 244.5 and rounded to 10."""
+    rows = [["ID", "Description"], ["A1", "Short text"], ["A2", "Disk is full!"]]
+    tbl = _table("BigFixContent", "", rows)
+    assert rt.measured_widths(tbl.findall(W + "tr"), 2) == [4160, 6640]
+
+
+def test_check_results_header_takes_its_column_alignment() -> None:
+    """Item 2 (Design, 10-20): a centered header never sits over left cells."""
+    tbl = _center_header(
+        _table(
+            "BigFixContent",
+            '<w:tblW w:w="5000" w:type="pct"/>',
+            [["Check Name", "Results"], ["Relay health", "Passed"]],
+        )
+    )
+    assert rt.normalize_table(tbl)
+    header = tbl.find(W + "tr")
+    assert [_jc(tc) for tc in header.findall(W + "tc")] == ["left", "left"]
+
+
+def test_section_health_counts_stay_centered() -> None:
+    tbl = _center_header(
+        _table(
+            "BigFixContent",
+            '<w:tblW w:w="5000" w:type="pct"/>',
+            [["Section", "Passed"], ["Server", "12"]],
+        )
+    )
+    body = tbl.findall(W + "tr")[1]
+    body.findall(W + "tc")[1].find(W + "p").insert(
+        0, etree.fromstring(f'<w:pPr {NS}><w:jc w:val="center"/></w:pPr>')
+    )
+    rt.normalize_table(tbl)
+    header = tbl.find(W + "tr")
+    assert [_jc(tc) for tc in header.findall(W + "tc")] == ["left", "center"]
+    assert _jc(body.findall(W + "tc")[1]) == "center"
+
+
+def test_findings_source_id_cells_do_not_wrap() -> None:
+    tbl = _table(
+        "BigFixContent",
+        "",
+        [
+            ["Source ID", "Description", "Impact", "Suggested Remediation"],
+            ["PERF-13", "Components per baseline", "High", "Split the baseline."],
+        ],
+    )
+    rt.normalize_table(tbl)
+    grid = [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")]
+    assert grid == [1500, 3224, 1163, 4913]
+    header, body = tbl.findall(W + "tr")
+    assert header.find(f"{W}tc/{W}tcPr/{W}noWrap") is None
+    first, *rest = body.findall(W + "tc")
+    assert first.find(f"{W}tcPr/{W}noWrap") is not None
+    assert all(tc.find(f"{W}tcPr/{W}noWrap") is None for tc in rest)
+
+
+def _out_of_order(parent, order: list[str]) -> bool:
+    names = [etree.QName(child).localname for child in parent]
+    ranks = [order.index(name) for name in names if name in order]
+    return ranks != sorted(ranks)
+
+
+def test_cell_and_table_properties_are_in_schema_order_in_the_file(tmp_path) -> None:
+    """Item 1 (Design, 10-20): vAlign before shd or tcMar, and tblLook before
+    tblCellMar, draw white lines in Word. Checked on a saved file."""
+    report = tmp_path / "report.docx"
+    document = Document()
+    document.add_table(rows=2, cols=2)
+    document.save(report)
+    with zipfile.ZipFile(report) as package:
+        members = {name: package.read(name) for name in package.namelist()}
+    xml = members["word/document.xml"].decode("utf-8")
+    xml = re.sub(
+        r"<w:tblPr>.*?</w:tblPr>",
+        '<w:tblPr><w:tblStyle w:val="BigFixContent"/><w:tblLook w:val="04A0"/>'
+        '<w:tblCellMar><w:left w:w="80" w:type="dxa"/></w:tblCellMar></w:tblPr>',
+        xml,
+        count=1,
+        flags=re.DOTALL,
+    )
+    xml = re.sub(
+        r"<w:tcPr>(.*?)</w:tcPr>",
+        r'<w:tcPr>\1<w:vAlign w:val="center"/><w:shd w:val="clear" w:fill="F0F2F5"/>'
+        r'<w:tcMar><w:top w:w="40" w:type="dxa"/></w:tcMar></w:tcPr>',
+        xml,
+    )
+    members["word/document.xml"] = xml.encode("utf-8")
+    with zipfile.ZipFile(report, "w") as package:
+        for name, data in members.items():
+            package.writestr(name, data)
+
+    rt.normalize_docx_tables(report)
+
+    with zipfile.ZipFile(report) as package:
+        root = etree.fromstring(package.read("word/document.xml"))
+    cells = list(root.iter(W + "tcPr"))
+    assert cells
+    assert all(tc_pr.find(W + "vAlign") is not None for tc_pr in cells)
+    assert not any(_out_of_order(tc_pr, rt._TCPR_ORDER) for tc_pr in cells)
+    assert not any(
+        _out_of_order(tbl_pr, rt._TBLPR_ORDER) for tbl_pr in root.iter(W + "tblPr")
+    )
+
+
+def test_label_rows_merged_across_columns_do_not_decide_alignment() -> None:
+    """Capacity Comparison: host label rows span every column. "2 cores" and
+    "4 GB" make Required a number column, header and cells (Design, 10-21)."""
+    tbl = _table(
+        "BigFixContent",
+        "",
+        [["Resource", "Required", "Basis"], ["CPU cores", "2 cores", "Figure 5"]],
+    )
+    label = etree.fromstring(
+        f'<w:tr {NS}><w:tc><w:tcPr><w:gridSpan w:val="3"/></w:tcPr>'
+        "<w:p><w:r><w:t>BFROOT1, Root server</w:t></w:r></w:p></w:tc></w:tr>"
+    )
+    tbl.findall(W + "tr")[0].addnext(label)
+    rt.normalize_table(tbl)
+    header, _, body = tbl.findall(W + "tr")
+    assert [_jc(tc) for tc in header.findall(W + "tc")] == ["left", "right", "left"]
+    assert [_jc(tc) for tc in body.findall(W + "tc")] == ["left", "right", "left"]

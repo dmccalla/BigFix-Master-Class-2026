@@ -11,6 +11,18 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Apply Design's 10-20 change list and review fixes. Loop Health takes in Reporting Issues, Evaluation Frequency comes before Contributing Factors, and PerfMon opens with Capture Summary and closes with Assessment by Area.
+
+- Lay out every report table by one rule. Cell and table properties are written in schema order, each header takes its column's alignment, number columns are right aligned, and widths come from Design's fixed sets, the template's proportions or the measured method.
+
+- Read relevant counts as "N relevant of M total" and name the Content_Info capture time beside the Fixlets and Analyses counts. PerfMon findings say advisory instead of warning.
+
+- Remove the FillDB Objects Not Healthy block, the sentence that named the Poor object and the list behind them. The rating counts stay. Show the FillDB Report Generated date as MM-DD-YYYY.
+
+- Name Client Performance Counters in the Enable Client CPU Multicore Scaling task description. The task change is untested and has not been imported.
+
+- Record which code and template built each report. The run log names the commit and the full template path, and each report's Comments property names the commit and the template file.
+
 - Extend the synthetic delivery dataset to the full current client schema, including polling, UDP, FastHashVerify, CPU idle, multicore and core counts, while retaining property interval, retrieved-property and missing-value cases.
 
 - Verify the default demonstration data with current Client Performance, PerfMon and FillDB report builds. Record capture provenance, current-field coverage and input hashes without changing original capture dates.

@@ -184,8 +184,8 @@ def test_external_site_timestamp_keeps_a_nonblank_fourth_column(path: Path) -> N
 # Parentheses are excluded so wrappers cannot silently change headings or spacers.
 LITERAL_CAPTURE_CONTRACTS = {
     "Individual Tasks": (
-        113,
-        "55804c84b0a9b1af2c54611736274e5354d012c01a2696e5d355d96daab5b2e0",
+        117,
+        "91e6eec8c3371e6358aae338f560670f1391aff5231d14285929b8c15c69c13d",
     ),
 }
 DEPLOYMENT_CAPTURE_TARGETS = {

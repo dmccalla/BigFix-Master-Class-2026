@@ -16,7 +16,8 @@ Original capture dates are retained. The Platform sample uses synthetic
 interval rows covering all 877 active properties. TA and Class samples
 retain 244 active-property intervals and 2537 loop source rows. Their
 synthetic Top 10 totals have been aligned with occurrence counts and
-average times. A retrieved-property interval is correctly Not collected.
+average times. Retrieved properties are the lab's 36 reserved and 6
+default properties from 10-22-2026, plus two custom examples.
 
 Existing local inputs were backed up before consolidation. No production
 code or collection task content is changed by this sample refresh.

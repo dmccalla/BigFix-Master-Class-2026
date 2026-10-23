@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Capture retrieved properties in Collect Deployment Information and use them in Client Performance. The Top 10 names a retrieved or reserved property and shows its interval. Evaluation Frequency and CLT-01 count default and custom retrieved properties and leave reserved properties out.
+
 - Clarify Client Performance loop averages, UDP coverage populations, property classifications and tiny nonzero percentages. Preserve scoring and finding rules.
 
 - Apply Design's 10-20 change list and review fixes. Loop Health takes in Reporting Issues, Evaluation Frequency comes before Contributing Factors, and PerfMon opens with Capture Summary and closes with Assessment by Area.

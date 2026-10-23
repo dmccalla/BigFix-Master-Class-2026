@@ -89,7 +89,7 @@ function Convert-EvaluationMs($value) {
 }
 function New-RunContext {
     # Counts are verified against the unchanged task requests by offline contracts.
-    $counts = [ordered]@{ General = 26; Root = 8; Relays = 25; RelayAffiliation = 3; Clients = 21; ClientSettings = 17; Operators = 19; Content = 28; Properties = 11; Actions = 19 }
+    $counts = [ordered]@{ General = 26; Root = 8; Relays = 25; RelayAffiliation = 3; Clients = 21; ClientSettings = 17; Operators = 19; Content = 28; Properties = 12; Actions = 19 }
     $selected = @()
     foreach ($item in $SelectedSections.Split(';')) {
         $pair = $item.Split('=')
@@ -115,7 +115,7 @@ function New-RunContext {
         SelectedSections = $selected; SelectionProvided = ($SelectedSections -ne '')
         PlannedRequests = $planned; PauseSeconds = $PauseSeconds; DataLogs = $DataLogs
         HelperSha256 = $helperHash
-        QueryContractSha256 = '7d5b45bfcee38654ef4cfcac19e99447937a8b9b86d45e01afb7b3b30607c675'
+        QueryContractSha256 = '04177cfc60da51a5ac968d6dee8e3cf837157ae2be43169412d8af16643e3b73'
         QueryEngine = 'Root API automatic selection; engine identity/version not observed'
         RequestWallTimeMs = 0; PausesScheduled = 0; ServerEvaluationMs = 0
         ParsedEvaluationCount = 0; UnparsedEvaluationCount = 0

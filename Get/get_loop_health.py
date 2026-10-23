@@ -1383,16 +1383,23 @@ def _properties_value(pressure: ActionSitePressure) -> str:
 # ---------------------------------------------------------------------------
 
 PROPERTY_INTERVAL_SECTION = "Active Properties by Evaluation Interval"
+RETRIEVED_PROPERTY_SECTION = "Retrieved Properties by Evaluation Interval"
 PROPERTY_SOURCE_NOTE = (
     "The custom-flagged count uses the BigFix property custom flag. "
     "Evaluation Frequency groups active analysis properties by source site. "
     "These are different classifications."
+)
+RETRIEVED_PROPERTY_SOURCE_NOTE = (
+    "The custom-flagged count uses the BigFix property custom flag. "
+    "Evaluation Frequency groups active analysis properties by source site and "
+    "retrieved properties by type. These are different classifications."
 )
 CONTENT_CAPTURE_NOTE = (
     "Content counts come from a separate deployment capture. Its timestamp is "
     "shown with the counts and may differ from the client loop collection period."
 )
 PROPERTY_INTERVAL_WIDTH = 9
+RETRIEVED_PROPERTY_WIDTH = 6
 PROPERTY_INTERVAL_FREQUENT_MINUTES = 15.0
 PROPERTY_INTERVAL_GUIDELINE_MINUTES = 360.0
 INTERVAL_BAND_ORDER = (
@@ -1416,9 +1423,48 @@ class PropertyInterval:
 
 
 @dataclass
+class RetrievedProperty:
+    """A property that belongs to no analysis, such as Computer Name."""
+
+    name: str
+    site_id: str
+    item_id: str
+    index: str
+    interval_minutes: float | None
+    property_type: str
+
+    @property
+    def reserved(self) -> bool:
+        return self.property_type.lower() == "reserved"
+
+    @property
+    def content_source(self) -> str:
+        """Reserved, or the Evaluation Frequency column the property counts in.
+
+        BigFix default retrieved properties count as External.
+        """
+        if self.reserved:
+            return "Reserved"
+        return "Custom" if self.property_type.lower() == "custom" else "External"
+
+
+@dataclass
 class PropertyIntervalSummary:
     source_file: Path
     properties: list[PropertyInterval]
+    # None for a capture made before the retrieved property section.
+    retrieved: list[RetrievedProperty] | None = None
+
+    @property
+    def counted_retrieved(self) -> list[RetrievedProperty]:
+        """Retrieved properties that count. A reserved property's interval cannot
+        be changed, so reserved properties are left out."""
+        return [item for item in self.retrieved or [] if not item.reserved]
+
+    @property
+    def counted(self) -> list[PropertyInterval | RetrievedProperty]:
+        """Every property Evaluation Frequency and CLT-01 count."""
+        return [*self.properties, *self.counted_retrieved]
 
 
 def parse_interval_minutes(text: str) -> float | None:
@@ -1487,14 +1533,10 @@ def format_interval_minutes(minutes: float | None) -> str:
     return f"{int(minutes // 60)} h {int(minutes % 60)} min"
 
 
-def _property_interval_rows(lines: list[str]) -> list[PropertyInterval] | None:
-    """Rows of the interval section, or None when the section is absent."""
+def _section_values(lines: list[str], section: str) -> list[str] | None:
+    """Values of one capture section, or None when the section is absent."""
     start = next(
-        (
-            i
-            for i, line in enumerate(lines)
-            if line.startswith("//=") and PROPERTY_INTERVAL_SECTION in line
-        ),
+        (i for i, line in enumerate(lines) if line.startswith("//=") and section in line),
         None,
     )
     if start is None:
@@ -1507,6 +1549,14 @@ def _property_interval_rows(lines: list[str]) -> list[PropertyInterval] | None:
         if not text or text.lower().startswith("column headers:"):
             continue
         values.append(text)
+    return values
+
+
+def _property_interval_rows(lines: list[str]) -> list[PropertyInterval] | None:
+    """Rows of the interval section, or None when the section is absent."""
+    values = _section_values(lines, PROPERTY_INTERVAL_SECTION)
+    if values is None:
+        return None
     rows: list[PropertyInterval] = []
     for i in range(0, len(values) - PROPERTY_INTERVAL_WIDTH + 1, PROPERTY_INTERVAL_WIDTH):
         chunk = values[i : i + PROPERTY_INTERVAL_WIDTH]
@@ -1523,6 +1573,29 @@ def _property_interval_rows(lines: list[str]) -> list[PropertyInterval] | None:
     return rows
 
 
+def _retrieved_property_rows(lines: list[str]) -> list[RetrievedProperty] | None:
+    """Rows of the retrieved property section, or None when it is absent."""
+    values = _section_values(lines, RETRIEVED_PROPERTY_SECTION)
+    if values is None:
+        return None
+    rows: list[RetrievedProperty] = []
+    for i in range(
+        0, len(values) - RETRIEVED_PROPERTY_WIDTH + 1, RETRIEVED_PROPERTY_WIDTH
+    ):
+        chunk = values[i : i + RETRIEVED_PROPERTY_WIDTH]
+        rows.append(
+            RetrievedProperty(
+                name=chunk[0],
+                site_id=chunk[1],
+                item_id=chunk[2],
+                index=chunk[3],
+                interval_minutes=parse_interval_minutes(chunk[4]),
+                property_type=chunk[5],
+            )
+        )
+    return rows
+
+
 def parse_property_intervals(folder: Path | None) -> PropertyIntervalSummary | None:
     """Read the active property intervals from the Property_Info capture."""
     if folder is None or not folder.is_dir():
@@ -1530,9 +1603,14 @@ def parse_property_intervals(folder: Path | None) -> PropertyIntervalSummary | N
     for path in _candidate_files(
         folder, ["Property_Info*.xml", "Property_Info*.log", "Property_Info*"]
     ):
-        rows = _property_interval_rows(read_capture_or_log_text(path).splitlines())
+        lines = read_capture_or_log_text(path).splitlines()
+        rows = _property_interval_rows(lines)
         if rows is not None:
-            return PropertyIntervalSummary(source_file=path, properties=rows)
+            return PropertyIntervalSummary(
+                source_file=path,
+                properties=rows,
+                retrieved=_retrieved_property_rows(lines),
+            )
     return None
 
 
@@ -1542,7 +1620,7 @@ def property_interval_band_counts(
     counts = {
         band: {"total": 0, "custom": 0, "external": 0} for band in INTERVAL_BAND_ORDER
     }
-    for item in summary.properties:
+    for item in summary.counted:
         entry = counts[interval_band(item.interval_minutes)]
         entry["total"] += 1
         key = "custom" if item.content_source.lower() == "custom" else "external"
@@ -1556,14 +1634,14 @@ def frequent_property_count(summary: PropertyIntervalSummary | None) -> int:
         return 0
     return sum(
         1
-        for item in summary.properties
+        for item in summary.counted
         if interval_band(item.interval_minutes) in {"Every report", "Under 15 minutes"}
     )
 
 
 def evaluation_frequency_rows(summary: PropertyIntervalSummary) -> list[list[str]]:
     counts = property_interval_band_counts(summary)
-    total = len(summary.properties)
+    total = len(summary.counted)
     rows: list[list[str]] = []
     for band in INTERVAL_BAND_ORDER:
         entry = counts[band]
@@ -1584,7 +1662,7 @@ def evaluation_frequency_rows(summary: PropertyIntervalSummary) -> list[list[str
 
 
 def active_property_rows(summary: PropertyIntervalSummary) -> list[list[Any]]:
-    return [
+    rows: list[list[Any]] = [
         [
             item.name,
             item.analysis,
@@ -1596,6 +1674,80 @@ def active_property_rows(summary: PropertyIntervalSummary) -> list[list[Any]]:
         ]
         for item in summary.properties
     ]
+    # A retrieved property has no analysis, source site or issuer. Reserved
+    # ones are listed but not counted.
+    rows.extend(
+        [
+            item.name,
+            "",
+            "",
+            "",
+            format_interval_minutes(item.interval_minutes),
+            interval_band(item.interval_minutes),
+            item.content_source,
+        ]
+        for item in summary.retrieved or []
+    )
+    return rows
+
+
+def _counted_phrase(count: int, one: str, many: str) -> str:
+    if not count:
+        return f"no {many}"
+    return f"the 1 {one}" if count == 1 else f"the {count:,} {many}"
+
+
+def evaluation_frequency_lead(summary: PropertyIntervalSummary) -> str:
+    """Opening paragraph of Evaluation Frequency."""
+    if summary.retrieved is None:
+        # A capture made before the retrieved property section.
+        return (
+            f"This table covers the {len(summary.properties):,} active "
+            "properties. Each one has an evaluation interval that sets how often "
+            "the Client re-evaluates it. A property set to every report runs on "
+            "every loop. So does a property with no interval, because BigFix "
+            "evaluates it every report. This Mini Report rates 6 hours or longer "
+            "as Healthy."
+        )
+    analysis = _counted_phrase(
+        len(summary.properties), "active analysis property", "active analysis properties"
+    )
+    retrieved = _counted_phrase(
+        len(summary.counted_retrieved), "retrieved property", "retrieved properties"
+    )
+    return (
+        f"This table covers {analysis} and {retrieved}. Each one has an evaluation "
+        "interval that sets how often the Client re-evaluates it. A property set "
+        "to every report runs on every loop. So does a property with no interval, "
+        "because BigFix evaluates it every report. Reserved properties are the "
+        "properties BigFix builds into every Client, such as Computer Name, OS and "
+        "IP Address. The Client evaluates them every report and their interval "
+        "cannot be changed, so this table and CLT-01 leave them out. This Mini "
+        "Report rates 6 hours or longer as Healthy."
+    )
+
+
+def evaluation_frequency_source_note(summary: PropertyIntervalSummary) -> str:
+    """How Evaluation Frequency sorts properties into Custom and External."""
+    retrieved = (
+        "It labels custom retrieved properties as Custom and BigFix default "
+        "retrieved properties as External. "
+        if summary.retrieved is not None
+        else ""
+    )
+    return (
+        "Evaluation Frequency labels analysis properties from custom, operator "
+        "and master sites as Custom, and those from external sites as External. "
+        f"{retrieved}External property intervals may be outside customer control. "
+        "Review changes with the content owner."
+    )
+
+
+def property_source_note(summary: PropertyIntervalSummary | None) -> str:
+    """The note on the custom-flagged count and the Evaluation Frequency groups."""
+    if summary is not None and summary.retrieved is not None:
+        return RETRIEVED_PROPERTY_SOURCE_NOTE
+    return PROPERTY_SOURCE_NOTE
 
 
 def _offender_property_key(result: str) -> tuple[str, str] | None:
@@ -1664,15 +1816,77 @@ def top10_kind_sentence(loop_offenders: list[LoopOffenderSummary]) -> str:
     return sentence
 
 
+def top10_interval_sentences(summary: PropertyIntervalSummary | None) -> str:
+    """Say what the Top 10 Interval column holds for this capture."""
+    if summary is not None and summary.retrieved is not None:
+        return (
+            "Interval is how often a property is set to run. A site evaluation is "
+            "not a property and has no interval."
+        )
+    # A capture made before the retrieved property section.
+    return (
+        "Interval is how often an analysis property is set to run. A site "
+        "evaluation is not a property and has no interval. A retrieved "
+        "property's interval is not in the capture."
+    )
+
+
+_RETRIEVED_RESULT = re.compile(
+    r"^Retrieved Property:\s*(?P<name>.*?)"
+    r"(?:\s*\([^()]*\.(?P<item>\d+):Evaluate Property (?P<index>\d+)\))?\s*$",
+    re.IGNORECASE,
+)
+
+
+def _retrieved_result(result: str) -> tuple[str, str, str] | None:
+    """(name, item ID, property index) of a Top 10 retrieved property result.
+
+    The Top 10 script writes "Retrieved Property: NAME (actionsite.13:Evaluate
+    Property 1)". The IDs are empty when a result does not carry them.
+    """
+    match = _RETRIEVED_RESULT.match(str(result or "").strip())
+    if match is None:
+        return None
+    return match.group("name"), match.group("item") or "", match.group("index") or ""
+
+
+def _retrieved_property(
+    result: str, summary: PropertyIntervalSummary | None
+) -> RetrievedProperty | None:
+    """The captured retrieved property a Top 10 result names, matched by ID."""
+    parsed = _retrieved_result(result)
+    if parsed is None or summary is None:
+        return None
+    _, item, index = parsed
+    return next(
+        (
+            prop
+            for prop in summary.retrieved or []
+            if item and (prop.item_id, prop.index) == (item, index)
+        ),
+        None,
+    )
+
+
 def offender_interval(result: str, summary: PropertyIntervalSummary | None) -> str:
-    """Interval of a Top 10 analysis property, or why there is none."""
+    """Interval of a Top 10 property, or why there is none."""
     key = _offender_property_key(result)
     if key is None:
-        # A site evaluation has no interval. A retrieved property has one,
-        # but the Property_Info capture lists analysis properties only.
+        # A site evaluation has no interval.
         if str(result).strip().lower().startswith("background evaluation of"):
             return "Not a property"
-        return "Not collected"
+        # Another evaluation, or a retrieved property in a capture made before
+        # the retrieved property section.
+        if (
+            _retrieved_result(result) is None
+            or summary is None
+            or summary.retrieved is None
+        ):
+            return "Not collected"
+        captured = _retrieved_property(result, summary)
+        if captured is None:
+            return "Not found"
+        return format_interval_minutes(captured.interval_minutes)
     if summary is None:
         return "Not collected"
     for item in summary.properties:
@@ -2144,9 +2358,16 @@ def format_loop_offender_strip_seconds(seconds: float | None) -> str:
     return f"{seconds_float:,.1f} s"
 
 
-def format_loop_offender_evaluation(result: str) -> str:
-    """Name an analysis property and its analysis. Leave other results as they are."""
+def format_loop_offender_evaluation(
+    result: str, summary: PropertyIntervalSummary | None = None
+) -> str:
+    """Name an analysis or retrieved property. Leave other results as they are."""
     text = str(result or "").strip()
+    retrieved = _retrieved_result(text)
+    if retrieved is not None:
+        captured = _retrieved_property(text, summary)
+        kind = "reserved" if captured is not None and captured.reserved else "retrieved"
+        return f"{retrieved[0]} ({kind} property)"
     fields: dict[str, str] = {}
     for part in text.split(" | "):
         name, sep, value = part.partition("=")
@@ -4019,7 +4240,7 @@ def generate_excel(
                 columns=["Metric", "Value", "Status", "Basis"],
             )
             pressure_df.to_excel(writer, sheet_name="Contributing Factors", index=False)
-            source_notes = [PROPERTY_SOURCE_NOTE]
+            source_notes = [property_source_note(property_intervals)]
             if actionsite_pressure.content_captured:
                 source_notes.append(CONTENT_CAPTURE_NOTE)
             pd.DataFrame({"Note": source_notes}).to_excel(
@@ -4752,9 +4973,7 @@ def generate_word(
                 top10_kind_sentence(loop_offenders)
                 + " These are the slowest evaluations each device reported, averaged across the "
                 "deployment. Occurrences is how many times an evaluation appeared in "
-                "a device's Top 10. Interval is how often an analysis property is "
-                "set to run. A site evaluation is not a property and has no interval. "
-                "A retrieved property's interval is not in the capture."
+                "a device's Top 10. " + top10_interval_sentences(property_intervals)
             )
         )
         build_word_table(
@@ -4771,7 +4990,7 @@ def generate_word(
                     str(item.rank),
                     format_loop_offender_seconds(item.avg_client_processing_seconds),
                     f"{item.occurrences:,}",
-                    format_loop_offender_evaluation(item.result),
+                    format_loop_offender_evaluation(item.result, property_intervals),
                     offender_interval(item.result, property_intervals),
                 ]
                 for item in loop_offenders
@@ -4781,14 +5000,7 @@ def generate_word(
     if property_intervals:
         document.add_heading("Evaluation Frequency", level=4)
         keep_with_next(
-            document.add_paragraph(
-                f"This table covers the {len(property_intervals.properties):,} active "
-                "properties. Each one has an evaluation interval that sets how often "
-                "the Client re-evaluates it. A property set to every report runs on "
-                "every loop. So does a property with no interval, because BigFix "
-                "evaluates it every report. This Mini Report rates 6 hours or longer "
-                "as Healthy."
-            )
+            document.add_paragraph(evaluation_frequency_lead(property_intervals))
         )
         build_word_table(
             document,
@@ -4803,14 +5015,9 @@ def generate_word(
             evaluation_frequency_rows(property_intervals),
             status_col=5,
         )
-        document.add_paragraph(
-            "Evaluation Frequency labels analysis properties from custom, operator "
-            "and master sites as Custom, and those from external sites as External. "
-            "External property intervals may be outside customer control. "
-            "Review changes with the content owner."
-        )
+        document.add_paragraph(evaluation_frequency_source_note(property_intervals))
         not_set = sum(
-            1 for item in property_intervals.properties if item.interval_minutes is None
+            1 for item in property_intervals.counted if item.interval_minutes is None
         )
         if not_set:
             add_note_paragraph(
@@ -4842,7 +5049,7 @@ def generate_word(
             actionsite_pressure_rows(actionsite_pressure),
             status_col=2,
         )
-        document.add_paragraph(PROPERTY_SOURCE_NOTE)
+        document.add_paragraph(property_source_note(property_intervals))
         if actionsite_pressure.content_captured:
             document.add_paragraph(CONTENT_CAPTURE_NOTE)
 

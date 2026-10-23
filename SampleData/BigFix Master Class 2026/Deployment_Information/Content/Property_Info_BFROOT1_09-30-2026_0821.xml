@@ -2464,3 +2464,503 @@
 	</Query>
 </BESAPI>
 
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI>
+<Query>
+<Result>
+<Answer type="string"> </Answer>
+</Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
+</Query>
+</BESAPI>
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI>
+<Query>
+<Result>
+<Answer type="string">//===== Retrieved Properties by Evaluation Interval ================</Answer>
+</Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
+</Query>
+</BESAPI>
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI>
+<Query>
+<Result>
+<Answer type="string">Column Headers: Property Name, Site ID, Item ID, Property Index, Evaluation Interval, Property Type</Answer>
+</Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
+</Query>
+</BESAPI>
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI>
+<Query>
+<Result>
+<Answer type="string"> </Answer>
+</Result>
+<Evaluation>
+<Time>Not applicable: local capture</Time>
+<Plurality>Singular</Plurality>
+</Evaluation>
+</Query>
+</BESAPI>
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="((names of it, ids of it, (if exists evaluation period of it then (evaluation period of it as string) else &quot;no-val&quot;), (if reserved flag of it then &quot;Reserved&quot; else if default flag of it then &quot;Default&quot; else &quot;Custom&quot;)) of bes properties whose (not exists source analysis of it))">
+		<Result>
+			<Tuple>
+				<Answer type="string">Computer Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">4</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">OS</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">5</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">CPU</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">6</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Last Report Time</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">7</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Locked</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">8</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Lock Expiration</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">9</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">BES Relay Selection Method</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">10</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Relay</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">11</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Distance to BES Relay</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">12</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">BES Relay Service Installed</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">13</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Relay Name of Client</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">14</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">DNS Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">15</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Active Directory Path</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">16</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Client Administrators</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">17</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Client Settings</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">18</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IP Address</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">19</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IPv6 Address</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">20</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Subscribed Sites</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">21</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">BES Root Server</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">22</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">License Type</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">23</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Agent Type</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">24</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Device Type</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">25</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Agent Version</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">26</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">ID</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">27</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Computer Type</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">28</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">MAC Address</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">29</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">OS Family</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">30</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">OS Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">31</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">OS Version</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">32</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">User Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">33</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">RAM</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">34</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Free Space on System Drive</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">35</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Total Size of System Drive</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">36</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">BIOS</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">37</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Subnet Address</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">38</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Default</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Display Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1474</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Principal Name</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1475</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP Computer Groups</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1476</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Groups</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1477</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Department</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1478</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Location</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1479</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">IDP User Site</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1480</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">no-val</Answer>
+				<Answer type="string">Reserved</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Asset Tag</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1820</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">1 day</Answer>
+				<Answer type="string">Custom</Answer>
+			</Tuple>
+			<Tuple>
+				<Answer type="string">Patch Window (Local)</Answer>
+				<Tuple>
+					<Answer type="integer">2299764711</Answer>
+					<Answer type="integer">1821</Answer>
+					<Answer type="integer">1</Answer>
+				</Tuple>
+				<Answer type="string">00:05:00</Answer>
+				<Answer type="string">Custom</Answer>
+			</Tuple>
+		</Result>
+		<Evaluation>
+			<Time>36.218ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

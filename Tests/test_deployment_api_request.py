@@ -503,7 +503,7 @@ def test_server_evaluation_units_are_explicit(
     assert run["UnparsedEvaluationCount"] == unparsed
 
 
-@pytest.mark.parametrize("logs,expected", [("0", 177), ("1", 179)])
+@pytest.mark.parametrize("logs,expected", [("0", 178), ("1", 180)])
 def test_complete_plan_includes_only_selected_admin_requests(
     context_collector, logs, expected
 ):

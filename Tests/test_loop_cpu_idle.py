@@ -124,7 +124,7 @@ def test_cpu_idle_settings_are_written_to_excel_and_word(tmp_path: Path) -> None
     )
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
-    assert "Client Settings" in headings
+    assert "CPU Settings" in headings
     assert "CPU Idle Settings" in headings
     assert any("are not scored" in p.text for p in doc.paragraphs)
     assert any("not measured CPU use" in p.text for p in doc.paragraphs)

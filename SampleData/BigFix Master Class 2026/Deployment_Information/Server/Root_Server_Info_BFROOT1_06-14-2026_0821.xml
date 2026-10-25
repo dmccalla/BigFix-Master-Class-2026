@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;ROOT SERVER INFORMATION&quot;)">
+		<Result>
+			<Answer type="string">ROOT SERVER INFORMATION</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.073ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.057ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Sun, 14 Jun 2026 08:23:37 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.116ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Report Version: 1.0&quot;)">
+		<Result>
+			<Answer type="string">Report Version: 1.0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.095ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot; &quot;)">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.046ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server Version Counts: &quot; &amp; concatenation &quot;, &quot; of (it as string) of (it &amp; &quot;--&quot; &amp; (multiplicity of it as string)) of unique values of values whose (it contains &quot;.&quot;) of results whose (not error flag of it and exists value of it) of bes property whose (name of it = &quot;BES Server Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string">
+		<Result>
+			<Answer type="string">BES Server Version Counts: 11.0.6.137--1</Answer>
+		</Result>
+		<Evaluation>
+			<Time>20.632ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Api Version Counts: &quot; &amp; concatenation &quot;, &quot; of (it as string) of (it &amp; &quot;--&quot; &amp; (multiplicity of it as string)) of unique values of values whose (it contains &quot;.&quot;) of results whose (not error flag of it and exists value of it) of bes property whose (name of it = &quot;BES API Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string">
+		<Result>
+			<Answer type="string">BES Api Version Counts: </Answer>
+		</Result>
+		<Evaluation>
+			<Time>25.214ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Computers on BES Server: &quot; &amp; number of values whose (gather url of bes license as lowercase contains it as lowercase) of results whose (exists value of it) of bes properties &quot;Relay&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">Number of Computers on BES Server: 161</Answer>
+		</Result>
+		<Evaluation>
+			<Time>892.67ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server CPU: &quot; &amp; concatenation &quot;, &quot; of values of results from (bes properties &quot;CPU&quot;) whose (exists value of it) of computers of results whose (exists value of it and value of it = &quot;BES Root Server&quot; or value of it = &quot;Main BES Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">BES Server CPU: 2900 MHz 12th Gen Intel Core i9-12900H</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.458ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server RAM: &quot; &amp; concatenation &quot;, &quot; of values of results from (bes properties &quot;RAM&quot;) whose (exists value of it) of computers of results whose (exists value of it and value of it = &quot;BES Root Server&quot; or value of it = &quot;Main BES Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">BES Server RAM: 12288 MB</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.971ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server OS: &quot; &amp; concatenation &quot;, &quot; of values of results from (bes properties &quot;OS&quot;) whose (exists value of it) of computers of results whose (exists value of it and value of it = &quot;BES Root Server&quot; or value of it = &quot;Main BES Server&quot;) of bes properties &quot;Relay&quot; whose (reserved flag of it) as string">
+		<Result>
+			<Answer type="string">BES Server OS: Win2025 10.0.26100.33296 (24H2)</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.944ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server Hardware Information: &quot; &amp; concatenation &quot;, &quot; of (it as string) of (it &amp; &quot;--&quot; &amp; (multiplicity of it as string)) of unique values of (it as trimmed string) of values of (results (properties of bes fixlets whose (analysis flag of it = TRUE AND name of it as lowercase contains &quot;hardware information&quot;), it) whose (exists value of it)) of bes computers whose (exists value of result (bes properties &quot;Relay&quot; whose (reserved flag of it),it) and (value of result (bes properties &quot;Relay&quot; whose (reserved flag of it),it) = &quot;BES Root Server&quot; or value of result (bes properties &quot;Relay&quot; whose (reserved flag of it),it) = &quot;Main BES Server&quot;)) as string">
+		<Result>
+			<Answer type="string">BES Server Hardware Information: 12th Gen Intel(R) Core(TM) i9-12900H--1, 3--1, 3070 x 1280--1, 6--2, =======--6, Availability=3--2, Caption=ATA Channel 0--1, Caption=ATA Channel 1--1, Caption=Intel(R) 82371AB/EB PCI Bus Master IDE Controller--1, Caption=Microsoft Storage Spaces Controller--1, Caption=Standard NVM Express Controller--1, Caption=Standard SATA AHCI Controller--1, ConfigManagerErrorCode=0--6, ConfigManagerUserConfig=False--6, CreationClassName=Win32_IDEController--4, CreationClassName=Win32_SCSIController--2, Description=IDE Channel--2, Description=Intel(R) 82371AB/EB PCI Bus Master IDE Controller--1, Description=Microsoft Storage Spaces Controller--1, Description=Standard NVM Express Controller--1, Description=Standard SATA AHCI Controller--1, DeviceID=PCIIDE\IDECHANNEL\4&amp;23686003&amp;0&amp;0--1, DeviceID=PCIIDE\IDECHANNEL\4&amp;23686003&amp;0&amp;1--1, DeviceID=PCI\VEN_15AD&amp;DEV_07E0&amp;SUBSYS_07E015AD&amp;REV_00\4&amp;BBF9765&amp;0&amp;1888--1, DeviceID=PCI\VEN_15AD&amp;DEV_07F0&amp;SUBSYS_07F015AD&amp;REV_00\4&amp;3B50545D&amp;0&amp;00B8--1, DeviceID=PCI\VEN_8086&amp;DEV_7111&amp;SUBSYS_197615AD&amp;REV_01\3&amp;61AAA01&amp;0&amp;39--1, DeviceID=ROOT\SPACEPORT\0000--1, DriverName=spaceport--1, DriverName=stornvme--1, False--1, Generic Non-PnP Monitor--1, High Definition Audio Device--1, Intel(R) 82574L Gigabit Network Connection--1, Manufacturer=(Standard IDE ATA/ATAPI controllers)--2, Manufacturer=Intel--1, Manufacturer=Microsoft--1, Manufacturer=Standard NVM Express Controller--1, Manufacturer=Standard SATA AHCI Controller--1, NECVMWar VMware SATA CD01--1, Name=ATA Channel 0--1, Name=ATA Channel 1--1, Name=Intel(R) 82371AB/EB PCI Bus Master IDE Controller--1, Name=Microsoft Storage Spaces Controller--1, Name=Standard NVM Express Controller--1, Name=Standard SATA AHCI Controller--1, PNPDeviceID=PCIIDE\IDECHANNEL\4&amp;23686003&amp;0&amp;0--1, PNPDeviceID=PCIIDE\IDECHANNEL\4&amp;23686003&amp;0&amp;1--1, PNPDeviceID=PCI\VEN_15AD&amp;DEV_07E0&amp;SUBSYS_07E015AD&amp;REV_00\4&amp;BBF9765&amp;0&amp;1888--1, PNPDeviceID=PCI\VEN_15AD&amp;DEV_07F0&amp;SUBSYS_07F015AD&amp;REV_00\4&amp;3B50545D&amp;0&amp;00B8--1, PNPDeviceID=PCI\VEN_8086&amp;DEV_7111&amp;SUBSYS_197615AD&amp;REV_01\3&amp;61AAA01&amp;0&amp;39--1, PNPDeviceID=ROOT\SPACEPORT\0000--1, ProtocolSupported=2--2, ProtocolSupported=37--4, Status=OK--6, StatusInfo=3--2, SystemCreationClassName=Win32_ComputerSystem--6, SystemName=BFROOT1--6, VMware SVGA 3D--1, VMware Virtual NVMe Disk--3, VMware, Inc.--1, VMware-56 4d 5c 19 69 98 7c f4-a0 23 26 b5 27 4e 05 36--1, VMware20,1--1</Answer>
+		</Result>
+		<Evaluation>
+			<Time>336.049ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

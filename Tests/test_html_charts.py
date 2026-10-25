@@ -374,7 +374,7 @@ def test_report_width_override_includes_snapshot_chart() -> None:
 def test_chart_template_has_numeric_layout_guardrails() -> None:
     html = html_charts._build_html("loop", {}, card_width=1600)
 
-    assert "font-family:'Roboto Condensed',sans-serif" in html
+    assert "font-family:'Aptos',sans-serif" in html
     assert "font-feature-settings:'tnum' 1" in html
     assert "font-variant-numeric:tabular-nums;" in html
     assert "'zero' 1" not in html
@@ -438,7 +438,7 @@ def test_perfmon_scorecard_keeps_exempt_header_and_simple_metric_cards() -> None
     assert "scoreLockup(" not in section
     assert "srcHeader('PerfMon Counters'" in section
     assert "+ miniScoreScale(score, color, 'Needs Attention')" in section
-    assert "+ miniScoringLine(d.scoringLine, d.sourceLine)" in section
+    assert "miniScoringLine(d.scoringLine, d.sourceLine)" not in section
     assert "grid-template-columns:repeat(4,1fr)" in section
     assert "srcPerfmonFindingLine(d)" in section
     assert "limit marker" not in section
@@ -482,7 +482,7 @@ def test_snapshot_cards_do_not_render_status_pills() -> None:
     assert "snapshotPill(" not in section
     assert "statusPill(" not in section
     assert "${tier||'Not Assessed'}" in section
-    assert "height:20px" in section
+    assert "height:var(--progress-bar-height)" in section
     assert "d.platform.score, d.platform.footnote" in html
 
 
@@ -496,16 +496,18 @@ def test_filldb_workload_bars_encode_health_without_dots() -> None:
 
     assert "const color = notAssessed ? '#0B1640' : filldbStatusColor(b);" in section
     assert "background: ${color}" in section
-    assert "color: ${color}; text-align: right" in section
-    assert "pct > 0 && pct < 4 ? '40px'" in section
+    assert "color:${color};text-align:right" in section
+    assert "pct > 0 && pct < 4 ? '40px'" not in section
+    assert "const fillWidth = pct > 0 ? b.width : '0'" in section
     assert "width: 640px; font-size: 38px; flex: 0 0 auto" in section
-    assert "width: 320px; white-space: nowrap; font-size: 38px" in section
+    assert "width:320px;white-space:nowrap;font-size:38px" in section
     assert "font-size: 38px" in section
-    assert "Bar length is minutes. Color is health." in section
+    assert "Length shows processing time. Color shows the analyzer rating." in section
     # Design, 10-21: the Objects Not Healthy block and its slot are gone.
     assert "Findings raised" not in section
     assert "Objects Not Healthy" not in section
-    assert "filldbDisplayLabel(b.label) !== 'Batch Rate'" in section
+    assert "filldbDisplayLabel(b.label) !== 'Batch Rate'" not in section
+    assert "const workloadItems = d.bars || []" in section
     assert (
         "else mount.className = (d.chart==='loop' || d.chart==='filldb') ? '' : 'card';"
         in html
@@ -574,7 +576,7 @@ def test_rollup_findings_footers_use_traceable_summaries() -> None:
     assert "white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" in summary_helper
     assert "function srcFindingIdList" in summary_helper
     assert "function srcFindingIdPreview" in summary_helper
-    assert "+${fmtCount(clean.length - max)} more below" in summary_helper
+    assert "+${fmtCount(clean.length - max)} more" in summary_helper
     assert "<strong>IDs</strong>" in summary_helper
     assert ".map(f=>" not in dashboard
     assert ".map(f=>" not in perfmon
@@ -587,7 +589,7 @@ def test_rollup_findings_footers_use_traceable_summaries() -> None:
     assert "const footerLine = srcBalanceFindingFooter(d, count, split);" in balance
     assert "Partially Assessed" in balance_helpers
     assert "not assessed</span>" in balance_helpers
-    assert "full trace below" in source_region
+    assert "See Findings & Recommendations." in source_region
 
 
 def test_what_needs_attention_overflow_copy_matches_design() -> None:
@@ -775,7 +777,7 @@ def test_overview_bars_use_score_status_or_neutral_tracks_only() -> None:
 
     assert "overviewStatusWord(k)" in section
     assert "#3D5A80" not in section
-    assert "background:#F0F2F5;border-radius:3px;" in section
+    assert "background:#F0F2F5;border-radius:var(--progress-bar-radius);" in section
 
 
 def test_mini_report_infographics_carry_the_scoring_legend() -> None:
@@ -798,20 +800,15 @@ def test_mini_report_infographics_carry_the_scoring_legend() -> None:
         section = html[start : html.index("\nfunction ", start + 10)]
         assert "miniScoreLockup(" in section, builder
         assert f", {middle})" in section, builder
-        assert "miniScoringLine(d.scoringLine" in section, builder
+        assert ("miniScoringLine(d.scoringLine" in section) == (builder == "function buildFilldb"), builder
     loop = html[
         html.index("function buildLoop") : html.index("// ---- SCORING SUMMARY ----")
     ]
     assert "${l.points} pts" in loop
 
 
-def test_source_lines_sit_above_the_scoring_line() -> None:
-    """CP-25 and PM-17: where the numbers live, directly above the scoring line."""
+def test_client_and_perfmon_graphics_have_no_bottom_prose() -> None:
     html = html_charts._build_html("loop", {}, card_width=960)
-    helper = html[
-        html.index("function miniScoringLine") : html.index("// ---- LOOP ----")
-    ]
-    assert helper.index("${sourceLine}") < helper.index("${scoringLine}")
-    assert "miniScoringLine(d.scoringLine, d.sourceLine)" in html
-    perfmon = html[html.index("function buildPerfmon") :]
-    assert "miniScoringLine(d.scoringLine, d.sourceLine)" in perfmon[:3000]
+    for start_name, end_name in (("function buildLoop", "// ---- SCORING SUMMARY ----"), ("function buildPerfmon", "function buildDashboard")):
+        section = html[html.index(start_name):html.index(end_name,html.index(start_name))]
+        assert "miniScoringLine(" not in section

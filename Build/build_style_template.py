@@ -50,7 +50,7 @@ TABLE_STYLE_XML = f"""
   <w:name w:val="BigFix Content"/>
   <w:basedOn w:val="TableNormal"/>
   <w:uiPriority w:val="49"/>
-  <w:pPr><w:spacing w:before="80" w:after="80"/></w:pPr>
+  <w:pPr><w:spacing w:before="80" w:after="80" w:line="240" w:lineRule="auto"/></w:pPr>
   <w:rPr><w:rFonts w:ascii="{BODY_FONT}" w:hAnsi="{BODY_FONT}" w:cs="{BODY_FONT}"/></w:rPr>
   <w:tblPr>
     <w:tblStyleRowBandSize w:val="1"/>
@@ -111,16 +111,11 @@ TABLE_STYLE_XML = f"""
 
 # Heading and body definitions copied from the full Workbench's report
 # template: (size in points, color, space before, space after, extra pPr).
-# The template's heading font is a licensed one this project does not ship,
-# so the headings use the body font in bold instead.
+# Headings use the body font in bold. The shared layout helper supplies
+# the approved section and subsection sizes without adding font dependencies.
 HEADINGS = {
     1: dict(size=24, color=NAVY, before=240, after=180, keep=True),
     2: dict(size=18, color=SLATE, before=240, after=None, keep=True),
-    # H3, H4 and H5 follow Design's 10-20 change list, Section 1: 16, 14 and
-    # 12 pt, so each level is smaller than the one above. No border, no new
-    # font and no change to Normal.
-    3: dict(size=16, color=NAVY, before=360, after=120, keep=True, line=276),
-    4: dict(size=14, color=BLUE, before=240, after=80, keep=True),
     5: dict(size=12, color=SLATE, before=200, after=40, keep=True),
 }
 NORMAL_SPACING = (120, 120)
@@ -203,6 +198,10 @@ def build(output: Path = OUTPUT) -> Path:
         style.element.getparent().remove(style.element)
     styles.element.append(parse_xml(TABLE_STYLE_XML.strip()))
 
+    if str(PROJECT_ROOT) not in sys.path:
+        sys.path.insert(0, str(PROJECT_ROOT))
+    from Lib.Design.report_layout import apply_report_hierarchy
+    apply_report_hierarchy(document)
     output.parent.mkdir(parents=True, exist_ok=True)
     document.save(str(output))
     return output

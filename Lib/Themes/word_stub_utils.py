@@ -94,7 +94,11 @@ def apply_standalone_narrow_margins(document: DocxDocument) -> DocxDocument:
         section.bottom_margin = margin
         section.left_margin = margin
         section.right_margin = margin
-    return document
+        section.header_distance = min(section.header_distance, Inches(0.2))
+        section.footer_distance = min(section.footer_distance, Inches(0.2))
+    from Lib.Design.report_layout import apply_report_hierarchy
+
+    return apply_report_hierarchy(document)
 
 
 def add_stub_front_matter(

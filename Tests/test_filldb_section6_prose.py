@@ -37,11 +37,10 @@ def test_object_health_sample() -> None:
         _row("Computer relay statuses", "----: Not enough data."),
     ]
     assert filldb.object_health_paragraph(rows) == (
-        "The analyzer rates 3 objects Great, 1 Good and 1 Poor. 2 objects had too "
-        "little data to rate. Parallel DB Update "
+        "The analyzer rates 3 objects Great, 1 Good and 1 Poor. 2 objects could not be rated. Parallel DB Update (10 rows) and Computer Relay Statuses (10 rows) had too little data. Parallel DB Update "
         "(Short Batch) takes the most time at 50.5 minutes. The score covers 3 of the "
-        "4 checks named in the NFR guide. The other 1 had too little data. The "
-        "Workload by Object chart in the Infographic shows the time for every object."
+        "4 guide checks. Parallel DB Update had too little data. The "
+        "Workload by Object chart above shows the time for every object."
     )
 
 
@@ -51,7 +50,7 @@ def test_object_health_leaves_out_zero_parts() -> None:
     assert text.startswith("The analyzer rates 4 objects Great. ")
     assert "too little data" not in text
     assert "Poor" not in text
-    assert "The score covers the 4 checks named in the NFR guide." in text
+    assert "The score covers the 4 guide checks." in text
 
 
 def test_object_health_names_no_poor_object() -> None:
@@ -67,7 +66,7 @@ def test_object_health_names_no_poor_object() -> None:
     assert "is Poor" not in text and "are Poor" not in text
     for name in ("Computer Administrators", "Computer Roles", "Fixlet Results"):
         assert name not in text
-    assert "1 object had too little data to rate." in text
+    assert "1 object could not be rated." in text
 
 
 def test_title_paragraph() -> None:
@@ -86,4 +85,4 @@ def test_title_paragraph() -> None:
 def test_score_text_uses_ranges_not_bands() -> None:
     source = filldb.Path(filldb.__file__).read_text(encoding="utf-8")
     assert "Score bands" not in source
-    assert "90 to 100 is Healthy, 70 to 89 is Needs Attention and 0 to 69" in source
+    assert "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 " in source

@@ -33,7 +33,7 @@ from Lib.Core.document_stamp import (  # noqa: E402
     strip_stamp_paragraphs_xml,
 )
 
-EXPECTED_FULL = "Customer: BigFix Inc · Assessment dates: 07/01/2026 to 07/04/2026"
+EXPECTED_FULL = "Customer: BigFix Inc · Assessment dates: 07-01-2026 to 07-04-2026"
 
 
 # ---------------------------------------------------------------------------
@@ -51,7 +51,7 @@ def test_stamp_separator_is_middle_dot_with_spaces():
     assert chr(8212) not in stamp
 
 
-def test_stamp_normalizes_dash_dates_to_slashes():
+def test_stamp_preserves_dash_dates():
     assert document_stamp("BigFix Inc", "07-01-2026", "07-04-2026") == EXPECTED_FULL
 
 

@@ -1373,7 +1373,7 @@ def _properties_value(pressure: ActionSitePressure) -> str:
         pressure.properties_count,
         [
             f"{_count_or_zero(pressure.active_properties_count)} active",
-            f"{_count_or_zero(pressure.custom_properties_count)} custom-flagged",
+            f"{_count_or_zero(pressure.custom_properties_count)} with the BigFix custom flag",
         ],
     )
 
@@ -1385,12 +1385,12 @@ def _properties_value(pressure: ActionSitePressure) -> str:
 PROPERTY_INTERVAL_SECTION = "Active Properties by Evaluation Interval"
 RETRIEVED_PROPERTY_SECTION = "Retrieved Properties by Evaluation Interval"
 PROPERTY_SOURCE_NOTE = (
-    "The custom-flagged count uses the BigFix property custom flag. "
+    "The property count uses the BigFix property custom flag. "
     "Evaluation Frequency groups active analysis properties by source site. "
     "These are different classifications."
 )
 RETRIEVED_PROPERTY_SOURCE_NOTE = (
-    "The custom-flagged count uses the BigFix property custom flag. "
+    "The property count uses the BigFix property custom flag. "
     "Evaluation Frequency groups active analysis properties by source site and "
     "retrieved properties by type. These are different classifications."
 )
@@ -1697,34 +1697,47 @@ def _counted_phrase(count: int, one: str, many: str) -> str:
     return f"the 1 {one}" if count == 1 else f"the {count:,} {many}"
 
 
-def evaluation_frequency_lead(summary: PropertyIntervalSummary) -> str:
+def evaluation_frequency_lead(summary: PropertyIntervalSummary, *, graphic: bool = False) -> str:
     """Opening paragraph of Evaluation Frequency."""
     if summary.retrieved is None:
         # A capture made before the retrieved property section.
-        return (
-            f"This table covers the {len(summary.properties):,} active "
-            "properties. Each one has an evaluation interval that sets how often "
-            "the Client re-evaluates it. A property set to every report runs on "
-            "every loop. So does a property with no interval, because BigFix "
-            "evaluates it every report. This Mini Report rates 6 hours or longer "
-            "as Healthy."
+        population = _counted_phrase(len(summary.properties), "active analysis property", "active analysis properties")
+    else:
+        population = (
+            _counted_phrase(len(summary.properties), "active analysis property", "active analysis properties")
+            + " and " + _counted_phrase(len(summary.counted_retrieved), "retrieved property", "retrieved properties")
         )
-    analysis = _counted_phrase(
-        len(summary.properties), "active analysis property", "active analysis properties"
-    )
-    retrieved = _counted_phrase(
-        len(summary.counted_retrieved), "retrieved property", "retrieved properties"
-    )
+    form = "graphic" if graphic else "table"
+    unit = "bar" if graphic else "row"
     return (
-        f"This table covers {analysis} and {retrieved}. Each one has an evaluation "
-        "interval that sets how often the Client re-evaluates it. A property set "
-        "to every report runs on every loop. So does a property with no interval, "
-        "because BigFix evaluates it every report. Reserved properties are the "
-        "properties BigFix builds into every Client, such as Computer Name, OS and "
-        "IP Address. The Client evaluates them every report and their interval "
-        "cannot be changed, so this table and CLT-01 leave them out. This Mini "
-        "Report rates 6 hours or longer as Healthy."
+        f"This {form} counts {len(summary.counted):,} properties: {population}. "
+        f"Each {unit} shows how many are set to each evaluation interval. "
+        "A property with no interval counts as Every report, because BigFix "
+        "evaluates it every report."
     )
+
+
+def evaluation_frequency_detail(summary: PropertyIntervalSummary) -> str:
+    buckets = property_interval_band_counts(summary)
+    frequent = sum(buckets[label]["total"] for label in ("Every report", "Under 15 minutes"))
+    return (
+        f"The Every report and Under 15 minutes rows add up to {frequent:,} properties. "
+        "CLT-01 reports this count. Those two rows are rated Needs Attention, "
+        "15 minutes to 6 hours is Advisory, and 6 hours or longer is Healthy."
+    )
+
+
+
+def evaluation_frequency_reserved_note(summary: PropertyIntervalSummary) -> str:
+    if summary.retrieved is None:
+        return ""
+    return (
+        "Reserved properties are the properties BigFix builds into every Client, "
+        "such as Computer Name, OS and IP Address. The Client evaluates them every "
+        "report and their interval cannot be changed, so this table and "
+        "CLT-01 leave them out."
+    )
+
 
 
 def evaluation_frequency_source_note(summary: PropertyIntervalSummary) -> str:
@@ -1813,6 +1826,8 @@ def top10_kind_sentence(loop_offenders: list[LoopOffenderSummary]) -> str:
             parts[0] if len(parts) == 1 else ", ".join(parts[:-1]) + " and " + parts[-1]
         )
         sentence += f" {tail[0].upper()}{tail[1:]}."
+    if counts[2]:
+        sentence += " Retrieved properties include reserved properties."
     return sentence
 
 
@@ -2910,19 +2925,19 @@ def udp_notification_data_notes(summary: UdpNotificationSummary) -> list[str]:
             summary.not_receiving_missing_subnet_count,
         )
         notes.append(
-            f"{missing_count:,} client(s) not receiving UDP pings did not report a "
+            f"{missing_count:,} {'client' if missing_count == 1 else 'clients'} not receiving UDP pings did not report a "
             "relay and/or IPv4 address, and were excluded from the corresponding "
             "rollups."
         )
     elif summary.not_receiving_missing_relay_count:
         notes.append(
-            f"{summary.not_receiving_missing_relay_count:,} client(s) not receiving "
+            f"{summary.not_receiving_missing_relay_count:,} {'client' if summary.not_receiving_missing_relay_count == 1 else 'clients'} not receiving "
             "UDP pings did not report a relay, so they were excluded from the relay "
             "issue rollup."
         )
     elif summary.not_receiving_missing_subnet_count:
         notes.append(
-            f"{summary.not_receiving_missing_subnet_count:,} client(s) not receiving "
+            f"{summary.not_receiving_missing_subnet_count:,} {'client' if summary.not_receiving_missing_subnet_count == 1 else 'clients'} not receiving "
             "UDP pings did not report an IPv4 address, so they were excluded from "
             "the IPv4 /24 subnet issue rollup."
         )
@@ -3763,9 +3778,9 @@ def loop_finding_reasons(
     frequent = frequent_property_count(property_intervals)
     if frequent:
         subject = (
-            "1 active property is"
+            "1 property is"
             if frequent == 1
-            else f"{frequent:,} active properties are"
+            else f"{frequent:,} properties are"
         )
         reasons.append(
             LoopFindingReason(
@@ -3961,7 +3976,9 @@ def generate_png(
         slow_value = format_loop_offender_strip_seconds(
             top_offender.avg_client_processing_seconds
         )
-        slow_detail = compact_loop_offender_label(top_offender.result)
+        slow_detail = compact_loop_offender_label(
+            format_loop_offender_evaluation(top_offender.result, property_intervals)
+        )
     else:
         slow_value = "Not available"
         slow_detail = "Top 10 data not provided"
@@ -3979,8 +3996,6 @@ def generate_png(
         "distLabel": f"Loop distribution &middot; {scored_total:,} devices scored",
         "dist": dist,
         "legend": legend,
-        "scoringLine": LOOP_SCORING_LINE,
-        "sourceLine": LOOP_SOURCE_LINE,
         "footer": [
             {"label": "Average loop time", "value": m_s(metrics.avg_mean_seconds)},
             {
@@ -4518,7 +4533,7 @@ def context_strip_tiles(
         udp_value = count_with_denominator(
             udp_summary.not_receiving_count, udp_summary.total_devices
         )
-        udp_detail = "Devices that received no UDP pings."
+        udp_detail = "Devices with no UDP pings in the UDP capture. The UDP capture and client loop capture can contain different populations."
 
         if udp_summary.relay_rows:
             relay_name, relay_count, _relay_pct = udp_summary.relay_rows[0]
@@ -4539,7 +4554,7 @@ def context_strip_tiles(
 
     reporting_value = count_with_denominator(metrics.total_devices, score_total)
     reporting_detail = (
-        f"{metrics.total_issue_count:,} have no usable loop data"
+        f"{metrics.total_issue_count:,} {'has' if metrics.total_issue_count == 1 else 'have'} no usable loop data"
         if metrics.total_issue_count
         else "All scored devices have usable loop data"
     )
@@ -4563,7 +4578,7 @@ def context_strip_tiles(
             "muted": udp_muted,
         },
         {
-            "label": "Relay With Most UDP Issues",
+            "label": "Relay with most UDP issues",
             "value": relay_value,
             "caption": relay_detail,
             "muted": relay_muted,
@@ -4629,7 +4644,7 @@ def client_loop_infographic_key_rows(
     tiles = {tile["label"]: str(tile["value"]) for tile in context}
     # The relay tile shows the affected count large and the relay name beneath
     # it. The key names the relay, because that is what the tile identifies.
-    relay_tile = next(t for t in context if t["label"] == "Relay With Most UDP Issues")
+    relay_tile = next(t for t in context if t["label"] == "Relay with most UDP issues")
     relay_name = (
         f"{relay_tile['value']} on {relay_tile['caption']}"
         if udp_summary and udp_summary.relay_rows
@@ -4704,7 +4719,7 @@ def client_loop_infographic_key_rows(
             "Devices that receive no UDP notifications from their relay.",
         ],
         [
-            "Relay With Most UDP Issues",
+            "Relay with most UDP issues",
             relay_name,
             "Relay with the most devices that receive no UDP notifications.",
         ],
@@ -4712,7 +4727,7 @@ def client_loop_infographic_key_rows(
             "Findings raised",
             LOOP_FINDING_ID if raised else "None raised",
             "CLT-01 is raised for any of three reasons. The health score is "
-            "below 90. An active property is set to every report or to under 15 "
+            "below 90. A property is set to every report or to under 15 "
             "minutes. More than 5% of devices have no usable loop data.",
         ],
     ]
@@ -4748,19 +4763,6 @@ MINI_REPORT_ROLLUP_LIMIT = 10
 
 # Points each device earns for its loop group (Duncan's option B, 10-19).
 LOOP_GROUP_POINTS = {"Healthy": 100, "Good": 85, "Warning": 67, "Critical": 34}
-LOOP_SCORING_LINE = (
-    "Score ranges: 90 to 100 Healthy, 70 to 89 Warning, 0 to 69 Critical. Points per "
-    "device: "
-    + ", ".join(f"{group} {points}" for group, points in LOOP_GROUP_POINTS.items())
-    + "."
-)
-
-# CP-25: where the Infographic's numbers live.
-LOOP_SOURCE_LINE = (
-    "Numbers from the Loop Health table. Every device is in the Excel sheet Source Data."
-)
-
-
 UNREPORTED_GROUPS = {"Not reported", "Unknown"}
 
 # The Command Polling tables in the Mini Report keep the columns that answer
@@ -4856,14 +4858,20 @@ def generate_word(
     )
 
     add_stub_front_matter(document, "Client Performance Analysis")
+    sections = {}
+
+    def client_heading(key, text, level):
+        paragraph = document.add_heading(text, level=level)
+        sections[key] = paragraph
+        return paragraph
     if stamp:
         stamp_docx_document(document, stamp)
 
     title = (
         f"This analysis covers {metrics.score_total_devices:,} BigFix Clients from "
         f"{metrics.report_start_text} to {metrics.report_end_text}. It was generated "
-        f"on {metrics.generated_at_text}. The Client Performance Excel holds every "
-        "row behind the tables in this Mini Report."
+        f"on {metrics.generated_at_text}. The Client Performance workbook holds the "
+        "supporting data."
     )
     if not loop_offenders:
         title += (
@@ -4892,7 +4900,7 @@ def generate_word(
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
 
-    keep_with_next(document.add_heading("Reading the Infographic", level=3))
+    keep_with_next(client_heading('Reading the Infographic', 'Reading the Infographic', 3))
     build_word_table(
         document,
         ["Infographic tile", "Value", "What it means"],
@@ -4915,14 +4923,14 @@ def generate_word(
             else []
         )
         if finding_rows:
-            document.add_heading("Automated Findings", level=3)
+            client_heading('Automated Findings', 'Automated Findings', 3)
             build_word_table(
                 document,
                 ["Finding ID", "Automated Finding"],
                 finding_rows,
             )
 
-    document.add_heading("Loop Health", level=3)
+    client_heading('Loop Health', 'Loop Health', 3)
     keep_with_next(
         document.add_paragraph(
             "Each device is placed in a group by its average loop time across the "
@@ -4944,13 +4952,14 @@ def generate_word(
     )
     document.add_paragraph(
         f"{_device_count(metrics.total_issue_count)} "
-        f"({pct(metrics.total_issue_pct)}) reported no usable loop data. They "
-        "count as Critical in the table and in the score. When more than "
+        f"({pct(metrics.total_issue_pct)}) reported no usable loop data. "
+        + ("It counts" if metrics.total_issue_count == 1 else "They count")
+        + " as Critical in the Loop Health group and in the score. When more than "
         f"{NO_DATA_PCT_LIMIT:g}% of devices have no usable data, CLT-01 gives it "
         "as a reason."
     )
 
-    document.add_heading("How the Score Is Calculated", level=4)
+    client_heading('How the Score Is Calculated', 'How the Score Is Calculated', 4)
     document.add_paragraph(
         "Each device earns points for its group. Healthy earns 100, Good 85, "
         "Warning 67 and Critical 34. The score is the average across all devices."
@@ -4960,14 +4969,14 @@ def generate_word(
     )
 
     if loop_offenders or actionsite_pressure or property_intervals:
-        document.add_heading("Loop Cost", level=3)
+        client_heading('Loop Cost', 'Loop Cost', 3)
         document.add_paragraph(
             "These sections show what the Client evaluates in each loop. They do "
             "not change the score. Evaluation Frequency can add a reason to CLT-01."
         )
 
     if loop_offenders:
-        document.add_heading("Top 10 Most Expensive Evaluations", level=4)
+        client_heading('Top 10 Most Expensive Evaluations', 'Top 10 Most Expensive Evaluations', 4)
         keep_with_next(
             document.add_paragraph(
                 top10_kind_sentence(loop_offenders)
@@ -4998,7 +5007,7 @@ def generate_word(
         )
 
     if property_intervals:
-        document.add_heading("Evaluation Frequency", level=4)
+        client_heading('Evaluation Frequency', 'Evaluation Frequency', 4)
         keep_with_next(
             document.add_paragraph(evaluation_frequency_lead(property_intervals))
         )
@@ -5015,6 +5024,10 @@ def generate_word(
             evaluation_frequency_rows(property_intervals),
             status_col=5,
         )
+        document.add_paragraph(evaluation_frequency_detail(property_intervals))
+        reserved_note = evaluation_frequency_reserved_note(property_intervals)
+        if reserved_note:
+            document.add_paragraph(reserved_note)
         document.add_paragraph(evaluation_frequency_source_note(property_intervals))
         not_set = sum(
             1 for item in property_intervals.counted if item.interval_minutes is None
@@ -5032,12 +5045,13 @@ def generate_word(
                 ),
             )
         if minimum_analysis_interval:
+            client_heading("Minimum Analysis Interval", "Minimum Analysis Interval", 4)
             document.add_paragraph(
                 minimum_analysis_interval_paragraph(minimum_analysis_interval)
             )
 
     if actionsite_pressure:
-        document.add_heading("Contributing Factors", level=4)
+        client_heading('Contributing Factors', 'Contributing Factors', 4)
         keep_with_next(
             document.add_paragraph(
                 "Deployment-wide counts that add work to every Client loop."
@@ -5054,14 +5068,14 @@ def generate_word(
             document.add_paragraph(CONTENT_CAPTURE_NOTE)
 
     if udp_summary or command_polling_summary:
-        document.add_heading("Notification and Polling", level=3)
+        client_heading('Notification and Polling', 'Notification and Polling', 3)
         document.add_paragraph(
             "Relays send UDP notifications so Clients act on new content right away. "
             "Command polling is the fallback when those notifications do not arrive."
         )
 
     if udp_summary:
-        document.add_heading("UDP Notification Coverage", level=4)
+        client_heading('UDP Notification Coverage', 'UDP Notification Coverage', 4)
         build_word_table(
             document,
             ["Status", "Devices / Total", "% of Total"],
@@ -5097,7 +5111,7 @@ def generate_word(
             )
 
     if command_polling_summary:
-        document.add_heading("Command Polling", level=4)
+        client_heading('Command Polling', 'Command Polling', 4)
         keep_with_next(
             document.add_paragraph(
                 f"The first four rows add up to the "
@@ -5144,7 +5158,7 @@ def generate_word(
             )
 
     if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:
-        document.add_heading("Client Settings", level=3)
+        client_heading('Client Settings', 'Client Settings', 3)
         document.add_paragraph(
             "These settings control how much CPU the Client uses. They are reported "
             "for context and are not scored. Duty cycle is the work interval divided "
@@ -5154,7 +5168,7 @@ def generate_word(
         )
 
     if fast_hash_verify_summary:
-        document.add_heading("FastHashVerify", level=4)
+        client_heading('FastHashVerify', 'FastHashVerify', 4)
         keep_with_next(
             document.add_paragraph(
                 "FastHashVerify lets the Client use more CPU while it checks the hash "
@@ -5168,9 +5182,9 @@ def generate_word(
             ["Status", "Devices / Total", "% of Total"],
             fast_hash_verify_coverage_rows(fast_hash_verify_summary),
         )
-        keep_with_next(
-            document.add_paragraph("Reported FastHashVerify work and sleep settings:")
-        )
+        settings_heading = document.add_paragraph("Reported FastHashVerify Work and Sleep Settings")
+        sections["FastHashVerify settings"] = settings_heading
+        keep_with_next(settings_heading)
         build_word_table(
             document,
             [
@@ -5183,7 +5197,7 @@ def generate_word(
         )
 
     if agent_cpu_idle_summary:
-        document.add_heading("CPU Idle Settings", level=4)
+        client_heading('CPU Idle Settings', 'CPU Idle Settings', 4)
         keep_with_next(
             document.add_paragraph(
                 "Work Idle and Sleep Idle set how long the Client works and rests "
@@ -5202,7 +5216,7 @@ def generate_word(
         )
 
     if agent_multicore_summary:
-        document.add_heading("Multicore CPU Scaling", level=4)
+        client_heading('Multicore CPU Scaling', 'Multicore CPU Scaling', 4)
         keep_with_next(
             document.add_paragraph(
                 "Available on BigFix 11.0.7 and later Clients. Not Applicable means "
@@ -5218,6 +5232,18 @@ def generate_word(
             agent_multicore_summary.settings_rows,
         )
 
+    from Lib.Design.client_report_layout import apply_client_layout
+
+    apply_client_layout(
+            document, word_output, sys.modules[__name__], sections=sections,
+            render_details=png_output.exists(), metrics=metrics,
+            actionsite_pressure=actionsite_pressure,
+            loop_offenders=loop_offenders, property_intervals=property_intervals,
+            agent_cpu_idle_summary=agent_cpu_idle_summary,
+            agent_multicore_summary=agent_multicore_summary,
+            fast_hash_verify_summary=fast_hash_verify_summary,
+            udp_summary=udp_summary, command_polling_summary=command_polling_summary,
+        )
     document.save(str(word_output))
     report_tables.normalize_docx_tables(word_output)
 

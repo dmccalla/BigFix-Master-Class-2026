@@ -477,7 +477,7 @@ def test_perfmon_png_timeseries_layout_rules_are_in_source() -> None:
     assert 'label="_nolegend_"' in source
     assert "ncol=min(2, len(handles))" in source
     assert "render_zero_counter_strip" in source
-    assert "perfmon_chart_title" in source
+    assert 'str(col).replace("_", " ")' in source
     assert "host_name" in source
 
 
@@ -630,7 +630,8 @@ def test_insert_perfmon_summary_adds_simple_status_table() -> None:
     }
 
     summary = inject_perfmon_charts.insert_perfmon_summary(doc_xml, observations)
-    assert "Assessment by Area" not in summary
+    assert "Assessment by Area" in summary
+    assert "Points" in summary
     updated = inject_perfmon_charts.build_assessment_by_area_xml(observations, 4)
 
     assert "<w:tbl>" in updated
@@ -705,7 +706,7 @@ def test_general_observations_placeholder_stays_above_capture_summary() -> None:
         updated.index("General Observations")
         < updated.index(placeholder)
         < updated.index("Capture Summary")
-        < updated.index("Storage Queue Depth")
+        < updated.rindex("Storage Queue Depth")
     )
     assert "The standard was met throughout the sample window." in updated
     assert "Observation: Your observations go here." not in updated
@@ -885,7 +886,7 @@ def test_perfmon_observation_calls_out_affected_counters() -> None:
 
     assert "Affected Counters Requiring Review" in xml
     assert "Network_Interface_X710_Packets_Received_Discarded" in xml
-    assert "peak 6102" in xml
+    assert "peak 6,102" in xml
     assert "66 readings (1.39%) over the limit" in xml
     assert "Network_Interface_X710_Packets_Outbound_Discarded" not in xml
 
@@ -1258,7 +1259,7 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
         (
             "PRF-INF-07",
             "Network Health",
-            "Fail. Average 0.5 added per sample. Peak 3. 6 of 59 readings showed an "
+            "Fail. Average 0.50 added per sample. Peak 3.00. 6 of 59 readings showed an "
             "increase. See Network Health.",
         ),
         (
@@ -1431,15 +1432,15 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
         media_files = [name for name in zf.namelist() if name.startswith("word/media/")]
 
     assert doc_xml.index("Additional PerfMon Capture") < doc_xml.index("Next Section")
-    # The server name follows the capture heading directly, in bold.
+    # The server name follows the capture heading directly, in regular body type.
     assert (
         doc_xml.index("Additional PerfMon Capture")
-        < doc_xml.index("<w:b/></w:rPr><w:t>BFSQL01</w:t>")
-        < doc_xml.index("CPU Utilization")
+        < doc_xml.index("<w:r><w:t>BFSQL01</w:t>")
+        < doc_xml.rindex("CPU Utilization")
     )
     assert "CPU Utilization" in doc_xml
     assert doc_xml.index("Automated Findings") < doc_xml.index("PRF-INF-04")
-    assert doc_xml.index("PRF-INF-04") < doc_xml.index("CPU Utilization")
+    assert doc_xml.index("PRF-INF-04") < doc_xml.rindex("CPU Utilization")
     assert any("perfmon_supplemental_" in name for name in media_files)
 
 
@@ -1473,7 +1474,7 @@ def test_append_perfmon_capture_section_marks_a_missing_server_name(
         with ZipFile(output) as zf:
             doc_xml = zf.read("word/document.xml").decode("utf-8")
         assert doc_xml.index("PerfMon Capture 1") < doc_xml.index(
-            "<w:b/></w:rPr><w:t>Server name missing</w:t>"
+            "<w:r><w:t>Server name missing</w:t>"
         )
 
 
@@ -1685,7 +1686,9 @@ def _heading_at(doc_xml: str, text: str, level: int) -> int:
     return match.start()
 
 
-def test_append_capture_follows_the_section_7_order(monkeypatch, tmp_path: Path) -> None:
+def test_append_capture_follows_the_section_7_order(
+    monkeypatch, tmp_path: Path
+) -> None:
     chart_folder = tmp_path / "charts"
     chart_folder.mkdir()
     (chart_folder / "Processor_Total_Processor_Time.png").write_bytes(_TINY_PNG)
@@ -1737,14 +1740,14 @@ def test_append_capture_follows_the_section_7_order(monkeypatch, tmp_path: Path)
     with ZipFile(output) as zf:
         doc_xml = zf.read("word/document.xml").decode("utf-8")
     positions = [
-        _heading_at(doc_xml, "Automated Findings", 3),
         doc_xml.index("How This Score Is Calculated"),
+        _heading_at(doc_xml, "Assessment by Area", 3),
+        _heading_at(doc_xml, "Automated Findings", 3),
         _heading_at(doc_xml, "Capture Summary", 3),
         doc_xml.index("Of the 1 counters reviewed"),
         doc_xml.index("Analyzed system: BFSQL01."),
         doc_xml.index("Hardware / Context"),
         _heading_at(doc_xml, "CPU Utilization", 3),
-        _heading_at(doc_xml, "Assessment by Area", 3),
         doc_xml.index("Next Section"),
     ]
     assert positions == sorted(positions)

@@ -12,7 +12,9 @@ Client Performance coverage:
 - Command polling, UDP, FastHashVerify, CPU idle settings and core counts.
 
 These are demonstration values, not current measurements of a deployment.
-Original capture dates are retained. The Platform sample uses synthetic
+The active demo captures use a synthetic June 2026 assessment period. Original
+inputs are preserved in SampleData/Originals_20261024.zip. See
+DEMO_SNAPSHOT.json for the date shifts and hardware context. The Platform sample uses synthetic
 interval rows covering all 877 active properties. TA and Class samples
 retain 244 active-property intervals and 2537 loop source rows. Their
 synthetic Top 10 totals have been aligned with occurrence counts and

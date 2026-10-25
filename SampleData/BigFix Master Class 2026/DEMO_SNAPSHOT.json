@@ -1,0 +1,16 @@
+{
+  "kind": "synthetic demonstration assessment",
+  "assessment_start": "2026-06-01",
+  "assessment_end": "2026-06-14",
+  "root_host": "BFROOT1",
+  "root_fqdn": "BFROOT1.dmc.lab",
+  "root_logical_processors": 4,
+  "root_memory_mb": 12288,
+  "hardware_basis": "Processor instances in the unchanged BLG and RAM in Root_Server_Info. Capacity and client root-core examples aligned to the BLG in Platform.",
+  "expected_loop_rows": 2537,
+  "originals_archive": "../Originals_20261024.zip",
+  "originals_archive_sha256": "03af6f1134b301e3d999da6277f34d00448c27bef2c07ae8a11826f7933dd898",
+  "historical_evidence": "Unmodified raw server logs, console traces and saved release intelligence retain their original dates. They are reference examples outside the assessment window.",
+  "date_transform": "Loop and UDP dates shifted 114 days earlier. Reference capture dates shifted 108 days earlier. FillDB moved to 13-14 June 2026 at the same local times.",
+  "unchanged": "Scoring rules, property intervals, loop timings, FillDB counters and PerfMon binary/counter values."
+}

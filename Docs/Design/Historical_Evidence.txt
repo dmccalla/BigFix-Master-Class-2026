@@ -1,0 +1,2 @@
+Historical review and benchmark evidence is retained in the primary project archive.
+It is excluded from this standalone distribution. The user guide retains its benchmark summary.

@@ -1194,7 +1194,7 @@ def _write_perfmon_mini_report(
             from docx import Document
 
             document = apply_standalone_narrow_margins(Document())
-        add_stub_front_matter(document, "PerfMon Infrastructure Analysis")
+        add_stub_front_matter(document, "PerfMon Infrastructure Analysis", notice_text="")
         document.save(str(base_path))
 
         run_python(
@@ -1492,6 +1492,8 @@ def run_loop_pipeline(
         output_dir / f"{prefix}_Client_Loop.png",
         loop_docx,
     )
+    from Lib.Design.report_layout import update_workbook_pointer
+    update_workbook_pointer(loop_docx, f"{prefix}_Client_Loop.xlsx")
     if log:
         log.info("Loop docx", str(loop_docx))
 

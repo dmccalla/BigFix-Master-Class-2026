@@ -11,6 +11,34 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Keep long PerfMon chart footers clear of legends and axis labels. Preserve raw values, scoring, plotted series and display caps.
+
+- Keep Reading the Infographic at the same heading level as How the Score Is Calculated: H3 in the Full Report and H2 in the mini report.
+
+- Center the Document Control Version column and its header, overriding automatic numeric alignment.
+
+- Reconcile synthetic sample dates into one June assessment period, preserve changed originals, and verify input fingerprints. Preserve performance timings and scoring rules.
+
+- Separate report sections with heading spacing instead of repeated divider lines. Preserve chapter rules, heading levels, fonts, lists and report content.
+
+- Clarify evaluation interval populations, FillDB guide coverage and PerfMon context using approved wording. Correct report references and count grammar. Omit the derived FillDB check name. Preserve scoring and all PerfMon plots.
+
+- Prevent missing-memory PerfMon tile collisions and keep observation text with the following chart. Correct document stamp encoding and date formatting. Preserve historical cross-product evidence outside the standalone distribution.
+
+- Preserve unset CPU Idle devices in Client Performance charts and cover configured, mixed and entirely unset populations. Refresh sample validation fingerprints. Scoring rules are unchanged.
+
+- Apply one heading typeface through all levels, keep subsection headings compact without divider lines, and align PerfMon area headings across full and mini reports.
+
+- Remove imported character-style overrides from headings so the shared heading font and weight render consistently in Word.
+
+- Normalize report section spacing through the shared heading styles, remove redundant empty heading spacers, and give chapter separator paragraphs explicit spacing. Preserve cover, table, and page-break layout.
+
+- Standardize report score, distribution, and data bars with the same thickness and rounded ends.
+
+- Restore report page numbers, keep every PerfMon counter plot, remove redundant chart footnotes, and correct heading hierarchy and About-page pagination. Scoring and plotted values are unchanged.
+
+- Correct report portability and integration after independent review. Use shipped chart fonts when local fonts are absent, preserve template-owned Client guidance, restore approved frequency explanations and standalone font/spacing rules, and report an unchecked VM flag as not supplied. Scoring is unchanged.
+
 - Capture retrieved properties in Collect Deployment Information and use them in Client Performance. The Top 10 names a retrieved or reserved property and shows its interval. Evaluation Frequency and CLT-01 count default and custom retrieved properties and leave reserved properties out.
 
 - Clarify Client Performance loop averages, UDP coverage populations, property classifications and tiny nonzero percentages. Preserve scoring and finding rules.
@@ -80,12 +108,13 @@ the project release process for the steps to cut a release.
 - Name _BESClient_Report_MinimumAnalysisInterval under Evaluation Frequency when a device sets it, and list its values in the Min Analysis Interval sheet. A setting with no value means 60 seconds.
 
 ### Changed
+- Updated Client Performance, PerfMon and FillDB mini-report charts, headings, source explanations and page flow. Added regression checks while retaining the existing scores, thresholds and PerfMon plot data.
 
 - Set Heading 3, 4 and 5 to 16, 14 and 12 pt, with the spacing in Design's 10-20 change list, Section 1. No border, font or Normal change.
 - Spell PerfMon in the text readers see: report titles, app labels and messages, console and log lines, and help text. File and folder names, identifiers, globs and config keys keep Perfmon.
 - Rate ActionSite size against a 10 MB soft warning (Needs Attention) and a 25 MB hard ceiling (Critical), by Duncan's 10-19 ruling. It used a "Review" word no other Contributing Factors row uses.
 - Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.
-- Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects · M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
+- Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects Â· M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
 - Score client loops in four groups, by Duncan's 10-19 ruling on Design's review. Healthy is under 15 minutes (100 points), Good is 15 to 30 (85), Warning is 30 to 60 (67) and Critical is over 60 or no usable data (34). The Infographic draws no usable data as a hatched part of Critical, and the Loop Health table gives it its own row. Excel adds Good rows and a Good Threshold. `--good-threshold` joins `--healthy-threshold`, whose default is now 00:15:00.
 - Use one set of score cut-offs in all three Mini Reports: 90 to 100 Healthy, 70 to 89 Needs Attention or Warning, 0 to 69 Critical. PerfMon and FillDB move from 85 and 60.
 - Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.

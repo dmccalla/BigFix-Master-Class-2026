@@ -87,8 +87,8 @@ ANALYZER_STATISTICS = (
 )
 TABLE_WIDTHS = [3480, 2820, 1160, 873, 2282]
 TABLE_WIDTH = sum(TABLE_WIDTHS)
-SUMMARY_COLUMNS = ["Statistic", "Value"]
-SUMMARY_TABLE_WIDTHS = [3200, TABLE_WIDTH - 3200]
+SUMMARY_COLUMNS = ["Group", "Statistic", "Value"]
+SUMMARY_TABLE_WIDTHS = [1800, 3200, TABLE_WIDTH - 5000]
 TABLE_STYLE_ID = "BigFixContent"
 # Every visual aspect of the data table -- navy header, hairline borders, row
 # banding -- comes from the shared BigFixContent style (single source of truth),
@@ -256,7 +256,7 @@ def filldb_assessment_note(rows: list[dict[str, str]]) -> str:
     if scoreable:
         return ""
     return (
-        "Not Assessed: None of the four checks NFR PRF-BIG-30 names had a "
+        "Not Assessed: None of the four guide checks had a "
         "recognized health result, so there was not enough data to calculate a "
         "health score."
     )
@@ -453,6 +453,10 @@ def generate_filldb_chart(
         if parse_number(r.get("Time (ms)", "")) > 0
     )
 
+    by_name = {clean_object_name(r.get("FillDB Object", "")).lower():r for r in assessed_rows}
+    batch = by_name.get("batch rate")
+    short = by_name.get("parallel db update (short batch)")
+    matching_batch = bool(batch and short and all(batch.get(k) == short.get(k) for k in ("Count", "Time (ms)", "Rate/s", "Health Check")))
     # Workload bars, longest processing time first.
     ranked = sorted(
         assessed_rows, key=lambda r: parse_number(r.get("Time (ms)", "")), reverse=True
@@ -461,9 +465,9 @@ def generate_filldb_chart(
     max_min = max(times_min, default=0) or 1
     bars = [
         {
-            "label": clean_object_name(r.get("FillDB Object", "")),
+            "label": clean_object_name(r.get("FillDB Object", "")) + (" (same totals as Parallel DB Update (Short Batch))" if matching_batch and clean_object_name(r.get("FillDB Object", "")).lower() == "batch rate" else ""),
             "width": f"{m / max_min * 100:.1f}%",
-            "mins": f"{m:.1f}",
+            "mins": f"{m:.1f} min" if m >= 1 else f"{m*60:.3g} s",
             "color": status_color.get(health_status(r.get("Health Check", "")), C_NODATA),
         }
         for r, m in zip(ranked, times_min)
@@ -509,9 +513,9 @@ def generate_filldb_chart(
         )
 
     dist_defs = [
-        ("Healthy", great_count + good_count, C_GREAT),
-        ("Critical", review_count, C_POOR),
-        ("Not Assessed", unknown_count, C_NODATA),
+        ("Great or Good", great_count + good_count, C_GREAT),
+        ("Poor", review_count, C_POOR),
+        ("Not enough data", unknown_count, C_NODATA),
     ]
     dist_total = sum(c for _, c, _ in dist_defs) or 1
     dist = [
@@ -544,6 +548,8 @@ def generate_filldb_chart(
         "dist": dist,
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
+        "scopeNote": filldb_score_scope_note(rows),
+        "workloadNote": "Times are totals per object, not a sequence. " + ("Batch Rate repeats Parallel DB Update (Short Batch). " if matching_batch else "") + "Do not add them.",
         "assessmentNote": filldb_assessment_note(rows),
         "scoringLine": (
             "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 "
@@ -642,9 +648,6 @@ def set_cell_text(cell, text: str, bold: bool = False, color: str | None = None)
     cell.vertical_alignment = WD_CELL_VERTICAL_ALIGNMENT.CENTER
 
     paragraph = cell.paragraphs[0]
-    paragraph.paragraph_format.space_before = Pt(6)
-    paragraph.paragraph_format.space_after = Pt(6)
-    paragraph.paragraph_format.line_spacing = 1
 
     run = paragraph.add_run("" if text is None else str(text))
     run.bold = bold
@@ -697,7 +700,7 @@ def build_word_table(document: DocxDocument, rows: list[dict[str, str]]) -> None
             set_cell_text(
                 cell,
                 value,
-                bold=is_status_cell,
+                bold=is_status_cell or (column_name == "FillDB Object" and is_guide_check(item)),
                 color=status_style["text"] if is_status_cell and status_style else None,
             )
 
@@ -710,10 +713,11 @@ def build_capture_summary_table(
     heading = document.add_heading("Capture Summary", level=3)
     heading.paragraph_format.space_before = Pt(8)
     heading.paragraph_format.space_after = Pt(3)
-    document.add_paragraph(
+    lead = document.add_paragraph(
         "Duration (s) and Throughput (lines/s) are the analyzer's own run time and "
         "speed. They are not FillDB times."
     )
+    lead.paragraph_format.keep_with_next = True
 
     lines_processed = find_stat_value(rows, "Lines processed")
     summary_rows = [
@@ -731,6 +735,7 @@ def build_capture_summary_table(
         if value:
             summary_rows.append((label, format_table_number(value)))
 
+    analyzer_names = {"Lines Processed", "Duration (s)", "Throughput (lines/s)"}
     table = document.add_table(rows=1, cols=len(SUMMARY_COLUMNS))
     table.autofit = True
     set_table_style(table)
@@ -740,17 +745,16 @@ def build_capture_summary_table(
     set_repeat_table_header(header_row)
     set_row_cant_split(header_row)
     for idx, column_name in enumerate(SUMMARY_COLUMNS):
-        cell = header_row.cells[idx]
-        set_cell_width(cell, SUMMARY_TABLE_WIDTHS[idx])
-        set_cell_text(cell, column_name, bold=True)
-
-    for label, value in summary_rows:
+        set_cell_width(header_row.cells[idx], SUMMARY_TABLE_WIDTHS[idx])
+        set_cell_text(header_row.cells[idx], column_name, bold=True)
+    ordered = sorted(summary_rows, key=lambda item: item[0] in analyzer_names)
+    for label,value in ordered:
+        group = "Analyzer run" if label in analyzer_names else "Capture"
         row = table.add_row()
         set_row_cant_split(row)
-        for idx, text in enumerate((label, value)):
-            cell = row.cells[idx]
-            set_cell_width(cell, SUMMARY_TABLE_WIDTHS[idx])
-            set_cell_text(cell, text, bold=(idx == 0))
+        for index,text in enumerate((group,label,value)):
+            set_cell_width(row.cells[index], SUMMARY_TABLE_WIDTHS[index])
+            set_cell_text(row.cells[index], text)
 
 
 def clear_document_body(document: DocxDocument) -> None:
@@ -831,11 +835,14 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
         ]
         sentences.append(f"The analyzer rates {_join_names(parts)}.")
     if unrated:
-        sentences.append(
-            "1 object had too little data to rate."
-            if unrated == 1
-            else f"{unrated} objects had too little data to rate."
-        )
+        unknown = [r for r in objects if health_status(r.get("Health Check", "")) == "unknown"]
+        descriptions = [f"{titlecase_label(r.get('FillDB Object', ''))} ({format_count(parse_number(r.get('Count', '')))} rows)" for r in unknown if parse_number(r.get('Count', '')) > 0]
+        none = [titlecase_label(r.get('FillDB Object', '')) for r in unknown if parse_number(r.get('Count', '')) == 0]
+        sentences.append(f"{unrated} {'object' if unrated == 1 else 'objects'} could not be rated.")
+        if descriptions:
+            sentences.append(_join_names(descriptions)+" had too little data.")
+        if none:
+            sentences.append(_join_names(none)+" had none.")
     slowest = max(objects, key=lambda row: parse_number(row.get("Time (ms)", "")))
     slowest_ms = parse_number(slowest.get("Time (ms)", ""))
     if slowest_ms > 0:
@@ -853,17 +860,36 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
     total_checks = len(GUIDE_CHECKS)
     if assessed == total_checks:
         sentences.append(
-            f"The score covers the {total_checks} checks named in the NFR guide."
+            f"The score covers the {total_checks} guide checks."
         )
     elif assessed:
         sentences.append(
-            f"The score covers {assessed} of the {total_checks} checks named in the NFR "
-            f"guide. The other {total_checks - assessed} had too little data."
+            f"The score covers {assessed} of the {total_checks} guide checks."
         )
+        for row in objects:
+            if is_guide_check(row) and health_status(row.get("Health Check", "")) == "unknown":
+                name = titlecase_label(row.get("FillDB Object", ""))
+                reason = "no data" if parse_number(row.get("Count", "")) == 0 else "too little data"
+                sentences.append(f"{name} had {reason}.")
     sentences.append(
-        "The Workload by Object chart in the Infographic shows the time for every object."
+        "The Workload by Object chart above shows the time for every object."
     )
     return " ".join(sentences)
+
+
+def filldb_score_scope_note(rows: list[dict[str, str]]) -> str:
+    objects = object_performance_rows(rows)
+    guide = [r for r in objects if is_guide_check(r)]
+    assessed = [r for r in guide if health_status(r.get("Health Check", "")) in {"great", "good", "poor"}]
+    meets = sum(health_status(r.get("Health Check", "")) in {"great", "good"} for r in assessed)
+    text = f"The score covers the {len(GUIDE_CHECKS)} guide checks. {len(assessed)} were assessed and " + ("all met the standard." if assessed and meets == len(assessed) else f"{meets} met the standard.")
+    missing = [r for r in guide if r not in assessed]
+    for row in missing:
+        text += " " + titlecase_label(row.get("FillDB Object", "")) + (" had no data." if parse_number(row.get("Count", "")) == 0 else " had no recognized health result.")
+    poor = [titlecase_label(r.get("FillDB Object", "")) for r in objects if not is_guide_check(r) and health_status(r.get("Health Check", "")) == "poor"]
+    if poor:
+        text += " " + _join_names(poor) + (" is rated Poor but is not a guide check, so it does not affect the score." if len(poor) == 1 else " are rated Poor but are not guide checks, so they do not affect the score.")
+    return text
 
 
 def add_score_method_note(document: DocxDocument) -> None:
@@ -876,16 +902,21 @@ def add_score_method_note(document: DocxDocument) -> None:
         "checks that meet the standard:"
     )
     intro.paragraph_format.space_after = Pt(3)
+    intro.paragraph_format.space_before = Pt(0)
+    intro.paragraph_format.keep_with_next = True
 
     for text in (
         "Great or Good: 100 points",
         "Poor: 0 points",
     ):
-        bullet = document.add_paragraph(f"- {text}")
+        from Lib.Design.report_layout import add_bullet
+        bullet = add_bullet(document, text)
         bullet.paragraph_format.space_after = Pt(1)
+        bullet.paragraph_format.space_before = Pt(0)
+        bullet.paragraph_format.keep_with_next = True
 
     for text in (
-        "The score covers the four checks named in PRF-BIG-30 FillDB Health "
+        "The score covers the four checks named in FillDB Health "
         "Check (BigFix Non-Functional Requirements: A Checklist Approach, "
         "version 11.x.4, page 25): Parallel DB Update (Short Batch), Parallel DB "
         "Update, Batch Rate and Parallel Parsing. The guide says each should "
@@ -894,15 +925,11 @@ def add_score_method_note(document: DocxDocument) -> None:
         "This score covers the FillDB capture only.",
         "Other objects and checks without a recognized Health Check result are "
         "shown for context but are not included in the score.",
-        "Score ranges: 90 to 100 is Healthy, 70 to 89 is Needs Attention and 0 to 69 "
-        "is Critical.",
     ):
         para = document.add_paragraph(text)
         para.paragraph_format.space_after = Pt(3)
-
-    spacer = document.add_paragraph()
-    spacer.paragraph_format.space_after = Pt(8)
-
+        para.paragraph_format.space_before = Pt(0)
+        para.paragraph_format.keep_with_next = True
 
 def write_word_output(
     rows: list[dict[str, str]],
@@ -917,7 +944,7 @@ def write_word_output(
         create_stub_document_from_template(template_path) if template_path else Document()
     )
     apply_standalone_narrow_margins(document)
-    add_stub_front_matter(document, "FillDB Performance Analysis")
+    add_stub_front_matter(document, "FillDB Performance Analysis", notice_text="")
     if stamp:
         stamp_docx_document(document, stamp)
     document.add_paragraph(filldb_title_paragraph(rows, metadata or {}, source_csv_saved))
@@ -930,7 +957,7 @@ def write_word_output(
             "FillDB Performance Chart",
         )
         document.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-    assessment_note = filldb_assessment_note(rows)
+    assessment_note = filldb_assessment_note(rows) or ("" if chart_path else filldb_score_scope_note(rows))
     if assessment_note:
         note = document.add_paragraph(assessment_note)
         note.paragraph_format.space_before = Pt(3)
@@ -944,7 +971,18 @@ def write_word_output(
     document.add_heading(FILLDB_OBJECTS_HEADING, level=3)
     document.add_paragraph(FILLDB_OBJECTS_LEAD)
     build_word_table(document, rows)
+    document.add_paragraph("Bold object names identify the four guide checks. A guide check with no data is left out of the score.")
     build_capture_summary_table(document, rows, metadata or {})
+    end = document.add_paragraph()
+    end.paragraph_format.space_after = Pt(0)
+    end.paragraph_format.space_before = Pt(0)
+    end.paragraph_format.line_spacing = Pt(1)
+    from docx.oxml import OxmlElement
+    properties = OxmlElement('w:rPr')
+    size = OxmlElement('w:sz')
+    size.set(qn('w:val'),'2')
+    properties.append(size)
+    end._p.get_or_add_pPr().append(properties)
     document.save(str(output_path))
     report_tables.normalize_docx_tables(output_path)
 

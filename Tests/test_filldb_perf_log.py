@@ -142,7 +142,7 @@ def test_filldb_word_places_score_method_note_below_chart(tmp_path: Path) -> Non
     assert '<w:pStyle w:val="Heading3"/>' in xml
     assert "Formula:" in xml
     assert "Formula: (Great + Good) / assessed checks x 100" in xml
-    assert "PRF-BIG-30 FillDB Health Check" in xml
+    assert "FillDB Health Check" in xml
     assert "version 11.x.4, page 25" in xml
     assert "Health Check" in xml
     assert "100% Great" in xml
@@ -172,7 +172,7 @@ def test_filldb_word_explains_not_assessed_score_below_chart(tmp_path: Path) -> 
     document = Document(output)
     paragraphs = [paragraph.text for paragraph in document.paragraphs]
     note = (
-        "Not Assessed: None of the four checks NFR PRF-BIG-30 names had a "
+        "Not Assessed: None of the four guide checks had a "
         "recognized health result, so there was not enough data to calculate a "
         "health score."
     )

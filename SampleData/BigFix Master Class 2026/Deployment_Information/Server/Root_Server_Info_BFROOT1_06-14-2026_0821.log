@@ -1,0 +1,23 @@
+ROOT SERVER INFORMATION
+ 
+Report Generated: Sun, 14 Jun 2026 08:23:37 -0400
+Report Version: 1.0
+ 
+BES Server Version Counts: 11.0.6.137--1
+BES Api Version Counts: 
+Number of Computers on BES Server: 161
+BES Server CPU: 2900 MHz 12th Gen Intel Core i9-12900H
+BES Server RAM: 12288 MB
+BES Server OS: Win2025 10.0.26100.33296 (24H2)
+C: - Total Space: 203710MB - Free Space: 129946MB; E: - Total Space: 102381MB - Free Space: 82139MB; F: - Total Space: 102381MB - Free Space: 102286MB 
+FillDB Log File Size: 28 KB 
+Number of Files in Buffer Dir: 0 
+Buffer Dir Size: 0 
+Registration List Size: N/A 
+Web Reports SSL: HTTPS 
+FillDB Parallelism (Number of DB Updating Threads): 3  
+FillDB Parallelism (Number of DB Updating Threads for Query): 3  
+FillDB Parallelism (Number of Parsing Threads): 3  
+FillDB Parallelism (Number of Parsing Threads For Query): 3  
+FillDB Parallelism (Parallelism Enabled): 1  
+FillDB Parallelism (Parallelism Enabled For Query): 0  

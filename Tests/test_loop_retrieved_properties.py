@@ -65,7 +65,7 @@ MISSING_RESULT = "Retrieved Property: Old Property (actionsite.99:Evaluate Prope
 
 APPROVED_LEAD = (
     "This table covers the 2 active analysis properties and the 4 retrieved "
-    "properties. Each one has an evaluation interval that sets how often the "
+    "properties. Each row has an evaluation interval that sets how often the "
     "Client re-evaluates it. A property set to every report runs on every loop. "
     "So does a property with no interval, because BigFix evaluates it every "
     "report. Reserved properties are the properties BigFix builds into every "
@@ -87,7 +87,7 @@ EARLIER_SOURCE_NOTE = (
     "content owner."
 )
 APPROVED_FLAG_NOTE = (
-    "The custom-flagged count uses the BigFix property custom flag. Evaluation "
+    "The property count uses the BigFix property custom flag. Evaluation "
     "Frequency groups active analysis properties by source site and retrieved "
     "properties by type. These are different classifications."
 )
@@ -202,7 +202,7 @@ def test_clt01_counts_retrieved_properties_but_not_reserved_ones(
     assert loop.frequent_property_count(summary) == 3
     reasons = loop.loop_finding_reasons(_healthy_metrics(), summary)
     assert [r.text for r in reasons if r.section == "Evaluation Frequency"] == [
-        "3 active properties are set to every report or to under 15 minutes"
+        "3 properties are set to every report or to under 15 minutes"
     ]
 
 
@@ -240,17 +240,19 @@ def test_word_report_explains_reserved_properties(tmp_path: Path) -> None:
     doc = _word(tmp_path, _summary(tmp_path))
 
     paragraphs = [p.text for p in doc.paragraphs]
-    assert APPROVED_LEAD in paragraphs
+    assert any(p.startswith("This graphic counts ") for p in paragraphs)
+    all_text = " ".join(doc.element.body.xpath('.//w:t/text()'))
+    assert "Reserved properties are the properties BigFix builds into every Client" in all_text
+    assert "their interval cannot be changed" in all_text
     lead = next(p for p in paragraphs if p.startswith("1 of these 1 is"))
     assert lead.endswith(
         "Interval is how often a property is set to run. A site evaluation is not "
         "a property and has no interval."
     )
-    top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")
-    assert [c.text for c in top10.rows[1].cells[3:5]] == [
-        "BES Relay Service Installed (reserved property)",
-        "Every report",
-    ]
+    descriptions = " ".join(s._inline.docPr.get('descr', '') for s in doc.inline_shapes)
+    assert "BES Relay Service Installed (reserved property)" in descriptions
+    assert "interval Every report" in descriptions
+    assert "actionsite.13:Evaluate" not in descriptions
 
 
 def test_word_report_keeps_the_earlier_wording_for_an_older_capture(
@@ -259,17 +261,13 @@ def test_word_report_keeps_the_earlier_wording_for_an_older_capture(
     doc = _word(tmp_path, _summary(tmp_path, with_retrieved=False))
 
     paragraphs = [p.text for p in doc.paragraphs]
-    assert any(
-        p.startswith("This table covers the 2 active properties. Each one")
-        for p in paragraphs
-    )
+    assert any(p.startswith("This graphic counts ") for p in paragraphs)
+    assert "Reserved properties" not in " ".join(doc.element.body.xpath('.//w:t/text()'))
     lead = next(p for p in paragraphs if p.startswith("1 of these 1 is"))
     assert lead.endswith("A retrieved property's interval is not in the capture.")
-    top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")
-    assert [c.text for c in top10.rows[1].cells[3:5]] == [
-        "BES Relay Service Installed (retrieved property)",
-        "Not collected",
-    ]
+    descriptions = " ".join(s._inline.docPr.get('descr', '') for s in doc.inline_shapes)
+    assert "BES Relay Service Installed (retrieved property)" in descriptions
+    assert "interval Not collected" in descriptions
 
 
 @pytest.mark.parametrize("with_retrieved", [True, False])
@@ -304,7 +302,7 @@ def test_both_notes_name_retrieved_properties_only_when_captured(
     source_note = APPROVED_SOURCE_NOTE if with_retrieved else EARLIER_SOURCE_NOTE
     flag_note = APPROVED_FLAG_NOTE if with_retrieved else loop.PROPERTY_SOURCE_NOTE
     assert source_note in paragraphs
-    assert flag_note in paragraphs
+    assert flag_note in " ".join(Document(str(tmp_path / "loop.docx")).element.body.xpath(".//w:t/text()"))
     assert excel_notes == [flag_note]
 
 
@@ -313,13 +311,13 @@ def test_both_notes_name_retrieved_properties_only_when_captured(
     [
         (
             RETRIEVED[2:3],
-            "This table covers the 2 active analysis properties and the 1 "
-            "retrieved property. Each one",
+            "This table counts 3 properties: the 2 active analysis properties and the 1 "
+            "retrieved property. Each row",
         ),
         (
             RETRIEVED[:2],
-            "This table covers the 2 active analysis properties and no retrieved "
-            "properties. Each one",
+            "This table counts 2 properties: the 2 active analysis properties and no retrieved "
+            "properties. Each row",
         ),
     ],
 )

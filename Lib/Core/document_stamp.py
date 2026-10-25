@@ -32,13 +32,13 @@ _DATE_INPUT_FORMATS = ("%m-%d-%Y", "%m/%d/%Y", "%Y-%m-%d", "%m-%d-%y", "%m/%d/%y
 
 
 def _display_date(value: object) -> str:
-    """Render one assessment date as MM/DD/YYYY, or "" when unparseable."""
+    """Render one assessment date as MM-DD-YYYY, or "" when unparseable."""
     raw = str(value or "").strip()
     if not raw:
         return ""
     for fmt in _DATE_INPUT_FORMATS:
         try:
-            return datetime.strptime(raw, fmt).strftime("%m/%d/%Y")
+            return datetime.strptime(raw, fmt).strftime("%m-%d-%Y")
         except ValueError:
             continue
     return raw

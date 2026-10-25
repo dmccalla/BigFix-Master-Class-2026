@@ -95,7 +95,7 @@ def test_object_counts_have_thousands_separators(tmp_path: Path) -> None:
 def test_capture_summary_holds_the_analyzer_statistics(tmp_path: Path) -> None:
     _objects, summary = _build(tmp_path)
 
-    rows = {row[0]: row[1] for row in summary[1:]}
+    rows = {row[-2]: row[-1] for row in summary[1:]}
     assert rows["Lines Processed"] == "4,237,218"
     assert rows["Duration (s)"] == "68.54"
     assert rows["Throughput (lines/s)"] == "61,821.1"

@@ -86,8 +86,9 @@ def test_top10_lead_names_the_retrieved_property_case(tmp_path: Path) -> None:
     doc = Document(str(tmp_path / "loop.docx"))
     text = "\n".join(p.text for p in doc.paragraphs)
     assert "A retrieved property's interval is not in the capture." in text
-    top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")
-    assert top10.rows[1].cells[4].text == "Not collected"
+    descriptions = " ".join(shape._inline.docPr.get('descr', '') for shape in doc.inline_shapes)
+    assert "interval Not collected" in descriptions
+    assert "BES Relay Service Installed (retrieved property)" in descriptions
 
 
 def test_udp_capture_reads_like_the_collector_csv(tmp_path: Path) -> None:

@@ -102,25 +102,6 @@ PERFMON_SCORE_WEIGHTS = {
     "FAIL": 0.0,
     "CANNOT VERIFY": 0.25,
 }
-PERFMON_SCORING_LINE = (
-    "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 Critical. "
-    "Points per area: "
-    + ", ".join(
-        f"{label} {round(PERFMON_SCORE_WEIGHTS[key] * 100)}"
-        for key, label in (
-            ("PASS", "Pass"),
-            ("ADVISORY", "Advisory"),
-            ("CANNOT VERIFY", "Cannot Verify"),
-            ("FAIL", "Fail"),
-        )
-    )
-    + "."
-)
-# PM-17: where the Infographic's values live.
-PERFMON_SOURCE_LINE = (
-    "Values are capture averages from Assessment by Area. Every reading is in "
-    "the Excel sheet Raw Data."
-)
 CHART_BG_PAGE = THEME.bg_page
 CHART_BG_CARD = THEME.bg_card
 CHART_TITLE = THEME.title
@@ -198,7 +179,7 @@ def score_note_heading_xml(text: str) -> str:
 
 
 def perfmon_score_method_note_xml() -> str:
-    return "\n".join(
+    xml = "\n".join(
         [
             score_note_heading_xml("How This Score Is Calculated"),
             text_paragraph_xml(
@@ -206,10 +187,7 @@ def perfmon_score_method_note_xml() -> str:
                 "counter area compares to its applicable threshold during the "
                 "capture window:"
             ),
-            text_paragraph_xml("- Pass: 100 points"),
-            text_paragraph_xml("- Advisory: 55 points"),
-            text_paragraph_xml("- Cannot Verify: 25 points"),
-            text_paragraph_xml("- Fail: 0 points"),
+            text_paragraph_xml("Pass: 100 points | Advisory: 55 points | Cannot Verify: 25 points | Fail: 0 points"),
             text_paragraph_xml(
                 "Formula: Pass% x 100 + Advisory% x 55 + Cannot Verify% x 25 + Fail% x 0",
                 bold_prefix="Formula:",
@@ -227,6 +205,14 @@ def perfmon_score_method_note_xml() -> str:
             ),
         ]
     )
+
+    paragraphs = re.findall(r'<w:p>.*?</w:p>', xml, re.DOTALL)
+    for index, paragraph in enumerate(paragraphs):
+        if '<w:pPr>' not in paragraph:
+            keep = '<w:keepNext/>' if index < len(paragraphs)-1 else ''
+            revised = paragraph.replace('<w:p>', '<w:p><w:pPr>'+keep+'<w:spacing w:before="0" w:after="60"/></w:pPr>', 1)
+            xml = xml.replace(paragraph,revised,1)
+    return xml
 
 
 def status_icon(status: str) -> str:
@@ -263,8 +249,13 @@ def status_paragraph_xml(status: str, label: str, text: str) -> str:
     """Build a single Word paragraph with a colored status marker and label."""
     color = status_color(status)
     icon = status_icon(status)
+    properties = (
+        '<w:pPr><w:pStyle w:val="PerfMonEvidence"/></w:pPr>'
+        if label in {"Observation", "Counter"} else ""
+    )
     return (
         "<w:p>"
+        f"{properties}"
         f'<w:r><w:rPr><w:b/><w:color w:val="{color}"/></w:rPr>'
         f"<w:t>{xml_text_escape(icon)}</w:t></w:r>"
         '<w:r><w:t xml:space="preserve"> </w:t></w:r>'
@@ -298,14 +289,14 @@ def observation_paragraph_xml(section: dict, review_level: int = 4) -> str:
             item_status = item.get("status", "Not Available")
             details = []
             if item.get("average") is not None:
-                details.append(f"average {item['average']}")
+                details.append(f"average {format_report_number(item['average'])}")
             if item.get("maximum") is not None:
-                details.append(f"peak {item['maximum']}")
+                details.append(f"peak {format_report_number(item['maximum'])}")
             if item.get("violations"):
                 violation_percent = item.get("violation_percent")
                 violation_text = f"{item['violations']} readings"
                 if violation_percent is not None:
-                    violation_text += f" ({violation_percent}%)"
+                    violation_text += f" ({format_report_number(violation_percent)}%)"
                 details.append(f"{violation_text} over the limit")
             name = item.get("counter", "Unnamed counter")
             if details:
@@ -341,13 +332,30 @@ def table_cell_xml(
     )
 
 
+def format_report_number(value) -> str:
+    number = float(value)
+    if number == 0:
+        return "0"
+    if abs(number) >= 100:
+        return f"{number:,.0f}"
+    if abs(number) >= 10:
+        return f"{number:.1f}"
+    return f"{number:.2f}"
+
+
+def report_standard(text: str) -> str:
+    text = text.replace("<= 1ms", "1 ms or less").replace("<= 1 ms", "1 ms or less")
+    text = text.replace("<= 1 per disk x 1 disks = <= 1", "1 per disk \u00d7 1 disk = 1")
+    return text
+
+
 def build_perfmon_summary_table_xml(observations: dict) -> str:
     """Build the compact General Observations table from PerfMon section results."""
     sections = observations.get("sections", {})
     if not sections:
         return ""
 
-    widths = [2500, 1600, 3000, 3700]
+    widths = [2200, 1550, 3150, 2900, 1000]
     # Use the project's custom named table style defined in the report
     # template's styles.xml. Same style every other injector adopts so
     # all tables look consistent without per-cell shading overrides.
@@ -360,7 +368,7 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
         + "".join(f'<w:gridCol w:w="{width}"/>' for width in widths)
         + "</w:tblGrid>"
     )
-    headers = ["Area", "Status", "Standard / Basis", "Observed"]
+    headers = ["Area", "Status", "Standard / Basis", "Observed", "Points"]
     xml += (
         "<w:tr>"
         + "".join(
@@ -377,18 +385,19 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
         status = item.get("status", "Unknown")
         observed_parts = []
         if item.get("average") is not None:
-            observed_parts.append(f"avg {item['average']}")
+            observed_parts.append(f"avg {format_report_number(item['average'])}")
         if item.get("maximum") is not None:
-            observed_parts.append(f"peak {item['maximum']}")
+            observed_parts.append(f"peak {format_report_number(item['maximum'])}")
         if item.get("violations"):
             observed_parts.append(f"{item['violations']} readings over")
         if item.get("warnings") and item.get("range_floor"):
             observed_parts.append(
                 f"{item['warnings']} readings under {item['range_floor']}%"
             )
-        observed = (
-            ", ".join(observed_parts) or item.get("worst_counter", "") or "Reviewed"
-        )
+        if item.get("samples"):
+            observed_parts.append(f"{item['samples']} readings")
+        observed = ", ".join(observed_parts) or ("Not evaluated" if status == "Not Available" else "Reviewed")
+        points = perfmon_section_score(aggregate_perfmon_scorecard(observations).get(section, {}))
         xml += (
             "<w:tr>"
             + table_cell_xml(section, widths[0])
@@ -398,8 +407,9 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
                 color=status_color(status),
                 bold=True,
             )
-            + table_cell_xml(str(item.get("threshold", "See NFR standard")), widths[2])
+            + table_cell_xml(report_standard(str(item.get("threshold", "See NFR standard"))), widths[2])
             + table_cell_xml(observed, widths[3])
+            + table_cell_xml(str(points) if points is not None else "Not assessed", widths[4])
             + "</w:tr>"
         )
 
@@ -414,6 +424,8 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
 
     def value_with_source(value_key: str, source_key: str, suffix: str = "") -> str:
         value = environment.get(value_key)
+        if value_key == "Virtual Machine" and value in (False, "False", "No") and environment.get(source_key) in (None, "", "Not detected", "Not supplied"):
+            return "Not supplied"
         if value is None or value == "":
             return ""
         value_text = str(value)
@@ -1084,16 +1096,14 @@ def perfmon_section_source_id(section_name: object) -> str:
 
 
 def _perfmon_finding_number(value: object) -> str:
-    """Format a captured counter value without adding presentation-only rounding."""
+    """Format a captured counter value for the report display."""
     if value is None or str(value).strip() == "":
         return ""
     try:
         numeric = float(value)
     except (TypeError, ValueError):
         return str(value)
-    if numeric.is_integer():
-        return f"{int(numeric):,}"
-    return f"{numeric:,.2f}".rstrip("0").rstrip(".")
+    return format_report_number(numeric)
 
 
 def perfmon_finding_context(section_data: dict) -> str:
@@ -1235,7 +1245,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
     def fmt_value(value) -> str:
         try:
             f = float(value)
-            return f"{f:,.0f}" if abs(f) >= 100 else f"{f:.2f}".rstrip("0").rstrip(".")
+            return format_report_number(f)
         except Exception:
             return str(value or "-")
 
@@ -1323,7 +1333,7 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         thr = section_data.get("threshold", "")
         avg_raw = section_data.get("average")
         if res == "cannot" and avg_raw is None:
-            avg_display = "Not supplied" if name == "Memory Health" else "No data"
+            avg_display = "Cannot verify" if name == "Memory Health" else "No data"
         else:
             avg_display = fmt_value(avg_raw) + unit_for(thr)
         counters.append(
@@ -1355,8 +1365,6 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
             **findings_summary,
         },
         "findingIds": sorted(finding_ids),
-        "scoringLine": PERFMON_SCORING_LINE,
-        "sourceLine": PERFMON_SOURCE_LINE,
     }
     try:
         output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -1446,7 +1454,7 @@ def ensure_png_content_type(content_types_xml: str) -> str:
     )
 
 
-def build_summary_xml(observations: dict) -> str:
+def build_summary_xml(observations: dict, include_assessment: bool = True) -> str:
     """Capture Summary: the counter sentence and the capture line, then the
     Hardware / Context table. The priority list stays in Excel Worst Offenders."""
     summary = observations.get("summary", {})
@@ -1462,11 +1470,11 @@ def build_summary_xml(observations: dict) -> str:
     xml = heading_paragraph_xml("Capture Summary", level=3)
     for line in lines:
         xml += text_paragraph_xml(line)
-    return xml + hardware_xml
+    return (build_assessment_by_area_xml(observations, level=3) if include_assessment else "") + xml + hardware_xml
 
 
 def build_assessment_by_area_xml(observations: dict, level: int) -> str:
-    """Assessment by Area, the reference table that closes each capture."""
+    """Assessment by Area, the reference table before counter detail."""
     table_xml = build_perfmon_summary_table_xml(observations)
     if not table_xml:
         return ""
@@ -1908,7 +1916,7 @@ def png_emu(path: Path, max_width_in: float) -> tuple[int, int]:
     return int(width_in * EMU_PER_INCH), int(height_in * EMU_PER_INCH)
 
 
-def new_drawing_xml(rid: str, picture_id: int, cx: int, cy: int) -> str:
+def new_drawing_xml(rid: str, picture_id: int, cx: int, cy: int, alt_text: str = "") -> str:
     """
     Build DrawingML for an inline image.
 
@@ -1922,7 +1930,7 @@ def new_drawing_xml(rid: str, picture_id: int, cx: int, cy: int) -> str:
         'xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing">'
         f'<wp:extent cx="{cx}" cy="{cy}"/>'
         '<wp:effectExtent l="0" t="0" r="0" b="0"/>'
-        f'<wp:docPr id="{picture_id}" name="PerfmonChart{picture_id}"/>'
+        f'<wp:docPr id="{picture_id}" name="PerfmonChart{picture_id}" descr="{xml_attr_escape(alt_text)}"/>'
         "<wp:cNvGraphicFramePr>"
         '<a:graphicFrameLocks xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main" noChangeAspect="1"/>'
         "</wp:cNvGraphicFramePr>"
@@ -2149,6 +2157,9 @@ def find_perfmon_append_insert_point(doc_xml: str) -> int:
             return pm.start()
 
     body_end = doc_xml.rfind("</w:body>")
+    section_properties = doc_xml.rfind("<w:sectPr", 0, body_end)
+    if section_properties >= 0 and re.fullmatch(r"<w:sectPr\b[^>]*(?:/>|>.*?</w:sectPr>)\s*", doc_xml[section_properties:body_end], flags=re.DOTALL):
+        return section_properties
     return body_end if body_end >= 0 else len(doc_xml)
 
 
@@ -2205,7 +2216,7 @@ def append_perfmon_capture_section(
         analyzed_system = "Server name missing"
     section_chunks.append(
         "<w:p><w:pPr><w:keepNext/></w:pPr>"
-        "<w:r><w:rPr><w:b/></w:rPr>"
+        "<w:r>"
         f"<w:t>{xml_text_escape(analyzed_system)}</w:t></w:r></w:p>"
     )
 
@@ -2218,7 +2229,7 @@ def append_perfmon_capture_section(
         rels_xml = add_image_relationship(rels_xml, rid, f"media/{img_file}")
         content_types_xml = ensure_png_content_type(content_types_xml)
         cx, cy = png_emu(png_path, max_chart_width_in)
-        xml = new_drawing_xml(rid=rid, picture_id=picture_id, cx=cx, cy=cy)
+        xml = new_drawing_xml(rid=rid, picture_id=picture_id, cx=cx, cy=cy, alt_text="PerfMon infrastructure score and statuses for the monitored areas." if png_path == scorecard_path else png_path.stem)
         next_rid += 1
         picture_id += 1
         return xml
@@ -2227,15 +2238,18 @@ def append_perfmon_capture_section(
         if scorecard_path and scorecard_path.exists():
             section_chunks.append(_append_png(zf, scorecard_path))
 
+        if scorecard_path and scorecard_path.exists():
+            section_chunks.append(perfmon_score_method_note_xml())
+
+        assessment_xml = build_assessment_by_area_xml(observations, level=3)
+        if assessment_xml:
+            section_chunks.append(assessment_xml)
         if include_automated_findings:
             findings_xml = build_perfmon_automated_findings_table_xml(observations)
             if findings_xml:
                 section_chunks.append(findings_xml)
 
-        if scorecard_path and scorecard_path.exists():
-            section_chunks.append(perfmon_score_method_note_xml())
-
-        summary_xml = build_summary_xml(observations)
+        summary_xml = build_summary_xml(observations, include_assessment=False)
         if summary_xml:
             section_chunks.append(summary_xml)
 
@@ -2246,10 +2260,6 @@ def append_perfmon_capture_section(
                 section_chunks.append(observation_paragraph_xml(section_data, 4))
             for png in pngs:
                 section_chunks.append(_append_png(zf, png))
-
-        assessment_xml = build_assessment_by_area_xml(observations, level=3)
-        if assessment_xml:
-            section_chunks.append(assessment_xml)
 
     insert_at = find_perfmon_append_insert_point(doc_xml)
     new_doc_xml = doc_xml[:insert_at] + "\n".join(section_chunks) + doc_xml[insert_at:]
@@ -2272,6 +2282,8 @@ def append_perfmon_capture_section(
         content_types_xml.encode("utf-8"),
     )
 
+    from Lib.Design.perfmon_report_layout import finalize_perfmon_layout
+    finalize_perfmon_layout(output_path, chart_folder, section_title=section_title)
     validate_docx_package(output_path)
     log.ok("Supplemental PerfMon capture appended")
     log.result("Word document", output_path)
@@ -2474,6 +2486,8 @@ def inject_perfmon_charts(
         content_types_xml.encode("utf-8"),
     )
 
+    from Lib.Design.perfmon_report_layout import finalize_perfmon_layout
+    finalize_perfmon_layout(output_path, chart_folder)
     validate_docx_package(output_path)
 
     log.ok("PerfMon graphs injected")

@@ -75,13 +75,13 @@ def test_shipped_template_matches_the_builder(tmp_path: Path) -> None:
     assert _style(shipped, "Normal") == _style(built, "Normal")
 
 
-def test_heading_levels_step_down_with_no_border(tmp_path: Path) -> None:
-    """Design 10-20, Section 1: H3, H4 and H5 are 16, 14 and 12 pt, no border."""
+def test_approved_section_and_subheading_styles(tmp_path: Path) -> None:
+    """The 10-22 approval uses 20pt sections and 12pt subheadings."""
     xml = _styles_xml(build_style_template.build(tmp_path / "style.docx"))
     for style_id, half_points, before, after in (
-        ("Heading3", "32", "360", "120"),
-        ("Heading4", "28", "240", "80"),
-        ("Heading5", "24", "200", "40"),
+        ("Heading3", "40", "400", "120"),
+        ("Heading4", "24", "240", "80"),
+        ("Heading5", "22", "200", "60"),
     ):
         style = _style(xml, style_id)
         assert f'<w:sz w:val="{half_points}"/>' in style

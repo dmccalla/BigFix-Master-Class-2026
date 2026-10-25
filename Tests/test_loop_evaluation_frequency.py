@@ -292,7 +292,7 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
     findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
     assert [c.text for c in findings.rows[1].cells] == [
         "CLT-01",
-        "Medium.\n4 active properties are set to every report or to under 15 minutes. "
+        "Medium.\n4 properties are set to every report or to under 15 minutes. "
         "See Evaluation Frequency.",
     ]
     assert not any(t.cell(0, 0).text == "Property" for t in doc.tables)
@@ -381,7 +381,7 @@ def test_infographic_lists_one_clt01_and_names_no_data_as_critical(
         {
             "id": "CLT-01",
             "text": "High. The client loop health score is below 90. "
-            "4 active properties are set to every report or to under 15 minutes.",
+            "4 properties are set to every report or to under 15 minutes.",
         }
     ]
     assert data["findingsLine"] == "Raises 1 High finding (2 reasons)"
@@ -409,22 +409,10 @@ def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
 
     doc = Document(str(word_output))
     text = "\n".join(p.text for p in doc.paragraphs)
-    assert "A property set to every report runs on every loop. So does a property" in text
-    assert "with no interval, because BigFix evaluates it every report." in text
+    assert f"This graphic counts {len(summary.counted):,} properties:" in text
     assert "uses the loop time" not in text
-
-    key = next(t for t in doc.tables if t.cell(0, 0).text == "Infographic tile")
-    rows = {row.cells[0].text: [c.text for c in row.cells] for row in key.rows}
-    assert rows["Findings raised"][1] == "CLT-01"
-    assert (
-        rows["Findings raised"][2]
-        == "CLT-01 is raised for any of three reasons. The health score is below "
-        "90. An active property is set to every report or to under 15 minutes. "
-        "More than 5% of devices have no usable loop data."
-    )
-    assert rows["Loop distribution"][2].endswith(
-        "The hatched part of Critical is devices with no usable data."
-    )
-
-    top10 = next(t for t in doc.tables if t.cell(0, 0).text == "Rank")
-    assert top10.rows[1].cells[3].text == f"{APP_PROPERTY} (analysis: {APP_ANALYSIS})"
+    descriptions = " ".join(shape._inline.docPr.get('descr', '') for shape in doc.inline_shapes)
+    assert f"{APP_PROPERTY} (analysis: {APP_ANALYSIS})" in descriptions
+    assert "Counted in CLT-01:" in descriptions
+    findings = next(t for t in doc.tables if t.cell(0,0).text == "Finding ID")
+    assert findings.rows[1].cells[0].text == "CLT-01"

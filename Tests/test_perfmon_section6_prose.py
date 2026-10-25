@@ -118,7 +118,7 @@ def test_o8_storage_operations() -> None:
         ),
     )
     assert text == (
-        "This counter has no limit. It is reviewed for saturation or flat-lining. "
+        "Context counter with no pass/fail limit. It is scored as Pass. The 5,000 transfers/sec guide value is for reference only. "
         "The highest reading was 1,924 and the average was 478 across 59 readings."
     )
 
@@ -167,11 +167,5 @@ def test_scorecard_tile_and_scoring_line(monkeypatch, tmp_path) -> None:
     tile = data["counters"][0]
     assert tile[2] == "~5,000/s"
     assert tile[4] == 8
-    assert data["scoringLine"] == (
-        "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 Critical. "
-        "Points per area: Pass 100, Advisory 55, Cannot Verify 25, Fail 0."
-    )
-    assert data["sourceLine"] == (
-        "Values are capture averages from Assessment by Area. Every reading is in "
-        "the Excel sheet Raw Data."
-    )
+    assert "scoringLine" not in data
+    assert "sourceLine" not in data

@@ -41,7 +41,7 @@ def _rows(results: list[str]) -> list[loop.LoopOffenderSummary]:
         (
             [SITE] * 8 + [ANALYSIS, RETRIEVED],
             "8 of these 10 are site evaluations. 1 is an analysis property and 1 is "
-            "a retrieved property.",
+            "a retrieved property. Retrieved properties include reserved properties.",
         ),
         (
             [SITE] * 7 + [ANALYSIS] * 2 + [OTHER],
@@ -51,10 +51,10 @@ def _rows(results: list[str]) -> list[loop.LoopOffenderSummary]:
         (
             [SITE] * 5 + [ANALYSIS] * 3 + [RETRIEVED, OTHER],
             "5 of these 10 are site evaluations. 3 are analysis properties, 1 is a "
-            "retrieved property and 1 is another evaluation.",
+            "retrieved property and 1 is another evaluation. Retrieved properties include reserved properties.",
         ),
         ([SITE] * 10, "10 of these 10 are site evaluations."),
-        ([RETRIEVED], "1 of these 1 is a retrieved property."),
+        ([RETRIEVED], "1 of these 1 is a retrieved property. Retrieved properties include reserved properties."),
     ],
 )
 def test_top10_kind_sentence_accounts_for_every_row(
@@ -84,15 +84,8 @@ def test_excel_health_summary_calls_the_loop_groups_groups() -> None:
     assert '"Group": "Healthy"' in source
 
 
-def test_loop_scoring_line_uses_the_score_points() -> None:
-    assert loop.LOOP_SCORING_LINE == (
-        "Score ranges: 90 to 100 Healthy, 70 to 89 Warning, 0 to 69 Critical. Points per "
-        "device: Healthy 100, Good 85, Warning 67, Critical 34."
-    )
-
-
-def test_cp25_source_line() -> None:
-    assert loop.LOOP_SOURCE_LINE == (
-        "Numbers from the Loop Health table. Every device is in the Excel sheet "
-        "Source Data."
-    )
+def test_loop_graphic_has_no_source_or_scoring_prose():
+    source = loop.Path(loop.__file__).read_text(encoding="utf-8")
+    assert '"scoringLine":' not in source
+    assert '"sourceLine":' not in source
+    assert loop.LOOP_GROUP_POINTS == {"Healthy": 100, "Good": 85, "Warning": 67, "Critical": 34}

@@ -76,7 +76,7 @@ def test_counter_is_not_scored_without_physical_memory() -> None:
     assert finding["Status"] == "Not Available"
     assert finding["NotScoredReason"] == perfmon.MEMORY_NOT_SUPPLIED
     assert finding["PeakViolationWindow"] == (
-        f"Not scored: {perfmon.MEMORY_NOT_SUPPLIED}"
+        f"Not compared with the limit: {perfmon.MEMORY_NOT_SUPPLIED}"
     )
 
 
@@ -130,7 +130,7 @@ def test_not_scored_strip_names_the_reason() -> None:
     message, label, _color = perfmon.zero_counter_strip_text(
         USAGE, False, perfmon.MEMORY_NOT_SUPPLIED
     )
-    assert message == f"Not scored: {perfmon.MEMORY_NOT_SUPPLIED}"
+    assert message == f"Not compared with the limit: {perfmon.MEMORY_NOT_SUPPLIED}"
     assert label == "CANNOT VERIFY"
 
 
@@ -140,3 +140,69 @@ def test_scored_observation_keeps_the_physical_memory_basis() -> None:
 
     assert observation["status"] == "Critical"
     assert "a limit of 5% of physical memory" in observation["observation"]
+
+
+def test_missing_memory_strip_keeps_reason_result_and_standard_separate(tmp_path, monkeypatch):
+    from matplotlib.figure import Figure
+
+    saved = []
+    original = Figure.savefig
+
+    def inspect(figure, *args, **kwargs):
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        boxes = [(text.get_text(), text.get_window_extent(renderer)) for text in figure.texts]
+        for index, (left_text, left) in enumerate(boxes):
+            for right_text, right in boxes[index + 1:]:
+                assert not left.overlaps(right), (left_text, right_text)
+        saved.extend(text for text, _ in boxes)
+        return original(figure, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", inspect)
+    perfmon.render_zero_counter_strip(
+        USAGE, str(tmp_path / "missing_memory.png"), _frame([1, 1], None)["Time"],
+        {"label": "5% of physical memory"}, "06-14-2026 20:00 to 20:01",
+        True, sample_count=2, not_scored_reason=perfmon.MEMORY_NOT_SUPPLIED,
+    )
+    assert "CANNOT VERIFY" in saved
+    assert f"Not compared with the limit: {perfmon.MEMORY_NOT_SUPPLIED}" in saved
+
+
+@pytest.mark.parametrize("memory_gb", [12, 128])
+def test_nonzero_paging_plot_keeps_footer_legend_and_axis_labels_separate(tmp_path, monkeypatch, memory_gb):
+    from matplotlib.figure import Figure
+
+    frame = _frame([47.0, 48.0, 47.5], [(memory_gb + 4) * GIB] * 3)
+    chart, findings = perfmon.analyze(
+        frame, [USAGE], memory_gb, 0, False, 10, 0.98, 1.15,
+        "06-14-2026 20:00", "06-14-2026 20:03", "Parameter Supplied",
+        "Not supplied", "Not supplied",
+    )
+    inspected = []
+    original = Figure.savefig
+
+    def inspect(figure, *args, **kwargs):
+        figure.canvas.draw()
+        renderer = figure.canvas.get_renderer()
+        footer = next(t for t in figure.texts if t.get_text().startswith("Y-Axis:"))
+        footer_box = footer.get_window_extent(renderer)
+        axes = figure.axes[0]
+        legend_box = axes.get_legend().get_window_extent(renderer)
+        assert not footer_box.overlaps(legend_box)
+        for tick in axes.get_xticklabels():
+            if tick.get_visible() and tick.get_text():
+                assert not legend_box.overlaps(tick.get_window_extent(renderer))
+        for box in (footer_box, legend_box):
+            assert figure.bbox.contains(box.x0, box.y0)
+            assert figure.bbox.contains(box.x1, box.y1)
+        inspected.append(footer.get_text())
+        return original(figure, *args, **kwargs)
+
+    monkeypatch.setattr(Figure, "savefig", inspect)
+    perfmon.export_png_charts(
+        chart, [USAGE], findings, str(tmp_path / 'Charts'), 10, 0.98, 1.15,
+        "06-14-2026 20:00", "06-14-2026 20:03", memory_gb=memory_gb,
+    )
+    assert len(inspected) == 1
+    assert "Actual peak:" in inspected[0]
+    assert "physical memory" in inspected[0]

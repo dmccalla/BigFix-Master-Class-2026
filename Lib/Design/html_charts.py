@@ -44,6 +44,7 @@ from pathlib import Path
 
 from Lib.Core.subprocess_window import CREATE_NO_WINDOW
 from Lib.Design import status_spine
+from Lib.Design.progress_bars import css_tokens as progress_bar_css
 
 _ROOT = Path(__file__).resolve().parents[2]
 _TEMPLATE = _ROOT / "Assets" / "chart_template.html"
@@ -92,12 +93,22 @@ def _build_html(
     the card content reflows (sub-text wraps, cards grow taller): only width
     changes, not the design's palette.
     """
-    template = _TEMPLATE.read_text(encoding="utf-8")
+    template_path = (
+        Path(__file__).with_name("client_detail_template.html")
+        if chart == "clientdetail" else _TEMPLATE
+    )
+    template = template_path.read_text(encoding="utf-8")
     payload = json.dumps({"chart": chart, **data})
     spine = json.dumps(status_spine.chart_palette())
     floor = type_floor_css_px or (_TYPE_FLOOR_NATIVE_PX / _DEFAULT_SCALE)
     scale = _TYPE_SCALE if type_scale is None else type_scale
-    html = template.replace("<!--__FONTFACE__-->", _fontface()).replace(
+    if chart in {"clientdetail", "loop", "filldb"}:
+        from Lib.Design.approved_fonts import fontface_css
+        fonts = fontface_css(_FONT_FILES)
+        template = template.replace("'Roboto Condensed'", "'Aptos'").replace("'Roboto'", "'Aptos'")
+    else:
+        fonts = _fontface()
+    html = template.replace("<!--__FONTFACE__-->", fonts).replace(
         "/*__DATA__*/",
         (
             f"window.SPINE = {spine};\n"
@@ -106,6 +117,7 @@ def _build_html(
             f"window.DATA = {payload};"
         ),
     )
+    html = html.replace("</head>", f"<style>{progress_bar_css()}</style></head>", 1)
     if card_width:
         html = html.replace(
             "</head>",

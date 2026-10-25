@@ -111,4 +111,4 @@ def test_custom_flag_count_is_not_replaced_with_source_site_count():
         loop.property_interval_band_counts(properties)["6 hours or longer"]["custom"]
         == 1
     )
-    assert "0 custom-flagged" in loop._properties_value(pressure)
+    assert "0 with the BigFix custom flag" in loop._properties_value(pressure)

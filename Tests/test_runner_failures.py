@@ -72,7 +72,11 @@ class ChildOutputs:
             elif self.state == "directory":
                 path.mkdir()
         else:
-            path.write_bytes(b"artifact")
+            if path.suffix == ".docx":
+                from docx import Document
+                Document().save(path)
+            else:
+                path.write_bytes(b"artifact")
 
     def __call__(self, script: Path, args: list[str], log=None) -> int:
         self.calls.append(script.name)

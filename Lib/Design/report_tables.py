@@ -20,7 +20,8 @@ tables and to BigFixContent data tables with a percent width. A column is right
 aligned, header and cells, when every filled body cell is a number, a number
 with a unit or a time. Every other column is left aligned. A percent-width
 table that sets the alignment of its own cells (the Check Results dashboard
-tables) keeps it, and each header takes the alignment of its column.
+tables) keeps it, and each header takes the alignment of its column. The
+Version column in Document Control is centered, including its header.
 
 Tables with no style and tables in any other style are left alone. Tell the
 groups apart by style, width type and the table's own formatting, never by the
@@ -434,6 +435,9 @@ def _apply_layout(tbl) -> None:
                 _child(tc_pr, "noWrap", _TCPR_ORDER)
 
 
+CENTERED_COLUMNS = {("Version", "Date", "Notes"): (0,)}
+
+
 def _apply_column_alignment(tbl) -> None:
     rows = tbl.findall(W + "tr")
     grid = tbl.find(W + "tblGrid")
@@ -441,9 +445,13 @@ def _apply_column_alignment(tbl) -> None:
     if not rows or not column_count:
         return
     numbers = _number_columns(rows, column_count)
+    centered = CENTERED_COLUMNS.get(header_key(rows), ())
     for tr in rows:
         for tc, column, span in _row_cells(tr):
-            _align_cell(tc, "right" if column in numbers and span == 1 else "left")
+            alignment = "right" if column in numbers and span == 1 else "left"
+            if span == 1 and column in centered:
+                alignment = "center"
+            _align_cell(tc, alignment)
 
 
 _SAME_ALIGNMENT = {"start": "left", "end": "right"}

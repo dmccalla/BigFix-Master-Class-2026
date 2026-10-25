@@ -21,8 +21,8 @@ application subdirectory, the helper path starts with `../.github`.
 
 ## Local report checks
 
-Run from the application directory: `Report Builder` in Platform, or the
-repository root in TA and Master Class. Use the frozen development environment. Set
+Run from this application's repository root. Use the frozen development
+environment. Set
 `WORKBENCH_RUN_DELIVERY=1` and `WORKBENCH_DELIVERY_OUTPUT` to a short writable
 folder, then run `uv run --frozen python -m pytest -q Tests/test_client_delivery.py`.
 Without the setting, the fast known-answer checks still run; browser builds

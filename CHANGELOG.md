@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Accept both captured master-operator analyses labels. Group relay names without case differences and round displayed hours consistently. Keep local validation instructions specific to this application.
+
 - Reconcile delivery documentation with manual workflows, update the current Deployment Information contract, and distinguish shared guide rules from product scope and informational storage checks.
 
 - Enlarged report chart legend dots for readability at their Word placement size.

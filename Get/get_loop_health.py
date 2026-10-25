@@ -60,6 +60,7 @@ import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
+from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -478,7 +479,10 @@ def format_duration_for_report(seconds: float | None) -> str:
             hour_count = int(round(hours))
             unit = "hour" if hour_count == 1 else "hours"
             return f"{hour_count} {unit}"
-        return f"{hours:.1f} hours"
+        rounded = (Decimal(str(seconds_float)) / Decimal(3600)).quantize(
+            Decimal("0.1"), rounding=ROUND_HALF_UP
+        )
+        return f"{rounded:.1f} hours"
 
     return convert_to_hhmmss(seconds_float)
 
@@ -1181,7 +1185,7 @@ def parse_actionsite_pressure(folder: Path | None) -> ActionSitePressure | None:
         master_operator_analyses=_first_int_from_latest_file(
             folder,
             content_patterns,
-            r"Total Number of Master Operator Analyses\s*:\s*([\d,]+)",
+            r"(?:Total )?Number of Master Operator Analyses\s*:\s*([\d,]+)",
         ),
         content_captured=_content_capture_time(folder, content_patterns),
     )
@@ -2454,7 +2458,7 @@ def normalize_relay_name(value: Any) -> str:
         text = text.split("/", 1)[0].strip()
     if ":" in text and not re.match(r"^\[[0-9a-fA-F:]+\]", text):
         text = text.split(":", 1)[0].strip()
-    return text or "Not reported"
+    return text.casefold() or "Not reported"
 
 
 def ipv4_subnet_24(value: Any) -> str:

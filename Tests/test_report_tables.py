@@ -186,7 +186,7 @@ def test_note_under_a_table_drops_the_spacer_and_uses_4_and_12_pt() -> None:
     document = Document()
     rows = [[f"relay{i:02d}", "1"] for i in range(11)]
     loop.add_capped_rollup_table(
-        document, "Relays", "Top 10 Relays", ["Relay", "Devices"], rows, "relays", "Sheet"
+        document, "Relays", "Top 10 Relays", ["Relay", "Devices"], rows, "relays"
     )
     body = [el for el in document.element.body if el.tag != W + "sectPr"]
     assert body[-2].tag == W + "tbl"
@@ -366,6 +366,32 @@ def test_section_health_counts_stay_centered() -> None:
     assert _jc(body.findall(W + "tc")[1]) == "center"
 
 
+def test_pre_aligned_percent_header_still_gets_compact_spacing() -> None:
+    tbl = _center_header(
+        _table(
+            "BigFixContent",
+            '<w:tblW w:w="5000" w:type="pct"/>',
+            [["ID", "Component", "Status"], ["RSD-38", "Server", "Enabled"]],
+        )
+    )
+    header, body = tbl.findall(W + "tr")
+    original_body = etree.tostring(body)
+    original_grid = etree.tostring(tbl.find(W + "tblGrid"))
+    for paragraph in header.iter(W + "p"):
+        rt._set(rt._child(paragraph.find(W + "pPr"), "spacing", rt._PPR_ORDER), after="240")
+    rt.normalize_table(tbl)
+    assert etree.tostring(body) == original_body
+    assert etree.tostring(tbl.find(W + "tblGrid")) == original_grid
+    assert header.find(f"{W}trPr/{W}tblHeader") is not None
+    assert header.find(f"{W}trPr/{W}jc").get(W + "val") == "left"
+    for paragraph in header.iter(W + "p"):
+        assert paragraph.find(f"{W}pPr/{W}pStyle").get(W + "val") == rt.HEADER_PARAGRAPH_STYLE
+        assert paragraph.find(f"{W}pPr/{W}spacing") is None
+    before = etree.tostring(tbl)
+    rt.normalize_table(tbl)
+    assert etree.tostring(tbl) == before
+
+
 def test_findings_source_id_cells_do_not_wrap() -> None:
     tbl = _table(
         "BigFixContent",
@@ -450,3 +476,18 @@ def test_label_rows_merged_across_columns_do_not_decide_alignment() -> None:
     header, _, body = tbl.findall(W + "tr")
     assert [_jc(tc) for tc in header.findall(W + "tc")] == ["left", "right", "left"]
     assert [_jc(tc) for tc in body.findall(W + "tc")] == ["left", "right", "left"]
+
+
+def test_capacity_configuration_keeps_the_widths_selected_for_host_names():
+    table = _table(
+        "BigFixContent", '<w:tblW w:w="10800" w:type="dxa"/>',
+        [["Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"],
+         ["BFPLUGINPORTAL", "Plugin Portal, BES Explorer", "4", "8 GB", "100 GB", "Virtual", "Capture"]],
+    )
+    selected = (2160, 2808, 936, 864, 1296, 1296, 1440)
+    for column, width in zip(table.find(W + "tblGrid"), selected):
+        column.set(W + "w", str(width))
+    assert rt.normalize_table(table)
+    assert tuple(int(column.get(W + "w")) for column in table.find(W + "tblGrid")) == selected
+    for row in table.findall(W + "tr"):
+        assert tuple(int(cell.find(W + "tcPr/" + W + "tcW").get(W + "w")) for cell in row.findall(W + "tc")) == selected

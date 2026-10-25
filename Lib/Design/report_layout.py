@@ -183,19 +183,21 @@ def configure_heading_styles(document, *, client_mini=False):
         ("Heading 1", 28, heading_family, 0, 12),
         ("Heading 2", 24, heading_family, 20, 6),
         ("Heading 3", 20, heading_family, 20, 6),
-        ("Heading 4", 12, heading_family, 12, 4),
+        ("Heading 4", 14, heading_family, 16, 6),
         ("Heading 5", 11, heading_family, 10, 3),
     ]
     if client_mini:
         specifications[1] = ("Heading 2", 20, heading_family, 20, 6)
-        specifications[2] = ("Heading 3", 12, heading_family, 12, 4)
+        specifications[2] = ("Heading 3", 14, heading_family, 16, 6)
     for name, points, family, before, after in specifications:
         style = document.styles[name]
         style.font.name = family
         style.font.size = Pt(points)
         style.font.bold = True
         style.font.italic = False
-        style.font.color.rgb = RGBColor.from_string("000032")
+        style.font.color.rgb = RGBColor.from_string(
+            "007A8A" if name == "Heading 4" or (client_mini and name == "Heading 3") else "000032"
+        )
         fonts = style.element.get_or_add_rPr().find(qn("w:rFonts"))
         for key in list(fonts.attrib):
             del fonts.attrib[key]
@@ -216,6 +218,56 @@ def configure_heading_styles(document, *, client_mini=False):
         old = ppr.find(qn("w:pBdr"))
         if old is not None:
             ppr.remove(old)
+    configure_capacity_host_styles(document)
+    compact_table_header_style(document)
+
+
+def configure_capacity_host_styles(document):
+    """Separate each server comparison without adding navigation headings or boxes."""
+    from docx.enum.style import WD_STYLE_TYPE
+
+    for name, points, bold, before, after in (
+        ("Capacity Host", 12, True, 14, 2),
+        ("Capacity Host Details", 11, False, 0, 4),
+    ):
+        style = document.styles[name] if name in document.styles else document.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+        style.base_style = document.styles["Normal"]
+        style.font.size = Pt(points)
+        style.font.bold = bold
+        style.font.italic = False
+        style.font.color.rgb = RGBColor.from_string("000032")
+        style.paragraph_format.space_before = Pt(before)
+        style.paragraph_format.space_after = Pt(after)
+        style.paragraph_format.line_spacing = 1
+        style.paragraph_format.keep_with_next = True
+        style.paragraph_format.keep_together = True
+
+
+def compact_table_header_style(document):
+    """Let the shared table style provide compact, wrapped header rows."""
+    from Lib.Design.report_tables import ensure_header_paragraph_style
+
+    ensure_header_paragraph_style(document.styles.element)
+    table_style = next((style for style in document.styles if style.style_id == "BigFixContent"), None)
+    if table_style is None:
+        return
+    style = table_style.element
+    first = next(
+        (node for node in style.findall(qn("w:tblStylePr"))
+         if node.get(qn("w:type")) == "firstRow"), None
+    )
+    if first is None:
+        return
+    properties = first.find(qn("w:pPr"))
+    if properties is None:
+        properties = OxmlElement("w:pPr")
+        first.insert(0, properties)
+    spacing = properties.find(qn("w:spacing"))
+    if spacing is None:
+        spacing = OxmlElement("w:spacing")
+        properties.append(spacing)
+    for key, value in (("before", "0"), ("after", "0"), ("line", "240"), ("lineRule", "auto")):
+        spacing.set(qn("w:" + key), value)
 
 
 def apply_report_hierarchy(document):
@@ -372,7 +424,7 @@ def normalize_section_spacing(document):
             if extents and all(int(e.get("cx", "0")) >= 914400 and int(e.get("cy", "0")) <= 12700 for e in extents):
                 paragraph = Paragraph(rule, document)
                 paragraph.paragraph_format.space_before = Pt(0)
-                paragraph.paragraph_format.space_after = Pt(0)
+                paragraph.paragraph_format.space_after = Pt(12)
                 paragraph.paragraph_format.line_spacing = Pt(6)
                 paragraph.paragraph_format.keep_with_next = True
 
@@ -508,16 +560,3 @@ def add_callout(document, text, kind="NOTE"):
     paragraph.add_run(text)
     document.add_paragraph().paragraph_format.space_after = Pt(4)
     return table
-
-
-def update_workbook_pointer(path, workbook_name):
-    """Keep the displayed supporting workbook name aligned with builder renames."""
-    from docx import Document
-
-    document = Document(path)
-    for paragraph in document.paragraphs:
-        if paragraph.text.startswith("Supporting workbook:"):
-            paragraph.text = "Supporting workbook: " + workbook_name + "."
-            paragraph.paragraph_format.space_before = Pt(6)
-            paragraph.runs[-1].underline = True
-    document.save(path)

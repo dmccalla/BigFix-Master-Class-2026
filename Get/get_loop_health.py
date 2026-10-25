@@ -4798,7 +4798,6 @@ def add_capped_rollup_table(
     headers: list[str],
     rows: list[list[str]],
     noun: str,
-    sheet: str,
 ) -> None:
     """Write a worst-first rollup table, keeping only the top rows in the report."""
     capped = len(rows) > MINI_REPORT_ROLLUP_LIMIT
@@ -4812,10 +4811,7 @@ def add_capped_rollup_table(
         # Devices with no relay or no usable address are a group, not a relay or
         # subnet, so they are not counted in the note.
         named = sum(1 for row in rows if str(row[0]) not in UNREPORTED_GROUPS)
-        note = (
-            f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {named:,} {noun}. "
-            f"Every {noun[:-1]} is in the Excel sheet {sheet}."
-        )
+        note = f"Showing {MINI_REPORT_ROLLUP_LIMIT} of {named:,} {noun}."
         unreported = sum(
             _rollup_device_count(row) for row in rows if str(row[0]) in UNREPORTED_GROUPS
         )
@@ -4870,8 +4866,7 @@ def generate_word(
     title = (
         f"This analysis covers {metrics.score_total_devices:,} BigFix Clients from "
         f"{metrics.report_start_text} to {metrics.report_end_text}. It was generated "
-        f"on {metrics.generated_at_text}. The Client Performance workbook holds the "
-        "supporting data."
+        f"on {metrics.generated_at_text}."
     )
     if not loop_offenders:
         title += (
@@ -4959,7 +4954,7 @@ def generate_word(
         "as a reason."
     )
 
-    client_heading('How the Score Is Calculated', 'How the Score Is Calculated', 4)
+    client_heading('How the Score Is Calculated', 'How the Score Is Calculated', 3)
     document.add_paragraph(
         "Each device earns points for its group. Healthy earns 100, Good 85, "
         "Warning 67 and Critical 34. The score is the average across all devices."
@@ -5096,7 +5091,6 @@ def generate_word(
                 ],
                 udp_summary.relay_rows,
                 "relays",
-                "UDP Issues by Relay",
             )
 
         if udp_summary.subnet_rows:
@@ -5107,7 +5101,6 @@ def generate_word(
                 ["Subnet", "Not Receiving / Reported", "Serving Relays"],
                 udp_summary.subnet_rows,
                 "subnets",
-                "UDP Issues by Subnet",
             )
 
     if command_polling_summary:
@@ -5143,7 +5136,6 @@ def generate_word(
                 ["Relay", *POLLING_MINI_REPORT_HEADERS],
                 polling_mini_report_rows(command_polling_summary.relay_rows),
                 "relays",
-                "Polling by Relay",
             )
 
         if command_polling_summary.subnet_rows:
@@ -5154,7 +5146,6 @@ def generate_word(
                 ["Subnet", *POLLING_MINI_REPORT_HEADERS],
                 polling_mini_report_rows(command_polling_summary.subnet_rows),
                 "subnets",
-                "Polling by Subnet",
             )
 
     if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:

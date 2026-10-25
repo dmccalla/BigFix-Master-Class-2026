@@ -17,6 +17,7 @@ from lxml import etree
 from Lib.Design import html_charts
 from Lib.Design.report_layout import (
     add_callout,
+    compact_table_header_style,
     normalize_heading_typography,
     normalize_section_spacing,
 )
@@ -445,7 +446,6 @@ def apply_client_layout(
         or heading("Loop Health")
     )
     if score is not None and loop is not None:
-        score.style = document.styles["Heading 3"]
         nodes = [score._p]
         node = score._p.getnext()
         while node is not None:
@@ -538,10 +538,6 @@ def apply_client_layout(
             anchor.addnext(after)
             anchor.addnext(note._tbl)
             anchor.addnext(before)
-    workbook = document.add_paragraph(
-        "Supporting workbook: " + Path(output_path).with_suffix(".xlsx").name + "."
-    )
-    workbook.paragraph_format.space_before = Pt(6)
     # Callouts use the same treatment as the full-report template.
     source_notes = [
         p
@@ -590,7 +586,9 @@ def apply_client_layout(
                     for paragraph in cell.paragraphs:
                         paragraph.paragraph_format.keep_with_next = True
 
-    _standalone_heading_levels(document)
+    compact_table_header_style(document)
+    normalize_heading_typography(document)
+    normalize_section_spacing(document)
     from Lib.Design.report_layout import bind_report_bullets
 
     bind_report_bullets(document)
@@ -626,46 +624,3 @@ def _guidance_block(nodes, tag):
         properties.insert(position, page_break)
     block.append(content)
     return block
-
-
-def _standalone_heading_levels(document):
-    """Use H1 title, H2 sections and H3 subsections in the mini report."""
-
-    styles = document.styles
-    for target, source, outline in (
-        ("Heading 2", "Heading 3", 1),
-        ("Heading 3", "Heading 4", 2),
-    ):
-        for tag in ("pPr", "rPr"):
-            previous = styles[target].element.find(qn("w:" + tag))
-            if previous is not None:
-                styles[target].element.remove(previous)
-            properties = styles[source].element.find(qn("w:" + tag))
-            if properties is not None:
-                styles[target].element.append(deepcopy(properties))
-        properties = styles[target].element.get_or_add_pPr()
-        level = properties.find(qn("w:outlineLvl"))
-        if level is None:
-            level = OxmlElement("w:outlineLvl")
-            properties.append(level)
-        level.set(qn("w:val"), str(outline))
-    for node in document.element.body.xpath(".//w:p[w:pPr/w:pStyle]"):
-        style = node.find(qn("w:pPr")).find(qn("w:pStyle"))
-        value = style.get(qn("w:val"))
-        if value in {"Heading3", "Heading4"}:
-            style.set(
-                qn("w:val"), {"Heading3": "Heading2", "Heading4": "Heading3"}[value]
-            )
-            if value == "Heading3":
-                previous = node.getprevious()
-                while (
-                    previous is not None
-                    and previous.tag == qn("w:p")
-                    and not _text(previous).strip()
-                    and not previous.xpath(".//w:drawing|.//w:pict|.//w:br|.//w:sectPr")
-                ):
-                    before = previous.getprevious()
-                    previous.getparent().remove(previous)
-                    previous = before
-    normalize_heading_typography(document)
-    normalize_section_spacing(document)

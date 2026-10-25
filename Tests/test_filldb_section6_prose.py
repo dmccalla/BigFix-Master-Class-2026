@@ -72,14 +72,12 @@ def test_object_health_names_no_poor_object() -> None:
 def test_title_paragraph() -> None:
     rows = [*GUIDE, {"FillDB Object": "Lines processed", "Count": "4237218"}]
     metadata = {"start": "11-16-2025 02:56", "end": "11-17-2025 15:57"}
-    assert filldb.filldb_title_paragraph(rows, metadata, True) == (
+    title = filldb.filldb_title_paragraph(rows, metadata)
+    assert title == (
         "This analysis covers a FillDB capture from 11-16-2025 02:56 to "
-        "11-17-2025 15:57. The analyzer processed 4,237,218 lines. FillDB writes no "
-        f"Excel. {filldb.CSV_SAVED_SENTENCE}"
+        "11-17-2025 15:57. The analyzer processed 4,237,218 lines."
     )
-    assert filldb.CSV_SAVED_SENTENCE not in filldb.filldb_title_paragraph(
-        rows, metadata, False
-    )
+    assert "Excel" not in title and "CSV" not in title
 
 
 def test_score_text_uses_ranges_not_bands() -> None:

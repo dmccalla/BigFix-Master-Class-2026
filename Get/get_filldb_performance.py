@@ -780,13 +780,12 @@ FILLDB_OBJECTS_LEAD = (
     "Health Check is the analyzer's own rating, shown as the analyzer writes it. "
     "Rows marked Not enough data are left out of the score."
 )
-CSV_SAVED_SENTENCE = "The source CSV is saved beside this Mini Report."
 
 
 def filldb_title_paragraph(
-    rows: list[dict[str, str]], metadata: dict[str, str], source_csv_saved: bool
+    rows: list[dict[str, str]], metadata: dict[str, str]
 ) -> str:
-    """FD-07: what the capture covers and where its raw data is."""
+    """Describe the capture without directing readers to consultant files."""
     sentences = []
     start = metadata.get("start", "")
     end = metadata.get("end", "")
@@ -795,9 +794,6 @@ def filldb_title_paragraph(
     lines = find_stat_value(rows, "Lines processed")
     if lines:
         sentences.append(f"The analyzer processed {lines:,.0f} lines.")
-    sentences.append("FillDB writes no Excel.")
-    if source_csv_saved:
-        sentences.append(CSV_SAVED_SENTENCE)
     return " ".join(sentences)
 
 
@@ -938,7 +934,6 @@ def write_word_output(
     chart_path: Path | None = None,
     metadata: dict[str, str] | None = None,
     stamp: str = "",
-    source_csv_saved: bool = False,
 ) -> None:
     document = (
         create_stub_document_from_template(template_path) if template_path else Document()
@@ -947,7 +942,7 @@ def write_word_output(
     add_stub_front_matter(document, "FillDB Performance Analysis", notice_text="")
     if stamp:
         stamp_docx_document(document, stamp)
-    document.add_paragraph(filldb_title_paragraph(rows, metadata or {}, source_csv_saved))
+    document.add_paragraph(filldb_title_paragraph(rows, metadata or {}))
     if chart_path:
         picture = document.add_picture(str(chart_path), width=usable_page_width(document))
         set_picture_alt_text(
@@ -1057,7 +1052,6 @@ def main() -> int:
             chart_path=chart_path,
             metadata=metadata,
             stamp=stamp_from_args(args),
-            source_csv_saved=source_csv.exists(),
         )
 
         log.ok("FillDB performance report built")

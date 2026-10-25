@@ -262,7 +262,7 @@ def test_repaired_context_preserves_loop_workbook_and_word(
         ]
         assert any(row[0] == "ActionSite size" for table in tables for row in table)
         pointers = [p.text for p in doc.paragraphs if p.text.startswith("Supporting workbook:")]
-        assert pointers == ["Supporting workbook: " + workbook.name + "."]
+        assert pointers == []
         # Output filenames differ between the two equivalent capture snapshots.
         paragraphs = [p.text for p in doc.paragraphs if not p.text.startswith("Supporting workbook:")]
         snapshots.append((values, paragraphs, tables))

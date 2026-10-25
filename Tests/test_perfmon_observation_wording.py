@@ -1,7 +1,7 @@
 # Copyright (c) 2026 Duncan McCalla
 # SPDX-License-Identifier: MIT
 
-"""PerfMon observations say sustained only when most readings were over."""
+"""PerfMon observations report exact counts without estimating duration."""
 
 from __future__ import annotations
 
@@ -23,20 +23,32 @@ def _finding(violations: int, samples: int = 59) -> dict:
     }
 
 
-def test_a_short_run_of_readings_is_not_called_sustained() -> None:
+def test_few_readings_are_reported_as_an_exact_count() -> None:
     text = perfmon.observation_for_findings("Storage Latency", [_finding(4)])[
         "observation"
     ]
 
     assert "sustained" not in text
     assert "4 of 59 readings (6.78%) were over the limit" in text
-    assert "They raised the average over the limit. The other 55 readings met" in text
+    assert "Peak: 40.7 ms. Breach window: 20:34:40 to 20:40:40." in text
+    assert "The other" not in text
     assert " -- " not in text
 
 
-def test_most_readings_over_reads_as_sustained() -> None:
+def test_most_readings_over_are_reported_as_an_exact_count() -> None:
     text = perfmon.observation_for_findings("CPU Privileged Time", [_finding(54)])[
         "observation"
     ]
 
-    assert "The average stayed over the limit for most of the capture." in text
+    assert "54 of 59 readings (91.5%) were over the limit." in text
+    assert "most of the capture" not in text
+    assert "Peak: 40.7%." in text
+
+
+def test_every_reading_over_is_reported_as_an_exact_count() -> None:
+    finding = _finding(59)
+    original = dict(finding)
+    text = perfmon.observation_for_findings("Storage Latency", [finding])["observation"]
+    assert "59 of 59 readings (100%) were over the limit." in text
+    assert "most of the capture" not in text
+    assert finding == original

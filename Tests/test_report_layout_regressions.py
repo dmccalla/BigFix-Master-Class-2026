@@ -11,7 +11,7 @@ from Lib.Design.report_layout import apply_report_hierarchy, finalize_report_doc
 def test_heading_sizes_descend_and_sections_use_spacing_without_rules():
     document=apply_report_hierarchy(Document())
     sizes=[document.styles[f'Heading {i}'].font.size.pt for i in range(1,6)]
-    assert sizes==[28,24,20,12,11]
+    assert sizes==[28,24,20,14,11]
     for level in (2,3):
         style = document.styles[f'Heading {level}']
         assert style.element.find(qn('w:pPr')).find(qn('w:pBdr')) is None
@@ -140,3 +140,35 @@ def test_tagged_headings_own_gaps_in_imported_web_text():
     assert explanation.paragraph_format.space_before == 0
     assert explanation._p.get_or_add_pPr().get_or_add_spacing().get(qn('w:beforeAutospacing')) == '0'
     assert content[0] is heading._p and explanation.text == 'The subsection explanation'
+
+
+def test_chapter_rule_reserves_space_before_an_immediate_note_table():
+    from docx.oxml import OxmlElement
+    from docx.shared import Pt
+
+    document = Document()
+    document.add_heading('Introduction', level=1)
+    document.add_paragraph('Previous chapter content')
+    label = document.add_paragraph('SECTION 11')
+    document.add_heading('Reference Data', level=1)
+    rule = document.add_paragraph()
+    drawing = OxmlElement('w:drawing')
+    anchor = OxmlElement('wp:anchor')
+    extent = OxmlElement('wp:extent')
+    extent.set('cx', '6838950')
+    extent.set('cy', '0')
+    anchor.append(extent)
+    drawing.append(anchor)
+    rule.add_run()._r.append(drawing)
+    table = document.add_table(rows=1, cols=1)
+    table.cell(0, 0).text = 'Existing chapter note'
+    table_before = table._tbl.xml
+
+    apply_report_hierarchy(document)
+    apply_report_hierarchy(document)
+
+    assert label.paragraph_format.page_break_before
+    assert rule.paragraph_format.line_spacing == Pt(6)
+    assert rule.paragraph_format.space_after == Pt(12)
+    assert rule.paragraph_format.keep_with_next
+    assert table._tbl.xml == table_before

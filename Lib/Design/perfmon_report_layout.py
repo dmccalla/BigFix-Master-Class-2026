@@ -86,21 +86,6 @@ def finalize_perfmon_layout(output_path, chart_folder, section_title=None):
             for run in paragraph.runs:
                 run.font.name = "Aptos"
                 run.font.size = Pt(8)
-        expected_workbook = Path(chart_folder).name.removesuffix('_Charts')+'.xlsx'
-        if not any(
-            p.text.startswith("Supporting workbook:") and expected_workbook in p.text for p in document.paragraphs
-        ):
-            workbook = document.add_paragraph(
-                "Supporting workbook: "
-                + Path(chart_folder).name.removesuffix("_Charts")
-                + ".xlsx."
-            )
-            workbook.paragraph_format.space_before = Pt(6)
-            workbook.runs[-1].underline = True
-    # Explanatory captions need visible separation from the following table.
-    for paragraph in document.paragraphs:
-        if paragraph.text.startswith(("Supporting workbook:", "Supporting CSV:")):
-            paragraph.paragraph_format.space_before = Pt(6)
     if changed:
         document.save(output_path)
         from Lib.Design.report_tables import normalize_docx_tables

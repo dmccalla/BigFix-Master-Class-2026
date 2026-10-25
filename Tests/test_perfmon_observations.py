@@ -1789,3 +1789,25 @@ def test_full_report_puts_assessment_by_area_after_the_last_area() -> None:
     assert "<w:tbl>" in updated
     again = inject_perfmon_charts.insert_perfmon_assessment(updated, observations)
     assert again.count("Assessment by Area") == 1
+
+
+@pytest.mark.parametrize("over,total,percentage", [(60, 60, 100), (48, 60, 80), (10, 100, 10)])
+def test_critical_observation_states_measured_counts_without_estimating_duration(
+    over, total, percentage
+):
+    finding = {
+        "Counter": "Paging_File_Total_Usage_Peak", "Status": "Critical",
+        "Average": 8.1, "Maximum": 12.2, "Violations": over,
+        "ViolationPercent": percentage, "Warnings": 0, "WarningPercent": 0,
+        "Samples": total, "Threshold": "<= 5%", "Confidence": "High",
+        "PeakViolationWindow": "06-14-2026 10:00 - 06-14-2026 11:00",
+    }
+    original = dict(finding)
+    result = get_perfmon_charts.observation_for_findings("Memory Health", [finding])
+    text = result["observation"]
+    assert f"{over} of {total} readings ({get_perfmon_charts.fmt_number(percentage)}%) were over the limit." in text
+    assert "Peak: 12.2%. Breach window: 06-14-2026 10:00 to 06-14-2026 11:00." in text
+    assert "most of the capture" not in text
+    assert "The other" not in text
+    assert finding == original
+    assert result["status"] == "Critical"

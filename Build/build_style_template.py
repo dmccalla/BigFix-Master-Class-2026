@@ -74,7 +74,7 @@ TABLE_STYLE_XML = f"""
   <w:tblStylePr w:type="firstRow">
     <w:pPr>
       <w:wordWrap/>
-      <w:spacing w:before="80" w:after="80" w:line="240" w:lineRule="auto"/>
+      <w:spacing w:before="0" w:after="0" w:line="240" w:lineRule="auto"/>
       <w:jc w:val="left"/>
     </w:pPr>
     <w:rPr>

@@ -43,6 +43,7 @@ W = f"{{{W_NS}}}"
 
 TEXT_WIDTH_DXA = 10800
 TABLE_STYLE = "BigFixContent"
+HEADER_PARAGRAPH_STYLE = "ReportTableHeader"
 
 # Schema order of the children that this module sets, so an inserted element
 # lands where Word expects it.
@@ -164,6 +165,9 @@ _COMMAND_POLLING = (
 )
 FIXED_WIDTHS: dict[tuple[str, ...], tuple[int, ...]] = {
     ("Version", "Date", "Notes"): (1200, 1800, 7800),
+    ("Relay", "Impact", "Observed condition"): (2200, 1300, 7300),
+    ("ID", "Description", "Publish Date"): (2200, 6600, 2000),
+    ("ID", "Description", "Notes", "Publish Date"): (1800, 4600, 2400, 2000),
     ("Area", "Findings", "Source IDs"): (3000, 3000, 4800),
     ("Source ID", "Description", "Impact", "Suggested Remediation"): (
         1500,
@@ -224,6 +228,7 @@ KEEP_PROPORTIONS: frozenset[tuple[str, ...]] = frozenset(
     {
         ("Infrastructure", "Operational Maturity"),
         ("Reader", "Start Here", "Purpose"),
+        ("Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"),
         ("ID", "Check Instructions", "Notes and Findings"),
         ("Resource Name", "Description"),
     }
@@ -403,8 +408,32 @@ def _keep_header_with_body(tbl) -> None:
         return
     tr_pr = _header_row_properties(rows[0])
     _set(_child(tr_pr, "cantSplit", _TRPR_ORDER), val="1")
+    _child(tr_pr, "tblHeader", _TRPR_ORDER)
+    _set(_child(tr_pr, "jc", _TRPR_ORDER), val="left")
     for paragraph in rows[0].iter(W + "p"):
-        _child(_first_child(paragraph, "pPr"), "keepNext", _PPR_ORDER)
+        properties = _first_child(paragraph, "pPr")
+        _set(_child(properties, "pStyle", _PPR_ORDER), val=HEADER_PARAGRAPH_STYLE)
+        spacing = properties.find(W + "spacing")
+        if spacing is not None:
+            properties.remove(spacing)
+        _child(properties, "keepNext", _PPR_ORDER)
+
+
+def ensure_header_paragraph_style(styles) -> bool:
+    """Table headers must not inherit the body paragraph's surrounding gaps."""
+    before = etree.tostring(styles)
+    style = next((node for node in styles.findall(W + "style") if node.get(W + "styleId") == HEADER_PARAGRAPH_STYLE), None)
+    if style is None:
+        style = etree.SubElement(styles, W + "style")
+        _set(style, type="paragraph", customStyle="1", styleId=HEADER_PARAGRAPH_STYLE)
+        _set(etree.SubElement(style, W + "name"), val="Report Table Header")
+        _set(etree.SubElement(style, W + "basedOn"), val="Normal")
+    properties = style.find(W + "pPr")
+    if properties is None:
+        properties = etree.SubElement(style, W + "pPr")
+    _child(properties, "keepNext", _PPR_ORDER)
+    _set(_child(properties, "spacing", _PPR_ORDER), before="0", after="0", line="240", lineRule="auto")
+    return etree.tostring(styles) != before
 
 
 def _apply_layout(tbl) -> None:
@@ -497,7 +526,9 @@ def normalize_table(tbl) -> bool:
     if width_type is None:
         return False
     if not aligns_columns(tbl):
-        return _header_follows_column(tbl)
+        _header_follows_column(tbl)
+        _keep_header_with_body(tbl)
+        return True
     if in_scope(tbl):
         _apply_layout(tbl)
     _keep_header_with_body(tbl)
@@ -571,11 +602,15 @@ def normalize_docx_tables(docx_path: Path) -> int:
         changed = normalize_report_tables(root)
         if not changed:
             return 0
+        styles = etree.fromstring(zin.read("word/styles.xml"))
+        ensure_header_paragraph_style(styles)
         data = _serialize(root)
         tmp_path = docx_path.with_name(f"{docx_path.name}.tmp")
         with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
-                payload = data if item.filename == "word/document.xml" else zin.read(item)
+                payload = data if item.filename == "word/document.xml" else (
+                    _serialize(styles) if item.filename == "word/styles.xml" else zin.read(item)
+                )
                 zout.writestr(item, payload)
     tmp_path.replace(docx_path)
     return changed

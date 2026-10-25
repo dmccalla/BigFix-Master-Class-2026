@@ -76,11 +76,11 @@ def test_shipped_template_matches_the_builder(tmp_path: Path) -> None:
 
 
 def test_approved_section_and_subheading_styles(tmp_path: Path) -> None:
-    """The 10-22 approval uses 20pt sections and 12pt subheadings."""
+    """Use 20pt sections and the more visible 14pt subheadings."""
     xml = _styles_xml(build_style_template.build(tmp_path / "style.docx"))
     for style_id, half_points, before, after in (
         ("Heading3", "40", "400", "120"),
-        ("Heading4", "24", "240", "80"),
+        ("Heading4", "28", "320", "120"),
         ("Heading5", "22", "200", "60"),
     ):
         style = _style(xml, style_id)

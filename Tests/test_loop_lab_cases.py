@@ -188,11 +188,9 @@ def test_rollup_note_counts_only_named_relays(tmp_path: Path) -> None:
         ["Relay", "Devices"],
         rows,
         "relays",
-        "Polling by Relay",
     )
 
     text = "\n".join(p.text for p in document.paragraphs)
     assert (
-        "Showing 10 of 11 relays. Every relay is in the Excel sheet Polling by "
-        "Relay. 77 devices did not report a relay."
+        "Showing 10 of 11 relays. 77 devices did not report a relay."
     ) in text

@@ -43,7 +43,7 @@ def test_hierarchy_preserves_body_defaults_and_existing_font():
     assert etree.tostring(defaults) == before
     assert document.styles["Heading 3"].font.name == "Aptos"
     assert document.styles["Heading 3"].font.size.pt == 20
-    assert document.styles["Heading 4"].font.size.pt == 12
+    assert document.styles["Heading 4"].font.size.pt == 14
 
 
 def test_bullet_definitions_are_ordered_and_paragraphs_have_list_references():
@@ -123,13 +123,13 @@ def test_frequency_explanations_and_guidance_survive_both_paths(
     assert "Reading the Infographic" in text
     assert "Reserved properties" in text
     assert "This Mini Report rates" not in text
-    # The first content section follows the title without skipped outline levels.
+    # Full and mini reports preserve the same H3 sections and H4 child headings.
     headings = [p for p in document.paragraphs if p.style.name.startswith("Heading")]
     assert headings[0].style.name == "Heading 1"
     assert headings[1].text == "How the Score Is Calculated"
-    assert headings[1].style.name == "Heading 2"
-    assert document.styles["Heading 2"].font.size.pt == 20
-    assert document.styles["Heading 3"].font.size.pt == 12
+    assert headings[1].style.name == "Heading 3"
+    assert document.styles["Heading 3"].font.size.pt == 20
+    assert document.styles["Heading 4"].font.size.pt == 14
     # Guidance remains present even though it sits in a tagged Word block.
     guidance = etree.parse(
         str(Path(loop.__file__).parents[1] / "Lib/Design/client_guidance.xml")

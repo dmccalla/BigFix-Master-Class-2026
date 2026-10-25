@@ -1492,8 +1492,6 @@ def run_loop_pipeline(
         output_dir / f"{prefix}_Client_Loop.png",
         loop_docx,
     )
-    from Lib.Design.report_layout import update_workbook_pointer
-    update_workbook_pointer(loop_docx, f"{prefix}_Client_Loop.xlsx")
     if log:
         log.info("Loop docx", str(loop_docx))
 

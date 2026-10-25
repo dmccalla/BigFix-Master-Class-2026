@@ -40,6 +40,7 @@
   .eyebrow{font-weight:700;font-size:15.5px;letter-spacing:.12em;text-transform:uppercase;color:#0C7E88;}
   .pill{display:inline-flex;align-items:center;gap:9px;white-space:nowrap;font-weight:700;font-size:15px;letter-spacing:0;padding:9px 17px;border-radius:24px;background:var(--status-bg);color:var(--ink);}
   .pill .dot{width:10px;height:10px;border-radius:50%;}
+  .legend-dot{width:28px;height:28px;border-radius:50%;flex:none;}
   /* .st-* status pills are generated at render from window.SPINE (status_spine.py
      is the single source) by injectSpineCss() -- one edit there re-themes them all. */
   .scoreNum{font-family:'Roboto Condensed',sans-serif;font-weight:700;line-height:1;letter-spacing:0;}
@@ -451,7 +452,7 @@ function buildLoop(d){
       ${(d.dist || []).map((s,i)=>{const items=d.dist || [];const first=i===0,last=i===items.length-1;const radius=items.length===1?'999px':first?'999px 0 0 999px':last?'0 999px 999px 0':'0';const width=s.width || (s.pct!=null ? `${s.pct}%` : '0%');const color=standardStatusColor(s.color || '#5B677A');const count=s.count ?? s.num ?? '';const fill=s.hatch?`repeating-linear-gradient(45deg, ${color} 0 10px, #ffffff 10px 16px)`:color;return `<div style="border-radius: ${radius}; width: ${width}; background: ${fill}; display: flex; align-items: center; padding-left: 16px; color: #ffffff; font-weight: 700; font-size: 38px;">${count}</div>`;}).join('')}
     </div>
     <div style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 34px; row-gap: 8px; margin-top: 16px; font-size: 38px; color: #0B1640;">
-      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span style="width: 14px; height: 14px; border-radius: 7px; background: ${l.hatch?`repeating-linear-gradient(45deg, ${l.color} 0 3px, #ffffff 3px 5px)`:l.color};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${l.count}</span>${l.points!=null?` · ${l.points} pts`:''}</div>`).join('')}
+      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span class="legend-dot" style="background: ${l.hatch?`repeating-linear-gradient(45deg, ${l.color} 0 3px, #ffffff 3px 5px)`:l.color};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${l.count}</span>${l.points!=null?` · ${l.points} pts`:''}</div>`).join('')}
     </div>
 
     <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 36px;">LOOP TIMING</div>
@@ -835,7 +836,7 @@ function buildFilldb(d){
   }).join('');
   const legend = distItems.map(x=>{
     const dotBorder = filldbIsNotAssessed(x) ? ' border: 1px solid #E3E9F1;' : '';
-    return `<div style="display: flex; align-items: center; gap: 10px;"><span style="width: 14px; height: 14px; border-radius: 7px; background: ${filldbStatusColor(x)};${dotBorder}"></span>${srcText(filldbLegendName(x))} ${filldbDot} <span style="font-weight: 700;">${fmtCount(x.count)}</span></div>`;
+    return `<div style="display: flex; align-items: center; gap: 10px;"><span class="legend-dot" style="background: ${filldbStatusColor(x)};${dotBorder}"></span>${srcText(filldbLegendName(x))} ${filldbDot} <span style="font-weight: 700;">${fmtCount(x.count)}</span></div>`;
   }).join('');
   const workloadItems = d.bars || [];
   const workloadRows = workloadItems.map(b=>{
@@ -1192,7 +1193,7 @@ function buildBalance(d){
     ['Needs Attention', SRC_ATTENTION, '70 to 89'],
     ['Critical', SRC_CRITICAL, '0 to 69'],
     ['Not Assessed', SRC_NOT_ASSESSED, '']
-  ].map(([word,c,range]) => `<div style="display:flex;align-items:center;gap:10px;"><span style="width:14px;height:14px;border-radius:7px;background:${c};"></span>${word}${range?` ${SRC_DOT} ${range}`:''}</div>`).join('');
+  ].map(([word,c,range]) => `<div style="display:flex;align-items:center;gap:10px;"><span class="legend-dot" style="background:${c};"></span>${word}${range?` ${SRC_DOT} ${range}`:''}</div>`).join('');
   const groups = (d.groups || []).map((g,i)=>srcBalanceGroup(g, i===0)).join('');
   const split = {critical:0, high:0, medium:0, low:0};
   let count = 0;
@@ -1247,7 +1248,7 @@ function buildDashboard(d){
     const radius = i===0 ? '999px 0 0 999px' : i===(d.dist || []).length-1 ? '0 999px 999px 0' : '0';
     return `<div style="border-radius:${radius};width:${pct}%;background:${standardStatusColor(c)};display:flex;align-items:center;padding-left:16px;color:#ffffff;font-weight:700;font-size:38px;">${fmtCount(n)}</div>`;
   }).join('');
-  const legend = (d.dist || []).map(([label,n,c])=>`<div style="display:flex;align-items:center;gap:10px;"><span style="width:14px;height:14px;border-radius:7px;background:${standardStatusColor(c)};"></span>${srcText(label)} ${SRC_DOT} <span style="font-weight:700;">${fmtCount(n)}</span></div>`).join('');
+  const legend = (d.dist || []).map(([label,n,c])=>`<div style="display:flex;align-items:center;gap:10px;"><span class="legend-dot" style="background:${standardStatusColor(c)};"></span>${srcText(label)} ${SRC_DOT} <span style="font-weight:700;">${fmtCount(n)}</span></div>`).join('');
   const rows = (d.sections || []).map(([name,p,w,f])=>{
     const total = Math.max((Number(p)||0)+(Number(w)||0)+(Number(f)||0), 1);
     const parts = [[p,SRC_HEALTHY],[w,SRC_ATTENTION],[f,SRC_CRITICAL]].filter(([n])=>Number(n)>0);
@@ -1443,7 +1444,7 @@ function buildRelayCapacity(d){
   const total = Math.max(Number(d.total || 0), 1);
   const bar = d.bar || {};
   const within = Number(bar.within || 0), attention = Number(bar.attention || 0), notReported = Number(bar.notReported || 0);
-  const legend = (d.legend || []).map(item=>`<span style="display:flex;align-items:center;gap:12px;"><span style="width:14px;height:14px;border-radius:7px;background:${item.color || SRC_TRACK};"></span>${srcText(item.label)} ${SRC_DOT} <strong>${fmtCount(item.count)}</strong></span>`).join('');
+  const legend = (d.legend || []).map(item=>`<span style="display:flex;align-items:center;gap:12px;"><span class="legend-dot" style="background:${item.color || SRC_TRACK};"></span>${srcText(item.label)} ${SRC_DOT} <strong>${fmtCount(item.count)}</strong></span>`).join('');
   const why = (d.why || []).map(line=>srcText(line)).join('<br />');
   const nr = (d.notReported || []).map(line=>line.attention ? `<strong style="color:${SRC_ATTENTION};">${srcText(line.text)}</strong>` : srcText(line.text)).join('<br />');
   return `${srcCapacityHeader(d)}

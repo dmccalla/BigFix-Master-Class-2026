@@ -103,7 +103,7 @@ def test_loop_word_explains_the_score_before_loop_health(
     score_heading = next(
         p for p in doc.paragraphs if p.text.strip() == "How the Score Is Calculated"
     )
-    assert score_heading.style.name == "Heading 2"
+    assert score_heading.style.name == "Heading 3"
     assert "Client Loop Context" not in paragraphs
     assert paragraphs.index("How the Score Is Calculated") < paragraphs.index("Loop Health")
     assert "Score Method: test driver" not in paragraphs
@@ -563,7 +563,7 @@ def test_loop_word_keeps_the_key_after_the_score_explanation(
     assert infographic_index < score_index < loop_health_index
     reading_heading = next(p for p in doc.paragraphs if p.text == "Reading the Infographic")
     score_heading = next(p for p in doc.paragraphs if p.text == "How the Score Is Calculated")
-    assert reading_heading.style.name == score_heading.style.name == "Heading 2"
+    assert reading_heading.style.name == score_heading.style.name == "Heading 3"
     assert any(t.cell(0,0).text == "Infographic tile" for t in doc.tables)
 
 

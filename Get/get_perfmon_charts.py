@@ -653,19 +653,10 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
             "The standard was not met for this capture window. The worst counter "
             f"averaged {average}{unit} against {limit}."
         )
-        if samples and violations * 2 > samples:
-            result += (
-                " The average stayed over the limit for most of the capture. It "
-                f"peaked at {maximum}{unit}, with {violations} of {samples} readings "
-                f"({violation_pct}%) over the limit. Breach window: {window}."
-            )
-        else:
-            result += (
-                f" {violations} of {samples} readings ({violation_pct}%) were over the "
-                f"limit, in the breach window {window}. They raised the average "
-                f"over the limit. The other {samples - violations} readings met the "
-                f"standard. It peaked at {maximum}{unit}."
-            )
+        result += (
+            f" {violations} of {samples} readings ({violation_pct}%) were over the "
+            f"limit. Peak: {maximum}{unit}. Breach window: {window}."
+        )
     elif status == "Warning" and floor_ceiling:
         floor, ceiling = floor_ceiling
         result = (

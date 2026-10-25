@@ -140,13 +140,10 @@ def test_report_caps_rollups_and_says_so(tmp_path: Path) -> None:
     for heading in capped:
         assert heading in headings
         assert len(_table_after(doc, heading).rows) == LIMIT + 1  # header + top rows
-    for sheet in capped.values():
-        noun = "relay" if sheet.endswith("Relay") else "subnet"
-        expected = (
-            f"Showing {LIMIT} of {LIMIT + 5:,} {noun}s. "
-            f"Every {noun} is in the Excel sheet {sheet}."
-        )
-        assert sum(n.startswith(expected) for n in notes) == 1
+    for noun in ("relays", "subnets"):
+        expected = f"Showing {LIMIT} of {LIMIT + 5:,} {noun}."
+        assert sum(n.startswith(expected) for n in notes) == 2
+    assert not any("Excel" in n or "workbook" in n.lower() for n in notes)
 
 
 def test_report_keeps_short_rollups_whole(tmp_path: Path) -> None:

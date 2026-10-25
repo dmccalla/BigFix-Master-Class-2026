@@ -1,6 +1,8 @@
 # Delivery validation
 
-Every push runs the known-answer Client Performance checks. The fixture includes
+Delivery checks run locally or when a maintainer explicitly starts the manual
+workflow. Pushes and pull requests do not start the checked-in workflows.
+The known-answer Client Performance fixture includes
 the 15-, 30- and 60-minute group boundaries, missing/error results, evaluation
 intervals, and the Top 10 Interval column. The real report job checks the Word tables,
 Excel rows and chart values together, and saves build logs, chart HTML and PNGs.
@@ -9,7 +11,9 @@ The same fixture and expected answers are checked in all three products.
 The primary repository also has a manual **Cross-product delivery comparison**
 workflow. Configure `CROSS_REPO_READ_TOKEN` there with read access to the three
 repositories; the default workflow token cannot read sibling private repositories.
-Each regular CI job independently checks the same known answers.
+Each manually started CI job independently checks the same known answers.
+The root workflows are **CI**, **Delivery and release validation**, and
+**Controlled BigFix lab**. Platform also provides **Cross-product delivery comparison**.
 
 Run `.github/compare_delivery.py` with the three `delivery-summary.json` paths
 and `--output comparison.json` to compare the actual product results. From an
@@ -17,9 +21,10 @@ application subdirectory, the helper path starts with `../.github`.
 
 ## Local report checks
 
-Use the project's Python environment and locked CI tools. Set
+Run from the application directory: `Report Builder` in Platform, or the
+repository root in TA and Master Class. Use the frozen development environment. Set
 `WORKBENCH_RUN_DELIVERY=1` and `WORKBENCH_DELIVERY_OUTPUT` to a short writable
-folder, then run `python -m pytest -q Tests/test_client_delivery.py`.
+folder, then run `uv run --frozen python -m pytest -q Tests/test_client_delivery.py`.
 Without the setting, the fast known-answer checks still run; browser builds
 are explicitly skipped. Production Get, workbook, Word and chart code is used.
 

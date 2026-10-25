@@ -12,12 +12,12 @@ combined task.
   burst load across deployments with different capacities. It does not establish a
   guaranteed safe request rate. Administrators may select 1 second when the deployment
   is known to handle it. The existing 0-second override remains available.
-- Generate the 113 constant headings and blank lines locally as BESAPI XML fragments.
+- Generate the 117 constant headings and blank lines locally as BESAPI XML fragments.
   Keep their text, destinations, and ordering. Do not send them to `/api/query`.
   Include the schema-required Evaluation element, with Time explicitly marked
   `Not applicable: local capture` and Plurality `Singular`. Do not invent a server
   evaluation duration for locally generated data.
-- Preserve all 177 real Session Relevance expressions. With all sections selected,
+- Preserve all 178 real Session Relevance expressions. With all sections selected,
   pacing alone adds about 15 minutes at the default, plus request execution time.
   The two admin requests run only when the optional human readable logs are selected.
 - Keep the 13 existing client relevance expressions: Actionsite Size and the 12 root
@@ -31,6 +31,22 @@ combined task.
 - Preserve concatenated BESAPI documents. Captures are not single XML documents.
   Keep XML and locally collected answers even if a later request fails. Back up the
   preceding collection using the existing backup flow before a new collection starts.
+
+## Current contract identity, 2026-10-25
+
+The later retrieved-property addition brings the shipped contract to 178 real
+Session Relevance requests, 117 locally generated constant fragments and 13
+client-relevance fragments. There are 130 local XML fragments in total.
+The two optional log-only admin requests bring the all-options request count
+to 180. The five-second pacing and existing failure policy are unchanged.
+
+Query-contract SHA-256, recomputed from the ordered encoded queries and capture
+destinations in the standalone task and checked against the helper:
+`04177cfc60da51a5ac968d6dee8e3cf837157ae2be43169412d8af16643e3b73`.
+
+The October 19 action IDs, counts, fingerprints and test results below describe
+the validated version at that date. They are preserved as historical evidence.
+Those runs do not establish live lab validation of the later query set.
 
 ## Diagnostics and failure policy
 
@@ -116,7 +132,8 @@ and observed server-version counts for repeated measurements. Engine identity/ve
 database/storage performance, concurrent load and cache state are explicitly unknown;
 do not infer them. These diagnostics support runtime estimates and later comparisons
 with matching versions, query sets, sections, pacing and log settings. The shipped
-query fingerprint describes the tested task; custom ActionScript edits need their
+query fingerprint identifies the shipped query set. The dated validation
+records below describe the version tested on that date. Custom ActionScript edits need their
 own comparison identity. They do not
 establish deployment rankings. Automatic aggregation or uploading is not added.
 
@@ -158,7 +175,8 @@ and `DI-109`: the non-master-operator average and the operator minimum and maxim
 The CLI returned exit code 0 while its XML contained `<Error>`. These are query
 failures, not availability failures. The collector retains the response, records
 the missing evidence, continues the remaining requests, and finishes with 24004.
-The 177 original expressions and their output labels remain unchanged.
+The October 19 validated version contained 177 expressions. The current
+contract adds retrieved-property capture and contains 178 expressions.
 
 Full no-error lab scenarios deliberately flag this compatibility condition. A
 correctly reported incomplete collection is not proof that all requested data was
@@ -191,7 +209,7 @@ matching normal engine selection for the collector. It does not force the option
 Explorer-only JSON request mode. A preflight transport failure must be distinguished
 from a failure in an executed collection action.
 
-## Validation record, 2026-10-19
+## Historical validation record, 2026-10-19
 
 The controlled target was BFROOT1, computer ID 8317784. Runs were sequential.
 One-second pacing was an explicit lab override where shown; the default remains
@@ -229,7 +247,7 @@ the three existing query-engine limitations or establish production capacity.
 Readable summaries and environment context are included. Cross-deployment aggregation
 and benchmarking remain separate work.
 
-## Diagnostics follow-up validation, 2026-10-19 Eastern
+## Historical diagnostics follow-up validation, 2026-10-19 Eastern
 
 Standalone validation preceded the combined update, on the same allowlisted BFROOT1
 target. No collection actions overlapped. One second was an explicit lab override;

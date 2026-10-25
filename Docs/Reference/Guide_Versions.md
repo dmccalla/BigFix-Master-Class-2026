@@ -2,7 +2,9 @@
 
 The published BigFix guide that the analysis thresholds are built against. When a new edition ships, check its values against this page, update the code and this page together, and record the change in the CHANGELOG.
 
-The TA Health Check and the Master Class Diagnostics Workbench keep the same copy of this page.
+Shared module thresholds and guide editions stay aligned across the three
+products. Platform-only capacity figures and modules are documented in the
+Platform copy. Published guidance and house values remain distinct.
 
 ## Guides in Use
 
@@ -18,7 +20,7 @@ The Capacity Planning guide (11.x.12, 10-05-2026) has none of the values these t
 |---|---|---|---|---|
 | Storage queue depth | PRF-INF-01 | 14 | 1 or less per physical device | Same |
 | Storage latency | PRF-INF-02 | 14 | 1 ms or less per physical device | Same |
-| Storage operations | PRF-INF-03 | 14 | No flat-lining under load. 5,000 transfers per second for database storage | Same |
+| Storage operations | PRF-INF-03 | 14 | No flat-lining under load. 5,000 transfers per second for database storage | Informational. No pass/fail limit is applied. The 5,000 transfers/sec value is reference context. Under-load flat-lining requires consultant review. |
 | CPU utilization | PRF-INF-04 | 15 | 80% or less. 50% to 80% on a virtual machine | Same |
 | CPU queue length | PRF-INF-05 | 15 | 4 or less | Same |
 | CPU privileged time | PRF-INF-06 | 15 | 10% or less of aggregate CPU | 10% of total CPU time, by ruling 10-19-2026 |

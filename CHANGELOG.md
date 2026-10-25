@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Reconcile delivery documentation with manual workflows, update the current Deployment Information contract, and distinguish shared guide rules from product scope and informational storage checks.
+
 - Keep long PerfMon chart footers clear of legends and axis labels. Preserve raw values, scoring, plotted series and display caps.
 
 - Keep Reading the Infographic at the same heading level as How the Score Is Calculated: H3 in the Full Report and H2 in the mini report.

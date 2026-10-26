@@ -59,7 +59,26 @@ def test_udp_rollup_combines_case_variants_before_ranking(tmp_path):
 
 @pytest.mark.parametrize(
     "minutes, expected",
-    [(87, "1.5 hours"), (207, "3.5 hours"), (150, "2.5 hours"), (120, "2 hours")],
+    [
+        (87, "1 hour 27 minutes"),
+        (207, "3 hours 27 minutes"),
+        (150, "2 hours 30 minutes"),
+        (120, "2 hours"),
+        (61, "1 hour 1 minute"),
+        (60, "1 hour"),
+    ],
 )
-def test_hour_display_rounds_half_up(minutes, expected):
+def test_hour_display_keeps_exact_hours_and_minutes(minutes, expected):
     assert loop.format_duration_for_report(minutes * 60) == expected
+
+
+@pytest.mark.parametrize(
+    "seconds, expected",
+    [
+        (3661, "1 hour 1 minute 1 second"),
+        (7199, "1 hour 59 minutes 59 seconds"),
+        (3599, "00:59:59"),
+    ],
+)
+def test_duration_keeps_remaining_seconds_without_rounding_up(seconds, expected):
+    assert loop.format_duration_for_report(seconds) == expected

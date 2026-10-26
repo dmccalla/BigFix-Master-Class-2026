@@ -60,7 +60,6 @@ import sys
 from collections import Counter
 from dataclasses import dataclass, field
 from datetime import date, datetime, time, timedelta
-from decimal import ROUND_HALF_UP, Decimal
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -473,16 +472,15 @@ def format_duration_for_report(seconds: float | None) -> str:
     except (TypeError, ValueError):
         return "00:00:00"
 
-    if seconds_float > 60 * 60:
-        hours = seconds_float / 3600
-        if abs(hours - round(hours)) < 0.05:
-            hour_count = int(round(hours))
-            unit = "hour" if hour_count == 1 else "hours"
-            return f"{hour_count} {unit}"
-        rounded = (Decimal(str(seconds_float)) / Decimal(3600)).quantize(
-            Decimal("0.1"), rounding=ROUND_HALF_UP
-        )
-        return f"{rounded:.1f} hours"
+    if seconds_float >= 60 * 60:
+        hours, remainder = divmod(int(math.floor(seconds_float)), 3600)
+        minutes, secs = divmod(remainder, 60)
+        parts = [f"{hours} {'hour' if hours == 1 else 'hours'}"]
+        if minutes:
+            parts.append(f"{minutes} {'minute' if minutes == 1 else 'minutes'}")
+        if secs:
+            parts.append(f"{secs} {'second' if secs == 1 else 'seconds'}")
+        return " ".join(parts)
 
     return convert_to_hhmmss(seconds_float)
 

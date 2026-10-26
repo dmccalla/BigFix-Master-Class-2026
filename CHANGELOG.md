@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Keep short evidence groups together in report pagination, left-align the Client query and remove the empty trailing findings row. Preserve report words, charts and scores.
+
 - Display long Client loop durations as hours and minutes, retaining remaining whole seconds. Replace decimal-hour rounding with the approved duration format.
 
 - Accept both captured master-operator analyses labels. Group relay names without case differences and round displayed hours consistently. Keep local validation instructions specific to this application.

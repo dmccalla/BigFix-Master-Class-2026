@@ -591,6 +591,9 @@ def normalize_report_tables(root) -> int:
         if any(ancestor.tag == W + "tbl" for ancestor in tbl.iterancestors()):
             continue
         changed += normalize_table(tbl)
+    from Lib.Design.report_pagination import paginate_document_xml
+
+    changed += paginate_document_xml(root)
     return changed + order_table_properties(root)
 
 

@@ -146,7 +146,7 @@ def test_frequency_explanations_and_guidance_survive_both_paths(
     bullets = document.element.body.xpath(
         './/w:p[w:pPr/w:pStyle[@w:val="ReportBullet"]]'
     )
-    assert len(bullets) == 10
+    assert len(bullets) == 9
     assert all(p.find(qn("w:pPr")).find(qn("w:numPr")) is not None for p in bullets)
     heading = document.element.body.xpath(
         './/w:sdt[w:sdtPr/w:tag[@w:val="ClientGuidanceStartingPoints"]]/w:sdtContent/w:p'

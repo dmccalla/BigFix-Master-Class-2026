@@ -403,7 +403,7 @@ def test_findings_source_id_cells_do_not_wrap() -> None:
     )
     rt.normalize_table(tbl)
     grid = [int(col.get(W + "w")) for col in tbl.find(W + "tblGrid")]
-    assert grid == [1500, 3224, 1163, 4913]
+    assert grid == [1350, 3800, 1100, 4550]
     header, body = tbl.findall(W + "tr")
     assert header.find(f"{W}tc/{W}tcPr/{W}noWrap") is None
     first, *rest = body.findall(W + "tc")

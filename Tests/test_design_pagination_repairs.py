@@ -4,6 +4,7 @@
 
 import zipfile
 
+import pytest
 from docx import Document
 from docx.enum.text import WD_ALIGN_PARAGRAPH
 from docx.oxml import OxmlElement
@@ -27,18 +28,19 @@ def table(document, headers, count):
     return result
 
 
-def test_technical_evidence_has_one_boundary_and_retains_all_words():
+@pytest.mark.parametrize("title,section", [("Technical Evidence", "SECTION 08"), ("Findings & Recommendations", "SECTION 06")])
+def test_section_has_one_boundary_and_retains_all_words(title, section):
     document = Document()
     document.add_paragraph("Operational Maturity was not assessed.")
     document.add_page_break()
-    label = document.add_paragraph("SECTION 08")
-    heading = document.add_heading("Technical Evidence", level=1)
+    label = document.add_paragraph(section)
+    heading = document.add_heading(title, level=1)
     heading.paragraph_format.page_break_before = True
     apply_report_pagination(document)
     assert [p.text for p in document.paragraphs] == [
         "Operational Maturity was not assessed.",
-        "SECTION 08",
-        "Technical Evidence",
+        section,
+        title,
     ]
     assert label.paragraph_format.page_break_before
     assert heading.paragraph_format.page_break_before is False

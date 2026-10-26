@@ -518,6 +518,9 @@ def finalize_report_document(path):
         end.paragraph_format.space_after = Pt(0)
         end.paragraph_format.line_spacing = Pt(1)
         end.add_run().font.size = Pt(1)
+    from Lib.Design.report_finishing import finish_report_body
+
+    finish_report_body(document.element.body)
     document.save(path)
 
 
@@ -527,9 +530,9 @@ def add_callout(document, text, kind="NOTE"):
     if kind not in {"NOTE", "TIP"}:
         raise ValueError("Callout kind must be NOTE or TIP")
     fill, accent, icon = (
-        ("CFDBFB", "17707F", "\U0001f4dd")
+        ("CFDBFB", "17707F", "[i]")
         if kind == "NOTE"
-        else ("ECFDF5", "065F46", "\U0001f4a1")
+        else ("ECFDF5", "065F46", "[?]")
     )
     spacer = document.add_paragraph()
     spacer.paragraph_format.space_after = Pt(4)
@@ -553,7 +556,8 @@ def add_callout(document, text, kind="NOTE"):
     paragraph.paragraph_format.space_before = Pt(5)
     paragraph.paragraph_format.space_after = Pt(5)
     run = paragraph.add_run(icon + " ")
-    run.font.name = "Segoe UI Emoji"
+    run.font.name = "Aptos"
+    run.bold = True
     lead = paragraph.add_run(kind + "  ")
     lead.bold = True
     lead.font.color.rgb = RGBColor.from_string(accent)

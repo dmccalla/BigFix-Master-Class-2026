@@ -53,6 +53,9 @@ def paginate_document_xml(root):
         return False
     before = etree.tostring(body)
     parsed = parse_xml(before)
+    from Lib.Design.report_finishing import finish_report_body
+
+    finish_report_body(parsed)
     _paginate_body(parsed)
     if etree.tostring(parsed) == before:
         return False
@@ -118,9 +121,10 @@ def _paginate_body(body, document=None):
         text = _text(node).strip()
         if node.tag == qn("w:p"):
             paragraph = Paragraph(node, document)
-            if text == "Technical Evidence" and _heading(node):
+            if text in {"Technical Evidence", "Findings & Recommendations"} and _heading(node):
                 label = node.getprevious()
-                if label is not None and _text(label).strip() == "SECTION 08":
+                expected_label = "SECTION 08" if text == "Technical Evidence" else "SECTION 06"
+                if label is not None and _text(label).strip() == expected_label:
                     previous = label.getprevious()
                     while (
                         previous is not None

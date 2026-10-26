@@ -170,10 +170,10 @@ FIXED_WIDTHS: dict[tuple[str, ...], tuple[int, ...]] = {
     ("ID", "Description", "Notes", "Publish Date"): (1800, 4600, 2400, 2000),
     ("Area", "Findings", "Source IDs"): (3000, 3000, 4800),
     ("Source ID", "Description", "Impact", "Suggested Remediation"): (
-        1500,
-        3224,
-        1163,
-        4913,
+        1350,
+        3800,
+        1100,
+        4550,
     ),
     ("Group", "Devices / Total", "% of Total", "Rule"): (1900, 1900, 1700, 5300),
     (
@@ -220,6 +220,7 @@ FIXED_WIDTHS: dict[tuple[str, ...], tuple[int, ...]] = {
         1220,
         3430,
     ),
+    ("Display Name", "Version", "Subscribed Computers", "Most Recent Fixlet Modification", "Gather URL"): (2200, 1200, 1600, 2100, 3700),
     ("Statistic", "Value"): (6980, 3820),
 }
 
@@ -478,6 +479,8 @@ def _apply_column_alignment(tbl) -> None:
     for tr in rows:
         for tc, column, span in _row_cells(tr):
             alignment = "right" if column in numbers and span == 1 else "left"
+            if header_key(rows) == ("Resource", "Required", "Observed", "Short by", "Basis") and column in (1, 2):
+                alignment = "left"
             if span == 1 and column in centered:
                 alignment = "center"
             _align_cell(tc, alignment)

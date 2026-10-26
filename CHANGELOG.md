@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Complete the Design D-item report pass: clear cover metadata, nest investigation methods, use portable callout symbols, improve identifier wrapping and tighten sparse-page spacing. Preserve scoring and PerfMon plots.
+
 - Keep short evidence groups together in report pagination, left-align the Client query and remove the empty trailing findings row. Preserve report words, charts and scores.
 
 - Display long Client loop durations as hours and minutes, retaining remaining whole seconds. Replace decimal-hour rounding with the approved duration format.

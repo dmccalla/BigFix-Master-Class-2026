@@ -14,8 +14,8 @@ jobs:
     env:
       WORKBENCH_RUN_DELIVERY: "1"
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
           cache: pip
@@ -46,7 +46,7 @@ jobs:
           exit $LASTEXITCODE
       - name: Save release evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: release-validation
           path: |
@@ -63,15 +63,15 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5.6.0
         with:
           python-version: "3.13"
       - name: Install locked PDF tools
         run: python .github/install-ci-tools.py pypdfium2 pillow
       - name: Install the document renderer
         run: sudo apt-get update && sudo apt-get install -y --no-install-recommends libreoffice-writer fonts-crosextra-carlito
-      - uses: actions/download-artifact@v4
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4.3.0
         with:
           name: release-validation
           path: ${{ runner.temp }}/delivery-input
@@ -79,7 +79,7 @@ jobs:
         run: python .github/inspect_report.py "$RUNNER_TEMP"/delivery-input/delivery/run-*/report/*.docx --output "$RUNNER_TEMP/rendered" --soffice soffice
       - name: Save rendered pages and layout findings
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: rendered-report
           path: ${{ runner.temp }}/rendered

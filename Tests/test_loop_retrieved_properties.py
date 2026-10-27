@@ -241,15 +241,18 @@ def test_word_report_explains_reserved_properties(tmp_path: Path) -> None:
 
     paragraphs = [p.text for p in doc.paragraphs]
     assert any(p.startswith("This graphic counts ") for p in paragraphs)
-    all_text = " ".join(doc.element.body.xpath('.//w:t/text()'))
-    assert "Reserved properties are the properties BigFix builds into every Client" in all_text
+    all_text = " ".join(doc.element.body.xpath(".//w:t/text()"))
+    assert (
+        "Reserved properties are the properties BigFix builds into every Client"
+        in all_text
+    )
     assert "their interval cannot be changed" in all_text
     lead = next(p for p in paragraphs if p.startswith("1 of these 1 is"))
     assert lead.endswith(
         "Interval is how often a property is set to run. A site evaluation is not "
         "a property and has no interval."
     )
-    descriptions = " ".join(s._inline.docPr.get('descr', '') for s in doc.inline_shapes)
+    descriptions = " ".join(s._inline.docPr.get("descr", "") for s in doc.inline_shapes)
     assert "BES Relay Service Installed (reserved property)" in descriptions
     assert "interval Every report" in descriptions
     assert "actionsite.13:Evaluate" not in descriptions
@@ -262,10 +265,10 @@ def test_word_report_keeps_the_earlier_wording_for_an_older_capture(
 
     paragraphs = [p.text for p in doc.paragraphs]
     assert any(p.startswith("This graphic counts ") for p in paragraphs)
-    assert "Reserved properties" not in " ".join(doc.element.body.xpath('.//w:t/text()'))
+    assert "Reserved properties" not in " ".join(doc.element.body.xpath(".//w:t/text()"))
     lead = next(p for p in paragraphs if p.startswith("1 of these 1 is"))
     assert lead.endswith("A retrieved property's interval is not in the capture.")
-    descriptions = " ".join(s._inline.docPr.get('descr', '') for s in doc.inline_shapes)
+    descriptions = " ".join(s._inline.docPr.get("descr", "") for s in doc.inline_shapes)
     assert "BES Relay Service Installed (retrieved property)" in descriptions
     assert "interval Not collected" in descriptions
 
@@ -302,7 +305,9 @@ def test_both_notes_name_retrieved_properties_only_when_captured(
     source_note = APPROVED_SOURCE_NOTE if with_retrieved else EARLIER_SOURCE_NOTE
     flag_note = APPROVED_FLAG_NOTE if with_retrieved else loop.PROPERTY_SOURCE_NOTE
     assert source_note in paragraphs
-    assert flag_note in " ".join(Document(str(tmp_path / "loop.docx")).element.body.xpath(".//w:t/text()"))
+    assert flag_note in " ".join(
+        Document(str(tmp_path / "loop.docx")).element.body.xpath(".//w:t/text()")
+    )
     assert excel_notes == [flag_note]
 
 

@@ -104,8 +104,7 @@ def _paginate_body(body, document=None):
                 Paragraph(previous, document).paragraph_format.keep_with_next = True
                 previous = previous.getprevious()
         if (
-            headers
-            == ["Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"]
+            headers == ["Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"]
             and len(rows) <= 6
         ):
             _row_group(rows, document)
@@ -121,9 +120,13 @@ def _paginate_body(body, document=None):
         text = _text(node).strip()
         if node.tag == qn("w:p"):
             paragraph = Paragraph(node, document)
-            if text in {"Technical Evidence", "Findings & Recommendations"} and _heading(node):
+            if text in {"Technical Evidence", "Findings & Recommendations"} and _heading(
+                node
+            ):
                 label = node.getprevious()
-                expected_label = "SECTION 08" if text == "Technical Evidence" else "SECTION 06"
+                expected_label = (
+                    "SECTION 08" if text == "Technical Evidence" else "SECTION 06"
+                )
                 if label is not None and _text(label).strip() == expected_label:
                     previous = label.getprevious()
                     while (
@@ -151,9 +154,7 @@ def _paginate_body(body, document=None):
                 for following in nodes[index + 1 :]:
                     if following.tag != qn("w:p") or _heading(following):
                         break
-                    Paragraph(
-                        following, document
-                    ).paragraph_format.keep_with_next = True
+                    Paragraph(following, document).paragraph_format.keep_with_next = True
             if text == "Optimal Performance Targets":
                 bullets = []
                 for following in nodes[index + 1 : index + 4]:
@@ -187,9 +188,8 @@ def _paginate_body(body, document=None):
                             following, document
                         ).paragraph_format.keep_with_next = False
                         break
-        if (
-            "UDP coverage uses the records in the UDP capture" in text
-            and node.tag == qn("w:tbl")
+        if "UDP coverage uses the records in the UDP capture" in text and node.tag == qn(
+            "w:tbl"
         ):
             previous = node.getprevious()
             while (

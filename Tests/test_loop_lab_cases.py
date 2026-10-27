@@ -86,7 +86,9 @@ def test_top10_lead_names_the_retrieved_property_case(tmp_path: Path) -> None:
     doc = Document(str(tmp_path / "loop.docx"))
     text = "\n".join(p.text for p in doc.paragraphs)
     assert "A retrieved property's interval is not in the capture." in text
-    descriptions = " ".join(shape._inline.docPr.get('descr', '') for shape in doc.inline_shapes)
+    descriptions = " ".join(
+        shape._inline.docPr.get("descr", "") for shape in doc.inline_shapes
+    )
     assert "interval Not collected" in descriptions
     assert "BES Relay Service Installed (retrieved property)" in descriptions
 
@@ -191,6 +193,4 @@ def test_rollup_note_counts_only_named_relays(tmp_path: Path) -> None:
     )
 
     text = "\n".join(p.text for p in document.paragraphs)
-    assert (
-        "Showing 10 of 11 relays. 77 devices did not report a relay."
-    ) in text
+    assert ("Showing 10 of 11 relays. 77 devices did not report a relay.") in text

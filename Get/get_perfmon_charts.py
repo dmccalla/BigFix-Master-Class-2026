@@ -525,7 +525,9 @@ AREA_UNITS = {
 def is_no_limit(threshold: str) -> bool:
     """A counter reviewed for saturation or flat-lining, with no pass or fail limit."""
     text = str(threshold or "").strip().lower()
-    return "no passive fail" in text or text.startswith(("no saturation", "no limit", "context counter"))
+    return "no passive fail" in text or text.startswith(
+        ("no saturation", "no limit", "context counter")
+    )
 
 
 def vm_range(threshold: str) -> tuple[str, str] | None:
@@ -693,7 +695,9 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
             f"with a peak of {maximum}{unit}."
         )
         if violations == 1:
-            result += " 1 reading was briefly over the limit, but the average stayed within it."
+            result += (
+                " 1 reading was briefly over the limit, but the average stayed within it."
+            )
         elif violations:
             result += (
                 f" {violations} readings were briefly over the limit, but the average "
@@ -949,7 +953,11 @@ def zero_counter_strip_text(
 ) -> tuple[str, str, str]:
     """Return the message, status label, and status color for a zero chart."""
     if not_scored_reason:
-        return f"Not compared with the limit: {not_scored_reason}", "CANNOT VERIFY", "#595959"
+        return (
+            f"Not compared with the limit: {not_scored_reason}",
+            "CANNOT VERIFY",
+            "#595959",
+        )
     if not has_samples:
         return "No samples recorded", "CANNOT VERIFY", "#595959"
     if is_packet_counter(col):
@@ -1028,9 +1036,7 @@ def render_zero_counter_strip(
         col, has_samples, not_scored_reason
     )
     window_text = "" if not_scored_reason else f" over {time_window_phrase(times)}"
-    standard = (
-        f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
-    )
+    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
     max_display = f"{true_max:g}%" if "Usage_Peak" in col else f"{true_max:g}"
 
     fig.text(
@@ -1053,8 +1059,13 @@ def render_zero_counter_strip(
     )
     if not_scored_reason:
         fig.text(
-            0.025, 0.32, result_label, fontsize=20, fontweight="bold",
-            color=result_color, family=_FONT_FAMILY,
+            0.025,
+            0.32,
+            result_label,
+            fontsize=20,
+            fontweight="bold",
+            color=result_color,
+            family=_FONT_FAMILY,
         )
     fig.text(
         0.975,
@@ -1352,7 +1363,11 @@ def analyze(
                 "Average": round(avg_val, 2),
                 "Maximum": round(max_val, 2),
                 "PeakSampleTime": str(df.loc[analysis_df[col].idxmax(), "Time"]),
-                "RawSeriesDigest": hashlib.sha256(pd.util.hash_pandas_object(analysis_df[col], index=False).values.tobytes()).hexdigest(),
+                "RawSeriesDigest": hashlib.sha256(
+                    pd.util.hash_pandas_object(
+                        analysis_df[col], index=False
+                    ).values.tobytes()
+                ).hexdigest(),
                 "Violations": n_crit,
                 "ViolationPercent": v_pct,
                 "Warnings": n_warn,
@@ -1473,7 +1488,11 @@ def export_excel(
 
     # ---- Findings ----------------------------------------------------------
     ws_find = wb.add_worksheet("Findings")
-    f_keys = [k for k in findings[0] if k not in {"PeakSampleTime", "RawSeriesDigest"}] if findings else []
+    f_keys = (
+        [k for k in findings[0] if k not in {"PeakSampleTime", "RawSeriesDigest"}]
+        if findings
+        else []
+    )
     s_col = f_keys.index("Status") if "Status" in f_keys else -1
     write_header_row(ws_find, f_keys)
     write_data_rows(
@@ -1687,8 +1706,11 @@ def _separate_counter_footer(fig, ax, footer, legend) -> None:
     renderer = fig.canvas.get_renderer()
     legend_box = legend.get_window_extent(renderer)
     tick_bottom = min(
-        (tick.get_window_extent(renderer).y0 for tick in ax.get_xticklabels()
-         if tick.get_visible() and tick.get_text()),
+        (
+            tick.get_window_extent(renderer).y0
+            for tick in ax.get_xticklabels()
+            if tick.get_visible() and tick.get_text()
+        ),
         default=ax.get_window_extent(renderer).y0,
     )
     if legend_box.y1 + gap > tick_bottom:
@@ -1741,8 +1763,24 @@ def export_png_charts(
         max_raw = float(finding.get("Maximum") or display_max)
 
         png_path = os.path.join(png_folder, perfmon_chart_filename(col, png_folder))
-        plot_digest = hashlib.sha256(pd.util.hash_pandas_object(df[col], index=False).values.tobytes()).hexdigest()
-        manifest.append({"counter":col, "png":Path(png_path).name, "raw_series_digest":finding.get("RawSeriesDigest"), "plot_series_digest":plot_digest, "maximum":finding.get("Maximum"), "samples":finding.get("Samples"), "status":finding.get("Status"), "section":counter_section(col), "zero_packet":is_packet_counter(col) and max_raw == 0 and not raw_vals.empty})
+        plot_digest = hashlib.sha256(
+            pd.util.hash_pandas_object(df[col], index=False).values.tobytes()
+        ).hexdigest()
+        manifest.append(
+            {
+                "counter": col,
+                "png": Path(png_path).name,
+                "raw_series_digest": finding.get("RawSeriesDigest"),
+                "plot_series_digest": plot_digest,
+                "maximum": finding.get("Maximum"),
+                "samples": finding.get("Samples"),
+                "status": finding.get("Status"),
+                "section": counter_section(col),
+                "zero_packet": is_packet_counter(col)
+                and max_raw == 0
+                and not raw_vals.empty,
+            }
+        )
         if max_raw == 0:
             render_zero_counter_strip(
                 col,
@@ -1835,21 +1873,37 @@ def export_png_charts(
 
         ax.tick_params(axis="y", labelsize=14)
         from matplotlib.ticker import FuncFormatter
+
         ax.yaxis.set_major_formatter(FuncFormatter(lambda value, _: fmt_number(value)))
         ax.grid(True, color="#DCDCDC", linewidth=0.8, zorder=1)
 
         # Subtitle (scale note)
         true_max_str = fmt_number(max_raw)
         scale_note = f"Y-Axis: 0 to {fmt_number(amax)}  |  Actual peak: {true_max_str}  |  Readings: {finding.get('Samples', len(raw_vals))}"
-        if max_raw > display_max + max(0.005, abs(max_raw)*1e-6):
+        if max_raw > display_max + max(0.005, abs(max_raw) * 1e-6):
             scale_note += f"  |  Display capped at {fmt_number(display_max)}"
-        if max_raw > amax + max(0.005, abs(max_raw)*1e-6):
+        if max_raw > amax + max(0.005, abs(max_raw) * 1e-6):
             peak_time = pd.to_datetime(finding.get("PeakSampleTime"), errors="coerce")
             if not pd.isna(peak_time):
-                ax.plot([peak_time], [display_max], marker="^", color=_NEARBLACK, markersize=8, zorder=8)
-            ax.text(.99, .96, f"Actual peak {true_max_str}, above scale", transform=ax.transAxes,
-                    ha="right", va="top", fontsize=14, color=THEME.text,
-                    bbox={"facecolor":"white", "edgecolor":"none", "alpha":.9})
+                ax.plot(
+                    [peak_time],
+                    [display_max],
+                    marker="^",
+                    color=_NEARBLACK,
+                    markersize=8,
+                    zorder=8,
+                )
+            ax.text(
+                0.99,
+                0.96,
+                f"Actual peak {true_max_str}, above scale",
+                transform=ax.transAxes,
+                ha="right",
+                va="top",
+                fontsize=14,
+                color=THEME.text,
+                bbox={"facecolor": "white", "edgecolor": "none", "alpha": 0.9},
+            )
         if "Avg_Disk_ms" in col:
             scale_note += "  |  Unit: ms"
         if thr and thr.get("critical") is not None:
@@ -1897,8 +1951,12 @@ def export_png_charts(
         log.result("Graph (PNG)", png_path)
 
     for item in manifest:
-        item["png_sha256"] = hashlib.sha256((Path(png_folder)/item["png"]).read_bytes()).hexdigest()
-    (Path(png_folder)/"perfmon_plot_manifest.json").write_text(json.dumps(manifest, indent=2), encoding="utf-8")
+        item["png_sha256"] = hashlib.sha256(
+            (Path(png_folder) / item["png"]).read_bytes()
+        ).hexdigest()
+    (Path(png_folder) / "perfmon_plot_manifest.json").write_text(
+        json.dumps(manifest, indent=2), encoding="utf-8"
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -2101,7 +2159,10 @@ def main() -> None:
         {"Setting": "Physical Disk Count", "Value": n_disk or "Not detected/supplied"},
         {"Setting": "Physical Disk Source", "Value": disk_src},
         {"Setting": "Virtual Machine", "Value": vm},
-        {"Setting": "Virtual Machine Source", "Value": "Parameter Supplied" if vm else "Not supplied"},
+        {
+            "Setting": "Virtual Machine Source",
+            "Value": "Parameter Supplied" if vm else "Not supplied",
+        },
         {"Setting": "Sample Start", "Value": ss_str},
         {"Setting": "Sample End", "Value": se_str},
         {"Setting": "Sample Count", "Value": len(df_raw)},

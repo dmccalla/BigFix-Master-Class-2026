@@ -95,7 +95,8 @@ def _build_html(
     """
     template_path = (
         Path(__file__).with_name("client_detail_template.html")
-        if chart == "clientdetail" else _TEMPLATE
+        if chart == "clientdetail"
+        else _TEMPLATE
     )
     template = template_path.read_text(encoding="utf-8")
     payload = json.dumps({"chart": chart, **data})
@@ -104,8 +105,11 @@ def _build_html(
     scale = _TYPE_SCALE if type_scale is None else type_scale
     if chart in {"clientdetail", "loop", "filldb"}:
         from Lib.Design.approved_fonts import fontface_css
+
         fonts = fontface_css(_FONT_FILES)
-        template = template.replace("'Roboto Condensed'", "'Aptos'").replace("'Roboto'", "'Aptos'")
+        template = template.replace("'Roboto Condensed'", "'Aptos'").replace(
+            "'Roboto'", "'Aptos'"
+        )
     else:
         fonts = _fontface()
     html = template.replace("<!--__FONTFACE__-->", fonts).replace(

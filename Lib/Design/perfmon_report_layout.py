@@ -25,7 +25,8 @@ def finalize_perfmon_layout(output_path, chart_folder, section_title=None):
     from docx.enum.style import WD_STYLE_TYPE
 
     evidence_style = (
-        document.styles["PerfMonEvidence"] if "PerfMonEvidence" in document.styles
+        document.styles["PerfMonEvidence"]
+        if "PerfMonEvidence" in document.styles
         else document.styles.add_style("PerfMonEvidence", WD_STYLE_TYPE.PARAGRAPH)
     )
     evidence_style.base_style = document.styles["Normal"]
@@ -37,10 +38,10 @@ def finalize_perfmon_layout(output_path, chart_folder, section_title=None):
             return
         allowed = set()
         node = anchors[-1]._p.getnext()
-        while node is not None and node.tag != qn('w:sectPr'):
-            properties = node.find(qn('w:pPr'))
-            style = properties.find(qn('w:pStyle')) if properties is not None else None
-            if style is not None and style.get(qn('w:val')) in {'Heading1','Heading2'}:
+        while node is not None and node.tag != qn("w:sectPr"):
+            properties = node.find(qn("w:pPr"))
+            style = properties.find(qn("w:pStyle")) if properties is not None else None
+            if style is not None and style.get(qn("w:val")) in {"Heading1", "Heading2"}:
                 break
             allowed.add(node)
             node = node.getnext()

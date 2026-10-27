@@ -58,16 +58,12 @@ def apply_client_layout(
         while table is not None and table.tag != qn("w:tbl"):
             if table.tag == qn("w:p") and table.find(qn("w:pPr")) is not None:
                 style = table.find(qn("w:pPr")).find(qn("w:pStyle"))
-                if style is not None and style.get(qn("w:val"), "").startswith(
-                    "Heading"
-                ):
+                if style is not None and style.get(qn("w:val"), "").startswith("Heading"):
                     raise ValueError(f"Missing Client data table: {label}")
             table = table.getnext()
         if table is None:
             raise ValueError(f"Missing Client data table: {label}")
-        path = Path(output_path).with_suffix("") / (
-            kind + "_" + str(len(jobs)) + ".png"
-        )
+        path = Path(output_path).with_suffix("") / (kind + "_" + str(len(jobs)) + ".png")
         path.parent.mkdir(parents=True, exist_ok=True)
         jobs.append(("clientdetail", {"kind": kind, **data}, path, table, alt))
 
@@ -127,9 +123,7 @@ def apply_client_layout(
             if label != "Unreadable" or entry["total"]
         ]
         frequent = sum(
-            r["count"]
-            for r in rows
-            if r["label"] in {"Every report", "Under 15 minutes"}
+            r["count"] for r in rows if r["label"] in {"Every report", "Under 15 minutes"}
         )
         alt = (
             f"Property evaluation intervals among {len(intervals.counted):,} counted properties. "
@@ -144,14 +138,21 @@ def apply_client_layout(
         )
         h = heading("Evaluation Frequency")
         if h is not None and render_details:
-            lead = next(
-                (p for p in document.paragraphs if p._p is h._p.getnext()), None
-            )
+            lead = next((p for p in document.paragraphs if p._p is h._p.getnext()), None)
             if lead is not None:
                 lead.text = m.evaluation_frequency_lead(intervals, graphic=True)
-            reserved = next((p for p in document.paragraphs if p.text.startswith("Reserved properties are")), None)
+            reserved = next(
+                (
+                    p
+                    for p in document.paragraphs
+                    if p.text.startswith("Reserved properties are")
+                ),
+                None,
+            )
             if reserved is not None:
-                table = add_callout(document, reserved.text.replace("this table", "this graphic"))
+                table = add_callout(
+                    document, reserved.text.replace("this table", "this graphic")
+                )
                 before, after = table._tbl.getprevious(), table._tbl.getnext()
                 reserved._p.addprevious(before)
                 reserved._p.addprevious(table._tbl)
@@ -428,9 +429,7 @@ def apply_client_layout(
             lead._p.getparent().remove(lead._p)
 
     if jobs:
-        html_charts.render_charts(
-            [(kind, data, path) for kind, data, path, _, _ in jobs]
-        )
+        html_charts.render_charts([(kind, data, path) for kind, data, path, _, _ in jobs])
     for _, _, path, table, alt in jobs:
         shape = document.add_picture(str(path), width=Inches(7.5))
         set_picture_alt_text(shape, alt)

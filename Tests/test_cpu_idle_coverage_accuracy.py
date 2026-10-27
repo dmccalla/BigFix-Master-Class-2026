@@ -24,9 +24,7 @@ def test_cpu_idle_preserves_configured_and_unset_devices(
     image = tmp_path / "summary.png"
     Image.new("RGB", (40, 10), "white").save(image)
     output = tmp_path / "report.docx"
-    loop.generate_word(
-        _healthy_metrics(), image, output, agent_cpu_idle_summary=summary
-    )
+    loop.generate_word(_healthy_metrics(), image, output, agent_cpu_idle_summary=summary)
     duty = [data for _, data, _ in jobs if data.get("kind") == "duty"]
     if configured:
         assert len(duty) == 1

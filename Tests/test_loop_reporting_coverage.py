@@ -159,20 +159,18 @@ def test_word_report_lists_every_reason_in_one_row(tmp_path: Path) -> None:
         "The client loop health score is below 90. See Loop Health.\n"
         "6 of 100 devices (6.0%) have no usable loop data. See Loop Health.",
     ]
-    assert any(t.cell(0,0).text == "Infographic tile" for t in doc.tables)
+    assert any(t.cell(0, 0).text == "Infographic tile" for t in doc.tables)
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     assert "Reporting Issues" not in headings
-    assert not any(
-        r.cells[0].text == "Not Reported" for t in doc.tables for r in t.rows
-    )
+    assert not any(r.cells[0].text == "Not Reported" for t in doc.tables for r in t.rows)
     # The CP-12 sentence follows the slowest-device sentence under Loop Health.
     paragraphs = [p.text for p in doc.paragraphs if p.text.strip()]
     slowest = next(
-        i
-        for i, p in enumerate(paragraphs)
-        if p.startswith("The slowest device averages")
+        i for i, p in enumerate(paragraphs) if p.startswith("The slowest device averages")
     )
     assert paragraphs[slowest + 1].startswith(
         "6 devices (6.0%) reported no usable loop data."
     )
-    assert paragraphs.index("How the Score Is Calculated") < paragraphs.index("Loop Health")
+    assert paragraphs.index("How the Score Is Calculated") < paragraphs.index(
+        "Loop Health"
+    )

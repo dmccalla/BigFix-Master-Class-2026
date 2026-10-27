@@ -40,9 +40,7 @@ def test_active_captures_have_one_assessment_period():
         text = read_capture_or_log_text(source)
         generated = re.search(r"Report Generated: (.+)", text)
         if generated:
-            captured = datetime.strptime(
-                generated[1].strip(), "%a, %d %b %Y %H:%M:%S %z"
-            )
+            captured = datetime.strptime(generated[1].strip(), "%a, %d %b %Y %H:%M:%S %z")
             assert _period()[0] <= captured.date() <= end, source
         if source.name.startswith("Content_Info"):
             assert all(

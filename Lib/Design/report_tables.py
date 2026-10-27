@@ -220,7 +220,13 @@ FIXED_WIDTHS: dict[tuple[str, ...], tuple[int, ...]] = {
         1220,
         3430,
     ),
-    ("Display Name", "Version", "Subscribed Computers", "Most Recent Fixlet Modification", "Gather URL"): (2200, 1200, 1600, 2100, 3700),
+    (
+        "Display Name",
+        "Version",
+        "Subscribed Computers",
+        "Most Recent Fixlet Modification",
+        "Gather URL",
+    ): (2200, 1200, 1600, 2100, 3700),
     ("Statistic", "Value"): (6980, 3820),
 }
 
@@ -423,7 +429,14 @@ def _keep_header_with_body(tbl) -> None:
 def ensure_header_paragraph_style(styles) -> bool:
     """Table headers must not inherit the body paragraph's surrounding gaps."""
     before = etree.tostring(styles)
-    style = next((node for node in styles.findall(W + "style") if node.get(W + "styleId") == HEADER_PARAGRAPH_STYLE), None)
+    style = next(
+        (
+            node
+            for node in styles.findall(W + "style")
+            if node.get(W + "styleId") == HEADER_PARAGRAPH_STYLE
+        ),
+        None,
+    )
     if style is None:
         style = etree.SubElement(styles, W + "style")
         _set(style, type="paragraph", customStyle="1", styleId=HEADER_PARAGRAPH_STYLE)
@@ -433,7 +446,13 @@ def ensure_header_paragraph_style(styles) -> bool:
     if properties is None:
         properties = etree.SubElement(style, W + "pPr")
     _child(properties, "keepNext", _PPR_ORDER)
-    _set(_child(properties, "spacing", _PPR_ORDER), before="0", after="0", line="240", lineRule="auto")
+    _set(
+        _child(properties, "spacing", _PPR_ORDER),
+        before="0",
+        after="0",
+        line="240",
+        lineRule="auto",
+    )
     return etree.tostring(styles) != before
 
 
@@ -479,7 +498,13 @@ def _apply_column_alignment(tbl) -> None:
     for tr in rows:
         for tc, column, span in _row_cells(tr):
             alignment = "right" if column in numbers and span == 1 else "left"
-            if header_key(rows) == ("Resource", "Required", "Observed", "Short by", "Basis") and column in (1, 2):
+            if header_key(rows) == (
+                "Resource",
+                "Required",
+                "Observed",
+                "Short by",
+                "Basis",
+            ) and column in (1, 2):
                 alignment = "left"
             if span == 1 and column in centered:
                 alignment = "center"
@@ -614,8 +639,14 @@ def normalize_docx_tables(docx_path: Path) -> int:
         tmp_path = docx_path.with_name(f"{docx_path.name}.tmp")
         with zipfile.ZipFile(tmp_path, "w", zipfile.ZIP_DEFLATED) as zout:
             for item in zin.infolist():
-                payload = data if item.filename == "word/document.xml" else (
-                    _serialize(styles) if item.filename == "word/styles.xml" else zin.read(item)
+                payload = (
+                    data
+                    if item.filename == "word/document.xml"
+                    else (
+                        _serialize(styles)
+                        if item.filename == "word/styles.xml"
+                        else zin.read(item)
+                    )
                 )
                 zout.writestr(item, payload)
     tmp_path.replace(docx_path)

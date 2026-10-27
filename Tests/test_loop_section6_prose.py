@@ -54,7 +54,10 @@ def _rows(results: list[str]) -> list[loop.LoopOffenderSummary]:
             "retrieved property and 1 is another evaluation. Retrieved properties include reserved properties.",
         ),
         ([SITE] * 10, "10 of these 10 are site evaluations."),
-        ([RETRIEVED], "1 of these 1 is a retrieved property. Retrieved properties include reserved properties."),
+        (
+            [RETRIEVED],
+            "1 of these 1 is a retrieved property. Retrieved properties include reserved properties.",
+        ),
     ],
 )
 def test_top10_kind_sentence_accounts_for_every_row(
@@ -88,4 +91,9 @@ def test_loop_graphic_has_no_source_or_scoring_prose():
     source = loop.Path(loop.__file__).read_text(encoding="utf-8")
     assert '"scoringLine":' not in source
     assert '"sourceLine":' not in source
-    assert loop.LOOP_GROUP_POINTS == {"Healthy": 100, "Good": 85, "Warning": 67, "Critical": 34}
+    assert loop.LOOP_GROUP_POINTS == {
+        "Healthy": 100,
+        "Good": 85,
+        "Warning": 67,
+        "Critical": 34,
+    }

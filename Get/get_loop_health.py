@@ -523,7 +523,7 @@ def format_report_span(start_value: date | None, end_value: date | None) -> str:
 def pct(value: float, decimals: int = 1) -> str:
     rendered = f"{value * 100:.{decimals}f}"
     if value > 0 and float(rendered) == 0:
-        return f"<{10 ** -decimals:.{decimals}f}%"
+        return f"<{10**-decimals:.{decimals}f}%"
     return f"{rendered}%"
 
 
@@ -1699,15 +1699,30 @@ def _counted_phrase(count: int, one: str, many: str) -> str:
     return f"the 1 {one}" if count == 1 else f"the {count:,} {many}"
 
 
-def evaluation_frequency_lead(summary: PropertyIntervalSummary, *, graphic: bool = False) -> str:
+def evaluation_frequency_lead(
+    summary: PropertyIntervalSummary, *, graphic: bool = False
+) -> str:
     """Opening paragraph of Evaluation Frequency."""
     if summary.retrieved is None:
         # A capture made before the retrieved property section.
-        population = _counted_phrase(len(summary.properties), "active analysis property", "active analysis properties")
+        population = _counted_phrase(
+            len(summary.properties),
+            "active analysis property",
+            "active analysis properties",
+        )
     else:
         population = (
-            _counted_phrase(len(summary.properties), "active analysis property", "active analysis properties")
-            + " and " + _counted_phrase(len(summary.counted_retrieved), "retrieved property", "retrieved properties")
+            _counted_phrase(
+                len(summary.properties),
+                "active analysis property",
+                "active analysis properties",
+            )
+            + " and "
+            + _counted_phrase(
+                len(summary.counted_retrieved),
+                "retrieved property",
+                "retrieved properties",
+            )
         )
     form = "graphic" if graphic else "table"
     unit = "bar" if graphic else "row"
@@ -1721,13 +1736,14 @@ def evaluation_frequency_lead(summary: PropertyIntervalSummary, *, graphic: bool
 
 def evaluation_frequency_detail(summary: PropertyIntervalSummary) -> str:
     buckets = property_interval_band_counts(summary)
-    frequent = sum(buckets[label]["total"] for label in ("Every report", "Under 15 minutes"))
+    frequent = sum(
+        buckets[label]["total"] for label in ("Every report", "Under 15 minutes")
+    )
     return (
         f"The Every report and Under 15 minutes rows add up to {frequent:,} properties. "
         "CLT-01 reports this count. Those two rows are rated Needs Attention, "
         "15 minutes to 6 hours is Advisory, and 6 hours or longer is Healthy."
     )
-
 
 
 def evaluation_frequency_reserved_note(summary: PropertyIntervalSummary) -> str:
@@ -1739,7 +1755,6 @@ def evaluation_frequency_reserved_note(summary: PropertyIntervalSummary) -> str:
         "report and their interval cannot be changed, so this table and "
         "CLT-01 leave them out."
     )
-
 
 
 def evaluation_frequency_source_note(summary: PropertyIntervalSummary) -> str:
@@ -3779,11 +3794,7 @@ def loop_finding_reasons(
         )
     frequent = frequent_property_count(property_intervals)
     if frequent:
-        subject = (
-            "1 property is"
-            if frequent == 1
-            else f"{frequent:,} properties are"
-        )
+        subject = "1 property is" if frequent == 1 else f"{frequent:,} properties are"
         reasons.append(
             LoopFindingReason(
                 "Medium",
@@ -4862,6 +4873,7 @@ def generate_word(
         paragraph = document.add_heading(text, level=level)
         sections[key] = paragraph
         return paragraph
+
     if stamp:
         stamp_docx_document(document, stamp)
 
@@ -4897,7 +4909,9 @@ def generate_word(
         spacer = document.add_paragraph()
         spacer.paragraph_format.space_after = Pt(8)
 
-    keep_with_next(client_heading('Reading the Infographic', 'Reading the Infographic', 3))
+    keep_with_next(
+        client_heading("Reading the Infographic", "Reading the Infographic", 3)
+    )
     build_word_table(
         document,
         ["Infographic tile", "Value", "What it means"],
@@ -4920,14 +4934,14 @@ def generate_word(
             else []
         )
         if finding_rows:
-            client_heading('Automated Findings', 'Automated Findings', 3)
+            client_heading("Automated Findings", "Automated Findings", 3)
             build_word_table(
                 document,
                 ["Finding ID", "Automated Finding"],
                 finding_rows,
             )
 
-    client_heading('Loop Health', 'Loop Health', 3)
+    client_heading("Loop Health", "Loop Health", 3)
     keep_with_next(
         document.add_paragraph(
             "Each device is placed in a group by its average loop time across the "
@@ -4956,7 +4970,7 @@ def generate_word(
         "as a reason."
     )
 
-    client_heading('How the Score Is Calculated', 'How the Score Is Calculated', 3)
+    client_heading("How the Score Is Calculated", "How the Score Is Calculated", 3)
     document.add_paragraph(
         "Each device earns points for its group. Healthy earns 100, Good 85, "
         "Warning 67 and Critical 34. The score is the average across all devices."
@@ -4966,14 +4980,16 @@ def generate_word(
     )
 
     if loop_offenders or actionsite_pressure or property_intervals:
-        client_heading('Loop Cost', 'Loop Cost', 3)
+        client_heading("Loop Cost", "Loop Cost", 3)
         document.add_paragraph(
             "These sections show what the Client evaluates in each loop. They do "
             "not change the score. Evaluation Frequency can add a reason to CLT-01."
         )
 
     if loop_offenders:
-        client_heading('Top 10 Most Expensive Evaluations', 'Top 10 Most Expensive Evaluations', 4)
+        client_heading(
+            "Top 10 Most Expensive Evaluations", "Top 10 Most Expensive Evaluations", 4
+        )
         keep_with_next(
             document.add_paragraph(
                 top10_kind_sentence(loop_offenders)
@@ -5004,7 +5020,7 @@ def generate_word(
         )
 
     if property_intervals:
-        client_heading('Evaluation Frequency', 'Evaluation Frequency', 4)
+        client_heading("Evaluation Frequency", "Evaluation Frequency", 4)
         keep_with_next(
             document.add_paragraph(evaluation_frequency_lead(property_intervals))
         )
@@ -5048,7 +5064,7 @@ def generate_word(
             )
 
     if actionsite_pressure:
-        client_heading('Contributing Factors', 'Contributing Factors', 4)
+        client_heading("Contributing Factors", "Contributing Factors", 4)
         keep_with_next(
             document.add_paragraph(
                 "Deployment-wide counts that add work to every Client loop."
@@ -5065,14 +5081,14 @@ def generate_word(
             document.add_paragraph(CONTENT_CAPTURE_NOTE)
 
     if udp_summary or command_polling_summary:
-        client_heading('Notification and Polling', 'Notification and Polling', 3)
+        client_heading("Notification and Polling", "Notification and Polling", 3)
         document.add_paragraph(
             "Relays send UDP notifications so Clients act on new content right away. "
             "Command polling is the fallback when those notifications do not arrive."
         )
 
     if udp_summary:
-        client_heading('UDP Notification Coverage', 'UDP Notification Coverage', 4)
+        client_heading("UDP Notification Coverage", "UDP Notification Coverage", 4)
         build_word_table(
             document,
             ["Status", "Devices / Total", "% of Total"],
@@ -5106,7 +5122,7 @@ def generate_word(
             )
 
     if command_polling_summary:
-        client_heading('Command Polling', 'Command Polling', 4)
+        client_heading("Command Polling", "Command Polling", 4)
         keep_with_next(
             document.add_paragraph(
                 f"The first four rows add up to the "
@@ -5151,7 +5167,7 @@ def generate_word(
             )
 
     if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:
-        client_heading('Client Settings', 'Client Settings', 3)
+        client_heading("Client Settings", "Client Settings", 3)
         document.add_paragraph(
             "These settings control how much CPU the Client uses. They are reported "
             "for context and are not scored. Duty cycle is the work interval divided "
@@ -5161,7 +5177,7 @@ def generate_word(
         )
 
     if fast_hash_verify_summary:
-        client_heading('FastHashVerify', 'FastHashVerify', 4)
+        client_heading("FastHashVerify", "FastHashVerify", 4)
         keep_with_next(
             document.add_paragraph(
                 "FastHashVerify lets the Client use more CPU while it checks the hash "
@@ -5175,7 +5191,9 @@ def generate_word(
             ["Status", "Devices / Total", "% of Total"],
             fast_hash_verify_coverage_rows(fast_hash_verify_summary),
         )
-        settings_heading = document.add_paragraph("Reported FastHashVerify Work and Sleep Settings")
+        settings_heading = document.add_paragraph(
+            "Reported FastHashVerify Work and Sleep Settings"
+        )
         sections["FastHashVerify settings"] = settings_heading
         keep_with_next(settings_heading)
         build_word_table(
@@ -5190,7 +5208,7 @@ def generate_word(
         )
 
     if agent_cpu_idle_summary:
-        client_heading('CPU Idle Settings', 'CPU Idle Settings', 4)
+        client_heading("CPU Idle Settings", "CPU Idle Settings", 4)
         keep_with_next(
             document.add_paragraph(
                 "Work Idle and Sleep Idle set how long the Client works and rests "
@@ -5209,7 +5227,7 @@ def generate_word(
         )
 
     if agent_multicore_summary:
-        client_heading('Multicore CPU Scaling', 'Multicore CPU Scaling', 4)
+        client_heading("Multicore CPU Scaling", "Multicore CPU Scaling", 4)
         keep_with_next(
             document.add_paragraph(
                 "Available on BigFix 11.0.7 and later Clients. Not Applicable means "
@@ -5228,15 +5246,21 @@ def generate_word(
     from Lib.Design.client_report_layout import apply_client_layout
 
     apply_client_layout(
-            document, word_output, sys.modules[__name__], sections=sections,
-            render_details=png_output.exists(), metrics=metrics,
-            actionsite_pressure=actionsite_pressure,
-            loop_offenders=loop_offenders, property_intervals=property_intervals,
-            agent_cpu_idle_summary=agent_cpu_idle_summary,
-            agent_multicore_summary=agent_multicore_summary,
-            fast_hash_verify_summary=fast_hash_verify_summary,
-            udp_summary=udp_summary, command_polling_summary=command_polling_summary,
-        )
+        document,
+        word_output,
+        sys.modules[__name__],
+        sections=sections,
+        render_details=png_output.exists(),
+        metrics=metrics,
+        actionsite_pressure=actionsite_pressure,
+        loop_offenders=loop_offenders,
+        property_intervals=property_intervals,
+        agent_cpu_idle_summary=agent_cpu_idle_summary,
+        agent_multicore_summary=agent_multicore_summary,
+        fast_hash_verify_summary=fast_hash_verify_summary,
+        udp_summary=udp_summary,
+        command_polling_summary=command_polling_summary,
+    )
     document.save(str(word_output))
     report_tables.normalize_docx_tables(word_output)
 

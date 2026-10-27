@@ -201,6 +201,7 @@ def build(output: Path = OUTPUT) -> Path:
     if str(PROJECT_ROOT) not in sys.path:
         sys.path.insert(0, str(PROJECT_ROOT))
     from Lib.Design.report_layout import apply_report_hierarchy
+
     apply_report_hierarchy(document)
     output.parent.mkdir(parents=True, exist_ok=True)
     document.save(str(output))

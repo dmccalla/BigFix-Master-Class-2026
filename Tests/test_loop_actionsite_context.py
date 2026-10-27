@@ -105,7 +105,9 @@ def test_loop_word_explains_the_score_before_loop_health(
     )
     assert score_heading.style.name == "Heading 3"
     assert "Client Loop Context" not in paragraphs
-    assert paragraphs.index("How the Score Is Calculated") < paragraphs.index("Loop Health")
+    assert paragraphs.index("How the Score Is Calculated") < paragraphs.index(
+        "Loop Health"
+    )
     assert "Score Method: test driver" not in paragraphs
     assert "Score Breakdown: test breakdown" not in paragraphs
     assert (
@@ -463,7 +465,10 @@ def test_context_strip_tiles_use_udp_population_and_relay_count() -> None:
     tiles = loop.context_strip_tiles(metrics, udp_summary=udp_summary)
 
     assert tiles[1]["value"] == "2 / 4"
-    assert tiles[1]["caption"] == "Devices with no UDP pings in the UDP capture. The UDP capture and client loop capture can contain different populations."
+    assert (
+        tiles[1]["caption"]
+        == "Devices with no UDP pings in the UDP capture. The UDP capture and client loop capture can contain different populations."
+    )
     assert tiles[2]["value"] == "2 / 3"
     assert tiles[2]["caption"] == "relay-a"
 
@@ -558,13 +563,25 @@ def test_loop_word_keeps_the_key_after_the_score_explanation(
         for index, element in enumerate(body_elements)
         if element.find(f".//{qn('w:drawing')}") is not None
     )
-    score_index = next(index for index, element in enumerate(body_elements) if element_text(element) == "How the Score Is Calculated")
-    loop_health_index = next(index for index, element in enumerate(body_elements) if element_text(element) == "Loop Health")
+    score_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element_text(element) == "How the Score Is Calculated"
+    )
+    loop_health_index = next(
+        index
+        for index, element in enumerate(body_elements)
+        if element_text(element) == "Loop Health"
+    )
     assert infographic_index < score_index < loop_health_index
-    reading_heading = next(p for p in doc.paragraphs if p.text == "Reading the Infographic")
-    score_heading = next(p for p in doc.paragraphs if p.text == "How the Score Is Calculated")
+    reading_heading = next(
+        p for p in doc.paragraphs if p.text == "Reading the Infographic"
+    )
+    score_heading = next(
+        p for p in doc.paragraphs if p.text == "How the Score Is Calculated"
+    )
     assert reading_heading.style.name == score_heading.style.name == "Heading 3"
-    assert any(t.cell(0,0).text == "Infographic tile" for t in doc.tables)
+    assert any(t.cell(0, 0).text == "Infographic tile" for t in doc.tables)
 
 
 def test_actionsite_pressure_rows_use_spine_statuses_for_thresholds(

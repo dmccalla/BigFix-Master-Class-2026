@@ -20,7 +20,9 @@ from Lib.Design.report_layout import apply_report_hierarchy
 
 
 def _text(document):
-    return "\n".join("".join(p.xpath(".//w:t/text()")) for p in document.element.body.xpath(".//w:p"))
+    return "\n".join(
+        "".join(p.xpath(".//w:t/text()")) for p in document.element.body.xpath(".//w:p")
+    )
 
 
 def test_optional_fonts_use_the_shipped_regular_and_bold(monkeypatch):
@@ -60,9 +62,7 @@ def test_bullet_definitions_are_ordered_and_paragraphs_have_list_references():
     numpr = paragraph._p.find(qn("w:pPr")).find(qn("w:numPr"))
     number_id = numpr.find(qn("w:numId")).get(qn("w:val"))
     instance = next(
-        n
-        for n in children
-        if n.tag == qn("w:num") and n.get(qn("w:numId")) == number_id
+        n for n in children if n.tag == qn("w:num") and n.get(qn("w:numId")) == number_id
     )
     abstract_id = instance.find(qn("w:abstractNumId")).get(qn("w:val"))
     abstract = next(
@@ -78,9 +78,7 @@ def test_bullet_definitions_are_ordered_and_paragraphs_have_list_references():
 
 def test_standalone_style_templates_retain_the_body_font():
     templates = list(
-        (Path(__file__).resolve().parents[1] / "Templates").glob(
-            "*_Style_Template.docx"
-        )
+        (Path(__file__).resolve().parents[1] / "Templates").glob("*_Style_Template.docx")
     )
     if not templates:
         pytest.skip("Standalone style templates belong to the standalone applications")
@@ -143,9 +141,7 @@ def test_frequency_explanations_and_guidance_survive_both_paths(
             )
         )
         assert not content.strip() or content in text
-    bullets = document.element.body.xpath(
-        './/w:p[w:pPr/w:pStyle[@w:val="ReportBullet"]]'
-    )
+    bullets = document.element.body.xpath('.//w:p[w:pPr/w:pStyle[@w:val="ReportBullet"]]')
     assert len(bullets) == 9
     assert all(p.find(qn("w:pPr")).find(qn("w:numPr")) is not None for p in bullets)
     heading = document.element.body.xpath(
@@ -198,7 +194,6 @@ def test_content_chart_names_the_active_measure_and_retains_relevant_counts(
     text = _text(Document(output))
     assert "121 relevant of 6,702 total. 140 active." in text
     assert "877 active, 34 with the BigFix custom flag" in text
-
 
 
 def test_unchecked_vm_is_not_reported_as_a_detection():

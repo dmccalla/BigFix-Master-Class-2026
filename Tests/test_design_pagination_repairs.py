@@ -28,7 +28,10 @@ def table(document, headers, count):
     return result
 
 
-@pytest.mark.parametrize("title,section", [("Technical Evidence", "SECTION 08"), ("Findings & Recommendations", "SECTION 06")])
+@pytest.mark.parametrize(
+    "title,section",
+    [("Technical Evidence", "SECTION 08"), ("Findings & Recommendations", "SECTION 06")],
+)
 def test_section_has_one_boundary_and_retains_all_words(title, section):
     document = Document()
     document.add_paragraph("Operational Maturity was not assessed.")
@@ -55,8 +58,7 @@ def test_reading_key_keeps_only_a_short_opening_group():
     words = [cell.text for row in result.rows for cell in row.cells]
     apply_report_pagination(document)
     keeps = [
-        row.cells[0].paragraphs[0].paragraph_format.keep_with_next
-        for row in result.rows
+        row.cells[0].paragraphs[0].paragraph_format.keep_with_next for row in result.rows
     ]
     assert keeps[:3] == [True, True, False]
     assert all(value is None for value in keeps[3:])

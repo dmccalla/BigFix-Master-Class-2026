@@ -187,7 +187,9 @@ def perfmon_score_method_note_xml() -> str:
                 "counter area compares to its applicable threshold during the "
                 "capture window:"
             ),
-            text_paragraph_xml("Pass: 100 points | Advisory: 55 points | Cannot Verify: 25 points | Fail: 0 points"),
+            text_paragraph_xml(
+                "Pass: 100 points | Advisory: 55 points | Cannot Verify: 25 points | Fail: 0 points"
+            ),
             text_paragraph_xml(
                 "Formula: Pass% x 100 + Advisory% x 55 + Cannot Verify% x 25 + Fail% x 0",
                 bold_prefix="Formula:",
@@ -206,12 +208,16 @@ def perfmon_score_method_note_xml() -> str:
         ]
     )
 
-    paragraphs = re.findall(r'<w:p>.*?</w:p>', xml, re.DOTALL)
+    paragraphs = re.findall(r"<w:p>.*?</w:p>", xml, re.DOTALL)
     for index, paragraph in enumerate(paragraphs):
-        if '<w:pPr>' not in paragraph:
-            keep = '<w:keepNext/>' if index < len(paragraphs)-1 else ''
-            revised = paragraph.replace('<w:p>', '<w:p><w:pPr>'+keep+'<w:spacing w:before="0" w:after="60"/></w:pPr>', 1)
-            xml = xml.replace(paragraph,revised,1)
+        if "<w:pPr>" not in paragraph:
+            keep = "<w:keepNext/>" if index < len(paragraphs) - 1 else ""
+            revised = paragraph.replace(
+                "<w:p>",
+                "<w:p><w:pPr>" + keep + '<w:spacing w:before="0" w:after="60"/></w:pPr>',
+                1,
+            )
+            xml = xml.replace(paragraph, revised, 1)
     return xml
 
 
@@ -251,7 +257,8 @@ def status_paragraph_xml(status: str, label: str, text: str) -> str:
     icon = status_icon(status)
     properties = (
         '<w:pPr><w:pStyle w:val="PerfMonEvidence"/></w:pPr>'
-        if label in {"Observation", "Counter"} else ""
+        if label in {"Observation", "Counter"}
+        else ""
     )
     return (
         "<w:p>"
@@ -396,8 +403,12 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
             )
         if item.get("samples"):
             observed_parts.append(f"{item['samples']} readings")
-        observed = ", ".join(observed_parts) or ("Not evaluated" if status == "Not Available" else "Reviewed")
-        points = perfmon_section_score(aggregate_perfmon_scorecard(observations).get(section, {}))
+        observed = ", ".join(observed_parts) or (
+            "Not evaluated" if status == "Not Available" else "Reviewed"
+        )
+        points = perfmon_section_score(
+            aggregate_perfmon_scorecard(observations).get(section, {})
+        )
         xml += (
             "<w:tr>"
             + table_cell_xml(section, widths[0])
@@ -407,9 +418,13 @@ def build_perfmon_summary_table_xml(observations: dict) -> str:
                 color=status_color(status),
                 bold=True,
             )
-            + table_cell_xml(report_standard(str(item.get("threshold", "See NFR standard"))), widths[2])
+            + table_cell_xml(
+                report_standard(str(item.get("threshold", "See NFR standard"))), widths[2]
+            )
             + table_cell_xml(observed, widths[3])
-            + table_cell_xml(str(points) if points is not None else "Not assessed", widths[4])
+            + table_cell_xml(
+                str(points) if points is not None else "Not assessed", widths[4]
+            )
             + "</w:tr>"
         )
 
@@ -424,7 +439,11 @@ def build_perfmon_hardware_context_xml(observations: dict) -> str:
 
     def value_with_source(value_key: str, source_key: str, suffix: str = "") -> str:
         value = environment.get(value_key)
-        if value_key == "Virtual Machine" and value in (False, "False", "No") and environment.get(source_key) in (None, "", "Not detected", "Not supplied"):
+        if (
+            value_key == "Virtual Machine"
+            and value in (False, "False", "No")
+            and environment.get(source_key) in (None, "", "Not detected", "Not supplied")
+        ):
             return "Not supplied"
         if value is None or value == "":
             return ""
@@ -1470,7 +1489,15 @@ def build_summary_xml(observations: dict, include_assessment: bool = True) -> st
     xml = heading_paragraph_xml("Capture Summary", level=3)
     for line in lines:
         xml += text_paragraph_xml(line)
-    return (build_assessment_by_area_xml(observations, level=3) if include_assessment else "") + xml + hardware_xml
+    return (
+        (
+            build_assessment_by_area_xml(observations, level=3)
+            if include_assessment
+            else ""
+        )
+        + xml
+        + hardware_xml
+    )
 
 
 def build_assessment_by_area_xml(observations: dict, level: int) -> str:
@@ -1916,7 +1943,9 @@ def png_emu(path: Path, max_width_in: float) -> tuple[int, int]:
     return int(width_in * EMU_PER_INCH), int(height_in * EMU_PER_INCH)
 
 
-def new_drawing_xml(rid: str, picture_id: int, cx: int, cy: int, alt_text: str = "") -> str:
+def new_drawing_xml(
+    rid: str, picture_id: int, cx: int, cy: int, alt_text: str = ""
+) -> str:
     """
     Build DrawingML for an inline image.
 
@@ -2158,7 +2187,11 @@ def find_perfmon_append_insert_point(doc_xml: str) -> int:
 
     body_end = doc_xml.rfind("</w:body>")
     section_properties = doc_xml.rfind("<w:sectPr", 0, body_end)
-    if section_properties >= 0 and re.fullmatch(r"<w:sectPr\b[^>]*(?:/>|>.*?</w:sectPr>)\s*", doc_xml[section_properties:body_end], flags=re.DOTALL):
+    if section_properties >= 0 and re.fullmatch(
+        r"<w:sectPr\b[^>]*(?:/>|>.*?</w:sectPr>)\s*",
+        doc_xml[section_properties:body_end],
+        flags=re.DOTALL,
+    ):
         return section_properties
     return body_end if body_end >= 0 else len(doc_xml)
 
@@ -2229,7 +2262,15 @@ def append_perfmon_capture_section(
         rels_xml = add_image_relationship(rels_xml, rid, f"media/{img_file}")
         content_types_xml = ensure_png_content_type(content_types_xml)
         cx, cy = png_emu(png_path, max_chart_width_in)
-        xml = new_drawing_xml(rid=rid, picture_id=picture_id, cx=cx, cy=cy, alt_text="PerfMon infrastructure score and statuses for the monitored areas." if png_path == scorecard_path else png_path.stem)
+        xml = new_drawing_xml(
+            rid=rid,
+            picture_id=picture_id,
+            cx=cx,
+            cy=cy,
+            alt_text="PerfMon infrastructure score and statuses for the monitored areas."
+            if png_path == scorecard_path
+            else png_path.stem,
+        )
         next_rid += 1
         picture_id += 1
         return xml
@@ -2283,6 +2324,7 @@ def append_perfmon_capture_section(
     )
 
     from Lib.Design.perfmon_report_layout import finalize_perfmon_layout
+
     finalize_perfmon_layout(output_path, chart_folder, section_title=section_title)
     validate_docx_package(output_path)
     log.ok("Supplemental PerfMon capture appended")
@@ -2487,6 +2529,7 @@ def inject_perfmon_charts(
     )
 
     from Lib.Design.perfmon_report_layout import finalize_perfmon_layout
+
     finalize_perfmon_layout(output_path, chart_folder)
     validate_docx_package(output_path)
 

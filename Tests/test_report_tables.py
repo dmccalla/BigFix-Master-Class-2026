@@ -378,14 +378,19 @@ def test_pre_aligned_percent_header_still_gets_compact_spacing() -> None:
     original_body = etree.tostring(body)
     original_grid = etree.tostring(tbl.find(W + "tblGrid"))
     for paragraph in header.iter(W + "p"):
-        rt._set(rt._child(paragraph.find(W + "pPr"), "spacing", rt._PPR_ORDER), after="240")
+        rt._set(
+            rt._child(paragraph.find(W + "pPr"), "spacing", rt._PPR_ORDER), after="240"
+        )
     rt.normalize_table(tbl)
     assert etree.tostring(body) == original_body
     assert etree.tostring(tbl.find(W + "tblGrid")) == original_grid
     assert header.find(f"{W}trPr/{W}tblHeader") is not None
     assert header.find(f"{W}trPr/{W}jc").get(W + "val") == "left"
     for paragraph in header.iter(W + "p"):
-        assert paragraph.find(f"{W}pPr/{W}pStyle").get(W + "val") == rt.HEADER_PARAGRAPH_STYLE
+        assert (
+            paragraph.find(f"{W}pPr/{W}pStyle").get(W + "val")
+            == rt.HEADER_PARAGRAPH_STYLE
+        )
         assert paragraph.find(f"{W}pPr/{W}spacing") is None
     before = etree.tostring(tbl)
     rt.normalize_table(tbl)
@@ -480,14 +485,34 @@ def test_label_rows_merged_across_columns_do_not_decide_alignment() -> None:
 
 def test_capacity_configuration_keeps_the_widths_selected_for_host_names():
     table = _table(
-        "BigFixContent", '<w:tblW w:w="10800" w:type="dxa"/>',
-        [["Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"],
-         ["BFPLUGINPORTAL", "Plugin Portal, BES Explorer", "4", "8 GB", "100 GB", "Virtual", "Capture"]],
+        "BigFixContent",
+        '<w:tblW w:w="10800" w:type="dxa"/>',
+        [
+            ["Host", "Roles", "Cores", "RAM", "Storage", "Platform", "Source"],
+            [
+                "BFPLUGINPORTAL",
+                "Plugin Portal, BES Explorer",
+                "4",
+                "8 GB",
+                "100 GB",
+                "Virtual",
+                "Capture",
+            ],
+        ],
     )
     selected = (2160, 2808, 936, 864, 1296, 1296, 1440)
     for column, width in zip(table.find(W + "tblGrid"), selected):
         column.set(W + "w", str(width))
     assert rt.normalize_table(table)
-    assert tuple(int(column.get(W + "w")) for column in table.find(W + "tblGrid")) == selected
+    assert (
+        tuple(int(column.get(W + "w")) for column in table.find(W + "tblGrid"))
+        == selected
+    )
     for row in table.findall(W + "tr"):
-        assert tuple(int(cell.find(W + "tcPr/" + W + "tcW").get(W + "w")) for cell in row.findall(W + "tc")) == selected
+        assert (
+            tuple(
+                int(cell.find(W + "tcPr/" + W + "tcW").get(W + "w"))
+                for cell in row.findall(W + "tc")
+            )
+            == selected
+        )

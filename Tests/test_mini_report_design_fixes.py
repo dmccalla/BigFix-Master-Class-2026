@@ -2,7 +2,6 @@
 # SPDX-License-Identifier: MIT
 """Evidence and score boundaries for the reviewed mini-report presentation."""
 
-
 import get_filldb_performance as filldb
 import get_loop_health as loop
 import get_perfmon_charts as perfmon
@@ -154,6 +153,7 @@ def test_every_disk_plot_is_preserved_in_each_capture(tmp_path, scope):
     import json
 
     from Lib.Design.perfmon_report_layout import finalize_perfmon_layout
+
     document = Document()
     document.add_heading("PerfMon Capture 1", level=2)
     first = tmp_path / "total.png"
@@ -167,12 +167,28 @@ def test_every_disk_plot_is_preserved_in_each_capture(tmp_path, scope):
     output = tmp_path / "two_captures.docx"
     document.save(output)
     rows = []
-    for path,counter in [(first,"PhysicalDisk_Total_Current_Disk_Queue_Length"),(second,"PhysicalDisk_0_C_Current_Disk_Queue_Length")]:
-        rows.append({"counter":counter,"png_sha256":hashlib.sha256(path.read_bytes()).hexdigest(),"raw_series_digest":"same","plot_series_digest":"same","status":"OK","samples":3,"maximum":1,"section":"Storage Queue Depth"})
-    (tmp_path / "perfmon_plot_manifest.json").write_text(json.dumps(rows),encoding="utf-8")
-    finalize_perfmon_layout(output,tmp_path,section_title=scope)
-    result=Document(output)
-    assert len(result.inline_shapes)==3
-    validation=json.loads((tmp_path / "perfmon_layout_validation.json").read_text())
+    for path, counter in [
+        (first, "PhysicalDisk_Total_Current_Disk_Queue_Length"),
+        (second, "PhysicalDisk_0_C_Current_Disk_Queue_Length"),
+    ]:
+        rows.append(
+            {
+                "counter": counter,
+                "png_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "raw_series_digest": "same",
+                "plot_series_digest": "same",
+                "status": "OK",
+                "samples": 3,
+                "maximum": 1,
+                "section": "Storage Queue Depth",
+            }
+        )
+    (tmp_path / "perfmon_plot_manifest.json").write_text(
+        json.dumps(rows), encoding="utf-8"
+    )
+    finalize_perfmon_layout(output, tmp_path, section_title=scope)
+    result = Document(output)
+    assert len(result.inline_shapes) == 3
+    validation = json.loads((tmp_path / "perfmon_layout_validation.json").read_text())
     assert validation["plots_omitted"] == []
     assert validation["plots_preserved"] == 2

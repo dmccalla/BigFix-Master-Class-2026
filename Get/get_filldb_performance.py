@@ -453,10 +453,19 @@ def generate_filldb_chart(
         if parse_number(r.get("Time (ms)", "")) > 0
     )
 
-    by_name = {clean_object_name(r.get("FillDB Object", "")).lower():r for r in assessed_rows}
+    by_name = {
+        clean_object_name(r.get("FillDB Object", "")).lower(): r for r in assessed_rows
+    }
     batch = by_name.get("batch rate")
     short = by_name.get("parallel db update (short batch)")
-    matching_batch = bool(batch and short and all(batch.get(k) == short.get(k) for k in ("Count", "Time (ms)", "Rate/s", "Health Check")))
+    matching_batch = bool(
+        batch
+        and short
+        and all(
+            batch.get(k) == short.get(k)
+            for k in ("Count", "Time (ms)", "Rate/s", "Health Check")
+        )
+    )
     # Workload bars, longest processing time first.
     ranked = sorted(
         assessed_rows, key=lambda r: parse_number(r.get("Time (ms)", "")), reverse=True
@@ -465,9 +474,15 @@ def generate_filldb_chart(
     max_min = max(times_min, default=0) or 1
     bars = [
         {
-            "label": clean_object_name(r.get("FillDB Object", "")) + (" (same totals as Parallel DB Update (Short Batch))" if matching_batch and clean_object_name(r.get("FillDB Object", "")).lower() == "batch rate" else ""),
+            "label": clean_object_name(r.get("FillDB Object", ""))
+            + (
+                " (same totals as Parallel DB Update (Short Batch))"
+                if matching_batch
+                and clean_object_name(r.get("FillDB Object", "")).lower() == "batch rate"
+                else ""
+            ),
             "width": f"{m / max_min * 100:.1f}%",
-            "mins": f"{m:.1f} min" if m >= 1 else f"{m*60:.3g} s",
+            "mins": f"{m:.1f} min" if m >= 1 else f"{m * 60:.3g} s",
             "color": status_color.get(health_status(r.get("Health Check", "")), C_NODATA),
         }
         for r, m in zip(ranked, times_min)
@@ -549,7 +564,13 @@ def generate_filldb_chart(
         "barsLabel": "Workload by object &middot; processing time",
         "bars": bars,
         "scopeNote": filldb_score_scope_note(rows),
-        "workloadNote": "Times are totals per object, not a sequence. " + ("Batch Rate repeats Parallel DB Update (Short Batch). " if matching_batch else "") + "Do not add them.",
+        "workloadNote": "Times are totals per object, not a sequence. "
+        + (
+            "Batch Rate repeats Parallel DB Update (Short Batch). "
+            if matching_batch
+            else ""
+        )
+        + "Do not add them.",
         "assessmentNote": filldb_assessment_note(rows),
         "scoringLine": (
             "Score ranges: 90 to 100 Healthy, 70 to 89 Needs Attention, 0 to 69 "
@@ -700,7 +721,8 @@ def build_word_table(document: DocxDocument, rows: list[dict[str, str]]) -> None
             set_cell_text(
                 cell,
                 value,
-                bold=is_status_cell or (column_name == "FillDB Object" and is_guide_check(item)),
+                bold=is_status_cell
+                or (column_name == "FillDB Object" and is_guide_check(item)),
                 color=status_style["text"] if is_status_cell and status_style else None,
             )
 
@@ -748,11 +770,11 @@ def build_capture_summary_table(
         set_cell_width(header_row.cells[idx], SUMMARY_TABLE_WIDTHS[idx])
         set_cell_text(header_row.cells[idx], column_name, bold=True)
     ordered = sorted(summary_rows, key=lambda item: item[0] in analyzer_names)
-    for label,value in ordered:
+    for label, value in ordered:
         group = "Analyzer run" if label in analyzer_names else "Capture"
         row = table.add_row()
         set_row_cant_split(row)
-        for index,text in enumerate((group,label,value)):
+        for index, text in enumerate((group, label, value)):
             set_cell_width(row.cells[index], SUMMARY_TABLE_WIDTHS[index])
             set_cell_text(row.cells[index], text)
 
@@ -782,9 +804,7 @@ FILLDB_OBJECTS_LEAD = (
 )
 
 
-def filldb_title_paragraph(
-    rows: list[dict[str, str]], metadata: dict[str, str]
-) -> str:
+def filldb_title_paragraph(rows: list[dict[str, str]], metadata: dict[str, str]) -> str:
     """Describe the capture without directing readers to consultant files."""
     sentences = []
     start = metadata.get("start", "")
@@ -831,14 +851,26 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
         ]
         sentences.append(f"The analyzer rates {_join_names(parts)}.")
     if unrated:
-        unknown = [r for r in objects if health_status(r.get("Health Check", "")) == "unknown"]
-        descriptions = [f"{titlecase_label(r.get('FillDB Object', ''))} ({format_count(parse_number(r.get('Count', '')))} rows)" for r in unknown if parse_number(r.get('Count', '')) > 0]
-        none = [titlecase_label(r.get('FillDB Object', '')) for r in unknown if parse_number(r.get('Count', '')) == 0]
-        sentences.append(f"{unrated} {'object' if unrated == 1 else 'objects'} could not be rated.")
+        unknown = [
+            r for r in objects if health_status(r.get("Health Check", "")) == "unknown"
+        ]
+        descriptions = [
+            f"{titlecase_label(r.get('FillDB Object', ''))} ({format_count(parse_number(r.get('Count', '')))} rows)"
+            for r in unknown
+            if parse_number(r.get("Count", "")) > 0
+        ]
+        none = [
+            titlecase_label(r.get("FillDB Object", ""))
+            for r in unknown
+            if parse_number(r.get("Count", "")) == 0
+        ]
+        sentences.append(
+            f"{unrated} {'object' if unrated == 1 else 'objects'} could not be rated."
+        )
         if descriptions:
-            sentences.append(_join_names(descriptions)+" had too little data.")
+            sentences.append(_join_names(descriptions) + " had too little data.")
         if none:
-            sentences.append(_join_names(none)+" had none.")
+            sentences.append(_join_names(none) + " had none.")
     slowest = max(objects, key=lambda row: parse_number(row.get("Time (ms)", "")))
     slowest_ms = parse_number(slowest.get("Time (ms)", ""))
     if slowest_ms > 0:
@@ -855,17 +887,22 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
     )
     total_checks = len(GUIDE_CHECKS)
     if assessed == total_checks:
-        sentences.append(
-            f"The score covers the {total_checks} guide checks."
-        )
+        sentences.append(f"The score covers the {total_checks} guide checks.")
     elif assessed:
         sentences.append(
             f"The score covers {assessed} of the {total_checks} guide checks."
         )
         for row in objects:
-            if is_guide_check(row) and health_status(row.get("Health Check", "")) == "unknown":
+            if (
+                is_guide_check(row)
+                and health_status(row.get("Health Check", "")) == "unknown"
+            ):
                 name = titlecase_label(row.get("FillDB Object", ""))
-                reason = "no data" if parse_number(row.get("Count", "")) == 0 else "too little data"
+                reason = (
+                    "no data"
+                    if parse_number(row.get("Count", "")) == 0
+                    else "too little data"
+                )
                 sentences.append(f"{name} had {reason}.")
     sentences.append(
         "The Workload by Object chart above shows the time for every object."
@@ -876,15 +913,48 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
 def filldb_score_scope_note(rows: list[dict[str, str]]) -> str:
     objects = object_performance_rows(rows)
     guide = [r for r in objects if is_guide_check(r)]
-    assessed = [r for r in guide if health_status(r.get("Health Check", "")) in {"great", "good", "poor"}]
-    meets = sum(health_status(r.get("Health Check", "")) in {"great", "good"} for r in assessed)
-    text = f"The score covers the {len(GUIDE_CHECKS)} guide checks. {len(assessed)} were assessed and " + ("all met the standard." if assessed and meets == len(assessed) else f"{meets} met the standard.")
+    assessed = [
+        r
+        for r in guide
+        if health_status(r.get("Health Check", "")) in {"great", "good", "poor"}
+    ]
+    meets = sum(
+        health_status(r.get("Health Check", "")) in {"great", "good"} for r in assessed
+    )
+    text = (
+        f"The score covers the {len(GUIDE_CHECKS)} guide checks. {len(assessed)} were assessed and "
+        + (
+            "all met the standard."
+            if assessed and meets == len(assessed)
+            else f"{meets} met the standard."
+        )
+    )
     missing = [r for r in guide if r not in assessed]
     for row in missing:
-        text += " " + titlecase_label(row.get("FillDB Object", "")) + (" had no data." if parse_number(row.get("Count", "")) == 0 else " had no recognized health result.")
-    poor = [titlecase_label(r.get("FillDB Object", "")) for r in objects if not is_guide_check(r) and health_status(r.get("Health Check", "")) == "poor"]
+        text += (
+            " "
+            + titlecase_label(row.get("FillDB Object", ""))
+            + (
+                " had no data."
+                if parse_number(row.get("Count", "")) == 0
+                else " had no recognized health result."
+            )
+        )
+    poor = [
+        titlecase_label(r.get("FillDB Object", ""))
+        for r in objects
+        if not is_guide_check(r) and health_status(r.get("Health Check", "")) == "poor"
+    ]
     if poor:
-        text += " " + _join_names(poor) + (" is rated Poor but is not a guide check, so it does not affect the score." if len(poor) == 1 else " are rated Poor but are not guide checks, so they do not affect the score.")
+        text += (
+            " "
+            + _join_names(poor)
+            + (
+                " is rated Poor but is not a guide check, so it does not affect the score."
+                if len(poor) == 1
+                else " are rated Poor but are not guide checks, so they do not affect the score."
+            )
+        )
     return text
 
 
@@ -906,6 +976,7 @@ def add_score_method_note(document: DocxDocument) -> None:
         "Poor: 0 points",
     ):
         from Lib.Design.report_layout import add_bullet
+
         bullet = add_bullet(document, text)
         bullet.paragraph_format.space_after = Pt(1)
         bullet.paragraph_format.space_before = Pt(0)
@@ -926,6 +997,7 @@ def add_score_method_note(document: DocxDocument) -> None:
         para.paragraph_format.space_after = Pt(3)
         para.paragraph_format.space_before = Pt(0)
         para.paragraph_format.keep_with_next = True
+
 
 def write_word_output(
     rows: list[dict[str, str]],
@@ -952,7 +1024,9 @@ def write_word_output(
             "FillDB Performance Chart",
         )
         document.paragraphs[-1].alignment = WD_ALIGN_PARAGRAPH.CENTER
-    assessment_note = filldb_assessment_note(rows) or ("" if chart_path else filldb_score_scope_note(rows))
+    assessment_note = filldb_assessment_note(rows) or (
+        "" if chart_path else filldb_score_scope_note(rows)
+    )
     if assessment_note:
         note = document.add_paragraph(assessment_note)
         note.paragraph_format.space_before = Pt(3)
@@ -966,16 +1040,19 @@ def write_word_output(
     document.add_heading(FILLDB_OBJECTS_HEADING, level=3)
     document.add_paragraph(FILLDB_OBJECTS_LEAD)
     build_word_table(document, rows)
-    document.add_paragraph("Bold object names identify the four guide checks. A guide check with no data is left out of the score.")
+    document.add_paragraph(
+        "Bold object names identify the four guide checks. A guide check with no data is left out of the score."
+    )
     build_capture_summary_table(document, rows, metadata or {})
     end = document.add_paragraph()
     end.paragraph_format.space_after = Pt(0)
     end.paragraph_format.space_before = Pt(0)
     end.paragraph_format.line_spacing = Pt(1)
     from docx.oxml import OxmlElement
-    properties = OxmlElement('w:rPr')
-    size = OxmlElement('w:sz')
-    size.set(qn('w:val'),'2')
+
+    properties = OxmlElement("w:rPr")
+    size = OxmlElement("w:sz")
+    size.set(qn("w:val"), "2")
     properties.append(size)
     end._p.get_or_add_pPr().append(properties)
     document.save(str(output_path))

@@ -411,8 +411,10 @@ def test_word_report_uses_the_approved_sentences(tmp_path: Path) -> None:
     text = "\n".join(p.text for p in doc.paragraphs)
     assert f"This graphic counts {len(summary.counted):,} properties:" in text
     assert "uses the loop time" not in text
-    descriptions = " ".join(shape._inline.docPr.get('descr', '') for shape in doc.inline_shapes)
+    descriptions = " ".join(
+        shape._inline.docPr.get("descr", "") for shape in doc.inline_shapes
+    )
     assert f"{APP_PROPERTY} (analysis: {APP_ANALYSIS})" in descriptions
     assert "Counted in CLT-01:" in descriptions
-    findings = next(t for t in doc.tables if t.cell(0,0).text == "Finding ID")
+    findings = next(t for t in doc.tables if t.cell(0, 0).text == "Finding ID")
     assert findings.rows[1].cells[0].text == "CLT-01"

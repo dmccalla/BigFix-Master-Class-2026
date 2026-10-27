@@ -800,7 +800,9 @@ def test_mini_report_infographics_carry_the_scoring_legend() -> None:
         section = html[start : html.index("\nfunction ", start + 10)]
         assert "miniScoreLockup(" in section, builder
         assert f", {middle})" in section, builder
-        assert ("miniScoringLine(d.scoringLine" in section) == (builder == "function buildFilldb"), builder
+        assert ("miniScoringLine(d.scoringLine" in section) == (
+            builder == "function buildFilldb"
+        ), builder
     loop = html[
         html.index("function buildLoop") : html.index("// ---- SCORING SUMMARY ----")
     ]
@@ -809,6 +811,11 @@ def test_mini_report_infographics_carry_the_scoring_legend() -> None:
 
 def test_client_and_perfmon_graphics_have_no_bottom_prose() -> None:
     html = html_charts._build_html("loop", {}, card_width=960)
-    for start_name, end_name in (("function buildLoop", "// ---- SCORING SUMMARY ----"), ("function buildPerfmon", "function buildDashboard")):
-        section = html[html.index(start_name):html.index(end_name,html.index(start_name))]
+    for start_name, end_name in (
+        ("function buildLoop", "// ---- SCORING SUMMARY ----"),
+        ("function buildPerfmon", "function buildDashboard"),
+    ):
+        section = html[
+            html.index(start_name) : html.index(end_name, html.index(start_name))
+        ]
         assert "miniScoringLine(" not in section

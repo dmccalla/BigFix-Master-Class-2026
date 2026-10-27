@@ -15,8 +15,7 @@ def _ensure_bullet_style(document):
 
     numbering = document.part.numbering_part.element
     abstract_ids = [
-        int(e.get(qn("w:abstractNumId")))
-        for e in numbering.findall(qn("w:abstractNum"))
+        int(e.get(qn("w:abstractNumId"))) for e in numbering.findall(qn("w:abstractNum"))
     ]
     num_ids = [int(e.get(qn("w:numId"))) for e in numbering.findall(qn("w:num"))]
     if "ReportBullet" in document.styles:
@@ -143,9 +142,7 @@ def add_bullet(document, text):
 def bind_report_bullets(document):
     """Carry explicit list references through copied guidance and body injection."""
     _ensure_bullet_style(document)
-    number = (
-        document.styles["ReportBullet"].element.find(qn("w:pPr")).find(qn("w:numPr"))
-    )
+    number = document.styles["ReportBullet"].element.find(qn("w:pPr")).find(qn("w:numPr"))
     from copy import deepcopy
 
     for paragraph in document.element.body.iter(qn("w:p")):
@@ -196,7 +193,9 @@ def configure_heading_styles(document, *, client_mini=False):
         style.font.bold = True
         style.font.italic = False
         style.font.color.rgb = RGBColor.from_string(
-            "007A8A" if name == "Heading 4" or (client_mini and name == "Heading 3") else "000032"
+            "007A8A"
+            if name == "Heading 4" or (client_mini and name == "Heading 3")
+            else "000032"
         )
         fonts = style.element.get_or_add_rPr().find(qn("w:rFonts"))
         for key in list(fonts.attrib):
@@ -230,7 +229,11 @@ def configure_capacity_host_styles(document):
         ("Capacity Host", 12, True, 14, 2),
         ("Capacity Host Details", 11, False, 0, 4),
     ):
-        style = document.styles[name] if name in document.styles else document.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+        style = (
+            document.styles[name]
+            if name in document.styles
+            else document.styles.add_style(name, WD_STYLE_TYPE.PARAGRAPH)
+        )
         style.base_style = document.styles["Normal"]
         style.font.size = Pt(points)
         style.font.bold = bold
@@ -248,13 +251,19 @@ def compact_table_header_style(document):
     from Lib.Design.report_tables import ensure_header_paragraph_style
 
     ensure_header_paragraph_style(document.styles.element)
-    table_style = next((style for style in document.styles if style.style_id == "BigFixContent"), None)
+    table_style = next(
+        (style for style in document.styles if style.style_id == "BigFixContent"), None
+    )
     if table_style is None:
         return
     style = table_style.element
     first = next(
-        (node for node in style.findall(qn("w:tblStylePr"))
-         if node.get(qn("w:type")) == "firstRow"), None
+        (
+            node
+            for node in style.findall(qn("w:tblStylePr"))
+            if node.get(qn("w:type")) == "firstRow"
+        ),
+        None,
     )
     if first is None:
         return
@@ -266,7 +275,12 @@ def compact_table_header_style(document):
     if spacing is None:
         spacing = OxmlElement("w:spacing")
         properties.append(spacing)
-    for key, value in (("before", "0"), ("after", "0"), ("line", "240"), ("lineRule", "auto")):
+    for key, value in (
+        ("before", "0"),
+        ("after", "0"),
+        ("line", "240"),
+        ("lineRule", "auto"),
+    ):
         spacing.set(qn("w:" + key), value)
 
 
@@ -280,7 +294,11 @@ def apply_report_hierarchy(document):
         properties = paragraph.find(qn("w:pPr"))
         style = properties.find(qn("w:pStyle")) if properties is not None else None
         if style is None or style.get(qn("w:val")) not in {
-            "Heading1", "Heading2", "Heading3", "Heading4", "Heading5"
+            "Heading1",
+            "Heading2",
+            "Heading3",
+            "Heading4",
+            "Heading5",
         }:
             continue
         for tag in ("pBdr",):
@@ -304,7 +322,17 @@ def normalize_heading_typography(document):
         # Character styles such as Strong can toggle an already-bold heading
         # back to regular weight. Removing direct font tags alone is not enough.
         for run_properties in paragraph.xpath("./w:pPr/w:rPr|.//w:r/w:rPr"):
-            for tag in ("rStyle", "rFonts", "sz", "szCs", "b", "bCs", "i", "iCs", "color"):
+            for tag in (
+                "rStyle",
+                "rFonts",
+                "sz",
+                "szCs",
+                "b",
+                "bCs",
+                "i",
+                "iCs",
+                "color",
+            ):
                 for previous in list(run_properties.findall(qn("w:" + tag))):
                     run_properties.remove(previous)
 
@@ -355,7 +383,10 @@ def normalize_section_spacing(document):
     def remove_body_auto_spacing(node, side):
         if node is None or node.tag != qn("w:p"):
             return
-        if heading_style(node) in headings or not "".join(node.xpath(".//w:t/text()")).strip():
+        if (
+            heading_style(node) in headings
+            or not "".join(node.xpath(".//w:t/text()")).strip()
+        ):
             return
         if node.xpath(".//w:drawing|.//w:pict|.//w:br|.//w:sectPr"):
             return
@@ -368,7 +399,10 @@ def normalize_section_spacing(document):
     for node in list(document.element.body.iter(qn("w:p"))):
         if node.getparent() is None:
             continue
-        if any(parent.tag in {qn("w:tc"), qn("w:txbxContent")} for parent in node.iterancestors()):
+        if any(
+            parent.tag in {qn("w:tc"), qn("w:txbxContent")}
+            for parent in node.iterancestors()
+        ):
             continue
         style = heading_style(node)
         first_heading = style == "Heading1" and not started
@@ -378,7 +412,14 @@ def normalize_section_spacing(document):
             continue
         spacing = node.find(qn("w:pPr") + "/" + qn("w:spacing"))
         if spacing is not None:
-            for name in ("before", "after", "beforeLines", "afterLines", "beforeAutospacing", "afterAutospacing"):
+            for name in (
+                "before",
+                "after",
+                "beforeLines",
+                "afterLines",
+                "beforeAutospacing",
+                "afterAutospacing",
+            ):
                 spacing.attrib.pop(qn("w:" + name), None)
             if not spacing.attrib:
                 spacing.getparent().remove(spacing)
@@ -418,10 +459,17 @@ def normalize_section_spacing(document):
                 if not has_boundary:
                     Paragraph(label, document).paragraph_format.page_break_before = True
             rule = node.getnext()
-            if rule is None or rule.tag != qn("w:p") or "".join(rule.xpath(".//w:t/text()")).strip():
+            if (
+                rule is None
+                or rule.tag != qn("w:p")
+                or "".join(rule.xpath(".//w:t/text()")).strip()
+            ):
                 continue
             extents = rule.xpath(".//wp:anchor/wp:extent")
-            if extents and all(int(e.get("cx", "0")) >= 914400 and int(e.get("cy", "0")) <= 12700 for e in extents):
+            if extents and all(
+                int(e.get("cx", "0")) >= 914400 and int(e.get("cy", "0")) <= 12700
+                for e in extents
+            ):
                 paragraph = Paragraph(rule, document)
                 paragraph.paragraph_format.space_before = Pt(0)
                 paragraph.paragraph_format.space_after = Pt(12)
@@ -472,13 +520,17 @@ def finalize_report_document(path):
     document = apply_report_hierarchy(Document(path))
     for paragraph in document.paragraphs:
         if paragraph.style.name == "Heading 2" and paragraph.text in {
-            "Server Capacity Analysis", "FillDB Performance Analysis",
-            "PerfMon Counters Analysis", "Client Performance Analysis",
+            "Server Capacity Analysis",
+            "FillDB Performance Analysis",
+            "PerfMon Counters Analysis",
+            "Client Performance Analysis",
         }:
             node = paragraph._p.getnext()
             while node is not None and node.tag == qn("w:p"):
                 properties = node.find(qn("w:pPr"))
-                style = properties.find(qn("w:pStyle")) if properties is not None else None
+                style = (
+                    properties.find(qn("w:pStyle")) if properties is not None else None
+                )
                 if style is not None and style.get(qn("w:val"), "").startswith("Heading"):
                     break
                 if node.xpath(".//w:drawing|.//w:pict"):
@@ -487,7 +539,9 @@ def finalize_report_document(path):
                 node = node.getnext()
         if paragraph.text == "About BigFix" and paragraph.style.name == "Heading 1":
             label = paragraph._p.getprevious()
-            if label is not None and "".join(label.xpath(".//w:t/text()")).startswith("SECTION "):
+            if label is not None and "".join(label.xpath(".//w:t/text()")).startswith(
+                "SECTION "
+            ):
                 previous = label.getprevious()
                 while (
                     previous is not None
@@ -530,9 +584,7 @@ def add_callout(document, text, kind="NOTE"):
     if kind not in {"NOTE", "TIP"}:
         raise ValueError("Callout kind must be NOTE or TIP")
     fill, accent, icon = (
-        ("CFDBFB", "17707F", "[i]")
-        if kind == "NOTE"
-        else ("ECFDF5", "065F46", "[?]")
+        ("CFDBFB", "17707F", "[i]") if kind == "NOTE" else ("ECFDF5", "065F46", "[?]")
     )
     spacer = document.add_paragraph()
     spacer.paragraph_format.space_after = Pt(4)

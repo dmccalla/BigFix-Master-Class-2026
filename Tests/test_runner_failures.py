@@ -74,6 +74,7 @@ class ChildOutputs:
         else:
             if path.suffix == ".docx":
                 from docx import Document
+
                 Document().save(path)
             else:
                 path.write_bytes(b"artifact")

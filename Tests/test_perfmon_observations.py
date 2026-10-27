@@ -1686,9 +1686,7 @@ def _heading_at(doc_xml: str, text: str, level: int) -> int:
     return match.start()
 
 
-def test_append_capture_follows_the_section_7_order(
-    monkeypatch, tmp_path: Path
-) -> None:
+def test_append_capture_follows_the_section_7_order(monkeypatch, tmp_path: Path) -> None:
     chart_folder = tmp_path / "charts"
     chart_folder.mkdir()
     (chart_folder / "Processor_Total_Processor_Time.png").write_bytes(_TINY_PNG)
@@ -1791,21 +1789,33 @@ def test_full_report_puts_assessment_by_area_after_the_last_area() -> None:
     assert again.count("Assessment by Area") == 1
 
 
-@pytest.mark.parametrize("over,total,percentage", [(60, 60, 100), (48, 60, 80), (10, 100, 10)])
+@pytest.mark.parametrize(
+    "over,total,percentage", [(60, 60, 100), (48, 60, 80), (10, 100, 10)]
+)
 def test_critical_observation_states_measured_counts_without_estimating_duration(
     over, total, percentage
 ):
     finding = {
-        "Counter": "Paging_File_Total_Usage_Peak", "Status": "Critical",
-        "Average": 8.1, "Maximum": 12.2, "Violations": over,
-        "ViolationPercent": percentage, "Warnings": 0, "WarningPercent": 0,
-        "Samples": total, "Threshold": "<= 5%", "Confidence": "High",
+        "Counter": "Paging_File_Total_Usage_Peak",
+        "Status": "Critical",
+        "Average": 8.1,
+        "Maximum": 12.2,
+        "Violations": over,
+        "ViolationPercent": percentage,
+        "Warnings": 0,
+        "WarningPercent": 0,
+        "Samples": total,
+        "Threshold": "<= 5%",
+        "Confidence": "High",
         "PeakViolationWindow": "06-14-2026 10:00 - 06-14-2026 11:00",
     }
     original = dict(finding)
     result = get_perfmon_charts.observation_for_findings("Memory Health", [finding])
     text = result["observation"]
-    assert f"{over} of {total} readings ({get_perfmon_charts.fmt_number(percentage)}%) were over the limit." in text
+    assert (
+        f"{over} of {total} readings ({get_perfmon_charts.fmt_number(percentage)}%) were over the limit."
+        in text
+    )
     assert "Peak: 12.2%. Breach window: 06-14-2026 10:00 to 06-14-2026 11:00." in text
     assert "most of the capture" not in text
     assert "The other" not in text

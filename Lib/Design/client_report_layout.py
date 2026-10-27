@@ -208,9 +208,6 @@ def apply_client_layout(
                         row.cells[1].text = re.sub(
                             r", as of the .*? capture\.", ".", row.cells[1].text
                         )
-            for p in document.paragraphs:
-                if p.text.startswith("Content counts come from"):
-                    p.text = f"Content counts are from the {pressure.content_captured} deployment capture, which may differ from the client loop collection period ({metrics.report_start_text} to {metrics.report_end_text})."
     idle = context.get("agent_cpu_idle_summary")
     if idle:
         rows = [
@@ -543,9 +540,9 @@ def apply_client_layout(
         for p in document.paragraphs
         if p.text.startswith(
             (
-                "The property count uses",
-                "Content counts come from",
-                "Content counts are from",
+                "The property totals and the Evaluation Frequency chart",
+                "The content totals show the deployment",
+                "The client loop results were collected separately",
             )
         )
     ]

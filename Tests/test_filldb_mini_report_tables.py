@@ -83,10 +83,10 @@ def test_object_table_holds_only_objects(tmp_path: Path) -> None:
     assert "Statistic" not in names
 
 
-def test_object_counts_have_thousands_separators(tmp_path: Path) -> None:
+def test_object_values_preserve_analyzer_text(tmp_path: Path) -> None:
     objects, _summary = _build(tmp_path)
 
-    assert objects[1][:4] == ["Fixlet Results", "1,021,932", "439,062", "2,328"]
+    assert objects[1][:4] == ["Fixlet Results", "1021932", "439062", "2328"]
     assert objects[3][1:4] == ["0", "0", "0"]
     # The analyzer's own Health Check text is left as the analyzer wrote it.
     assert objects[1][4] == "093%: Good"
@@ -96,9 +96,11 @@ def test_capture_summary_holds_the_analyzer_statistics(tmp_path: Path) -> None:
     _objects, summary = _build(tmp_path)
 
     rows = {row[-2]: row[-1] for row in summary[1:]}
-    assert rows["Lines Processed"] == "4,237,218"
+    assert rows["Lines Processed"] == "4237218"
     assert rows["Duration (s)"] == "68.54"
-    assert rows["Throughput (lines/s)"] == "61,821.1"
+    assert rows["Throughput (lines/s)"] == "61821.1"
+    assert rows["FillDB start time"] == "2025-11-16 02:56:11-05:00"
+    assert rows["FillDB end time"] == "2025-11-17 15:57:07-05:00"
     assert rows["FillDB Duration (hh:mm:ss)"] == "1 day, 13:00:56"
     assert rows["FillDB Parsing Threads"] == "3"
     assert rows["FillDB Database Threads"] == "3"

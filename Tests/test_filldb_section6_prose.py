@@ -38,7 +38,7 @@ def test_object_health_sample() -> None:
     ]
     assert filldb.object_health_paragraph(rows) == (
         "The analyzer rates 3 objects Great, 1 Good and 1 Poor. 2 objects could not be rated. Parallel DB Update (10 rows) and Computer Relay Statuses (10 rows) had too little data. Parallel DB Update "
-        "(Short Batch) takes the most time at 50.5 minutes. The score covers 3 of the "
+        "(Short Batch) takes the most time at 3031912 ms. The score covers 3 of the "
         "4 guide checks. Parallel DB Update had too little data. The "
         "Workload by Object chart above shows the time for every object."
     )
@@ -75,7 +75,7 @@ def test_title_paragraph() -> None:
     title = filldb.filldb_title_paragraph(rows, metadata)
     assert title == (
         "This analysis covers a FillDB capture from 11-16-2025 02:56 to "
-        "11-17-2025 15:57. The analyzer processed 4,237,218 lines."
+        "11-17-2025 15:57. The analyzer processed 4237218 lines."
     )
     assert "Excel" not in title and "CSV" not in title
 

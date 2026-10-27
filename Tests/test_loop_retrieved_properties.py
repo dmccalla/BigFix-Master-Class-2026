@@ -86,11 +86,7 @@ EARLIER_SOURCE_NOTE = (
     "property intervals may be outside customer control. Review changes with the "
     "content owner."
 )
-APPROVED_FLAG_NOTE = (
-    "The property count uses the BigFix property custom flag. Evaluation "
-    "Frequency groups active analysis properties by source site and retrieved "
-    "properties by type. These are different classifications."
-)
+APPROVED_FLAG_NOTE = "The property totals and the Evaluation Frequency chart use different definitions of “custom,” so their counts may not match."
 
 
 def _lines(with_retrieved: bool = True) -> list[str]:

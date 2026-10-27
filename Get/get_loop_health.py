@@ -88,6 +88,7 @@ from Lib.Core.input_utils import (
 from Lib.Core.input_utils import (
     resolve_existing_folder as shared_resolve_existing_folder,
 )
+from Lib.Core.loop_evaluation_input import evaluation_source_sort_key
 from Lib.Design import report_tables, status_spine
 from Lib.Themes.workbook_theme import (
     WORKBOOK_THEME,
@@ -969,13 +970,7 @@ def discover_loop_offenders_file(
             candidates.extend(p for p in parent.glob(pattern) if p.is_file())
 
     candidates = list(dict.fromkeys(candidates))
-    candidates.sort(
-        key=lambda p: (
-            "-detail" in p.stem.lower(),
-            -p.stat().st_mtime,
-            p.name,
-        )
-    )
+    candidates.sort(key=evaluation_source_sort_key)
 
     for candidate in candidates:
         if _is_loop_evaluation_times_file(candidate):
@@ -1390,20 +1385,31 @@ def _properties_value(pressure: ActionSitePressure) -> str:
 
 PROPERTY_INTERVAL_SECTION = "Active Properties by Evaluation Interval"
 RETRIEVED_PROPERTY_SECTION = "Retrieved Properties by Evaluation Interval"
-PROPERTY_SOURCE_NOTE = (
-    "The property count uses the BigFix property custom flag. "
-    "Evaluation Frequency groups active analysis properties by source site. "
-    "These are different classifications."
-)
-RETRIEVED_PROPERTY_SOURCE_NOTE = (
-    "The property count uses the BigFix property custom flag. "
-    "Evaluation Frequency groups active analysis properties by source site and "
-    "retrieved properties by type. These are different classifications."
-)
-CONTENT_CAPTURE_NOTE = (
-    "Content counts come from a separate deployment capture. Its timestamp is "
-    "shown with the counts and may differ from the client loop collection period."
-)
+PROPERTY_SOURCE_NOTE = "The property totals and the Evaluation Frequency chart use different definitions of “custom,” so their counts may not match."
+RETRIEVED_PROPERTY_SOURCE_NOTE = PROPERTY_SOURCE_NOTE
+CONTENT_CAPTURE_NOTE = "The client loop results were collected separately and may reflect a different point in time."
+
+
+def content_capture_note(pressure: ActionSitePressure) -> str:
+    """Use the deployment capture's own timestamp in the approved source note."""
+    if not pressure.content_captured:
+        return CONTENT_CAPTURE_NOTE
+    try:
+        captured = datetime.strptime(pressure.content_captured, "%m-%d-%Y %H:%M")
+    except ValueError:
+        stamp = pressure.content_captured.rstrip(".") + "."
+    else:
+        suffix = "p.m." if captured.hour >= 12 else "a.m."
+        stamp = (
+            f"{captured:%B} {captured.day}, {captured.year} at "
+            f"{captured.hour % 12 or 12}:{captured.minute:02d} {suffix}"
+        )
+    return (
+        f"The content totals show the deployment as it was on {stamp} "
+        f"{CONTENT_CAPTURE_NOTE}"
+    )
+
+
 PROPERTY_INTERVAL_WIDTH = 9
 RETRIEVED_PROPERTY_WIDTH = 6
 PROPERTY_INTERVAL_FREQUENT_MINUTES = 15.0
@@ -2180,6 +2186,10 @@ def parse_loop_lookup_result(lookup_text: str) -> str:
     if prop.lower() == "background evaluation":
         return get_background_evaluation_result(site)
 
+    if re.fullmatch(r"Evaluate Property \d+", prop, flags=re.IGNORECASE):
+        # The item ID distinguishes properties with the same evaluation index.
+        return lookup_text.strip()
+
     if site.startswith("CustomSite_"):
         site_text = site.removeprefix("CustomSite_")
         site_kind = "Custom Site"
@@ -2337,7 +2347,9 @@ def aggregate_loop_offenders(
 
 
 def load_loop_offenders(
-    offenders_file: Path | None, top_count: int = 10
+    offenders_file: Path | None,
+    top_count: int = 10,
+    property_intervals: PropertyIntervalSummary | None = None,
 ) -> list[LoopOffenderSummary]:
     if offenders_file is None:
         return []
@@ -2361,6 +2373,22 @@ def load_loop_offenders(
     else:
         df = load_evaluation_times_input(offenders_file)
 
+    if "Result" in df.columns and property_intervals is not None:
+        retrieved = {
+            (prop.item_id, prop.index): prop.name
+            for prop in property_intervals.retrieved or []
+        }
+
+        def resolve_captured_property(result: str) -> str:
+            match = re.fullmatch(
+                r"actionsite\.(\d+):Evaluate Property (\d+)",
+                str(result).strip(),
+                flags=re.IGNORECASE,
+            )
+            name = retrieved.get(match.groups()) if match else None
+            return f"Retrieved Property: {name} ({result})" if name else result
+
+        df["Result"] = df["Result"].map(resolve_captured_property)
     return aggregate_loop_offenders(df, top_count=top_count)
 
 
@@ -4278,7 +4306,7 @@ def generate_excel(
             pressure_df.to_excel(writer, sheet_name="Contributing Factors", index=False)
             source_notes = [property_source_note(property_intervals)]
             if actionsite_pressure.content_captured:
-                source_notes.append(CONTENT_CAPTURE_NOTE)
+                source_notes.append(content_capture_note(actionsite_pressure))
             pd.DataFrame({"Note": source_notes}).to_excel(
                 writer, sheet_name="Data Notes", index=False
             )
@@ -5086,7 +5114,7 @@ def generate_word(
         )
         document.add_paragraph(property_source_note(property_intervals))
         if actionsite_pressure.content_captured:
-            document.add_paragraph(CONTENT_CAPTURE_NOTE)
+            document.add_paragraph(content_capture_note(actionsite_pressure))
 
     if udp_summary or command_polling_summary:
         client_heading("Notification and Polling", "Notification and Polling", 3)
@@ -5539,7 +5567,9 @@ def main() -> int:
                 sum(row.devices for row in minimum_analysis_interval),
             )
         loop_offenders = load_loop_offenders(
-            top_offenders_file, top_count=args.top_offenders_count
+            top_offenders_file,
+            top_count=args.top_offenders_count,
+            property_intervals=property_intervals,
         )
         command_polling_summary = analyze_command_polling(processed)
         fast_hash_verify_summary = analyze_fast_hash_verify(processed)

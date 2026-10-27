@@ -28,10 +28,10 @@ from __future__ import annotations
 
 import argparse
 import csv
-import re
 import shutil
 import sys
 from datetime import datetime
+from decimal import Decimal, InvalidOperation
 from pathlib import Path
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -81,6 +81,8 @@ COUNT_COLUMNS = ("Count", "Time (ms)", "Rate/s")
 ANALYZER_STATISTICS = (
     "Duration (s)",
     "Throughput (lines/s)",
+    "FillDB start time",
+    "FillDB end time",
     "FillDB Duration (hh:mm:ss)",
     "FillDB Parsing Threads",
     "FillDB Database Threads",
@@ -212,14 +214,15 @@ def parse_filldb_csv(input_path: Path) -> list[dict[str, str]]:
     return rows
 
 
-def parse_number(value: str) -> float:
+def parse_number(value: str) -> Decimal:
     cleaned = str(value or "").replace(",", "").strip()
     if not cleaned:
-        return 0.0
+        return Decimal(0)
     try:
-        return float(cleaned)
-    except ValueError:
-        return 0.0
+        number = Decimal(cleaned)
+        return number if number.is_finite() else Decimal(0)
+    except InvalidOperation:
+        return Decimal(0)
 
 
 def health_status(value: str) -> str:
@@ -267,21 +270,14 @@ def clean_object_name(value: str) -> str:
     return text.removesuffix(":")
 
 
-def format_count(value: float) -> str:
-    value = float(value or 0)
-    return f"{value:,.0f}"
+def format_count(value: str | int) -> str:
+    """Keep the analyzer's count text without numeric reformatting."""
+    return str(value)
 
 
 def format_table_number(value: str) -> str:
-    """Add thousands separators to a plain number. Leave any other text alone."""
-    text = str(value).strip()
-    try:
-        number = float(text)
-    except ValueError:
-        return value
-    if text.lstrip("-").isdigit():
-        return f"{int(number):,}"
-    return f"{number:,}"
+    """Preserve the analyzer's numeric text, including its precision."""
+    return value
 
 
 def is_capture_stat_row(row: dict[str, str]) -> bool:
@@ -320,90 +316,37 @@ def shorten_label(value: str, max_chars: int = 30) -> str:
     return text if len(text) <= max_chars else text[: max_chars - 1].rstrip() + "..."
 
 
-def find_stat_value(rows: list[dict[str, str]], stat_name: str) -> float:
+def find_stat_value(rows: list[dict[str, str]], stat_name: str) -> Decimal:
     wanted = clean_object_name(stat_name).strip().lower()
     for row in rows:
         object_name = clean_object_name(row.get("FillDB Object", "")).strip().lower()
         if object_name == wanted:
             return parse_number(row.get("Count", ""))
-    return 0.0
+    return Decimal(0)
 
 
 def find_stat_text(rows: list[dict[str, str]], stat_name: str) -> str:
-    """Return a statistic row's value as text (the analyzer stores it in the
-    Count column), with any trailing timezone offset removed so the date
-    parsers downstream can read it."""
+    """Return the analyzer's statistic text without changing its value."""
     wanted = clean_object_name(stat_name).strip().lower()
     for row in rows:
         object_name = clean_object_name(row.get("FillDB Object", "")).strip().lower()
         if object_name == wanted:
-            text = (row.get("Count") or "").strip()
-            return re.sub(r"\s*(?:[+-]\d{2}:?\d{2}|Z)$", "", text).strip()
+            return row.get("Count") or ""
     return ""
 
 
-def parse_metadata_datetime(value: str) -> datetime | None:
-    text = clean_user_path(value)
-    if not text:
-        return None
-
-    formats = (
-        "%m-%d-%Y %H:%M:%S",
-        "%m-%d-%Y %H:%M",
-        "%m-%d-%Y",
-        "%m/%d/%Y %H:%M:%S",
-        "%m/%d/%Y %H:%M",
-        "%m/%d/%Y",
-        "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d %H:%M",
-        "%Y-%m-%d",
-    )
-    for fmt in formats:
-        try:
-            return datetime.strptime(text, fmt)
-        except ValueError:
-            pass
-    return None
-
-
 def format_metadata_date(value: str) -> str:
-    parsed = parse_metadata_datetime(value)
-    if parsed is None:
-        text = clean_user_path(value)
-        return text if text else "Not specified"
-    if parsed.hour == 0 and parsed.minute == 0 and parsed.second == 0:
-        return parsed.strftime("%m-%d-%Y")
-    return parsed.strftime("%m-%d-%Y %H:%M")
+    return value if value else "Not specified"
 
 
-def calculate_capture_duration(start_value: str, end_value: str) -> str:
-    start = parse_metadata_datetime(start_value)
-    end = parse_metadata_datetime(end_value)
-    if start is None or end is None or end < start:
-        return ""
-
-    total_seconds = int((end - start).total_seconds())
-    days, remainder = divmod(total_seconds, 86400)
-    hours, remainder = divmod(remainder, 3600)
-    minutes, _ = divmod(remainder, 60)
-
-    parts = []
-    if days:
-        parts.append(f"{days} day{'s' if days != 1 else ''}")
-    if hours:
-        parts.append(f"{hours} hour{'s' if hours != 1 else ''}")
-    if minutes or not parts:
-        parts.append(f"{minutes} minute{'s' if minutes != 1 else ''}")
-    return ", ".join(parts[:2])
-
-
-def build_capture_metadata(start_value: str, end_value: str) -> dict[str, str]:
-    duration = calculate_capture_duration(start_value, end_value)
+def build_capture_metadata(
+    start_value: str, end_value: str, duration_value: str = ""
+) -> dict[str, str]:
     return {
         "generated": datetime.now().strftime("%m-%d-%Y %H:%M"),
         "start": format_metadata_date(start_value),
         "end": format_metadata_date(end_value),
-        "duration": duration if duration else "Not specified",
+        "duration": duration_value if duration_value else "Not specified",
     }
 
 
@@ -446,12 +389,7 @@ def generate_filldb_chart(
     )
     assessed_total = great_count + good_count + review_count + unknown_count
 
-    lines_processed = find_stat_value(rows, "Lines processed")
-    total_rows = lines_processed or sum(
-        parse_number(r.get("Count", ""))
-        for r in rows
-        if parse_number(r.get("Time (ms)", "")) > 0
-    )
+    lines_processed = find_stat_text(rows, "Lines processed")
 
     by_name = {
         clean_object_name(r.get("FillDB Object", "")).lower(): r for r in assessed_rows
@@ -470,8 +408,8 @@ def generate_filldb_chart(
     ranked = sorted(
         assessed_rows, key=lambda r: parse_number(r.get("Time (ms)", "")), reverse=True
     )
-    times_min = [parse_number(r.get("Time (ms)", "")) / 60000 for r in ranked]
-    max_min = max(times_min, default=0) or 1
+    times_ms = [parse_number(r.get("Time (ms)", "")) for r in ranked]
+    max_ms = max(times_ms, default=Decimal(0)) or Decimal(1)
     bars = [
         {
             "label": clean_object_name(r.get("FillDB Object", ""))
@@ -481,11 +419,12 @@ def generate_filldb_chart(
                 and clean_object_name(r.get("FillDB Object", "")).lower() == "batch rate"
                 else ""
             ),
-            "width": f"{m / max_min * 100:.1f}%",
-            "mins": f"{m:.1f} min" if m >= 1 else f"{m * 60:.3g} s",
+            "width": f"{time_ms / max_ms * 100:.1f}%",
+            # The template's legacy field name does not determine the unit.
+            "mins": f"{r.get('Time (ms)', '')} ms",
             "color": status_color.get(health_status(r.get("Health Check", "")), C_NODATA),
         }
-        for r, m in zip(ranked, times_min)
+        for r, time_ms in zip(ranked, times_ms)
     ]
 
     # FillDB Health Score, NFR PRF-BIG-30: the four named checks. Good or Great
@@ -544,7 +483,11 @@ def generate_filldb_chart(
         if c > 0
     ]
 
-    meta = f"{format_count(total_rows)} lines processed"
+    meta = (
+        f"{lines_processed} lines processed"
+        if lines_processed
+        else "Lines processed: Not available"
+    )
     if metadata.get("duration") and metadata["duration"] != "Not specified":
         meta += f" &middot; capture {metadata['duration']}"
 
@@ -741,7 +684,7 @@ def build_capture_summary_table(
     )
     lead.paragraph_format.keep_with_next = True
 
-    lines_processed = find_stat_value(rows, "Lines processed")
+    lines_processed = find_stat_text(rows, "Lines processed")
     summary_rows = [
         ("Report Generated", metadata.get("generated", "Not specified")),
         ("Collection Start", metadata.get("start", "Not specified")),
@@ -749,7 +692,7 @@ def build_capture_summary_table(
         ("Capture Duration", metadata.get("duration", "Not specified")),
         (
             "Lines Processed",
-            format_count(lines_processed) if lines_processed else "Not available",
+            lines_processed if lines_processed else "Not available",
         ),
     ]
     for label in ANALYZER_STATISTICS:
@@ -811,9 +754,9 @@ def filldb_title_paragraph(rows: list[dict[str, str]], metadata: dict[str, str])
     end = metadata.get("end", "")
     if start and end and "Not specified" not in (start, end):
         sentences.append(f"This analysis covers a FillDB capture from {start} to {end}.")
-    lines = find_stat_value(rows, "Lines processed")
+    lines = find_stat_text(rows, "Lines processed")
     if lines:
-        sentences.append(f"The analyzer processed {lines:,.0f} lines.")
+        sentences.append(f"The analyzer processed {lines} lines.")
     return " ".join(sentences)
 
 
@@ -855,7 +798,7 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
             r for r in objects if health_status(r.get("Health Check", "")) == "unknown"
         ]
         descriptions = [
-            f"{titlecase_label(r.get('FillDB Object', ''))} ({format_count(parse_number(r.get('Count', '')))} rows)"
+            f"{titlecase_label(r.get('FillDB Object', ''))} ({r.get('Count', '')} rows)"
             for r in unknown
             if parse_number(r.get("Count", "")) > 0
         ]
@@ -876,7 +819,7 @@ def object_health_paragraph(rows: list[dict[str, str]]) -> str:
     if slowest_ms > 0:
         sentences.append(
             f"{titlecase_label(slowest.get('FillDB Object', ''))} takes the most time "
-            f"at {slowest_ms / 60000:,.1f} minutes."
+            f"at {slowest.get('Time (ms)', '')} ms."
         )
 
     assessed = sum(
@@ -1083,7 +1026,7 @@ def main() -> int:
     parser.add_argument(
         "--template",
         "-t",
-        help="Optional style template .docx override. If omitted, a nearby template with the required table style is auto-discovered.",
+        help="Optional report template .docx override. If omitted, a nearby template with the required table style is auto-discovered.",
     )
     add_stamp_arguments(parser)
 
@@ -1120,7 +1063,11 @@ def main() -> int:
             collection_start = find_stat_text(rows, "FillDB start time")
         if not clean_user_path(collection_end):
             collection_end = find_stat_text(rows, "FillDB end time")
-        metadata = build_capture_metadata(collection_start, collection_end)
+        metadata = build_capture_metadata(
+            collection_start,
+            collection_end,
+            find_stat_text(rows, "FillDB duration (hh:mm:ss)"),
+        )
         generate_filldb_chart(rows, chart_path, metadata)
         write_word_output(
             rows,

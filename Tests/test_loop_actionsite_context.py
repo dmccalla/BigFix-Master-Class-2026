@@ -689,7 +689,7 @@ def test_load_loop_offenders_accepts_raw_evaluation_time_text(tmp_path: Path) ->
     assert [item.result for item in offenders] == [
         "Background Evaluation of External Site: Universal Checklist for Windows Server",
         "Background Evaluation of Custom Site: Resolve",
-        "Evaluate Property 1 of External Site: Patching Support",
+        "Patching Support.344:Evaluate Property 1",
     ]
     assert offenders[0].total_client_processing_seconds == 71.213
     assert offenders[1].occurrences == 2

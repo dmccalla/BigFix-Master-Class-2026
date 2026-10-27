@@ -11,6 +11,12 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Preserve FillDB analyzer values exactly in report tables, chart labels and narrative. Keep milliseconds, numeric precision and timestamps; never infer a missing line count from object totals.
+
+- Use the approved plain-English Client note to explain differing custom-property counts and the separate deployment snapshot. Show the snapshot's actual date and time.
+
+- Prefer resolved Top 10 results over raw timing captures in both report input paths. Keep raw property IDs distinct and use captured retrieved-property names when available.
+
 - Align shared runtime and development packages with Platform and TA, including CustomTkinter 5.2.2. Keep uv tooling external.
 
 - Clear the code sweep Ruff format gate and pin CI actions to verified release commits.

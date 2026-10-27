@@ -72,6 +72,7 @@ from Lib.Core.input_utils import (
     resolve_existing_file,
     resolve_existing_folder,
 )
+from Lib.Core.loop_evaluation_input import evaluation_source_sort_key
 from Lib.Core.performance_diagnostics import (
     PerformanceRecorder,
     process_resource_metrics,
@@ -678,13 +679,7 @@ def _find_loop_evaluation_file(search_dirs: list[Path]) -> Path | None:
                 continue
 
     candidates = list(dict.fromkeys(candidates))
-    candidates.sort(
-        key=lambda p: (
-            not p.stem.lower().endswith("-detail"),
-            -p.stat().st_mtime,
-            p.name.lower(),
-        )
-    )
+    candidates.sort(key=evaluation_source_sort_key)
     for candidate in candidates:
         if _looks_like_loop_evaluation_file(candidate):
             return candidate.resolve()

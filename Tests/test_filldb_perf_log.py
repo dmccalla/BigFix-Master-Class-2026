@@ -51,9 +51,9 @@ def _write_log(path: Path, first_ts: str, last_ts: str) -> Path:
     return path
 
 
-def test_filldb_chart_count_formatter_uses_full_comma_counts() -> None:
-    assert filldb_report.format_count(143_428_334) == "143,428,334"
-    assert filldb_report.format_count(124_502) == "124,502"
+def test_filldb_count_formatter_preserves_analyzer_text() -> None:
+    assert filldb_report.format_count("143428334") == "143428334"
+    assert filldb_report.format_count("124502.000") == "124502.000"
 
 
 def test_filldb_chart_payload_colors_workload_bars_by_health(

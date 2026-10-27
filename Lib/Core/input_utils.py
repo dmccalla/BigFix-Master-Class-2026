@@ -58,6 +58,49 @@ def clean_user_path(value) -> str:
     return str(value).strip().strip('"').strip("'")
 
 
+MAX_WHOLE_NUMBER_DIGITS = 9
+MAX_NAME_CHARS = 60
+
+
+def parse_whole_number(value, label: str) -> int:
+    """Return value as an int. Text must be plain ASCII digits with an optional minus sign.
+
+    str.isdigit() and int() accept other Unicode digits and long digit strings, so
+    a typed value is checked against an explicit pattern instead.
+    """
+    if isinstance(value, bool):
+        raise ValueError(f"{label} must be a whole number.")
+    if isinstance(value, int):
+        return value
+    if isinstance(value, float) and value.is_integer():
+        return int(value)
+    text = str(value).strip()
+    if not re.fullmatch(rf"-?[0-9]{{1,{MAX_WHOLE_NUMBER_DIGITS}}}", text):
+        raise ValueError(
+            f"{label} must be a whole number of at most {MAX_WHOLE_NUMBER_DIGITS} digits."
+        )
+    return int(text)
+
+
+def positive_ascii_int_or_blank(value) -> str:
+    """Return the text when it is a positive whole number in ASCII digits, else blank."""
+    text = str(value or "").strip()
+    if re.fullmatch(rf"[0-9]{{1,{MAX_WHOLE_NUMBER_DIGITS}}}", text) and int(text) > 0:
+        return text
+    return ""
+
+
+def name_length_warning(name: str, label: str) -> str:
+    """Return a notice when the folder and file form of a name will be shortened, else blank."""
+    clean = re.sub(r"_+", "_", re.sub(r"[^\w]", "_", str(name or "").strip())).strip("_")
+    if len(clean) <= MAX_NAME_CHARS:
+        return ""
+    return (
+        f"{label} is longer than {MAX_NAME_CHARS} characters. "
+        f"Folder and file names will use only the first {MAX_NAME_CHARS}."
+    )
+
+
 def normalize_extensions(
     extensions: set[str] | tuple[str, ...] | list[str],
 ) -> set[str]:

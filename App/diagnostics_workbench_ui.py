@@ -71,7 +71,9 @@ from Lib.Core import app_version  # noqa: E402
 from Lib.Core.input_utils import (  # noqa: E402
     DEFAULT_WORK_DIR,
     clean_user_path,
+    name_length_warning,
     open_path,
+    positive_ascii_int_or_blank,
 )
 from Lib.Core.performance_diagnostics import (  # noqa: E402
     PerformanceRecorder,
@@ -2898,8 +2900,41 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
         name_entry = self._form_entry(name_row, self.run_name_var, "run_name")
         name_entry.configure(width=320)
         name_entry.grid(row=0, column=1, sticky="w", pady=14)
+        self._attach_name_length_warning(name_row, self.run_name_var, "Run name")
 
         self._auto_scan_if_ready()
+
+    def _attach_name_length_warning(
+        self, row, var, label: str, column: int = 1, columnspan: int = 1
+    ) -> None:
+        """Show a notice under a name field while its folder form will be shortened."""
+        notice = ctk.CTkLabel(
+            row,
+            text="",
+            text_color=OCHRE,
+            font=(UI_FONT, 14, "bold"),
+            wraplength=520,
+            justify="left",
+            anchor="w",
+        )
+        notice.grid(row=1, column=column, columnspan=columnspan, sticky="w", pady=(0, 12))
+        notice.grid_remove()
+
+        def refresh(*_a) -> None:
+            message = name_length_warning(var.get(), label)
+            try:
+                if not notice.winfo_exists():
+                    return
+                notice.configure(text=message)
+                if message:
+                    notice.grid()
+                else:
+                    notice.grid_remove()
+            except TclError:
+                pass
+
+        var.trace_add("write", refresh)
+        refresh()
 
     def _sync_scan_confirmation_visibility(self) -> None:
         pairs = (
@@ -3265,8 +3300,7 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             self._refresh_module_card_views([key])
 
     def _positive_int_or_blank(self, value: str) -> str:
-        clean = str(value or "").strip()
-        return clean if clean.isdigit() and int(clean) > 0 else ""
+        return positive_ascii_int_or_blank(value)
 
     def _selected_keys(self) -> list[str]:
         return [

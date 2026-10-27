@@ -66,7 +66,9 @@ from Lib.Core.build_provenance import (
 )
 from Lib.Core.input_utils import (
     DEFAULT_WORK_DIR,
+    MAX_NAME_CHARS,
     clean_user_path,
+    parse_whole_number,
     resolve_existing_file,
     resolve_existing_folder,
 )
@@ -423,7 +425,11 @@ def _resolve_input_value_from_config(
         value = resolve_existing_folder(raw, input_field.label) if raw else None
 
     elif kind == "int":
-        value = input_field.default if raw in (None, "") else int(raw)
+        value = (
+            input_field.default
+            if raw in (None, "")
+            else parse_whole_number(raw, input_field.label)
+        )
         if not (input_field.min_val <= value <= input_field.max_val):
             raise ValueError(
                 f"{input_field.label} must be between {input_field.min_val} "
@@ -432,7 +438,7 @@ def _resolve_input_value_from_config(
 
     elif kind == "int_detected":
         if raw not in (None, ""):
-            value = int(raw)
+            value = parse_whole_number(raw, input_field.label)
         elif mod.pre_collect is not None:
             if pre_collect_cache is None:
                 pre_collect_cache = mod.pre_collect(inputs)
@@ -442,6 +448,10 @@ def _resolve_input_value_from_config(
         if value < input_field.min_val:
             raise ValueError(
                 f"{input_field.label} must be at least {input_field.min_val}."
+            )
+        if value > input_field.max_val:
+            raise ValueError(
+                f"{input_field.label} must be no more than {input_field.max_val}."
             )
 
     elif kind == "bool":
@@ -1102,12 +1112,14 @@ PERFMON_SCHEMA: list[InputField] = [
         kind="int_detected",
         label="Capture 1 Logical Processors",
         min_val=0,
+        max_val=4096,
     ),
     InputField(
         key="physical_disks",
         kind="int_detected",
         label="Capture 1 Physical Disks",
         min_val=0,
+        max_val=4096,
     ),
     InputField(
         key="physical_memory_gb",
@@ -1132,12 +1144,14 @@ PERFMON_SCHEMA: list[InputField] = [
         kind="int_detected",
         label="Capture 2 Logical Processors",
         min_val=0,
+        max_val=4096,
     ),
     InputField(
         key="capture2_physical_disks",
         kind="int_detected",
         label="Capture 2 Physical Disks",
         min_val=0,
+        max_val=4096,
     ),
     InputField(
         key="capture2_physical_memory_gb",
@@ -1695,7 +1709,7 @@ MODULE_BY_KEY = {mod.key: mod for mod in MODULES}
 def sanitize_run_name(name: str) -> str:
     """Return a filesystem-safe version of the run name."""
     clean = re.sub(r"[^\w]", "_", name.strip())
-    clean = re.sub(r"_+", "_", clean).strip("_")
+    clean = re.sub(r"_+", "_", clean).strip("_")[:MAX_NAME_CHARS].strip("_")
     return clean or "Diagnostics"
 
 

@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Align shared runtime and development packages with Platform and TA, including CustomTkinter 5.2.2. Keep uv tooling external.
+
 - Clear the code sweep Ruff format gate and pin CI actions to verified release commits.
 
 - Apply the approved 2026-10-26 security cooldown exception for certifi; update filelock and Pillow under the standard cutoff. See Docs/Reference/Dependency_Cooldown_Exception_2026-10-26.md.

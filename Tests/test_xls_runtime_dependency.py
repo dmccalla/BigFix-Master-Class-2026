@@ -26,7 +26,7 @@ def test_project_declares_supported_xlrd_runtime() -> None:
     dependencies = [Requirement(value) for value in project["project"]["dependencies"]]
     readers = [dependency for dependency in dependencies if dependency.name == "xlrd"]
     assert len(readers) == 1
-    assert str(readers[0].specifier) == ">=2.0.2"
+    assert str(readers[0].specifier) == "==2.0.2"
 
 
 def test_launcher_pins_approved_xlrd() -> None:

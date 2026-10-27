@@ -17,24 +17,24 @@ dependencies = [
     # is needed. Edge ships with Windows.
     "playwright>=1.40.0",
     "openpyxl>=3.1.0",
-    "xlrd>=2.0.2",
+    "xlrd==2.0.2",
     "pandas>=2.0.0",
     "xlsxwriter>=3.0.0",
     # customtkinter powers the desktop UI.
-    "customtkinter>=5.2.0,<7.0.0",
+    "customtkinter>=5.2.0,<6.0.0",
 ]
 
 [dependency-groups]
 validation = ["pypdfium2>=4.30,<6", "pyinstaller>=6.16,<7"]
 dev = [
-    "bandit>=1.7.9",
-    "cyclonedx-bom>=4.0.0",
-    "mypy>=1.10",
-    "pip-audit>=2.7.0",
-    "pip-licenses>=5.0.0",
+    "bandit>=1.9.4",
+    "cyclonedx-bom>=7.3.0",
+    "mypy>=2.1.0",
+    "pip-audit>=2.10.0",
+    "pip-licenses>=5.5.5",
     "pytest>=8.0.0",
-    "ruff>=0.5.0",
-    "vulture>=2.11",
+    "ruff>=0.15.14",
+    "vulture>=2.16",
 ]
 
 [tool.uv]

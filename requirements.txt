@@ -2,7 +2,7 @@
 #    uv export --no-dev --no-hashes --no-emit-project --frozen --output-file requirements.txt
 contourpy==1.4.0
     # via matplotlib
-customtkinter==6.0.0
+customtkinter==5.2.2
     # via master-class-diagnostics-workbench
 cycler==0.12.1
     # via matplotlib

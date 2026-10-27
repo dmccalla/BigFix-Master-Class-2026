@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Apply the approved 2026-10-26 security cooldown exception for certifi; update filelock and Pillow under the standard cutoff. See Docs/Reference/Dependency_Cooldown_Exception_2026-10-26.md.
+
 - Complete the Design D-item report pass: clear cover metadata, nest investigation methods, use portable callout symbols, improve identifier wrapping and tighten sparse-page spacing. Preserve scoring and PerfMon plots.
 
 - Keep short evidence groups together in report pagination, left-align the Client query and remove the empty trailing findings row. Preserve report words, charts and scores.

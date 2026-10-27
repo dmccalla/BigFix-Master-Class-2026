@@ -105,6 +105,7 @@
 
     var apiUsername = document.getElementById( "apiUserName" ).value.replace(/^\s+|\s+$/g, '');
     var apiPassword = document.getElementById( "apiPassword" ).value;
+    if (apiUsername.indexOf('"') !== -1 || apiPassword.indexOf('"') !== -1) { alert('API Username and API Password cannot contain a double quote character.'); return false; }
     var apiPasswordConfirm = document.getElementById( "apiPasswordConfirm" ).value;
     var rootServerName = document.getElementById( "rootServerName" ).value;
     var queryDelaySeconds = document.getElementById( "queryDelaySeconds" ).value.replace(/^\s+|\s+$/g, '');
@@ -749,7 +750,7 @@ endif
 //*
 //* ====================================================================================================>
 
-waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user={parameter "apiUsername"} --password={parameter "apiPassword"} --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
+waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user="{parameter "apiUsername"}" --password="{parameter "apiPassword"}" --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
 parameter "diNativeLoginExitCode" = "{exit code of action as string}"
 waithidden powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "{parameter "diRequestHelper"}" -Mode Login -NativeExitCode {parameter "diNativeLoginExitCode"} -StateFile "{parameter "diCollectorState"}" -CsvFile "{parameter "diCollectorCsv"}"
 if {exit code of action != 0}

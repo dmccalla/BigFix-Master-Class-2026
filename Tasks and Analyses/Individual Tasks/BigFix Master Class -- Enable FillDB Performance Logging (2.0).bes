@@ -230,6 +230,7 @@ document.body.ontakeaction = function(event) {
     } else
     var apiUsername = document.getElementById("apiUsername").value;
     var apiPassword = document.getElementById("apiPassword").value;
+    if (apiUsername.indexOf('"') !== -1 || apiPassword.indexOf('"') !== -1) { alert('API Username and API Password cannot contain a double quote character.'); return false; }
     var apiPasswordConfirm = document.getElementById("apiPasswordConfirm").value;
     var rootServerName = document.getElementById("rootServerName").value;
     if (rootServerName == "") { alert("Root Server Hostname must not be blank. Click Edit and enter the root server hostname or IP address."); return false; }
@@ -603,7 +604,7 @@ move __createfile "{parameter "xmlFilesFolder" & "\disable_filldb_performance_lo
 //*     Login to the API and post the XML file to generate the action.
 //*
 
-waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user={parameter "apiUsername"} --password={parameter "apiPassword"} --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
+waithidden cmd.exe /C ""{parameter "cliFolder" & "\iem"}" login -q --server=https://{if ((parameter "rootServerName") != "") then (parameter "rootServerName") else (host name of root server)}:{parameter "apiPort"} --user="{parameter "apiUsername"}" --password="{parameter "apiPassword"}" --masthead="{preceding text of last "\" of pathname of data folder of client & "\actionsite.afxm"}""
 waithidden cmd.exe /C "{parameter "cliFolder" & "\iem"}" POST {parameter "xmlFilesFolder" & "\disable_filldb_performance_logging.xml"} https://localhost:{parameter "apiPort"}/api/actions
 endif
 

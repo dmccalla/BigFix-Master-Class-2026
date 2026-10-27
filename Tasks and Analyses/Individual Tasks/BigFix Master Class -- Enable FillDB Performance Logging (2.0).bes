@@ -492,7 +492,7 @@ createfile until _END_
 //* ====================================================================================================>
 
 waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'filldb' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'filldb' -ErrorAction SilentlyContinue))[0]; Stop-Service -InputObject $s -Force -ErrorAction SilentlyContinue; $s.WaitForStatus('Stopped','00:20:00')"
-continue if {{exit code of action = 0}}
+continue if {{exit code of action = 0}
 
 //*
 //*		Disable logging and set the log info back to whatever it was before we made the change to 
@@ -513,7 +513,7 @@ regdelete "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerfL
 
 waithidden cmd.exe /C ping 127.0.0.1 -n 10 -w 500> nul
 waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'filldb' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'filldb' -ErrorAction SilentlyContinue))[0]; Start-Service -InputObject $s; $s.WaitForStatus('Running','00:05:00')"
-continue if {{exit code of action = 0}}
+continue if {{exit code of action = 0}
 
 //*
 //*		Delete the expiration breadcrumb

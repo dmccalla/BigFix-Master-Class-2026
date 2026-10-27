@@ -25,7 +25,7 @@ SITE = next(
     p / "Tasks and Analyses" for p in HERE.parents if (p / "Tasks and Analyses").is_dir()
 )
 TASKS = sorted(SITE.rglob("*.bes"))
-GATE = re.compile(r"^\s*continue if \{+exit code of action = 0\}+\s*$")
+GATE = re.compile(r"^\s*continue if \{\{?exit code of action = 0\}\s*$")
 
 
 def _lines(path: Path) -> list[str]:

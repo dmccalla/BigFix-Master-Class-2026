@@ -54,7 +54,7 @@ import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
 from Lib.Themes.chart_theme import THEME, choose_font
-from Lib.Themes.workbook_theme import xlsxwriter_formats
+from Lib.Themes.workbook_theme import xlsxwriter_formats, xlsxwriter_options
 
 _FONT_FAMILY = choose_font()
 import pandas as pd
@@ -1433,7 +1433,7 @@ def export_excel(
     stamp: str = "",
 ) -> None:
 
-    wb = xlsxwriter.Workbook(output_path, {"nan_inf_to_errors": True})
+    wb = xlsxwriter.Workbook(output_path, xlsxwriter_options({"nan_inf_to_errors": True}))
     base_formats = xlsxwriter_formats(wb)
     fmt = {
         "hdr": base_formats["header"],

@@ -38,6 +38,29 @@ def ox_color(color: str) -> str:
     return _clean(color)
 
 
+def xlsxwriter_options(extra: dict | None = None) -> dict:
+    """Return workbook options that keep untrusted strings out of formulas."""
+    options = {"strings_to_formulas": False}
+    options.update(extra or {})
+    return options
+
+
+def set_openpyxl_cell_value(cell, value):
+    """Write a workbook value while forcing strings to remain text cells."""
+    cell.value = value
+    if isinstance(value, str):
+        cell.data_type = "s"
+    return cell
+
+
+def append_openpyxl_row(sheet, values) -> None:
+    """Append a row whose string values cannot be interpreted as formulas."""
+    sheet.append(list(values))
+    for cell in sheet[sheet.max_row]:
+        if isinstance(cell.value, str):
+            cell.data_type = "s"
+
+
 @dataclass(frozen=True)
 class WorkbookTheme:
     """Shared Excel design tokens sourced from the design system."""

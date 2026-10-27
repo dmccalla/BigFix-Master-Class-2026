@@ -89,7 +89,11 @@ from Lib.Core.input_utils import (
     resolve_existing_folder as shared_resolve_existing_folder,
 )
 from Lib.Design import report_tables, status_spine
-from Lib.Themes.workbook_theme import WORKBOOK_THEME, finish_openpyxl_workbook
+from Lib.Themes.workbook_theme import (
+    WORKBOOK_THEME,
+    finish_openpyxl_workbook,
+    xlsxwriter_options,
+)
 
 try:
     from docx import Document
@@ -4239,7 +4243,11 @@ def generate_excel(
             ]
         )
 
-    with pd.ExcelWriter(excel_output, engine="openpyxl") as writer:
+    with pd.ExcelWriter(
+        excel_output,
+        engine="xlsxwriter",
+        engine_kwargs={"options": xlsxwriter_options()},
+    ) as writer:
         metrics_df.to_excel(writer, sheet_name="Health Summary", index=False, startrow=0)
         bands_df.to_excel(
             writer, sheet_name="Health Summary", index=False, startrow=bands_start_row

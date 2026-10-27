@@ -44,6 +44,9 @@ from typing import Any
 from urllib import error, parse, request
 from xml.etree import ElementTree as ET
 
+from defusedxml import ElementTree as SafeET
+from defusedxml.common import DefusedXmlException
+
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TERMINAL_ACTION_STATES = {
     "cancelled",
@@ -143,8 +146,8 @@ def extract_resource_id(payload: bytes | str, resource_name: str) -> int:
         return int(stripped)
 
     try:
-        root = ET.fromstring(stripped)
-    except ET.ParseError as exc:
+        root = SafeET.fromstring(stripped)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise HarnessError(
             f"The API returned invalid XML for {resource_name}: {exc}"
         ) from exc
@@ -225,8 +228,8 @@ def build_client_query_xml(computer_id: int, relevance: str) -> bytes:
 def content_type(payload: bytes | str) -> str:
     """Return Task or Fixlet for a single deployable BES XML document."""
     try:
-        root = ET.fromstring(payload)
-    except ET.ParseError as exc:
+        root = SafeET.fromstring(payload)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise HarnessError(f"Content XML is not well formed: {exc}") from exc
     kinds = [
         _local_name(element.tag)
@@ -242,8 +245,8 @@ def clone_content_xml(path: Path, suffix: str) -> bytes:
     """Return a temporary task/fixlet copy with a clearly marked title."""
     raw = path.read_text(encoding="utf-8-sig")
     try:
-        root = ET.fromstring(raw)
-    except ET.ParseError as exc:
+        root = SafeET.fromstring(raw)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise HarnessError(f"Task XML is not well formed: {path}: {exc}") from exc
     contents = [
         element for element in root if _local_name(element.tag) in {"Task", "Fixlet"}
@@ -270,8 +273,8 @@ def _parse_action_state(
     payload: bytes, computer_id: int, *, success_state: str = "Fixed"
 ) -> str:
     try:
-        root = ET.fromstring(payload)
-    except ET.ParseError as exc:
+        root = SafeET.fromstring(payload)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise HarnessError(f"Action status response is invalid XML: {exc}") from exc
 
     for computer in root.iter():
@@ -328,8 +331,8 @@ def _parse_client_query_result(
     payload: bytes, computer_id: int
 ) -> tuple[bool, str] | None:
     try:
-        root = ET.fromstring(payload)
-    except ET.ParseError as exc:
+        root = SafeET.fromstring(payload)
+    except (ET.ParseError, DefusedXmlException) as exc:
         raise HarnessError(f"Client query response is invalid XML: {exc}") from exc
     for result in root.iter():
         if _local_name(result.tag) != "QueryResult":

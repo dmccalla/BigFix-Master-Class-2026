@@ -132,7 +132,8 @@ parameter "fillDBPerfNoticeFolder" = "{if (exists values whose (it contains "\")
 //*		Set the log info back to whatever it was before we made the change to centralized HC logging
 //*
 
-waithidden cmd.exe /C net stop filldb
+waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'filldb' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'filldb' -ErrorAction SilentlyContinue))[0]; Stop-Service -InputObject $s -Force -ErrorAction SilentlyContinue; $s.WaitForStatus('Stopped','00:20:00')"
+continue if {exit code of action = 0}
 
 if {exists values whose (it as lowercase != "was not set") of settings "__FillDB_Perf_Logs_Backup_Value" of client}
 regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"="{escape of concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client}"
@@ -157,7 +158,8 @@ endif
 //*
 
 waithidden cmd.exe /C ping 127.0.0.1 -n 10 -w 500> nul
-waithidden cmd.exe /C net start filldb
+waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'filldb' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'filldb' -ErrorAction SilentlyContinue))[0]; Start-Service -InputObject $s; $s.WaitForStatus('Running','00:05:00')"
+continue if {exit code of action = 0}
 
 waithidden cmd.exe /C echo The FillDB Performance log in this folder is no longer active and is ready for analysis.  > "{parameter "fillDBPerfLogsFolder" & "\HEALTHCHECK_FILLDB_PERF_README.txt"}"
 

@@ -97,7 +97,8 @@ parameter "res" = "{parameter "restart" of action as string as lowercase}"
 if {(parameter "res") is "y"}
 	parameter "fillDBPerfNoticeFolder" = "{if (exists values whose (it contains "\") of settings "__FillDB_Perf_Logs_Backup_Value" of client) then (preceding text of last "\" of (concatenation "" of values of settings "__FillDB_Perf_Logs_Backup_Value" of client)) else (if exists value "PerformanceDataPath" whose (it as string contains "\") of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry then (preceding text of last "\" of (value "PerformanceDataPath" of key "HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB" of x32 registry as string)) else (""))}"
 
-	waithidden cmd.exe /C net stop FillDB
+	waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'FillDB' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'FillDB' -ErrorAction SilentlyContinue))[0]; Stop-Service -InputObject $s -Force -ErrorAction SilentlyContinue; $s.WaitForStatus('Stopped','00:20:00')"
+	continue if {exit code of action = 0}
 
 	regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "PerformanceDataPath"=""
 	regset "[HKEY_LOCAL_MACHINE\SOFTWARE\BigFix\Enterprise Server\FillDB]" "EnablePerformanceLogging"="0"
@@ -108,7 +109,8 @@ if {(parameter "res") is "y"}
 //*
 
 	waithidden cmd.exe /C ping 127.0.0.1 -n 5 -w 500> nul
-	waithidden cmd.exe /C net start FillDB
+	waithidden powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "$ErrorActionPreference='Stop'; $s=(@(Get-Service -Name 'FillDB' -ErrorAction SilentlyContinue)+@(Get-Service -DisplayName 'FillDB' -ErrorAction SilentlyContinue))[0]; Start-Service -InputObject $s; $s.WaitForStatus('Running','00:05:00')"
+	continue if {exit code of action = 0}
 
 	//* Remove Health Check notices before clearing the saved path.
 	if {(parameter "fillDBPerfNoticeFolder" != "") and (exists folder (parameter "fillDBPerfNoticeFolder"))}

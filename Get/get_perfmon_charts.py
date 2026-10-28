@@ -949,7 +949,7 @@ def time_window_phrase(times: pd.Series) -> str:
 
 
 def zero_counter_strip_text(
-    col: str, has_samples: bool, not_scored_reason: str = ""
+    col: str, has_samples: bool, not_scored_reason: str = "", status: str = ""
 ) -> tuple[str, str, str]:
     """Return the message, status label, and status color for a zero chart."""
     if not_scored_reason:
@@ -960,6 +960,10 @@ def zero_counter_strip_text(
         )
     if not has_samples:
         return "No samples recorded", "CANNOT VERIFY", "#595959"
+    if status in {"Warning", "Advisory"}:
+        return "All recorded values were 0", "ADVISORY", _BLUE
+    if status in {"Critical", "Fail"}:
+        return "All recorded values were 0", "FAIL", _RED
     if is_packet_counter(col):
         return "No packet errors or discards recorded", "PASS", "#1F8A5B"
     if "Usage_Peak" in col:
@@ -1026,22 +1030,24 @@ def render_zero_counter_strip(
     true_max: float = 0,
     host_name: str = "",
     not_scored_reason: str = "",
+    status: str = "",
 ) -> None:
-    fig = plt.figure(figsize=(14.3, 1.55 if not_scored_reason else 1.15), dpi=200)
+    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
+    expanded = bool(not_scored_reason) or len(standard) > 70
+    fig = plt.figure(figsize=(14.3, 1.55 if expanded else 1.15), dpi=200)
     fig.patch.set_facecolor("white")
     ax = fig.add_axes((0, 0, 1, 1))
     ax.axis("off")
 
     message, result_label, result_color = zero_counter_strip_text(
-        col, has_samples, not_scored_reason
+        col, has_samples, not_scored_reason, status
     )
     window_text = "" if not_scored_reason else f" over {time_window_phrase(times)}"
-    standard = f"Standard: {threshold['label']}" if threshold else "Standard: not defined"
     max_display = f"{true_max:g}%" if "Usage_Peak" in col else f"{true_max:g}"
 
     fig.text(
         0.025,
-        0.82 if not_scored_reason else 0.74,
+        0.82 if expanded else 0.74,
         col,
         fontsize=13,
         fontweight="bold",
@@ -1050,7 +1056,7 @@ def render_zero_counter_strip(
     )
     fig.text(
         0.025,
-        0.57 if not_scored_reason else 0.38,
+        0.57 if expanded else 0.38,
         message if not_scored_reason else f"{message}{window_text} - {result_label}",
         fontsize=16 if not_scored_reason else 20,
         fontweight="bold",
@@ -1069,7 +1075,7 @@ def render_zero_counter_strip(
         )
     fig.text(
         0.975,
-        0.33 if not_scored_reason else 0.39,
+        0.33 if expanded else 0.39,
         standard,
         ha="right",
         fontsize=12,
@@ -1348,7 +1354,7 @@ def analyze(
 
         # Collect derived columns -- added via concat after the loop
         new_cols[f"{col}_RollingAvg"] = (
-            chart_df[col].rolling(window=rolling_window, min_periods=1).mean()
+            analysis_df[col].rolling(window=rolling_window, min_periods=1).mean()
         )
         new_cols[f"{col}_OK"] = chart_df[col].where(statuses == "OK")
         new_cols[f"{col}_Warning"] = chart_df[col].where(statuses == "Warning")
@@ -1596,6 +1602,15 @@ def export_excel(
             for row_r in range(1, n_data_rows + 1):
                 ws_cd.write_number(row_r, thr_idx, thr["critical"])
 
+        floor_idx = None
+        if thr and thr.get("min") is not None:
+            floor_idx = len(cd_cols)
+            header = f"AdvisoryFloor_{col}"
+            cd_cols.append(header)
+            ws_cd.write(0, floor_idx, header, fmt["hdr"])
+            for row_r in range(1, n_data_rows + 1):
+                ws_cd.write_number(row_r, floor_idx, thr["min"])
+
         # Build scatter chart
         chart = wb.add_chart({"type": "scatter", "subtype": "straight"})
         chart.set_title(
@@ -1656,6 +1671,17 @@ def export_excel(
                     ],
                     "values": ["ChartData", 1, thr_idx, n_data_rows, thr_idx],
                     "line": {"color": _RED, "width": 2, "dash_type": "dash"},
+                    "marker": {"type": "none"},
+                }
+            )
+
+        if floor_idx is not None and thr is not None:
+            chart.add_series(
+                {
+                    "name": f"VM advisory floor: {thr['min']:g}%",
+                    "categories": ["ChartData", 1, time_cd_idx, n_data_rows, time_cd_idx],
+                    "values": ["ChartData", 1, floor_idx, n_data_rows, floor_idx],
+                    "line": {"color": _BLUE, "width": 2, "dash_type": "dash"},
                     "marker": {"type": "none"},
                 }
             )
@@ -1793,6 +1819,7 @@ def export_png_charts(
                 true_max=max_raw,
                 host_name=analyzed_system,
                 not_scored_reason=finding.get("NotScoredReason", ""),
+                status=finding.get("Status", ""),
             )
             log.result("Graph (PNG)", png_path)
             continue
@@ -1808,7 +1835,13 @@ def export_png_charts(
         if thr and amax:
             crit = thr.get("critical")
             if crit is not None and crit > 0:
-                ax.axhspan(0, min(crit, amax), alpha=_ALPHA, color=_GREEN_BG, zorder=0)
+                floor = thr.get("min", 0) if thr.get("type") == "range" else 0
+                if floor > 0:
+                    ax.axhspan(0, min(floor, amax), alpha=_ALPHA, color=_BLUE, zorder=0)
+                if floor < min(crit, amax):
+                    ax.axhspan(
+                        floor, min(crit, amax), alpha=_ALPHA, color=_GREEN_BG, zorder=0
+                    )
                 if crit < amax:
                     ax.axhspan(crit, amax, alpha=_ALPHA, color=_RED_BG, zorder=0)
             elif crit == 0:
@@ -1851,6 +1884,21 @@ def export_png_charts(
                         linewidth=2,
                         linestyle="--",
                         label=f"Standard: {thr['label']}",
+                    )
+                )
+            if thr.get("type") == "range" and thr.get("min") is not None:
+                if thr["min"] <= amax:
+                    ax.axhline(
+                        y=thr["min"], color=_BLUE, linewidth=2, linestyle="--", zorder=5
+                    )
+                extra_handles.append(
+                    Line2D(
+                        [0],
+                        [0],
+                        color=_BLUE,
+                        linewidth=2,
+                        linestyle="--",
+                        label=f"VM advisory floor: {thr['min']:g}%",
                     )
                 )
             # Informational guide values are caption context, not a drawn line.

@@ -17,7 +17,7 @@ function frequency(d){
 }
 function groups(d){return d.rows.map(r=>`<div class="row" data-split-row><span>${esc(r.label)}</span>${parts([{count:r.count,color:r.color}],d.total)}<strong class="value">${number(r.count)} &middot; ${percent(r.count,d.total)}</strong></div>`).join('');}
 function counts(d){return d.rows.map(r=>`<div style="margin:20px 0"><div style="display:flex;justify-content:space-between;margin-bottom:14px"><strong>${esc(r.label)}</strong><span>${number(r.count)} / ${number(r.total)}</span></div>${parts([{count:r.count,color:teal}],r.total)}</div>`).join('');}
-function checks(d){return `<div class="tiles">${d.checks.map(r=>`<div class="tile"><span>${esc(r.label)}</span><div class="number">${number(r.count)}</div><div>${percent(r.count,d.total)} of ${number(d.total)} devices</div></div>`).join('')}</div><div class="note">These checks can overlap. Their counts should not be added.</div>`;}
+function checks(d){return `<div class="tiles">${d.checks.map(r=>`<div class="tile"><span>${esc(r.label)}</span><div class="number">${number(r.count)}</div><div>${percent(r.count,d.total)} of ${number(d.total)} devices</div></div>`).join('')}</div><div class="note">Each device is counted in no more than one of these three checks.</div>`;}
 /*__DATA__*/
 const d=window.DATA||{};const builders={distribution,duty,costs,frequency,groups,counts,checks};document.getElementById('mount').innerHTML=(builders[d.kind]||distribution)(d);document.fonts.ready.then(()=>window.__RENDERED__=true);
 </script></body></html>

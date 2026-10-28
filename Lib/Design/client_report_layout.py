@@ -366,7 +366,7 @@ def apply_client_layout(
         check_heading = document.add_heading("Reported Polling Checks", level=4)
         table.addnext(check_heading._p)
         note = document.add_paragraph(
-            "These checks can overlap. Their counts should not be added."
+            "Each device is counted in no more than one of these three checks."
         )
         check_heading._p.addnext(note._p)
         before = len(document.tables)
@@ -411,7 +411,7 @@ def apply_client_layout(
                 {"kind": "checks", "total": polling.total_devices, "checks": checks},
                 path,
                 marker,
-                "Three potentially overlapping polling checks. These check counts must not be added.",
+                "Each device is counted in no more than one of these three checks.",
             )
         )
         lead = next(

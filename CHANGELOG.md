@@ -11,6 +11,10 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Correct Client overall-score wording and mutually exclusive polling notes. Compute Perfmon rolling averages from uncapped readings, show the VM CPU advisory floor in Word and Excel charts, honor assessed zero-counter statuses and prevent long zero-strip notes from overlapping results. Preserve analyzer values and scoring.
+
+- Simplify the Collect Deployment Information task description with approved wording, the existing title rule and READ BEFORE YOU RUN panel. Preserve collection behavior.
+
 - Preserve FillDB analyzer values exactly in report tables, chart labels and narrative. Keep milliseconds, numeric precision and timestamps; never infer a missing line count from object totals.
 
 - Use the approved plain-English Client note to explain differing custom-property counts and the separate deployment snapshot. Show the snapshot's actual date and time.

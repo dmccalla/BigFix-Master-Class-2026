@@ -5012,7 +5012,7 @@ def generate_word(
         "Warning 67 and Critical 34. The score is the average across all devices."
     )
     document.add_paragraph(
-        "A score of 90 to 100 is Healthy, 70 to 89 is Warning, and 0 to 69 is Critical."
+        "A score of 90 to 100 is Healthy, 70 to 89 is Needs Attention, and 0 to 69 is Critical."
     )
 
     if loop_offenders or actionsite_pressure or property_intervals:

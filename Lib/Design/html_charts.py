@@ -38,6 +38,7 @@ import functools
 import json
 import logging
 import os
+import secrets
 import subprocess
 import sys
 from pathlib import Path
@@ -121,6 +122,19 @@ def _build_html(
             f"window.DATA = {payload};"
         ),
     )
+    # Only embedded fonts, styles and this document's scripts may load.
+    nonce = secrets.token_urlsafe(24)
+    policy = (
+        "default-src 'none'; "
+        f"script-src 'nonce-{nonce}'; "
+        "style-src 'unsafe-inline'; font-src data:; img-src data:; "
+        "connect-src 'none'; base-uri 'none'; form-action 'none'"
+    )
+    html = html.replace(
+        "<head>",
+        f'<head><meta http-equiv="Content-Security-Policy" content="{policy}">',
+        1,
+    ).replace("<script>", f'<script nonce="{nonce}">')
     html = html.replace("</head>", f"<style>{progress_bar_css()}</style></head>", 1)
     if card_width:
         html = html.replace(
@@ -288,6 +302,8 @@ def render_charts(
                         # Fresh pages keep readiness state local to this attempt.
                         page = browser.new_page(device_scale_factor=scale)
                         try:
+                            # Collected content must never cause an outbound request.
+                            page.route("**/*", lambda route: route.abort())
                             page.set_content(html, wait_until="networkidle")
                             page.wait_for_function("window.__RENDERED__ === true")
                             page.locator("#mount").screenshot(path=str(out))

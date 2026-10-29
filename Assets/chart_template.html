@@ -53,7 +53,6 @@
 <div class="export"><div id="mount" class="card"></div></div>
 
 <script>
-/* eslint-disable */
 /* Render functions ported from chart_afters.html, kept identical. Data is read
    from window.DATA (injected by html_charts.py) instead of being hard-coded. */
 // The status spine: one ramp used everywhere. Scores map to 3 bands only
@@ -152,7 +151,7 @@ const fmtCount = v => {
   const s = String(v).trim();
   const normalized = s.replace(/,/g,'');
   if(_countPattern.test(normalized)) return Number(normalized).toLocaleString('en-US');
-  return s;
+  return esc(s);
 };
 const countNumber = v => Number(String(v).replace(/,/g,''));
 const pluralCount = (n, one, many) => `${fmtCount(n)} ${countNumber(n)===1?one:(many||one+'s')}`;
@@ -211,10 +210,19 @@ const LEGACY_STATUS_COLOR_MAP = {
   '5B677A':'Not Assessed',
   '8A93A3':'Not Assessed',
 };
+// CSS values cross an attribute boundary; accept only colors and percentages.
+function safeColor(value, fallback='#0B1640'){
+  const color = String(value || '').trim();
+  return /^(?:#[0-9a-f]{3,4}|#[0-9a-f]{6}|#[0-9a-f]{8}|transparent|currentcolor|rgba?\([0-9.,%\s]+\))$/i.test(color) ? color : fallback;
+}
+function safeWidth(value){
+  const width = String(value || '0%').trim();
+  return /^(?:\d+(?:\.\d+)?|\.\d+)%$/.test(width) && parseFloat(width) <= 100 ? width : '0%';
+}
 function standardStatusColor(color){
   const legacy = LEGACY_STATUS_COLOR_MAP[hexKey(color)];
   if(legacy) return SPINE[legacy].mark;
-  return color;
+  return safeColor(color);
 }
 function fitNumericValues(){
   document.querySelectorAll('.fit-num').forEach(el=>{
@@ -282,7 +290,7 @@ const covSub = cov => (cov && cov.state==='partial' && cov.assessed!=null && cov
 function header(title, sub, rightHTML, opts){
   const o = opts || {};
   const cleanSub = dotSep(sub);
-  const body = `<div class="hrow"><div style="min-width:0;flex:1;"><div class="title">${title}</div>${cleanSub?`<div style="font-size:18px;color:#0B1640;margin-top:6px;line-height:1.35;">${cleanSub}</div>`:''}</div>${rightHTML?`<div class="hright">${rightHTML}</div>`:''}</div><div class="rule" style="${o.padded?'margin:22px 0 0;':''}"></div>`;
+  const body = `<div class="hrow"><div style="min-width:0;flex:1;"><div class="title">${srcText(title)}</div>${cleanSub?`<div style="font-size:18px;color:#0B1640;margin-top:6px;line-height:1.35;">${srcText(cleanSub)}</div>`:''}</div>${rightHTML?`<div class="hright">${rightHTML}</div>`:''}</div><div class="rule" style="${o.padded?'margin:22px 0 0;':''}"></div>`;
   return o.padded ? `<div style="padding:${o.padding || '26px 28px 0'};">${body}</div>` : body;
 }
 function scoreColor(d){
@@ -302,10 +310,10 @@ function scoreLockup(d, size){
   const scoreText = numeric ? d.score : (d.overallTier || scoreStatusWord(d));
   const color = scoreColor(d);
   const word = scoreStatusWord(d);
-  const coverage = d.coverageLine ? `<div style="font-size:14px;color:#0B1640;line-height:1.25;margin-top:4px;white-space:normal;">${d.coverageLine}</div>` : '';
+  const coverage = d.coverageLine ? `<div style="font-size:14px;color:#0B1640;line-height:1.25;margin-top:4px;white-space:normal;">${srcText(d.coverageLine)}</div>` : '';
   const status = o.statusWord ? `<div style="font-size:20px;font-weight:800;color:${color};line-height:1.1;margin-top:5px;text-align:right;">${word}</div>` : '';
   return `<div style="display:flex;flex-direction:column;align-items:flex-end;white-space:nowrap;flex:none;">
-    <span style="display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;"><span class="scoreNum num" style="font-size:${size}px;color:${color};">${scoreText}</span>${numeric?`<span class="num" style="font-size:${slashSize}px;font-weight:700;color:#0B1640;">/ 100</span>`:''}</span>
+    <span style="display:inline-flex;align-items:baseline;gap:5px;white-space:nowrap;"><span class="scoreNum num" style="font-size:${size}px;color:${color};">${srcText(scoreText)}</span>${numeric?`<span class="num" style="font-size:${slashSize}px;font-weight:700;color:#0B1640;">/ 100</span>`:''}</span>
     ${status}${coverage}
   </div>`;
 }
@@ -314,7 +322,7 @@ function analysisHeader(d, opts){
   const subtitle = dotSep(d.sub || d.meta || '');
   const findingLine = d.findingsLine ? `<div style="font-size:18px;color:#0B1640;margin-top:6px;line-height:1.35;">${findingLineHTML(d.findingsLine)}</div>` : '';
   const headerRow = `<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:24px;">
-    <div style="min-width:0;flex:1;"><div class="title">${d.title}</div>${subtitle?`<div style="font-size:18px;color:#0B1640;margin-top:6px;line-height:1.35;white-space:normal;">${subtitle}</div>`:''}${findingLine}</div>
+    <div style="min-width:0;flex:1;"><div class="title">${srcText(d.title)}</div>${subtitle?`<div style="font-size:18px;color:#0B1640;margin-top:6px;line-height:1.35;white-space:normal;">${subtitle}</div>`:''}${findingLine}</div>
     ${scoreLockup(d, o.scoreSize || 48, {statusWord: !!o.statusWord})}
   </div>`;
   const fill = d.barColor ? standardStatusColor(d.barColor) : scoreColor(d);
@@ -438,45 +446,45 @@ function buildLoop(d){
   return `<div id="c-loop" style="width: 2250px; background: #ffffff; padding: 4px 8px 8px 4px;">
     <div style="display: flex; align-items: flex-start; justify-content: space-between;">
       <div>
-        <div style="font-size: 64px; font-weight: 700; color: #0B1640;">${d.title}</div>
-        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${meta}</div>
-        ${findingLead ? `<div style="font-size: 38px; font-weight: 700; color: #C2410C; margin-top: 8px;">${findingLead}</div>` : ''}
+        <div style="font-size: 64px; font-weight: 700; color: #0B1640;">${srcText(d.title)}</div>
+        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${srcText(meta)}</div>
+        ${findingLead ? `<div style="font-size: 38px; font-weight: 700; color: #C2410C; margin-top: 8px;">${srcText(findingLead)}</div>` : ''}
       </div>
       ${miniScoreLockup(d.score, scoreColor(d), loopLegendLabel(scoreStatusWord(d)))}
     </div>
     ${miniScoreScale(d.barPct, scoreColor(d), 'Warning')}
     <div style="height: 1px; background: #E3E9F1; margin-top: 28px;"></div>
 
-    <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 30px;">${dotSep(d.distLabel || '').toUpperCase()}</div>
+    <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 30px;">${srcText(d.distLabel || '').toUpperCase()}</div>
     <div data-progress-track style="display: flex; height:var(--progress-bar-height); margin-top: 16px; border-radius:var(--progress-bar-radius); overflow: hidden;">
-      ${(d.dist || []).map((s,i)=>{const items=d.dist || [];const first=i===0,last=i===items.length-1;const radius=items.length===1?'999px':first?'999px 0 0 999px':last?'0 999px 999px 0':'0';const width=s.width || (s.pct!=null ? `${s.pct}%` : '0%');const color=standardStatusColor(s.color || '#5B677A');const count=s.count ?? s.num ?? '';const fill=s.hatch?`repeating-linear-gradient(45deg, ${color} 0 10px, #ffffff 10px 16px)`:color;return `<div style="border-radius: ${radius}; width: ${width}; background: ${fill}; display: flex; align-items: center; padding-left: 16px; color: #ffffff; font-weight: 700; font-size: 38px;">${count}</div>`;}).join('')}
+      ${(d.dist || []).map((s,i)=>{const items=d.dist || [];const first=i===0,last=i===items.length-1;const radius=items.length===1?'999px':first?'999px 0 0 999px':last?'0 999px 999px 0':'0';const width=safeWidth(s.width || (s.pct!=null ? `${s.pct}%` : '0%'));const color=standardStatusColor(s.color || '#5B677A');const count=s.count ?? s.num ?? '';const fill=s.hatch?`repeating-linear-gradient(45deg, ${color} 0 10px, #ffffff 10px 16px)`:color;return `<div style="border-radius: ${radius}; width: ${width}; background: ${fill}; display: flex; align-items: center; padding-left: 16px; color: #ffffff; font-weight: 700; font-size: 38px;">${srcText(count)}</div>`;}).join('')}
     </div>
     <div style="display: flex; flex-wrap: wrap; align-items: center; column-gap: 34px; row-gap: 8px; margin-top: 16px; font-size: 38px; color: #0B1640;">
-      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span class="legend-dot" style="background: ${l.hatch?`repeating-linear-gradient(45deg, ${l.color} 0 3px, #ffffff 3px 5px)`:l.color};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${l.count}</span>${l.points!=null?` · ${l.points} pts`:''}</div>`).join('')}
+      ${d.legend.map(l=>`<div style="display: flex; align-items: center; gap: 10px;"><span class="legend-dot" style="background: ${l.hatch?`repeating-linear-gradient(45deg, ${safeColor(l.color)} 0 3px, #ffffff 3px 5px)`:safeColor(l.color)};"></span>${loopLegendLabel(l.label)} · <span style="font-weight: 700;">${srcText(l.count)}</span>${l.points!=null?` · ${srcText(l.points)} pts`:''}</div>`).join('')}
     </div>
 
     <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 36px;">LOOP TIMING</div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 16px;">
       ${footer.map(f=>`<div style="border: 1px solid #E3E9F1; border-radius: 12px; padding: 22px 24px;">
-        <div style="font-size: 38px; font-weight: 700; color: #0B1640; letter-spacing: 0.04em;">${String(f.label || '').toUpperCase()}</div>
-        <div style="font-size: 64px; font-weight: 700; color: ${f.color || '#0B1640'}; margin-top: 10px;">${f.value}</div>
-        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${f.caption || ''}</div>
+        <div style="font-size: 38px; font-weight: 700; color: #0B1640; letter-spacing: 0.04em;">${srcText(f.label || '').toUpperCase()}</div>
+        <div style="font-size: 64px; font-weight: 700; color: ${safeColor(f.color)}; margin-top: 10px;">${srcText(f.value)}</div>
+        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${srcText(f.caption || '')}</div>
       </div>`).join('')}
     </div>
 
     <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 36px;">REPORTING COVERAGE</div>
     <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 16px;">
       ${context.map(c=>`<div style="border: 1px solid #E3E9F1; border-radius: 12px; padding: 22px 24px;">
-        <div style="font-size: 38px; font-weight: 700; color: #0B1640; letter-spacing: 0.04em;">${String(c.label || '').toUpperCase()}</div>
-        <div style="font-size: 64px; font-weight: 700; color: ${contextColor(c)}; margin-top: 10px;">${c.value}</div>
-        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${c.caption || ''}</div>
+        <div style="font-size: 38px; font-weight: 700; color: #0B1640; letter-spacing: 0.04em;">${srcText(c.label || '').toUpperCase()}</div>
+        <div style="font-size: 64px; font-weight: 700; color: ${safeColor(contextColor(c))}; margin-top: 10px;">${srcText(c.value)}</div>
+        <div style="font-size: 38px; color: #0B1640; margin-top: 8px;">${srcText(c.caption || '')}</div>
       </div>`).join('')}
     </div>
 
     <div style="height: 1px; background: #E3E9F1; margin: 34px 0 26px 0;"></div>
     <div style="font-family: 'Roboto Condensed', sans-serif; font-weight: 700; font-size: 38px; letter-spacing: 0.06em; text-transform: uppercase; color: #0C7E88;">Findings raised</div>
     <div style="display: flex; flex-direction: column; gap: 8px; margin-top: 12px;">
-      ${findings.length ? findings.map(f=>`<div style="font-size: 38px; line-height: 1.5;"><strong style="color: #C2410C;">${f.id}</strong> · ${f.text}</div>`).join('') : (fallbackFindingLine || '<div style="font-size: 38px; line-height: 1.5;">None raised.</div>')}
+      ${findings.length ? findings.map(f=>`<div style="font-size: 38px; line-height: 1.5;"><strong style="color: #C2410C;">${srcText(f.id)}</strong> · ${srcText(f.text)}</div>`).join('') : (fallbackFindingLine || '<div style="font-size: 38px; line-height: 1.5;">None raised.</div>')}
     </div>
 
   </div>`;
@@ -492,7 +500,7 @@ function buildScorecard(d){
       const sub = covSub(cov);
       return `<div style="min-width:0;border:1px solid #E3E9F1;border-radius:12px;padding:22px 24px;">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-          <div class="metricLabel" style="font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#0B1640;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;">${name}</div>
+          <div class="metricLabel" style="font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#0B1640;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;">${srcText(name)}</div>
         </div>
         <div class="num display statValue fit-num" data-min-size="20" style="font-size:28px;font-weight:800;color:#0B1640;margin:14px 0 ${sub?'4px':'14px'};">${covLabel(cov)}</div>
         ${sub?`<div class="num metricCaption" style="font-size:14px;color:#0B1640;margin-bottom:12px;">${sub}</div>`:''}
@@ -503,21 +511,21 @@ function buildScorecard(d){
     const color=barOf[bandOf(score)];
     return `<div style="min-width:0;border:1px solid #E3E9F1;border-radius:12px;padding:22px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;">
-        <div class="metricLabel" style="font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#0B1640;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;">${name}</div><div style="font-weight:800;font-size:17px;color:${color};">${tier}</div>
+        <div class="metricLabel" style="font-weight:700;font-size:15px;letter-spacing:.04em;text-transform:uppercase;color:#0B1640;white-space:normal;overflow:visible;text-overflow:clip;line-height:1.2;">${srcText(name)}</div><div style="font-weight:800;font-size:17px;color:${color};">${tier}</div>
       </div>
-      <div class="num display statValue fit-num" data-min-size="28" style="font-size:46px;font-weight:800;color:#0B1640;margin:10px 0 14px;">${score}<span style="font-size:19px;color:#0B1640;font-weight:700;"> /100</span></div>
-      ${coverageLine?`<div class="metricCaption" style="font-size:14px;color:#0B1640;margin-bottom:12px;">${coverageLine}</div>`:''}
+      <div class="num display statValue fit-num" data-min-size="28" style="font-size:46px;font-weight:800;color:#0B1640;margin:10px 0 14px;">${srcText(score)}<span style="font-size:19px;color:#0B1640;font-weight:700;"> /100</span></div>
+      ${coverageLine?`<div class="metricCaption" style="font-size:14px;color:#0B1640;margin-bottom:12px;">${srcText(coverageLine)}</div>`:''}
       <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:#F0F2F5;overflow:hidden;">${scoreFill(score, color)}</div>
     </div>`;}).join('');
   const detail = d.sections.map(([name,score,cats,find,cov,split,coverageLine])=>`
     <div style="display:grid;grid-template-columns:minmax(0,1fr) 220px 560px;align-items:center;gap:18px;background:#F0F2F5;border-radius:10px;padding:15px 20px;">
-      <span class="metricLabel" style="font-weight:700;font-size:17px;color:#0B1640;">${name}</span>
-      <span class="num metricCaption" style="font-size:15px;color:#0B1640;font-weight:600;text-align:right;">${score==null?covLabel(cov):score+' / 100'}</span>
+      <span class="metricLabel" style="font-weight:700;font-size:17px;color:#0B1640;">${srcText(name)}</span>
+      <span class="num metricCaption" style="font-size:15px;color:#0B1640;font-weight:600;text-align:right;">${score==null?covLabel(cov):srcText(score)+' / 100'}</span>
       <span class="num metricCaption" style="font-size:15px;color:#0B1640;text-align:right;">${impactSplitHTML(split)}</span>
     </div>`).join('');
   const scale = ['Healthy','Needs Attention','Critical','Not Assessed'].map(t=>{const s=SPINE[t];const label=s.band?`${t} ${s.band}`:t;return `<span style="display:inline-flex;align-items:center;gap:9px;font-size:14.5px;color:#0B1640;"><span style="width:12px;height:12px;border-radius:50%;background:${s.mark};"></span>${label}</span>`;}).join('');
   const headerPayload = Object.assign({}, d, {coverageLine:''});
-  return header(d.title, d.sub, d.score!=null ? scoreLockup(headerPayload,56,{statusWord:true}) : `<span style="font-weight:800;color:#0B1640;">${d.overallTier||'Not Assessed'}</span>`)
+  return header(d.title, d.sub, d.score!=null ? scoreLockup(headerPayload,56,{statusWord:true}) : `<span style="font-weight:800;color:#0B1640;">${srcText(d.overallTier||'Not Assessed')}</span>`)
     + (d.score!=null ? `<div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:#F0F2F5;overflow:hidden;margin-bottom:18px;">${scoreFill(d.score, barOf[bandOf(d.score)])}</div>` : '')
     + `<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;">${tiles}</div>`
     + `<div class="rule"></div><div class="eyebrow" style="margin-bottom:14px;">Detail views in this report</div>`
@@ -532,7 +540,7 @@ function renderBreakdown(rows){
     // Not Assessed (null): empty bar + muted label, never a "null" number.
     if(score==null){
       return `<div style="display:grid;grid-template-columns:440px minmax(0,1fr) 170px 620px;align-items:center;gap:16px;margin-bottom:12px;">
-        <span data-single-line="category-label" style="font-size:15.5px;color:#0B1640;white-space:nowrap;">${name}</span>
+        <span data-single-line="category-label" style="font-size:15.5px;color:#0B1640;white-space:nowrap;">${srcText(name)}</span>
         <div data-progress-track style="height:var(--progress-bar-height);background:#F0F2F5;border-radius:var(--progress-bar-radius);overflow:hidden;"></div>
         <span data-single-line="score-label" class="num" style="font-size:14px;color:#0B1640;white-space:nowrap;">Not Assessed</span>
         <span data-single-line="findings-split" class="num metricCaption" style="font-size:14px;color:#0B1640;text-align:right;white-space:nowrap;"></span>
@@ -540,7 +548,7 @@ function renderBreakdown(rows){
     }
     const b=bandOf(score);
     return `<div style="display:grid;grid-template-columns:440px minmax(0,1fr) 170px 620px;align-items:center;gap:16px;margin-bottom:12px;">
-      <span data-single-line="category-label" style="font-size:15.5px;color:#0B1640;white-space:nowrap;">${name}</span>
+      <span data-single-line="category-label" style="font-size:15.5px;color:#0B1640;white-space:nowrap;">${srcText(name)}</span>
       <div data-progress-track style="height:var(--progress-bar-height);background:#F0F2F5;border-radius:var(--progress-bar-radius);overflow:hidden;">${scoreFill(score, barOf[b])}</div>
       <span data-single-line="score-label" class="num" style="font-weight:800;font-size:17px;color:${barOf[b]};white-space:nowrap;">${score}</span>
       <span data-single-line="findings-split" class="num metricCaption" style="font-size:14px;color:#0B1640;text-align:right;white-space:nowrap;">${impactSplitHTML(split)}</span>
@@ -566,12 +574,7 @@ function dedupeCoverageStats(stats){
     return [label, val, cleanSub, split];
   });
 }
-function buildBreakdown(d){
-  const payload = Object.assign({}, d, {coverageLine:''});
-  return analysisHeader(payload,{scoreSize:60,bar:true,statusWord:true})
-    + `<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:18px;margin-bottom:8px;">${statTiles(dedupeCoverageStats(d.stats))}</div>`
-    + `<div class="rule"></div><div>${renderBreakdown(d.bars)}</div>`;
-}
+
 
 // ---- DEPLOYMENT HEALTH BALANCE ----
 function balRow([name,score,find,split]){
@@ -580,7 +583,7 @@ function balRow([name,score,find,split]){
   // misleading 0/red bar or "null".
   if(score==null){
     return `<div style="display:grid;grid-template-columns:440px minmax(0,1fr) 170px 620px;align-items:center;gap:18px;margin-bottom:8px;">
-      <span data-single-line="category-label" style="font-size:15px;color:#0B1640;white-space:nowrap;">${name}</span>
+      <span data-single-line="category-label" style="font-size:15px;color:#0B1640;white-space:nowrap;">${srcText(name)}</span>
       <div data-progress-track style="height:var(--progress-bar-height);background:#F0F2F5;border-radius:var(--progress-bar-radius);overflow:hidden;"></div>
       <span style="display:flex;align-items:center;justify-content:flex-start;min-width:0;">
         <span data-single-line="score-label" class="num" style="font-size:14px;color:#0B1640;white-space:nowrap;">Not Assessed</span>
@@ -590,7 +593,7 @@ function balRow([name,score,find,split]){
   }
   const b=bandOf(score);
   return `<div style="display:grid;grid-template-columns:440px minmax(0,1fr) 170px 620px;align-items:center;gap:18px;margin-bottom:8px;">
-    <span data-single-line="category-label" style="font-size:15px;color:#0B1640;white-space:nowrap;">${name}</span>
+    <span data-single-line="category-label" style="font-size:15px;color:#0B1640;white-space:nowrap;">${srcText(name)}</span>
     <div data-progress-track style="height:var(--progress-bar-height);background:#F0F2F5;border-radius:var(--progress-bar-radius);overflow:hidden;">${scoreFill(score, barOf[b])}</div>
     <span style="display:flex;align-items:center;justify-content:flex-start;gap:12px;min-width:0;">
       <span data-single-line="score-label" class="num" style="font-weight:800;font-size:18px;color:${barOf[b]};white-space:nowrap;">${score}</span>
@@ -607,7 +610,7 @@ function balGroup(g){
   const color = score==null ? '#0B1640' : barOf[bandOf(score)];
   const right = score==null
     ? `<span class="num" style="font-size:14px;color:#0B1640;">${covLabel(cov)}${partial?` (${fmtCount(cov.assessed)} of ${fmtCount(cov.total)})`:''}</span>`
-    : `<span style="font-weight:800;font-size:17px;color:${color};">${tierOf(score)}</span><span class="num" style="font-weight:800;font-size:17px;color:#0B1640;">${score}<span style="color:#0B1640;font-size:14px;font-weight:700;"> /100</span></span>`;
+    : `<span style="font-weight:800;font-size:17px;color:${color};">${tierOf(score)}</span><span class="num" style="font-weight:800;font-size:17px;color:#0B1640;">${srcText(score)}<span style="color:#0B1640;font-size:14px;font-weight:700;"> /100</span></span>`;
   // Roll-up counts (the old separate Scoring Summary card's unique content,
   // folded in here per Fix 2 so there is only one summary graphic).
   const rollup = (catCount!=null && findingCount!=null)
@@ -618,22 +621,7 @@ function balGroup(g){
     <span style="display:flex;align-items:center;gap:14px;">${right}</span>
   </div>`;
 }
-function buildBalance(d){
-  // Single legend, score states only (Advisory is per-finding, never a score band).
-  // ones), sourced from SPINE so it can never drift from the bands the bars and
-  // chips actually use.
-  const legend = ['Healthy','Needs Attention','Critical','Not Assessed'].map(w=>{
-    const s = SPINE[w];
-    const label = s.band ? `${w} (${s.band})` : w;
-    return `<span style="display:inline-flex;align-items:center;gap:9px;font-size:14.5px;color:#0B1640;"><span style="width:12px;height:12px;border-radius:50%;background:${s.mark};"></span>${label}</span>`;
-  }).join('');
-  const sortAsc=a=>a.slice().sort((x,y)=>(x[1]??1e9)-(y[1]??1e9));  // Not Assessed (null) sorts last
-  const rows = d.groups.map(g=>balGroup(g)+sortAsc(g.cats).map(balRow).join('')).join('');
-  const headerPayload = Object.assign({}, d, {coverageLine:''});
-  return header(d.title, d.sub, d.score!=null ? scoreLockup(headerPayload,50,{statusWord:true}) : `<span style="font-weight:800;color:#0B1640;">${d.overallTier||'Not Assessed'}</span>`)
-    + `<div style="display:flex;gap:26px;margin:6px 0 14px;flex-wrap:wrap;">${legend}</div>`
-    + `<div>${rows}</div>`;
-}
+
 
 // ---- KEY RISKS ----
 // Ranked triage cards (Fix: What Needs Attention becomes an explicit P1..Pn
@@ -659,25 +647,7 @@ function riskCard(r){
     </div>
   </div>`;
 }
-function buildRisks(d){
-  const rows = d.risks.map(riskCard).join('');
-  const shown = d.risks.length;
-  const hiddenRaw = countNumber(d.hiddenCount);
-  const declaredTotal = countNumber(d.count);
-  const hidden = Number.isFinite(hiddenRaw)
-    ? Math.max(hiddenRaw, 0)
-    : Math.max((Number.isFinite(declaredTotal) ? declaredTotal : shown) - shown, 0);
-  const total = shown + hidden;
-  const medium = Math.max(countNumber(d.mediumCount) || 0, 0);
-  const low = Math.max(countNumber(d.lowCount) || 0, 0);
-  const more = hidden > 0
-    ? `<div style="font-size:14px;color:#0B1640;text-align:left;margin-top:7px;">${fmtCount(medium)} Medium and ${fmtCount(low)} Low in Findings and Recommendations.</div>`
-    : '';
-  const defaultSub = `Prioritized remediation items &middot; ${fmtCount(total)} items &middot; Source ID traces each to its check`;
-  const sub = /IDs on each card/i.test(String(d.sub || '')) ? defaultSub : (d.sub || defaultSub);
-  return header(d.title, sub, '')
-    + `<div style="display:flex;flex-direction:column;gap:8px;">${rows}</div>${more}`;
-}
+
 
 // ---- WHAT'S WORKING WELL ----
 // Two groups, both gated on the category's own score (Fix 8): Platform
@@ -700,38 +670,14 @@ function healthyRow([name,score,evidence]){
   const cleanEvidence = cleanStrengthEvidence(evidence);
   return `<div style="display:grid;grid-template-columns:180px minmax(0,1fr) 70px;align-items:center;gap:16px;border:1px solid #E3E9F1;border-radius:12px;padding:10px 18px;margin-bottom:8px;">
     <span style="display:inline-flex;align-items:center;justify-content:center;background:${SPINE['Healthy'].bg};color:${SPINE['Healthy'].text};font-size:15px;font-weight:800;border-radius:999px;padding:8px 12px;">Healthy</span>
-    <span style="min-width:0;"><span class="metricLabel" style="font-weight:800;font-size:17px;color:#0B1640;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${name}</span>${cleanEvidence?`<span class="metricCaption" style="font-size:15px;color:#0B1640;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cleanEvidence}</span>`:''}</span>
+    <span style="min-width:0;"><span class="metricLabel" style="font-weight:800;font-size:17px;color:#0B1640;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${srcText(name)}</span>${cleanEvidence?`<span class="metricCaption" style="font-size:15px;color:#0B1640;line-height:1.2;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${cleanEvidence}</span>`:''}</span>
     <span class="num" style="font-weight:800;font-size:26px;color:${barOf[b]};text-align:right;">${hasScore?fmtCount(score):''}</span>
   </div>`;
 }
 function omPill([name,score]){
   return healthyRow([name,score,'']);
 }
-function buildStrengths(d){
-  const healthy = d.healthyGroup||{rows:[]};
-  const om = d.omGroup||{pills:[]};
-  const title = String(d.title || "What's Working Well").replace(/^What is Working Well$/,"What's Working Well");
-  const platformLabel = /^healthy$/i.test(String(healthy.label || ''))
-    ? `Platform Health &middot; ${fmtCount(healthy.rows.length)} area${healthy.rows.length===1?'':'s'}`
-    : healthy.label;
-  const omLabel = /^healthy$/i.test(String(om.label || ''))
-    ? `Operational Maturity &middot; ${fmtCount(om.pills.length)} area${om.pills.length===1?'':'s'}`
-    : om.label;
-  const shownAreaCount = (healthy.rows || []).length + (om.pills || []).length;
-  const declaredAreaCount = countNumber(d.areaCount);
-  const areaCount = shownAreaCount || (Number.isFinite(declaredAreaCount) ? declaredAreaCount : 0);
-  const subtitle = d.sub || `Areas scoring 85 or higher &middot; ${fmtCount(areaCount)} qualified`;
-  const showEmpty = !d.hideEmptyGroups;
-  const healthyRows = healthy.rows.length
-    ? healthy.rows.map(healthyRow).join('')
-    : `<div style="padding:13px 0;font-size:15px;color:#0B1640;">No Platform Health areas scored 85 or higher.</div>`;
-  const omPills = om.pills.length
-    ? `<div>${om.pills.map(omPill).join('')}</div>`
-    : `<div style="padding:2px 0 13px;font-size:15px;color:#0B1640;">No Operational Maturity areas scored 85 or higher.</div>`;
-  return header(title,subtitle,'')
-    +(healthy.rows.length||showEmpty ? groupCaption(platformLabel)+`<div>${healthyRows}</div>` : '')
-    +(om.pills.length||showEmpty ? groupCaption(omLabel)+omPills : '');
-}
+
 
 // ---- status palette for KPI pills (Deployment Overview) ----
 const statusInfo = Object.fromEntries(
@@ -747,39 +693,7 @@ function overviewStatusWord(k){
 }
 
 // ---- DEPLOYMENT OVERVIEW (design-system after) ----
-function buildOverview(d){
-  // Pattern A: every metric is a discrete white inset card (one #E3E9F1
-  // hairline, even gap, no edge-to-edge dividers, no accent bar, no banding).
-  const card = 'background:#fff;border:1px solid #E3E9F1;border-radius:12px;';
-  const kpis = d.kpis.map(k=>{const si=statusInfo[overviewStatusWord(k)]||statusInfo.Critical; return `
-    <div style="min-width:0;${card}padding:16px 20px 15px;">
-      <div class="metricLabel" style="font-size:14px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:#0B1640;margin-bottom:9px;">${k.label}</div>
-      <div class="num statValue fit-num" data-min-size="26" style="font-size:32px;font-weight:800;color:${si.fg};letter-spacing:0;">${fmtMetric(k.big)}</div>
-      <div class="metricCaption" style="font-size:15px;color:#0B1640;margin:6px 0 10px;">${dotSep(k.sub)}</div>
-      <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:#F0F2F5;overflow:hidden;margin-bottom:8px;">${valueFill(k.width, si.dot, 'var(--progress-bar-radius)')}</div>
-    </div>`;}).join('');
-  const ratios = d.ratios.map(c=>`
-    <div style="min-width:0;${card}padding:15px 20px;">
-      <div style="display:grid;grid-template-columns:minmax(0,1fr) 74px;align-items:baseline;gap:10px;margin-bottom:7px;"><span class="metricLabel" style="font-size:15px;font-weight:700;color:#0B1640;">${c.label}</span><span class="num metricCaption" style="font-size:14px;color:#0B1640;">${c.pctLabel}</span></div>
-      <div class="num metricCaption" style="font-size:15.5px;color:#0B1640;margin-bottom:8px;"><strong style="color:#0B1640;">${fmtCount(c.val)}</strong> relevant of ${fmtCount(c.of)} total</div>
-      <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:#F0F2F5;overflow:hidden;"><div style="height:100%;width:${c.width};background:#F0F2F5;border-radius:var(--progress-bar-radius);"></div></div>
-    </div>`).join('');
-  const activity = d.activity.map(a=>`
-    <div style="min-width:0;${card}padding:14px 20px;">
-      <div class="metricLabel" style="font-size:14px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#0B1640;margin-bottom:6px;">${a.label}</div>
-      <div class="num statValue fit-num" data-min-size="22" style="font-size:27px;font-weight:800;color:#0B1640;">${fmtCount(a.big)}</div>
-      <div class="metricCaption" style="font-size:15px;color:#0B1640;margin-top:4px;">${dotSep(a.sub)}</div>
-    </div>`).join('');
-  const word = statusWordFromLabel(d.status.name || d.status.label) || 'Not Assessed';
-  const right = '';
-  return `
-    ${header(d.title, d.meta, right, {padded:true,padding:'20px 24px 0'})}
-    <div style="padding:18px 24px;display:flex;flex-direction:column;gap:13px;">
-      <div data-card-row-group="overview-kpis" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">${kpis}</div>
-      <div data-card-row-group="overview-ratios" style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;">${ratios}</div>
-      <div data-card-row-group="overview-activity" style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;">${activity}</div>
-    </div>`;
-}
+
 
 // ---- FILLDB PERFORMANCE (design-system after) ----
 function buildFilldb(d){
@@ -827,7 +741,7 @@ function buildFilldb(d){
   const scorePct = Number.isFinite(Number(payload.barPct)) ? Number(payload.barPct) : Number(score);
   const distItems = d.dist || [];
   const dist = distItems.map((x,i)=>{
-    const width = x.width || '0%';
+    const width = safeWidth(x.width);
     const widthPct = parseFloat(String(width || '0'));
     const showCount = widthPct >= 8;
     const first=i===0,last=i===distItems.length-1;
@@ -866,7 +780,7 @@ function buildFilldb(d){
   ${miniScoreScale(scorePct, scoreFill, 'Needs Attention')}<div style="font-size:38px;margin-top:20px;line-height:1.35">${esc(d.scopeNote || '')}</div>
   <div style="height: 1px; background: #E3E9F1; margin-top: 28px;"></div>
 
-  <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 30px; text-transform: uppercase;">${dotSep(d.distLabel)}</div>
+  <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; margin-top: 30px; text-transform: uppercase;">${srcText(d.distLabel)}</div>
   <div data-progress-track style="display: flex; height:var(--progress-bar-height); margin-top: 16px; border-radius:var(--progress-bar-radius); overflow: hidden;">
     ${dist}
   </div>
@@ -875,7 +789,7 @@ function buildFilldb(d){
   </div>
 
   <div style="display: flex; align-items: baseline; justify-content: space-between; margin-top: 36px;">
-    <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; text-transform: uppercase;">${dotSep(d.barsLabel)}</div>
+    <div style="font-size: 38px; font-weight: 700; color: #0C7E88; letter-spacing: 0.08em; text-transform: uppercase;">${srcText(d.barsLabel)}</div>
     <div style="font-size: 38px; color: #0B1640;">Length shows processing time. Color shows the analyzer rating.</div>
   </div>
   <div style="display: flex; flex-direction: column; gap: 14px; margin-top: 16px;">
@@ -914,7 +828,7 @@ function snapshotScoreCard(label, score, footnote){
     ${figure}
     <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:#F0F2F5;overflow:hidden;margin-top:14px;">${hasScore?scoreFill(numericScore, meterColor):''}</div>
     <div style="font-size:38px;font-weight:700;color:${tierColor};line-height:1.15;margin-top:14px;">${tier||'Not Assessed'}</div>
-    ${footnote?`<div style="font-size:38px;line-height:1.15;color:#0B1640;margin-top:8px;">${dotSep(footnote)}</div>`:''}
+    ${footnote?`<div style="font-size:38px;line-height:1.15;color:#0B1640;margin-top:8px;">${srcText(footnote)}</div>`:''}
   </div>`;
 }
 function snapshotFindingsCard(f){
@@ -1349,7 +1263,7 @@ function srcMetricCard(k){
   return `<div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
     <div style="font-size:38px;font-weight:700;letter-spacing:0.04em;">${srcText(k.label).toUpperCase()}</div>
     <div style="font-size:64px;font-weight:700;color:${color};margin-top:10px;">${srcText(k.big)}</div>
-    <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:${SRC_TRACK};margin-top:12px;overflow:hidden;"><div style="width:${k.width || '0%'};height:100%;border-radius:999px;background:${color};"></div></div>
+    <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:${SRC_TRACK};margin-top:12px;overflow:hidden;"><div style="width:${safeWidth(k.width)};height:100%;border-radius:999px;background:${color};"></div></div>
     <div style="font-size:38px;margin-top:10px;">${srcText(k.sub)}.</div>
   </div>`;
 }
@@ -1360,7 +1274,7 @@ function buildOverview(d){
     <div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
       <div style="display:flex;justify-content:space-between;align-items:baseline;"><span style="font-size:38px;font-weight:700;letter-spacing:0.04em;">${srcText(c.label).toUpperCase()}</span><span style="font-size:38px;font-weight:700;">${srcText(c.pctLabel)}</span></div>
       <div style="font-size:38px;margin-top:10px;"><span style="font-weight:700;">${fmtCount(c.val)}</span> relevant of ${fmtCount(c.of)} total</div>
-      <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:${SRC_TRACK};margin-top:12px;overflow:hidden;"><div style="width:${c.width};height:100%;border-radius:999px;background:${SRC_TEAL};"></div></div>
+      <div data-progress-track style="height:var(--progress-bar-height);border-radius:var(--progress-bar-radius);background:${SRC_TRACK};margin-top:12px;overflow:hidden;"><div style="width:${safeWidth(c.width)};height:100%;border-radius:999px;background:${SRC_TEAL};"></div></div>
     </div>`).join('');
   const activity = (d.activity || []).map(a=>`
     <div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
@@ -1384,14 +1298,14 @@ function srcCapacityHeader(d){
   const h = d.headline || {};
   return `<div style="display:grid;grid-template-columns:minmax(0,1fr) auto;column-gap:40px;align-items:start;">
       <div style="font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:64px;line-height:1.1;min-width:0;">${srcText(d.title || '')}</div>
-      <div style="font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:56px;color:${h.color || SRC_ATTENTION};line-height:1;text-align:right;white-space:nowrap;">${srcText(h.value || '')}</div>
+      <div style="font-family:'Roboto Condensed',sans-serif;font-weight:700;font-size:56px;color:${safeColor(h.color, SRC_ATTENTION)};line-height:1;text-align:right;white-space:nowrap;">${srcText(h.value || '')}</div>
       <div style="font-size:38px;margin-top:10px;line-height:1.18;min-width:0;">${srcText(d.sub || '')}</div>
       <div style="font-size:38px;margin-top:10px;line-height:1.18;text-align:right;white-space:nowrap;">${srcText(h.label || '')}</div>
     </div>`;
 }
 function srcCapacityFindingLines(items, emptyText){
   if(!items || !items.length) return `<div style="font-size:44px;font-weight:700;margin-top:12px;">None</div><div style="font-size:38px;margin-top:8px;">${srcText(emptyText || 'No capacity finding raised.')}</div>`;
-  return items.map(item=>`<strong style="color:${item.color || SRC_CRITICAL};">${srcText(item.id)}</strong> ${SRC_DOT} ${srcText(item.severity)}, ${srcText(item.text)}`).join('<br />');
+  return items.map(item=>`<strong style="color:${safeColor(item.color, SRC_CRITICAL)};">${srcText(item.id)}</strong> ${SRC_DOT} ${srcText(item.severity)}, ${srcText(item.text)}`).join('<br />');
 }
 function buildServerCapacity(d){
   const total = Math.max(Number(d.hostCount || 0), 1);
@@ -1444,7 +1358,7 @@ function buildRelayCapacity(d){
   const total = Math.max(Number(d.total || 0), 1);
   const bar = d.bar || {};
   const within = Number(bar.within || 0), attention = Number(bar.attention || 0), notReported = Number(bar.notReported || 0);
-  const legend = (d.legend || []).map(item=>`<span style="display:flex;align-items:center;gap:12px;"><span class="legend-dot" style="background:${item.color || SRC_TRACK};"></span>${srcText(item.label)} ${SRC_DOT} <strong>${fmtCount(item.count)}</strong></span>`).join('');
+  const legend = (d.legend || []).map(item=>`<span style="display:flex;align-items:center;gap:12px;"><span class="legend-dot" style="background:${safeColor(item.color, SRC_TRACK)};"></span>${srcText(item.label)} ${SRC_DOT} <strong>${fmtCount(item.count)}</strong></span>`).join('');
   const why = (d.why || []).map(line=>srcText(line)).join('<br />');
   const nr = (d.notReported || []).map(line=>line.attention ? `<strong style="color:${SRC_ATTENTION};">${srcText(line.text)}</strong>` : srcText(line.text)).join('<br />');
   return `${srcCapacityHeader(d)}
@@ -1482,7 +1396,9 @@ async function render(){
   else if(d.chart==='snapshot') mount.className = 'snapshot';
   else mount.className = (d.chart==='loop' || d.chart==='filldb') ? '' : 'card';
   mount.classList.add(`chart-${String(d.chart || 'unknown').replace(/[^a-z0-9_-]/ig,'').toLowerCase()}`);
-  mount.innerHTML = build ? build(d) : `<div style="padding:40px;color:${SPINE['Critical'].text};">Unknown chart: ${d.chart}</div>`;
+  // Builders encode text and constrain CSS; test_chart_hostile_input exercises every payload field.
+  // eslint-disable-next-line no-unsanitized/property
+  mount.innerHTML = build ? build(d) : `<div style="padding:40px;color:${SPINE['Critical'].text};">Unknown chart: ${srcText(d.chart)}</div>`;
   markSingleLineCells();
   try { await document.fonts.ready; } catch(e){}
   scaleTypeRamp();

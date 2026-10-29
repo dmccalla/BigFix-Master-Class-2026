@@ -393,7 +393,7 @@ def test_context_reuses_only_successful_aggregate_answers_and_preserves_zero(
     )
     assert local["OsReportedMemoryGiB"] == 64
     assert local["CpuModel"] == "Lab CPU"
-    assert data["Run"]["PlannedRequests"] == 34
+    assert data["Run"]["PlannedRequests"] == 36
     assert "RelayCount: 0; source: DI-016" in summary.read_text()
     assert "ActiveComputerCount: 32" in summary.read_text()
     for text in (state.read_text(), summary.read_text()):
@@ -453,7 +453,7 @@ def test_readable_summary_has_bounded_slowest_requests_and_distinct_timings(
     assert call("Finish") == 24004
     data = json.loads(state.read_text())
     run = data["Run"]
-    assert run["PlannedRequests"] == 36  # The two optional admin calls.
+    assert run["PlannedRequests"] == 36  # The two General-section admin calls.
     assert run["PausesScheduled"] == data["Requests"] == 12
     assert run["ElapsedMs"] >= run["RequestWallTimeMs"] > run["ServerEvaluationMs"]
     assert run["ParsedEvaluationCount"] == 11
@@ -503,7 +503,20 @@ def test_server_evaluation_units_are_explicit(
     assert run["UnparsedEvaluationCount"] == unparsed
 
 
-@pytest.mark.parametrize("logs,expected", [("0", 178), ("1", 180)])
+@pytest.mark.parametrize("logs", ("0", "1"))
+@pytest.mark.parametrize(
+    "selected,expected", [("General=true", 28), ("General=false;Root=true", 8)]
+)
+def test_admin_plan_depends_on_general_selection_only(
+    context_collector, logs, selected, expected
+):
+    _, state, _, _ = context_collector(selected=selected, logs=logs)
+    run = json.loads(state.read_text())["Run"]
+    assert run["PlannedRequests"] == expected
+    assert run["DataLogs"] == logs
+
+
+@pytest.mark.parametrize("logs,expected", [("0", 180), ("1", 180)])
 def test_complete_plan_includes_only_selected_admin_requests(
     context_collector, logs, expected
 ):

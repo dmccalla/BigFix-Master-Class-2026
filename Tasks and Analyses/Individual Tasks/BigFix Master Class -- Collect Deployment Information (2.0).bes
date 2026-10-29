@@ -365,7 +365,7 @@ function New-RunContext {{
     }
     $planned = 0
     foreach ($section in $selected) {{ $planned += $counts[$section] }
-    if ($selected -contains 'General' -and $DataLogs -eq '1') {{ $planned += 2 }
+    if ($selected -contains 'General') {{ $planned += 2 }
     $otherSelected = @()
     foreach ($item in $OtherModules.Split(';')) {{
         $pair = $item.Split('=')
@@ -957,7 +957,6 @@ appendfile {concatenation "%0d%0a" of (preceding texts of firsts "<" of followin
 move __appendfile "{parameter "generalInfoFile"}"
 endif
 
-if {(parameter "generateLogFiles" | "0") = "1"}
 //* 		Some API calls return data in a different format than the GET query calls above. We grab admin options and fields here and parse the XML responses.
 //*
 
@@ -972,6 +971,7 @@ exit {exit code of action}
 endif
 waithidden cmd.exe /C ping -n {(parameter "apiQueryDelaySeconds" as integer) + 1} 127.0.0.1
 
+if {(parameter "generateLogFiles" | "0") = "1"}
 //*
 //* 		Parse the Admin Tool Options and Fields XML files and format things so they are human readable. 
 //*

@@ -6,6 +6,7 @@
 
 import contextlib
 import json
+import re
 from pathlib import Path
 from types import SimpleNamespace
 from unittest.mock import Mock
@@ -75,6 +76,12 @@ def test_render_batch_reuses_browser_and_preserves_options(chart_runtime, tmp_pa
         page.set_content.assert_called_once_with(
             "<html></html>", wait_until="networkidle"
         )
+        page.route.assert_called_once()
+        pattern, deny_request = page.route.call_args.args
+        assert pattern == "**/*"
+        request = Mock()
+        deny_request(request)
+        request.abort.assert_called_once_with()
         page.wait_for_function.assert_called_once_with("window.__RENDERED__ === true")
         page.locator.assert_called_once_with("#mount")
         page.close.assert_called_once_with()
@@ -380,12 +387,12 @@ def test_chart_template_has_numeric_layout_guardrails() -> None:
     assert "'zero' 1" not in html
     assert ".statGrid.three{grid-template-columns:repeat(3,minmax(0,1fr));}" in html
     assert ".statGrid.four{grid-template-columns:repeat(4,minmax(0,1fr));}" in html
-    assert "grid-template-columns:repeat(4,minmax(0,1fr));gap:16px" in html
+    assert "grid-template-columns:repeat(4,1fr);gap:20px" in html
     assert ".metricLabel,.metricCaption,.statValue" in html
     assert "const fmtMetric = v =>" in html
     assert "fitNumericValues();" in html
     assert "${fmtMetric(val)}" in html
-    assert "${fmtMetric(k.big)}" in html
+    assert "${srcText(k.big)}" in html
 
 
 def test_html_charts_default_to_word_readable_width() -> None:
@@ -420,12 +427,12 @@ def test_analysis_score_headers_use_shared_non_wrapping_lockup() -> None:
     assert "function scoreLockup" in html
     assert "function analysisHeader" in html
     assert "const scoreText = numeric ? d.score" in html
-    assert "${scoreText}" in html
+    assert "${srcText(scoreText)}" in html
     assert (
         "flex-direction:column;align-items:flex-end;white-space:nowrap;flex:none" in html
     )
     assert "white-space:normal" in html
-    assert "analysisHeader(payload,{scoreSize:60,bar:true,statusWord:true})" in html
+    assert "srcScoreRight(d.score, d.tier)" in html
 
 
 def test_perfmon_scorecard_keeps_exempt_header_and_simple_metric_cards() -> None:
@@ -618,17 +625,12 @@ def test_what_needs_attention_overflow_copy_matches_design() -> None:
     # The chart standard's type floor. This survives whatever the copy becomes.
     assert 'style="font-size:38px;margin-top:18px;"' in html
 
-    # The remainder line, in both the small and large variants, because the
-    # template carries the substitution in both.
+    # The active builder owns the remainder line once.
     remainder = (
         "${fmtCount(medium)} Medium and ${fmtCount(low)} Low "
         "in Findings and Recommendations."
     )
-    assert html.count(remainder) == 2, html.count(remainder)
-    assert (
-        '<div style="font-size:14px;color:#0B1640;text-align:left;'
-        f'margin-top:7px;">{remainder}</div>'
-    ) in html
+    assert html.count(remainder) == 1, html.count(remainder)
     assert f'<div style="font-size:38px;margin-top:18px;">{remainder}</div>' in html
 
     # Superseded wordings, each guarding against a revision coming back.
@@ -657,12 +659,12 @@ def test_scorecard_header_does_not_repeat_coverage_line() -> None:
 
 def test_balance_and_breakdowns_suppress_duplicate_header_coverage() -> None:
     html = html_charts._build_html("balance", {}, card_width=960)
-
-    assert "function dedupeCoverageStats" in html
-    assert "scoreLockup(headerPayload,56,{statusWord:true})" in html
-    assert "analysisHeader(payload,{scoreSize:60,bar:true,statusWord:true})" in html
-    assert "cleanSub = 'out of 100'" in html
-    assert "cleanSub = 'focus areas'" in html
+    for name in ("buildBreakdown", "buildBalance"):
+        start = html.index(f"function {name}(")
+        section = html[start : html.index("\nfunction ", start + 10)]
+        assert "srcHeader(d.title, d.sub," in section
+        assert "coverageLine" not in section
+        assert "analysisHeader(" not in section
 
 
 def test_not_assessed_rows_do_not_report_clean_findings() -> None:
@@ -728,16 +730,6 @@ def test_chart_template_marks_cells_for_rendered_single_line_validation() -> Non
     assert 'data-single-line="object-label"' in html
 
 
-def test_snapshot_and_overview_card_rows_are_marked_without_orphans() -> None:
-    html = html_charts._build_html("overview", {}, card_width=960)
-
-    assert 'data-card-row-group="overview-kpis"' in html
-    assert 'data-card-row-group="overview-ratios"' in html
-    assert 'data-card-row-group="overview-activity"' in html
-    assert "grid-template-columns:repeat(4,minmax(0,1fr));gap:16px" in html
-    assert 'data-single-line="card-subline"' not in html
-
-
 def test_zero_score_bars_have_visible_fill_not_empty_track() -> None:
     html = html_charts._build_html("platformhealth", {}, card_width=960)
 
@@ -772,12 +764,13 @@ def test_strength_rows_match_reference_with_healthy_pill_and_score() -> None:
 def test_overview_bars_use_score_status_or_neutral_tracks_only() -> None:
     html = html_charts._build_html("overview", {}, card_width=960)
     section = html[
-        html.index("function buildOverview") : html.index("// ---- FILLDB PERFORMANCE")
+        html.index("function srcOverviewWord") : html.index("function srcCapacityHeader")
     ]
 
-    assert "overviewStatusWord(k)" in section
+    assert "srcOverviewWord(k)" in section
+    assert "SPINE[word].mark" in section
     assert "#3D5A80" not in section
-    assert "background:#F0F2F5;border-radius:var(--progress-bar-radius);" in section
+    assert "background:${SRC_TRACK};" in section
 
 
 def test_mini_report_infographics_carry_the_scoring_legend() -> None:
@@ -806,7 +799,7 @@ def test_mini_report_infographics_carry_the_scoring_legend() -> None:
     loop = html[
         html.index("function buildLoop") : html.index("// ---- SCORING SUMMARY ----")
     ]
-    assert "${l.points} pts" in loop
+    assert "${srcText(l.points)} pts" in loop
 
 
 def test_client_and_perfmon_graphics_have_no_bottom_prose() -> None:
@@ -819,3 +812,23 @@ def test_client_and_perfmon_graphics_have_no_bottom_prose() -> None:
             html.index(start_name) : html.index(end_name, html.index(start_name))
         ]
         assert "miniScoringLine(" not in section
+
+
+def test_snapshot_row_markers_and_overview_card_grids() -> None:
+    html = html_charts._build_html("overview", {}, card_width=960)
+
+    assert 'data-card-row-group="snapshot"' in html
+    start = html.index("function buildOverview(")
+    section = html[start : html.index("\nfunction ", start + 10)]
+    assert section.count("grid-template-columns:repeat(4,1fr);gap:20px") == 2
+    assert "grid-template-columns:repeat(3,1fr);gap:20px" in section
+    assert 'data-single-line="card-subline"' not in html
+
+
+@pytest.mark.parametrize(
+    "name",
+    ["buildBreakdown", "buildBalance", "buildRisks", "buildStrengths", "buildOverview"],
+)
+def test_chart_builders_have_one_authoritative_declaration(name: str) -> None:
+    template = html_charts._TEMPLATE.read_text(encoding="utf-8")
+    assert len(re.findall(rf"^function {name}\(", template, re.MULTILINE)) == 1

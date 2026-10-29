@@ -97,7 +97,7 @@ function New-RunContext {
     }
     $planned = 0
     foreach ($section in $selected) { $planned += $counts[$section] }
-    if ($selected -contains 'General' -and $DataLogs -eq '1') { $planned += 2 }
+    if ($selected -contains 'General') { $planned += 2 }
     $otherSelected = @()
     foreach ($item in $OtherModules.Split(';')) {
         $pair = $item.Split('=')

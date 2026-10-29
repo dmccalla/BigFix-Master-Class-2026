@@ -41,9 +41,7 @@ dev = [
 # Dependency cooldown: never lock a package version published after this
 # cutoff. Build/refresh-lockfile.ps1 moves it to seven days before the day
 # it runs. The project Security policy documents the dependency cooldown.
-exclude-newer = "2026-10-19T00:00:00Z"  # auto-managed by refresh-lockfile.ps1
-exclude-newer-package = { certifi = "2026-10-21T00:00:00Z" }
-
+exclude-newer = "2026-10-22T00:00:00Z"  # auto-managed by refresh-lockfile.ps1
 [tool.pytest.ini_options]
 testpaths = ["Tests"]
 python_files = ["test_*.py"]

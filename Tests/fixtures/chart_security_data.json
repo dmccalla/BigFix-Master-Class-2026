@@ -1,0 +1,914 @@
+{
+  "scorecard": {
+    "chart": "scorecard",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "overallTier": "Needs Attention",
+    "score": 78,
+    "ribbon": {
+      "tier": "Needs Attention",
+      "overall": 78,
+      "ph": 71,
+      "om": 85,
+      "pass": 85,
+      "phCov": {
+        "state": "Fixture",
+        "assessed": 8,
+        "total": 8
+      },
+      "omCov": {
+        "state": "partial",
+        "assessed": 1,
+        "total": 6
+      }
+    },
+    "sections": [
+      [
+        "Fixture",
+        71,
+        8,
+        25,
+        {
+          "state": "Fixture",
+          "assessed": 8,
+          "total": 8
+        },
+        {
+          "critical": 3,
+          "high": 9,
+          "medium": 10,
+          "low": 3
+        },
+        "Fixture"
+      ],
+      [
+        "Fixture",
+        85,
+        6,
+        1,
+        {
+          "state": "partial",
+          "assessed": 1,
+          "total": 6
+        },
+        {
+          "critical": 0,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "Fixture"
+      ]
+    ]
+  },
+  "balance": {
+    "chart": "balance",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "overallTier": "Needs Attention",
+    "score": 78,
+    "findingIds": [
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture"
+    ],
+    "ribbon": {
+      "tier": "Needs Attention",
+      "overall": 78,
+      "ph": 71,
+      "om": 85,
+      "pass": 85,
+      "phCov": {
+        "state": "Fixture",
+        "assessed": 8,
+        "total": 8
+      },
+      "omCov": {
+        "state": "partial",
+        "assessed": 1,
+        "total": 6
+      }
+    },
+    "groups": [
+      {
+        "title": "Fixture",
+        "score": 71,
+        "cov": {
+          "state": "Fixture",
+          "assessed": 8,
+          "total": 8
+        },
+        "catCount": 8,
+        "findingCount": 25,
+        "findingSplit": {
+          "critical": 3,
+          "high": 9,
+          "medium": 10,
+          "low": 3
+        },
+        "findingIds": [
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture",
+          "Fixture"
+        ],
+        "coverageLine": "Fixture",
+        "cats": [
+          [
+            "Fixture",
+            0,
+            12,
+            {
+              "critical": 3,
+              "high": 3,
+              "medium": 4,
+              "low": 2
+            }
+          ],
+          [
+            "Fixture",
+            55,
+            3,
+            {
+              "critical": 0,
+              "high": 3,
+              "medium": 0,
+              "low": 0
+            }
+          ]
+        ]
+      },
+      {
+        "title": "Fixture",
+        "score": 85,
+        "cov": {
+          "state": "partial",
+          "assessed": 1,
+          "total": 6
+        },
+        "catCount": 6,
+        "findingCount": 1,
+        "findingSplit": {
+          "critical": 0,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        },
+        "findingIds": [],
+        "coverageLine": "Fixture",
+        "cats": [
+          [
+            "Fixture",
+            85,
+            1,
+            {
+              "critical": 0,
+              "high": 1,
+              "medium": 0,
+              "low": 0
+            }
+          ],
+          [
+            "Fixture",
+            null,
+            0,
+            {
+              "critical": 0,
+              "high": 0,
+              "medium": 0,
+              "low": 0
+            }
+          ]
+        ]
+      }
+    ]
+  },
+  "opmaturity": {
+    "chart": "opmaturity",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "tier": "Healthy",
+    "score": 85,
+    "findingIds": [],
+    "ribbon": {
+      "tier": "Needs Attention",
+      "overall": 78,
+      "ph": 71,
+      "om": 85,
+      "pass": 85,
+      "phCov": {
+        "state": "Fixture",
+        "assessed": 8,
+        "total": 8
+      },
+      "omCov": {
+        "state": "partial",
+        "assessed": 1,
+        "total": 6
+      }
+    },
+    "cov": {
+      "state": "partial",
+      "assessed": 1,
+      "total": 6
+    },
+    "stats": [
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ],
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ]
+    ],
+    "bars": [
+      [
+        "Fixture",
+        85,
+        {
+          "critical": 0,
+          "high": 1,
+          "medium": 0,
+          "low": 0
+        }
+      ],
+      [
+        "Fixture",
+        null,
+        {
+          "critical": 0,
+          "high": 0,
+          "medium": 0,
+          "low": 0
+        }
+      ]
+    ]
+  },
+  "platformhealth": {
+    "chart": "platformhealth",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "tier": "Needs Attention",
+    "score": 71,
+    "findingIds": [
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture"
+    ],
+    "ribbon": {
+      "tier": "Needs Attention",
+      "overall": 78,
+      "ph": 71,
+      "om": 85,
+      "pass": 85,
+      "phCov": {
+        "state": "Fixture",
+        "assessed": 8,
+        "total": 8
+      },
+      "omCov": {
+        "state": "partial",
+        "assessed": 1,
+        "total": 6
+      }
+    },
+    "cov": {
+      "state": "Fixture",
+      "assessed": 8,
+      "total": 8
+    },
+    "stats": [
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ],
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ]
+    ],
+    "bars": [
+      [
+        "Fixture",
+        0,
+        {
+          "critical": 3,
+          "high": 3,
+          "medium": 4,
+          "low": 2
+        }
+      ],
+      [
+        "Fixture",
+        55,
+        {
+          "critical": 0,
+          "high": 3,
+          "medium": 0,
+          "low": 0
+        }
+      ]
+    ]
+  },
+  "dashboard": {
+    "chart": "dashboard",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "status": {
+      "cls": "Fixture",
+      "label": "Fixture"
+    },
+    "kpis": [
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ],
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture"
+      ]
+    ],
+    "distEyebrow": "Fixture",
+    "dist": [
+      [
+        "Fixture",
+        35,
+        "#187A43"
+      ],
+      [
+        "Needs Attention",
+        2,
+        "#B45309"
+      ]
+    ],
+    "distTot": 40,
+    "sections": [
+      [
+        "Fixture",
+        12,
+        0,
+        1
+      ],
+      [
+        "Fixture",
+        7,
+        0,
+        1
+      ]
+    ],
+    "findingIds": [
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture",
+      "Fixture"
+    ]
+  },
+  "overview": {
+    "chart": "overview",
+    "title": "Fixture",
+    "meta": "Fixture",
+    "status": {
+      "name": "Critical"
+    },
+    "kpis": [
+      {
+        "label": "Fixture",
+        "big": "50%",
+        "width": "50%",
+        "sub": "Fixture",
+        "status": "Critical"
+      },
+      {
+        "label": "Fixture",
+        "big": "100%",
+        "width": "100%",
+        "sub": "Fixture",
+        "status": "Healthy"
+      }
+    ],
+    "ratios": [
+      {
+        "label": "Fixture",
+        "pctLabel": "17.0%",
+        "val": 5752,
+        "of": 33785,
+        "width": "17%"
+      },
+      {
+        "label": "Fixture",
+        "pctLabel": "47.2%",
+        "val": 988,
+        "of": 2092,
+        "width": "47.2%"
+      }
+    ],
+    "activity": [
+      {
+        "label": "Fixture",
+        "big": 465,
+        "sub": "Fixture"
+      },
+      {
+        "label": "Fixture",
+        "big": 10,
+        "sub": "Fixture"
+      }
+    ]
+  },
+  "relaycapacity": {
+    "chart": "relaycapacity",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "empty": true,
+    "headline": {
+      "value": "Fixture",
+      "label": "Fixture",
+      "color": "#B45309"
+    },
+    "emptyTitle": "Fixture",
+    "emptyText": "Fixture",
+    "palette": {
+      "ink": "#0B1640",
+      "meet": "#187A43",
+      "attention": "#B45309",
+      "short": "#C2410C",
+      "track": "#F0F2F5",
+      "teal": "#0C7E88",
+      "line": "#E3E9F1"
+    }
+  },
+  "servercapacity": {
+    "chart": "servercapacity",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "headline": {
+      "value": "Fixture",
+      "label": "Fixture",
+      "color": "#C2410C"
+    },
+    "hostCount": 4,
+    "rows": [
+      {
+        "label": "Fixture",
+        "meet": 3,
+        "short": 1,
+        "notAssessed": 0
+      },
+      {
+        "label": "Fixture",
+        "meet": 2,
+        "short": 2,
+        "notAssessed": 0
+      }
+    ],
+    "largestShortfall": {
+      "host": "Fixture",
+      "detail": "Fixture"
+    },
+    "notAssessed": {
+      "value": "Fixture",
+      "detail": "Fixture"
+    },
+    "findings": [],
+    "findingsNote": "Fixture",
+    "palette": {
+      "ink": "#0B1640",
+      "meet": "#187A43",
+      "attention": "#B45309",
+      "short": "#C2410C",
+      "track": "#F0F2F5",
+      "teal": "#0C7E88",
+      "line": "#E3E9F1"
+    }
+  },
+  "loop": {
+    "chart": "loop",
+    "title": "Fixture",
+    "meta": "Fixture",
+    "findingsLine": "Fixture",
+    "findings": [
+      {
+        "id": "Fixture",
+        "text": "Fixture"
+      }
+    ],
+    "score": 67,
+    "scoreColor": "#C2410C",
+    "status": {
+      "cls": "Fixture",
+      "label": "Critical"
+    },
+    "barPct": 67,
+    "barColor": "#C2410C",
+    "distLabel": "Fixture",
+    "dist": [
+      {
+        "pct": 50.0,
+        "color": "#187A43",
+        "num": "Fixture",
+        "fs": 18
+      },
+      {
+        "pct": 50.0,
+        "color": "#C2410C",
+        "num": "Fixture",
+        "fs": 18
+      }
+    ],
+    "legend": [
+      {
+        "color": "#187A43",
+        "label": "Fixture",
+        "count": "Fixture",
+        "pct": 50.0
+      },
+      {
+        "color": "#B45309",
+        "label": "Fixture",
+        "count": "Fixture",
+        "pct": null
+      }
+    ],
+    "footer": [
+      {
+        "label": "Fixture",
+        "value": "Fixture"
+      },
+      {
+        "label": "Fixture",
+        "value": "Fixture",
+        "caption": "Fixture"
+      }
+    ],
+    "context": [
+      {
+        "label": "Fixture",
+        "value": "Fixture",
+        "caption": "Fixture",
+        "muted": false
+      },
+      {
+        "label": "Fixture",
+        "value": "Fixture",
+        "caption": "Fixture",
+        "muted": false
+      }
+    ]
+  },
+  "filldb": {
+    "chart": "filldb",
+    "title": "Fixture",
+    "meta": "Fixture",
+    "score": 100,
+    "scoreColor": "#187A43",
+    "status": {
+      "cls": "Fixture",
+      "label": "Healthy"
+    },
+    "barPct": 100,
+    "barColor": "#187A43",
+    "distLabel": "Fixture",
+    "notHealthy": "Fixture",
+    "dist": [
+      {
+        "count": 11,
+        "css": "#187A43",
+        "label": "Fixture",
+        "width": "73.3%"
+      },
+      {
+        "count": 1,
+        "css": "#C2410C",
+        "label": "Fixture",
+        "width": "6.7%"
+      }
+    ],
+    "barsLabel": "Fixture",
+    "bars": [
+      {
+        "label": "Fixture",
+        "width": "100.0%",
+        "mins": "Fixture",
+        "color": "#187A43"
+      },
+      {
+        "label": "Fixture",
+        "width": "100.0%",
+        "mins": "Fixture",
+        "color": "#187A43"
+      }
+    ],
+    "assessmentNote": ""
+  },
+  "perfmon": {
+    "chart": "perfmon",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "score": 66,
+    "scoreColor": "#C5283D",
+    "status": {
+      "cls": "Fixture",
+      "label": "Critical"
+    },
+    "counters": [
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture",
+        "pass",
+        28
+      ],
+      [
+        "Fixture",
+        "Fixture",
+        "Fixture",
+        "fail",
+        100
+      ]
+    ],
+    "findingsSummary": {
+      "total": 3,
+      "critical": 2,
+      "warning": 0,
+      "cannotVerify": 1
+    },
+    "findingIds": [
+      "Fixture",
+      "Fixture",
+      "Fixture"
+    ]
+  },
+  "risks": {
+    "chart": "risks",
+    "title": "Fixture",
+    "sub": "Fixture",
+    "count": 4,
+    "hiddenCount": 1,
+    "ribbon": {
+      "overall": 75,
+      "tier": "Needs Attention",
+      "ph": 69,
+      "om": 81,
+      "pass": 69
+    },
+    "risks": [
+      {
+        "rank": "Fixture",
+        "band": "Fixture",
+        "severity": "Critical",
+        "area": "Fixture",
+        "title": "Fixture",
+        "impact": "Fixture",
+        "action": "Fixture",
+        "target": "Fixture",
+        "idCitation": "Fixture"
+      },
+      {
+        "rank": "Fixture",
+        "band": "Fixture",
+        "severity": "Fixture",
+        "area": "Fixture",
+        "title": "Fixture",
+        "impact": "Fixture",
+        "action": "Fixture",
+        "target": "Fixture",
+        "idCitation": "Fixture"
+      }
+    ]
+  },
+  "snapshot": {
+    "chart": "snapshot",
+    "overall": {
+      "score": 75,
+      "footnote": "Fixture"
+    },
+    "platform": {
+      "score": 69
+    },
+    "om": {
+      "score": 81
+    },
+    "findings": {
+      "count": 51,
+      "totalAreas": 14,
+      "platformCount": 43,
+      "operationalCount": 8,
+      "criticalCount": 27,
+      "attentionCount": 24
+    }
+  },
+  "strengths": {
+    "chart": "strengths",
+    "title": "Fixture",
+    "ribbon": {
+      "overall": 75,
+      "tier": "Needs Attention",
+      "ph": 69,
+      "om": 81,
+      "pass": 69
+    },
+    "areaCount": 3,
+    "healthyGroup": {
+      "label": "Healthy",
+      "rows": [
+        [
+          "Fixture",
+          100,
+          "Fixture"
+        ],
+        [
+          "Fixture",
+          100,
+          "Fixture"
+        ]
+      ]
+    },
+    "omGroup": {
+      "label": "Healthy",
+      "pills": [
+        [
+          "Fixture",
+          91
+        ],
+        [
+          "Fixture",
+          88
+        ]
+      ]
+    }
+  },
+  "clientdetail-counts": {
+    "chart": "clientdetail",
+    "kind": "counts",
+    "rows": [
+      {
+        "label": "Fixture",
+        "count": 6709,
+        "total": 36274
+      },
+      {
+        "label": "Fixture",
+        "count": 140,
+        "total": 6702
+      }
+    ]
+  },
+  "clientdetail-costs": {
+    "chart": "clientdetail",
+    "kind": "costs",
+    "rows": [
+      {
+        "rank": 1,
+        "seconds": 104.261,
+        "occurrences": 14,
+        "name": "Fixture",
+        "property": false,
+        "interval": "Fixture"
+      },
+      {
+        "rank": 2,
+        "seconds": 68.384,
+        "occurrences": 5,
+        "name": "Fixture",
+        "property": true,
+        "interval": "Fixture"
+      }
+    ]
+  },
+  "clientdetail-distribution": {
+    "chart": "clientdetail",
+    "kind": "distribution",
+    "total": 12,
+    "rows": [
+      {
+        "label": "Fixture",
+        "count": 6.0,
+        "color": "#000032",
+        "missing": false
+      },
+      {
+        "label": "Fixture",
+        "count": 6.0,
+        "color": "#AEB8C6",
+        "missing": true
+      }
+    ]
+  },
+  "clientdetail-duty": {
+    "chart": "clientdetail",
+    "kind": "duty",
+    "total": 12,
+    "rows": [
+      {
+        "work": 100.0,
+        "sleep": 400.0,
+        "duty": "20.0%",
+        "count": 6.0
+      }
+    ],
+    "unset": 6.0
+  },
+  "clientdetail-frequency": {
+    "chart": "clientdetail",
+    "kind": "frequency",
+    "total": 885,
+    "rows": [
+      {
+        "label": "Fixture",
+        "count": 153,
+        "custom": 0,
+        "external": 153,
+        "status": "Needs Attention"
+      },
+      {
+        "label": "Fixture",
+        "count": 147,
+        "custom": 1,
+        "external": 146,
+        "status": "Needs Attention"
+      }
+    ],
+    "frequent": 300
+  },
+  "clientdetail-groups": {
+    "chart": "clientdetail",
+    "kind": "groups",
+    "total": 13,
+    "rows": [
+      {
+        "label": "Fixture",
+        "count": 11.0,
+        "color": "#187A43"
+      },
+      {
+        "label": "Fixture",
+        "count": 0.0,
+        "color": "#4E8F2B"
+      }
+    ]
+  },
+  "clientdetail-checks": {
+    "chart": "clientdetail",
+    "kind": "checks",
+    "total": 12,
+    "checks": [
+      {
+        "label": "Fixture",
+        "count": 0.0
+      },
+      {
+        "label": "Fixture",
+        "count": 0.0
+      }
+    ]
+  }
+}

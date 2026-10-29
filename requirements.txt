@@ -12,7 +12,7 @@ defusedxml==0.7.1
     # via master-class-diagnostics-workbench
 et-xmlfile==2.0.0
     # via openpyxl
-fonttools==4.66.0
+fonttools==4.67.0
     # via matplotlib
 greenlet==3.5.6
     # via playwright
@@ -22,7 +22,7 @@ lxml==6.1.3
     # via python-docx
 matplotlib==3.11.2
     # via master-class-diagnostics-workbench
-numpy==2.5.3
+numpy==2.5.4
     # via
     #   contourpy
     #   master-class-diagnostics-workbench
@@ -40,13 +40,13 @@ pillow==13.0.0
     # via
     #   master-class-diagnostics-workbench
     #   matplotlib
-playwright==1.63.0
+playwright==1.64.0
     # via master-class-diagnostics-workbench
-pyee==13.0.1
+pyee==14.0.0
     # via playwright
 pyparsing==3.3.3
     # via matplotlib
-python-dateutil==2.9.0.post0
+python-dateutil==3.0.0
     # via
     #   matplotlib
     #   pandas
@@ -58,8 +58,10 @@ typing-extensions==4.16.0
     # via
     #   pyee
     #   python-docx
-tzdata==2026.4 ; sys_platform == 'emscripten' or sys_platform == 'win32'
-    # via pandas
+tzdata==2026.5
+    # via
+    #   pandas
+    #   python-dateutil
 xlrd==2.0.2
     # via master-class-diagnostics-workbench
 xlsxwriter==3.2.9

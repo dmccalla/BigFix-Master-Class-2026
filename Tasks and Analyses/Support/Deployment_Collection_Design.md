@@ -19,7 +19,7 @@ combined task.
   evaluation duration for locally generated data.
 - Preserve all 178 real Session Relevance expressions. With all sections selected,
   pacing alone adds about 15 minutes at the default, plus request execution time.
-  The two admin requests run only when the optional human readable logs are selected.
+  The two admin requests run whenever the General section is collected, even when readable logs are off.
 - Keep the 13 existing client relevance expressions: Actionsite Size and the 12 root
   server values. Append these answers to the appropriate XML before optional log
   conversion. XML-only collection must retain them and must not create a partial
@@ -37,7 +37,7 @@ combined task.
 The later retrieved-property addition brings the shipped contract to 178 real
 Session Relevance requests, 117 locally generated constant fragments and 13
 client-relevance fragments. There are 130 local XML fragments in total.
-The two optional log-only admin requests bring the all-options request count
+The two General-section admin requests bring the all-options request count
 to 180. The five-second pacing and existing failure policy are unchanged.
 
 Query-contract SHA-256, recomputed from the ordered encoded queries and capture

@@ -11,6 +11,14 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Refresh the locked dependencies with the normal seven-day cutoff of 2026-10-22. Remove the completed certifi/uv exception and preserve verified chart output.
+
+- Encode chart data at HTML and CSS boundaries, block external chart requests and untrusted scripts, and add hostile-input regression tests. Preserve rendered chart output.
+
+- Remove five superseded chart builders while preserving the active implementations and rendered output.
+
+- Capture Admin Tool fields and options whenever Deployment Information's General section runs, even when readable logs are off. Keep log formatting optional.
+
 - Correct Client overall-score wording and mutually exclusive polling notes. Compute Perfmon rolling averages from uncapped readings, show the VM CPU advisory floor in Word and Excel charts, honor assessed zero-counter statuses and prevent long zero-strip notes from overlapping results. Preserve analyzer values and scoring.
 
 - Simplify the Collect Deployment Information task description with approved wording, the existing title rule and READ BEFORE YOU RUN panel. Preserve collection behavior.

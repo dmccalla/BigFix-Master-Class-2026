@@ -48,7 +48,8 @@ folder there, named after the run and the time of the build.
 
 **Run Name** is required. It names the run folder and prefixes every output
 file, so use something you will recognize later, such as the customer or
-server name.
+server name. A name longer than 60 characters is shortened in the folder and
+file names, and a warning appears under the field. The run is not blocked.
 
 ## Step 2: Modules
 

@@ -11,6 +11,18 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Limit typed whole numbers to ASCII digits, nine digits at most. Cap PerfMon logical processors and disks at 4,096. Warn under the Run Name field when a name passes 60 characters. The name is shortened in folder and file names and the run is not blocked.
+
+- Keep formula-like values as text in the workbook, as the Platform workbook already does.
+
+- Parse BigFix responses in the lab harness with defusedxml and add tests that reject internal and external entities.
+
+- Quote API and database credentials in `iem login` and `curl` calls. Every credential form now rejects a double quote, which quoting cannot protect.
+
+- Make every service stop wait up to 20 minutes and every start up to 5 minutes, and fail the action if the service does not get there. Before this, tasks waited ten seconds and never checked, which left the root server down while the task reported success.
+
+- Create the auto-disable action only when its post succeeds, so logging cannot be left on with no disable action.
+
 - Refresh the locked dependencies with the normal seven-day cutoff of 2026-10-22. Remove the completed certifi/uv exception and preserve verified chart output.
 
 - Encode chart data at HTML and CSS boundaries, block external chart requests and untrusted scripts, and add hostile-input regression tests. Preserve rendered chart output.

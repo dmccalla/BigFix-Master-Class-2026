@@ -183,7 +183,7 @@ Avoid a guaranteed setup time. It depends on the computer and package access.
 |---|---|
 | Data Folder | Optional. Select the folder containing the collected files to scan for module inputs. Leave it blank to choose inputs individually on Step 2. |
 | Output Folder | Required. Select a writable location for the run folders. |
-| Run Name | Required. Enter a recognizable name. It is used in the run-folder name and output filenames. |
+| Run Name | Required. Enter a recognizable name. It is used in the run-folder name and output filenames. Names over 60 characters are shortened and a warning shows. |
 
 Tell the user to select **Next** after completing the required fields.
 Explain that the scan summary reports inputs found for the three modules.

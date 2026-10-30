@@ -31,7 +31,7 @@ Reviews how long clients take to evaluate their content, and why.
 | Report Start Date and End Date | Yes | Entered on step 2 | The period the collection covers. |
 | Top 10 slowest evaluations | No | `*top10-query-results*.csv`, `*top10*.csv`, `*top10*.txt`, `*top10*.xml`, and evaluation-time exports | The session relevance query in `Utilities\query_properties.ps1`, or its console export. Adds the Top 10 Most Expensive Evaluations table. |
 | UDP notifications | No | `*udp-notification*.csv`, `*udp_notification*.csv`, the `.xml` forms, `*udp-ping*.csv`, `*receiving*udp*.csv` | The same script. Adds UDP coverage by relay and by subnet, and the Command Polling Review. |
-| `Deployment_Information` folder | Yes | A folder named `Deployment_Information` | The Collect Deployment Information task on the root server. The module reads `General_Info`, `Content_Info`, `Operator_Info` and `Action_Info` (the `.xml` capture is preferred and the `.log` is the fallback). Adds the Contributing Factors and Evaluation Frequency sections. Evaluation Frequency reads the active property intervals from `Property_Info`. |
+| `Deployment_Information` folder | Yes | A folder named `Deployment_Information` | The Collect Deployment Information task on the root server. The module reads `General_Info`, `Content_Info`, `Operator_Info`, `Action_Info` and `Client_Settings_Info` (the `.xml` capture is preferred and the `.log` is the fallback). Adds the Contributing Factors and Evaluation Frequency sections. Evaluation Frequency reads the active property intervals from `Property_Info`. |
 
 ## Perfmon Infrastructure Analysis
 
@@ -72,9 +72,9 @@ The captures above come from three places:
    period and save the `.blg`. Enable FillDB performance logging for the same
    period and copy the logs. Run `Utilities\query_properties.ps1` for the Top
    10 and UDP captures.
-3. **Nothing customer-specific.** Every capture is operational telemetry:
-   counter values, evaluation times, relay and subnet names. No credentials or
-   content are collected.
+3. **Confidential deployment data.** Captures include computer names, network
+   details, operator information and configuration data. Treat them as
+   confidential and review them before sharing.
 
 Keep the captures for one deployment together. The Workbench never modifies
 an input file.
@@ -95,7 +95,9 @@ the collection task in a live lab.
 For the Client Performance lab, confirm that the `BigFix Master Class
 -- Client Performance Counters - Basic (2.0)` analysis is active before running
 the collection task. The collection task runs as a one-time action from the
-root server.
+root server. Also run `BigFix Master Class -- Collect Deployment Information (2.0)`
+once on the root server. Client Performance requires its `Deployment_Information`
+folder.
 
 For the PerfMon lab, run the task against the role servers in scope and
 retrieve the logs directly from those machines. PerfMon logs are large and are

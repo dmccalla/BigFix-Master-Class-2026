@@ -1,6 +1,6 @@
 # Master Class Diagnostics Workbench: User Guide Design Handoff
 
-Status: Design handoff. Use the existing user guide as the document master.
+Status: Historical. This design handoff is complete and the guide has shipped. Use the existing user guide as the document master.
 
 ## Assignment
 

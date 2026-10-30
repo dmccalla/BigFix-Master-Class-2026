@@ -115,7 +115,7 @@ The switch is unavailable while a build is running.
 
 Attendees take home a package with three parts: the Workbench with its lab
 sample data, the class presentation, and the Student Lab Guide, "Session 3 -
-Duncan McCalla - Automated Performance and Configuration Analysis FINAL.docx".
+Duncan McCalla - Automated BigFix Performance and Configuration Analysis - Lab Guide - Final.docx".
 The guide walks through the 20 minute lab: collect the data in the BigFix
 console, run the Workbench, and read the Client Performance and Perfmon
 outputs. FillDB is a bonus round in the appendix. The guide and the

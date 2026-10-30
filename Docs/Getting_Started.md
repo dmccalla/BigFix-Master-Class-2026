@@ -9,6 +9,9 @@ deployment is needed to follow it.
 - Windows 11.
 - Python 3.12 or newer. Install it from python.org and tick **Add Python to
   PATH** during setup.
+- uv, installed after Python. In PowerShell, run
+  `winget install --id=astral-sh.uv -e`, reopen PowerShell, and check
+  `uv --version`.
 - Microsoft Edge or Google Chrome. Edge is already on Windows.
 - Microsoft Word and Excel are the preferred and tested applications for
   opening the Mini Reports and Excel workbooks. LibreOffice and other
@@ -65,11 +68,12 @@ choose.
 
 The Client Performance Analysis needs the **Report Start Date** and
 **Report End Date**. They bound the period the report describes. For the
-sample data, use 5 October 2026 to 6 October 2026.
+sample data, use `06-01-2026` to `06-14-2026`. Enter dates as `MM-DD-YYYY`.
 
 The Perfmon Infrastructure Analysis reads the processor and disk counts from
-the capture. Physical memory cannot be read from a capture, so enter it when
-you know it. A second capture is optional.
+the capture. Enter physical memory in GB; the desktop workflow requires
+positive processor, disk and RAM values. For the supplied sample, enter 12 GB
+and select Virtual machine. A second capture is optional.
 
 Use **All Available** to select every module with an input and **Clear** to
 deselect them all. A module you leave unselected is skipped.
@@ -82,8 +86,8 @@ moves from Queued to Running to Done. Parsing a large PerfMon capture can take
 several minutes.
 
 **View Logs** opens the engine log as it is written. **Open Output** opens the
-run folder once the build finishes. **Cancel** stops the build after the
-current module.
+run folder once the build finishes. **Cancel** requests cancellation of the running build. A canceled run may
+contain incomplete outputs.
 
 ## The Outputs
 

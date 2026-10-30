@@ -1,5 +1,7 @@
 # Master Class Diagnostics Workbench User Guide Verification
 
+Historical record. It describes guide version 1.0 Draft as checked on 2026-10-14 and is not updated for later guide versions.
+
 Date: 2026-10-14. Guide version: 1.0 Draft. DRAFT watermark retained.
 
 ## Scope And Data

@@ -143,7 +143,7 @@ def package_fixture():
             "Utilities/MXFillDBPerf.exe",
             "Templates/Diagnostics_Style_Template.docx",
             "pyproject.toml",
-            "Docs/Getting_Started.md",
+            "Docs/Reference/Getting_Started.md",
             "Docs/User Guide/guide.docx",
             "Docs/User Guide/screenshot.png",
             "Docs/User Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf",

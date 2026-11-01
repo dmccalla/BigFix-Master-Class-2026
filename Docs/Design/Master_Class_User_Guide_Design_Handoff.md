@@ -11,7 +11,7 @@ The result should look like another guide in the same document family.
 
 The supplied design master is:
 
-`Docs/User Guide/Source_User_Guide_2.0.docx`
+`Docs/Design/Source_User_Guide_2.0.docx`
 
 This is an unchanged copy of the main user guide, renamed for the handoff.
 It is reference material, not the finished Master Class guide. Start from
@@ -75,9 +75,9 @@ for this brief:
 
 | File | Use |
 |---|---|
-| `Docs/User Guide/Source_User_Guide_2.0.docx` | Required visual master and source of reusable content. |
-| `Docs/Getting_Started.md` | Existing launch, workflow, output, and troubleshooting copy. |
-| `Docs/Data_Collection.md` | Input descriptions and collected-data folder layout. |
+| `Docs/Design/Source_User_Guide_2.0.docx` | Required visual master and source of reusable content. |
+| `Docs/Reference/Getting_Started.md` | Existing launch, workflow, output, and troubleshooting copy. |
+| `Docs/Reference/Data_Collection.md` | Input descriptions and collected-data folder layout. |
 | `README.md` | Product overview and supported environment. |
 | `Launchers/Run Diagnostics Workbench.cmd` | Actual first-launch behavior and package installation. |
 | `App/diagnostics_workbench_ui.py` | Current labels, required fields, status changes, and Cancel behavior. |
@@ -90,7 +90,7 @@ user guide.
 
 ## Reuse From The Existing User Guide
 
-Use `Docs/User Guide/Source_User_Guide_2.0.docx` for both the design and the
+Use `Docs/Design/Source_User_Guide_2.0.docx` for both the design and the
 sections identified below. Preserve the formatting of retained content and
 edit its instructions to match the Master Class application.
 
@@ -148,7 +148,7 @@ List the three modules using these exact names:
 - **FillDB Performance Analysis**: FillDB processing performance.
 
 Explain that users need collected files before running an analysis. For
-input collection details, direct them to `Docs/Data_Collection.md`.
+input collection details, direct them to `Docs/Reference/Data_Collection.md`.
 
 ### 2. Requirements And Launch
 

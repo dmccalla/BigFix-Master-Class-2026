@@ -74,8 +74,8 @@ The [User Guide (Word)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_Use
 and [User Guide (PDF)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf)
 cover setup, data collection, the three-step workflow, and outputs.
 
-See [Getting Started](Docs/Getting_Started.md) for the application workflow
-and outputs. [Data Collection](Docs/Data_Collection.md) describes the files
+See [Getting Started](Docs/Reference/Getting_Started.md) for the application workflow
+and outputs. [Data Collection](Docs/Reference/Data_Collection.md) describes the files
 each module needs, where they come from, and how the live labs run the
 corresponding BigFix collection tasks first.
 
@@ -109,8 +109,8 @@ The switch is unavailable while a build is running.
 
 ## Class Materials
 
-- [Getting Started](Docs/Getting_Started.md) explains the Workbench workflow.
-- [Data Collection](Docs/Data_Collection.md) explains the live collection tasks
+- [Getting Started](Docs/Reference/Getting_Started.md) explains the Workbench workflow.
+- [Data Collection](Docs/Reference/Data_Collection.md) explains the live collection tasks
   and the files each module reads.
 
 Attendees take home a package with three parts: the Workbench with its lab

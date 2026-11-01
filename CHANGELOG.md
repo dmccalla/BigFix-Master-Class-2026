@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Organize Docs the same way in all three repositories. Docs holds only README.md and folders: User Guide, Lab Guide, Reference for living documents, Records for dated ones, and Design for handoffs. Getting Started and Data Collection moved into Reference. A new test fails on loose files in Docs or a broken relative Markdown link.
+
 - Limit typed whole numbers to ASCII digits, nine digits at most. Cap PerfMon logical processors and disks at 4,096. Warn under the Run Name field when a name passes 60 characters. The name is shortened in folder and file names and the run is not blocked.
 
 - Keep formula-like values as text in the workbook, as the Platform workbook already does.
@@ -45,7 +47,7 @@ the project release process for the steps to cut a release.
 
 - Clear the code sweep Ruff format gate and pin CI actions to verified release commits.
 
-- Apply the approved 2026-10-26 security cooldown exception for certifi; update filelock and Pillow under the standard cutoff. See Docs/Reference/Dependency_Cooldown_Exception_2026-10-26.md.
+- Apply the approved 2026-10-26 security cooldown exception for certifi; update filelock and Pillow under the standard cutoff. See Docs/Records/Dependency_Cooldown_Exception_2026-10-26.md.
 
 - Complete the Design D-item report pass: clear cover metadata, nest investigation methods, use portable callout symbols, improve identifier wrapping and tighten sparse-page spacing. Preserve scoring and PerfMon plots.
 

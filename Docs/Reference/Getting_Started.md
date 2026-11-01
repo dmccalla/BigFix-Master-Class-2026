@@ -31,7 +31,7 @@ deployment is needed to follow it.
 
 Windows may block the `.cmd` launcher because it was downloaded from the Internet. If it will not run, right-click the `.cmd` file and select **Properties**. On the **General** tab, tick the **Unblock** box at the bottom, then click **OK**. Run the launcher again. If **Unblock** is not shown, no change is needed.
 
-![Windows launcher file Properties with the Unblock checkbox selected](User%20Guide/windows-launcher-unblock.png)
+![Windows launcher file Properties with the Unblock checkbox selected](../User%20Guide/windows-launcher-unblock.png)
 
 *The screenshot uses Run Diagnostics Workbench.cmd as an example. The same steps apply to this tool's `.cmd` launcher.*
 

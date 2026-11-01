@@ -48,7 +48,7 @@ def test_launcher_checks_the_declared_python_floor() -> None:
 def test_docs_name_the_declared_python_floor() -> None:
     major, minor = _declared_floor()
     floor = f"{major}.{minor}"
-    for rel in ("README.md", "Docs/Getting_Started.md", "Build/package_release.ps1"):
+    for rel in ("README.md", "Docs/Reference/Getting_Started.md", "Build/package_release.ps1"):
         text = (ROOT / rel).read_text(encoding="utf-8")
         found = set(re.findall(r"Python (3\.\d+) or newer", text))
         assert found == {floor}, (

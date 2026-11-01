@@ -21,7 +21,7 @@ were discarded and replaced.
 - Run Name: `Example_Server`.
 - Output Folder: `C:\Temp\MasterClassGuide\Output`.
 - Client dates: 10-05-2026 to 10-06-2026, as specified for the sample in
-  `Docs/Getting_Started.md`.
+  `Docs/Reference/Getting_Started.md`.
 - Perfmon: the Results BLG, with CPU and disk counts detected by the app.
 - RAM: 12 GB. Virtual machine: selected. Both supplied by Duncan.
 - Capture 2: unused. No second capture was invented.
@@ -198,7 +198,7 @@ Section 2.5 adds a brief collection table for the three modules, with exact
 task names, prerequisites, capture highlights, and the FillDB restart and
 automatic-disable warning. Names and behavior were checked against the
 Master Class `.bes` definitions under `Tasks and Analyses`,
-`Docs/Data_Collection.md`, and the Session 3 lab guide in `Docs/Lab Guide`.
+`Docs/Reference/Data_Collection.md`, and the Session 3 lab guide in `Docs/Lab Guide`.
 The lab guide remains the source for collection screenshots and detailed
 console instructions. The Results folder name and structure are retained.
 

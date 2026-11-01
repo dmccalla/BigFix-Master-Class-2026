@@ -34,7 +34,7 @@
 <DIV class=hc-eyebrow>&nbsp;</DIV>
 <DIV class=hc-h1>Collect Client Performance Counter Analysis Data</DIV>
 <DIV class=hc-lead><FONT color=#000000>
-<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV>The "BigFix Master Class -- Client Performance Counters - Basic (2.0)" analysis must be imported and activated or this task will return nothing. The "Collect Deployment Information" task must also have been run, because the report needs its Deployment_Information results.</FONT></DIV>
+<DIV class=hc-rule style="HEIGHT: 3px; WIDTH: 851px">&nbsp;</DIV></FONT></DIV>
 <DIV class=hc-banner>
 <DIV class=hc-bannerhd>READ BEFORE YOU RUN</DIV>
 <TABLE style="WIDTH: 830px; BORDER-COLLAPSE: collapse; TABLE-LAYOUT: fixed">
@@ -163,11 +163,12 @@ hcSync();</script> </DIV>]]></Description>
 		<Source>HCL BigFix AVP and Professional Services</Source>
 		<SourceID></SourceID>
 		<SourceReleaseDate>2026-09-24</SourceReleaseDate>
+		<SourceSeverity></SourceSeverity>
 		<CVENames></CVENames>
 		<SANSID></SANSID>
 		<MIMEField>
 			<Name>x-fixlet-modification-time</Name>
-			<Value>Fri, 02 Oct 2026 03:17:06 +0000</Value>
+			<Value>Fri, 30 Oct 2026 00:29:11 +0000</Value>
 		</MIMEField>
 		<Domain>BES </Domain>
 		<DefaultAction ID="Action1">

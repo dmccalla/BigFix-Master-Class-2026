@@ -12,7 +12,7 @@ This record supports section 6.3, Estimated Build Time and Memory, in the user g
 - Client Performance, PerfMon and FillDB were selected. The production report engine ran in a fresh process with a fresh copy of the input.
 - Timing covers input discovery, analysis, charts and Excel and Word output. It excludes copying the input, a 15-second baseline, module selection, review pauses, output checks and opening Word.
 - Memory is the Windows job peak committed memory for the engine and every process it started, including chart renderers.
-- Client data was synthetic and scaled from 50,000 to 300,000 endpoints, with about 2% of endpoints not reporting. Every size used the same real PerfMon capture. The data generator is `Report Builder/Tools/generate_synthetic_dataset.py` in the Platform repository, seed 42.
+- Client data was synthetic and scaled from 50,000 to 300,000 endpoints, with about 2% of endpoints not reporting. Every size used the same real PerfMon capture. The synthetic data came from a seeded generator (seed 42).
 - Each build was checked for the expected Word, Excel and chart files and for the expected number of reporting rows in the Client Performance workbook.
 
 ## PerfMon capture used

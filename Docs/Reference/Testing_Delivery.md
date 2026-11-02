@@ -36,6 +36,11 @@ checks stay out of the denominator. Unrelated object ratings cannot change the
 score. On Windows, the bundled analyzer also processes synthetic raw logs with
 sparse activity, healthy throughput and poor throughput.
 
+Use the normal shipped `SampleData` FillDB CSV for scored report verification.
+The shared sample produces Healthy, 100 of 100, with three of four guide checks
+assessed. Verify its source values, chart and Word output together. The fourth
+guide check has zero captured messages and remains excluded from the score.
+
 A short live lab run verifies capture and processing. If the analyzer returns
 Not enough data on every guide check, the expected score is Not Assessed.
 Such a run does not exercise a numeric score or establish customer assessment

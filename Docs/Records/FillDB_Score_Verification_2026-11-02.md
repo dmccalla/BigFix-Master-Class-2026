@@ -1,5 +1,26 @@
 # FillDB score verification
 
+## Normal shipped test data
+
+Regenerated Main, TA and MC FillDB reports using each application's normal
+`SampleData` FillDB analysis CSV. All three inputs have the same SHA-256 and
+contain 1,496,466 parsed messages. Each report shows Healthy, 100 of 100,
+with three of the four guide checks assessed. Parallel DB Update has zero
+captured messages and remains excluded from the score.
+
+The delivered CSV values, Word table cells, chart payload and embedded chart
+were checked. Corresponding chart images match across all three applications.
+Microsoft Word exported each report to three pages. All nine pages were
+visually reviewed, including the numeric score, coverage explanation and tables.
+No scoring formula or customer-facing prose changed.
+
+Current report evidence is in `Temp/FillDB_Normal_Data_20261102`, including
+the three reports, `verification.json`, `word-exports.json` and
+`pdf-verification.json`. Use these normal-data reports for scored output
+verification. The short live captures below verify the insufficient-data path.
+
+## Live capture coverage
+
 The live lab reports correctly show Not Assessed. Their analyzer output has no
 recognized health result for any of the four scored guide checks. The dates
 match 2 November 2026. No date filter removed otherwise scoreable FillDB data.

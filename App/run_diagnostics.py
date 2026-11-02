@@ -1574,7 +1574,11 @@ def run_loop_pipeline(
         args += ["--evaluation-times-file", str(inputs["top_offenders_file"])]
     if inputs.get("udp_notifications_file"):
         args += ["--udp-notifications-file", str(inputs["udp_notifications_file"])]
-    args += ["--include-automated-findings"]
+    args += [
+        "--include-automated-findings",
+        "--companion-workbook-name",
+        f"{prefix}_Client_Loop.xlsx",
+    ]
 
     run_python(find_script("get_loop_health.py"), args, log)
 

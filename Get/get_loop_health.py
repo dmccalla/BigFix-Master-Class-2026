@@ -4818,6 +4818,22 @@ def add_note_paragraph(document, text: str) -> None:
 # Rollup tables in the Mini Report stop at this many rows so a large deployment
 # cannot run the report to dozens of pages. The workbook always keeps every row.
 MINI_REPORT_ROLLUP_LIMIT = 10
+ROLLUP_WORKSHEETS = {
+    "UDP Notification Issues by Relay": "UDP Issues by Relay",
+    "Top Subnets Not Receiving UDP Pings": "UDP Issues by Subnet",
+    "Command Polling by Relay": "Polling by Relay",
+    "Command Polling by Subnet": "Polling by Subnet",
+}
+
+
+def workbook_reference(worksheet: str, workbook_name: str) -> str:
+    """Name the existing module workbook and its complete worksheet."""
+    target = (
+        Path(workbook_name).name
+        if workbook_name
+        else "the accompanying Client Performance workbook"
+    )
+    return f"See the {worksheet} worksheet in {target} for the complete list."
 
 
 # Points each device earns for its loop group (Duncan's option B, 10-19).
@@ -4857,6 +4873,8 @@ def add_capped_rollup_table(
     headers: list[str],
     rows: list[list[str]],
     noun: str,
+    *,
+    workbook_name: str = "",
 ) -> None:
     """Write a worst-first rollup table, keeping only the top rows in the report."""
     capped = len(rows) > MINI_REPORT_ROLLUP_LIMIT
@@ -4877,6 +4895,9 @@ def add_capped_rollup_table(
         if unreported:
             missing = "a relay" if noun == "relays" else "a usable address"
             note += f" {_device_count(unreported)} did not report {missing}."
+        worksheet = ROLLUP_WORKSHEETS.get(heading)
+        if worksheet:
+            note += " " + workbook_reference(worksheet, workbook_name)
         add_note_paragraph(document, note)
 
 
@@ -4895,6 +4916,8 @@ def generate_word(
     minimum_analysis_interval: list[MinimumAnalysisInterval] | None = None,
     stamp: str = "",
     include_automated_findings: bool = False,
+    companion_workbook_name: str = "",
+    total_evaluation_count: int = 0,
 ) -> None:
     if Document is None:
         raise RuntimeError(
@@ -4914,6 +4937,9 @@ def generate_word(
 
     add_stub_front_matter(document, "Client Performance Analysis")
     sections = {}
+    companion_workbook_name = (
+        companion_workbook_name or word_output.with_suffix(".xlsx").name
+    )
 
     def client_heading(key, text, level):
         paragraph = document.add_heading(text, level=level)
@@ -5064,6 +5090,12 @@ def generate_word(
                 for item in loop_offenders
             ],
         )
+        if total_evaluation_count > len(loop_offenders):
+            add_note_paragraph(
+                document,
+                f"Showing {len(loop_offenders)} of {total_evaluation_count:,} captured evaluations. "
+                + workbook_reference("Evaluation Offenders", companion_workbook_name),
+            )
 
     if property_intervals:
         client_heading("Evaluation Frequency", "Evaluation Frequency", 4)
@@ -5155,6 +5187,7 @@ def generate_word(
                 ],
                 udp_summary.relay_rows,
                 "relays",
+                workbook_name=companion_workbook_name,
             )
 
         if udp_summary.subnet_rows:
@@ -5165,6 +5198,7 @@ def generate_word(
                 ["Subnet", "Not Receiving / Reported", "Serving Relays"],
                 udp_summary.subnet_rows,
                 "subnets",
+                workbook_name=companion_workbook_name,
             )
 
     if command_polling_summary:
@@ -5200,6 +5234,7 @@ def generate_word(
                 ["Relay", *POLLING_MINI_REPORT_HEADERS],
                 polling_mini_report_rows(command_polling_summary.relay_rows),
                 "relays",
+                workbook_name=companion_workbook_name,
             )
 
         if command_polling_summary.subnet_rows:
@@ -5210,6 +5245,7 @@ def generate_word(
                 ["Subnet", *POLLING_MINI_REPORT_HEADERS],
                 polling_mini_report_rows(command_polling_summary.subnet_rows),
                 "subnets",
+                workbook_name=companion_workbook_name,
             )
 
     if fast_hash_verify_summary or agent_cpu_idle_summary or agent_multicore_summary:
@@ -5378,6 +5414,7 @@ def main() -> int:
         action="store_true",
         help="Include the automated findings table in the Mini Report Word document.",
     )
+    parser.add_argument("--companion-workbook-name", default="", help=argparse.SUPPRESS)
     add_stamp_arguments(parser)
     args = parser.parse_args()
 
@@ -5576,10 +5613,15 @@ def main() -> int:
                 "Devices with a minimum analysis interval",
                 sum(row.devices for row in minimum_analysis_interval),
             )
-        loop_offenders = load_loop_offenders(
+        all_loop_offenders = load_loop_offenders(
             top_offenders_file,
-            top_count=args.top_offenders_count,
+            top_count=0,
             property_intervals=property_intervals,
+        )
+        loop_offenders = (
+            all_loop_offenders[: args.top_offenders_count]
+            if args.top_offenders_count > 0
+            else all_loop_offenders
         )
         command_polling_summary = analyze_command_polling(processed)
         fast_hash_verify_summary = analyze_fast_hash_verify(processed)
@@ -5677,7 +5719,7 @@ def main() -> int:
             fix_first_devices,
             excel_output,
             actionsite_pressure=actionsite_pressure,
-            loop_offenders=loop_offenders,
+            loop_offenders=all_loop_offenders,
             udp_summary=udp_summary,
             command_polling_summary=command_polling_summary,
             fast_hash_verify_summary=fast_hash_verify_summary,
@@ -5705,6 +5747,8 @@ def main() -> int:
                 minimum_analysis_interval=minimum_analysis_interval,
                 stamp=stamp,
                 include_automated_findings=args.include_automated_findings,
+                companion_workbook_name=args.companion_workbook_name or excel_output.name,
+                total_evaluation_count=len(all_loop_offenders),
             )
 
         log.ok("Client performance analysis built")

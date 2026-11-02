@@ -113,6 +113,20 @@ findings and the tables behind them. The Infographic is the one-page visual
 of the same result. The Excel workbook carries the source data and the
 per-item detail for anyone who wants to go deeper.
 
+When a Client Performance relay or subnet table has more than ten rows, the
+Mini Report shows ten and names the Excel file and worksheet containing the
+complete list, including those ten. UDP detail is in **UDP Issues by Relay**
+and **UDP Issues by Subnet**. Command polling detail is in **Polling by Relay**
+and **Polling by Subnet**. **Evaluation Offenders** holds every aggregated
+evaluation available in the capture, with a report reference when the list
+exceeds its preview. This is the captured evaluation list, not an inventory of
+every evaluation on every device.
+
+Keep the Mini Report and its matching Excel workbook together when sharing
+these results. Tables with ten or fewer rows need no overflow reference.
+These references use the existing module workbook; no additional workbook is
+created.
+
 ## Running Your Own Data
 
 Collect the files described in [Data Collection](Data_Collection.md), put

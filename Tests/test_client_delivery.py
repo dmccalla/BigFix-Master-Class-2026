@@ -237,29 +237,75 @@ def test_real_report_workbook_and_chart_agree(delivered):
         [[cell.text for cell in row.cells] for row in table.rows]
         for table in document.tables
     ]
-    frequency_table = next(table for table in tables if table[0][0] == "Interval")
-    assert frequency_table[1:] == CASE["expected_frequency"]
-    assert not any(table[0][0] == "Property" for table in tables)
-    top10 = next(table for table in tables if table[0][0] == "Rank")
-    assert top10[0][-1] == "Interval"
+    from hashlib import sha256
+
+    # Verify the data used for each graphic and that its PNG is actually in
+    # the delivered Word file. The current approved layout uses charts.
+    charts = []
+    embedded = {
+        sha256(rel.target_part.blob).hexdigest()
+        for rel in document.part.rels.values()
+        if rel.reltype.endswith("/image")
+    }
+    for path in delivered.rglob("*.chartdata.json"):
+        data = json.loads(path.read_text(encoding="utf-8"))
+        if data.get("chart") != "clientdetail":
+            continue
+        png = path.with_name(path.name.replace(".chartdata.json", ".png"))
+        assert sha256(png.read_bytes()).hexdigest() in embedded, png.name
+        charts.append(data)
+    frequency = next(chart for chart in charts if chart["kind"] == "frequency")
+    assert frequency["total"] == 7
+    assert frequency["frequent"] == 3
+    assert frequency["rows"] == [
+        dict(
+            label=row[0],
+            count=int(row[1].split("/")[0]),
+            custom=int(row[3]),
+            external=int(row[4]),
+            status=row[5],
+        )
+        for row in CASE["expected_frequency"]
+    ]
+    costs = next(chart for chart in charts if chart["kind"] == "costs")
+    expected_names = [row[:] for row in CASE["expected_top10_rows"]]
+    expected_names[1][0] = "QA Site"
+    assert [[row["name"], row["interval"]] for row in costs["rows"]] == expected_names
     assert [
-        CASE["expected_top10"]["evaluation"],
-        CASE["expected_top10"]["interval"],
-    ] in [row[3:5] for row in top10[1:]]
-    assert [row[3:5] for row in top10[1:]] == CASE["expected_top10_rows"]
+        (row["rank"], row["seconds"], row["occurrences"]) for row in costs["rows"]
+    ] == [(1, 60, 2), (2, 50, 1), (3, 30, 3)]
     coverage = next(
-        table
-        for table in tables
-        if table[0][:2] == ["Status", "Devices / Total"]
-        and table[1][0] == "Receiving UDP Pings"
+        chart
+        for chart in charts
+        if chart["kind"] == "distribution"
+        and chart["rows"][0]["label"] == "Receiving UDP pings"
     )
-    assert coverage[1:] == CASE["expected_udp_coverage"]
+    assert coverage["total"] == 4
+    assert [(row["label"].lower(), row["count"]) for row in coverage["rows"]] == [
+        (row[0].lower(), int(row[1].split("/")[0]))
+        for row in CASE["expected_udp_coverage"]
+    ]
+    descriptions = [
+        shape._inline.docPr.get("descr", "") for shape in document.inline_shapes
+    ]
+    assert any(
+        "Property evaluation intervals among 7 counted properties." in value
+        and "Counted in CLT-01: 3." in value
+        for value in descriptions
+    )
+    assert any(
+        "QA Every Report (analysis: QA Analysis): 60.0 seconds, 2 occurrences, interval Every report."
+        in value
+        for value in descriptions
+    )
     paragraphs = [p.text for p in document.paragraphs]
     assert CASE["expected_minimum_analysis_interval"] in paragraphs
     findings = next(table for table in tables if table[0][0] == "Finding ID")
     assert len(findings) == 2
     assert findings[1][0] == "CLT-01"
-    assert "3 active properties are set to every report" in findings[1][1]
+    assert (
+        "3 properties are set to every report or to under 15 minutes." in findings[1][1]
+    )
     sidecar = json.loads(
         artifact(delivered, ".chartdata.json").read_text(encoding="utf-8")
     )
@@ -280,7 +326,7 @@ def test_real_report_workbook_and_chart_agree(delivered):
             for field in CASE["expected_metrics"]
         },
         "frequency": [list(row) for row in frequencies],
-        "top10": [row[3:5] for row in top10[1:]],
+        "top10": [[row["name"], row["interval"]] for row in costs["rows"]],
         "chart": {key: data[key] for key in ("score", "barPct", "dist")},
         "finding_ids": sorted(row[0] for row in findings[1:]),
     }
@@ -313,25 +359,23 @@ def test_real_chart_has_no_script_errors_or_clipped_text(delivered):
             page.evaluate("document.fonts.ready")
             page.wait_for_function("window.__RENDERED__ === true")
             assert not errors, errors
-            problems = page.evaluate("""() => {
-                const card = document.querySelector('#mount');
-                if (!card) return ['missing chart card'];
-                const box = card.getBoundingClientRect();
-                const bad = [];
-                const walker = document.createTreeWalker(card, NodeFilter.SHOW_TEXT);
-                while (walker.nextNode()) {
-                    const node = walker.currentNode;
-                    if (!node.textContent.trim()) continue;
-                    const style = getComputedStyle(node.parentElement);
-                    if (style.display === 'none' || style.visibility === 'hidden') continue;
-                    const range = document.createRange(); range.selectNodeContents(node);
-                    for (const rect of range.getClientRects()) {
-                        if (!rect.width || !rect.height) continue;
-                        if (rect.left < box.left - 2 || rect.right > box.right + 2 || rect.top < box.top - 2 || rect.bottom > box.bottom + 2) bad.push(node.textContent.trim());
-                    }
-                }
-                return bad;
-            }""")
+            from chart_layout_checks import TEXT_OUTSIDE_CARD
+
+            problems = page.evaluate(TEXT_OUTSIDE_CARD)
+            # The guard must still catch real clipped digits and horizontal
+            # overflow, rather than merely accepting the current score.
+            for position in ("top:-100px;left:40px", "top:40px;left:-100px"):
+                page.evaluate(
+                    """position => {
+                    const node = document.createElement('span');
+                    node.id = 'clipping-probe'; node.textContent = '888';
+                    node.style.cssText = 'position:absolute;font:800 153px Aptos;' + position;
+                    document.querySelector('#mount').append(node);
+                }""",
+                    position,
+                )
+                assert "888" in page.evaluate(TEXT_OUTSIDE_CARD)
+                page.locator("#clipping-probe").evaluate("(node) => node.remove()")
             page.screenshot(
                 path=str(delivered.parent / "chart-layout.png"), full_page=True
             )

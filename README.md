@@ -38,13 +38,10 @@ must have been generated with `--healthcheck`. The analyzed data is included
 in the Mini Report; no Excel workbook is needed because `MXFillDBPerf` does
 not produce a separate dataset for sorting or filtering.
 
-The repository ships small FillDB and Perfmon samples under `SampleData`.
-
-The lab sample data the Student Lab Guide uses, including the Client
-Performance capture, is in `SampleData\BigFix Master Class 2026\Results`.
-It is too large for the repository. Download `Sample-Data-Results.zip` from
-the repository's v2.1 release. To add it to a clone, extract
-`Sample-Data-Results.zip` into the Workbench folder.
+The included sample data at `SampleData\BigFix Master Class 2026` covers all
+three modules. It uses the same complete sample capture as the main Workbench
+and TA Health Check, including 2,537 clients and 24 relays. Select this folder
+for the lab practice run. No separate sample download is needed.
 
 ## Requirements
 
@@ -58,10 +55,8 @@ the repository's v2.1 release. To add it to a clone, extract
   `uv --version`.
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
-- Microsoft Word and Excel are the preferred and most extensively tested
-  applications for opening the Mini Reports and Excel workbooks. LibreOffice
-  has been tested successfully as an alternative, but it has received less
-  compatibility coverage than Word and Excel.
+- Microsoft Word is required to review Mini Report formatting and export PDFs.
+  Microsoft Excel is the preferred application for the workbooks.
 
 The Workbench installs its own packages into a private `.venv` folder next
 to the code. Your Python installation is not changed. Runtime dependencies
@@ -102,7 +97,7 @@ The switch is unavailable while a build is running.
 | `Fonts/` | Bundled open-source fonts (Inter, Roboto) |
 | `Build/` | The release and template builders |
 | `Templates/` | The Word style template the Mini Reports take their styles from |
-| `SampleData/` | Small FillDB and Perfmon samples, and the lab sample data in the release |
+| `SampleData/` | The complete shared sample capture for all three modules |
 | `Utilities/` | Helpers the data collection uses: `MXFillDBPerf.exe` and `query_properties.ps1` |
 | `Launchers/` | The Windows launcher |
 | `Docs/` | Guides for attendees and the live lab collection workflow |

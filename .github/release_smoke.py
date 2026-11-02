@@ -190,7 +190,8 @@ print(json.dumps({'launched':sys.argv[3],'source':module.__file__}))
     if sidecar["score"] != 56 or [int(segment["num"]) for segment in sidecar["dist"]] != [
         1,
         2,
-        3,
+        1,
+        2,
     ]:
         raise ValueError("Packaged report changed the known answers")
     return {

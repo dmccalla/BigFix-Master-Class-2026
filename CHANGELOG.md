@@ -11,6 +11,17 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Add FillDB known-answer score tests, real-analyzer controls and delivered-output checks for assessed, partial and insufficient data. Record live capture dates and recover the MC performance capture after the lab reboot.
+
+- Record the 2 November release validation with full automated suites, live lab collection, fresh tool output, Microsoft Word review and package evidence.
+
+- Align the packaged-report smoke check with the existing delivery fixture: one healthy client, two warnings, one critical client, and two clients without usable loop data. The expected score remains 56.
+
+- Correct release validation guidance to require Microsoft Word for report pagination and PDF export.
+- Refresh the shared sample validation and guide references for the current included capture.
+
+- Repair Client Performance delivery tests to verify the current embedded charts and their known values. Check visible characters for clipping without treating unused font space as a layout defect.
+
 - Use one complete demonstration dataset across the main, TA and MC workbenches: 2,537 client records, 24 relays, 25 subnets and 244 active property intervals. Align shared inputs, deployment dashboards and capacity examples, preserve original evidence, and verify the complete dataset by file fingerprints.
 
 - Point shortened Client Performance relay, subnet, and evaluation previews to the exact worksheet in the existing Excel workbook. Use the delivered workbook filename and retain the complete captured evaluation list in Evaluation Offenders. No additional workbook is created.
@@ -186,7 +197,7 @@ the project release process for the steps to cut a release.
 - Spell PerfMon in the text readers see: report titles, app labels and messages, console and log lines, and help text. File and folder names, identifiers, globs and config keys keep Perfmon.
 - Rate ActionSite size against a 10 MB soft warning (Needs Attention) and a 25 MB hard ceiling (Critical), by Duncan's 10-19 ruling. It used a "Review" word no other Contributing Factors row uses.
 - Apply only the NFR guide's limits in PerfMon, by Duncan's 10-19 ruling. The warning levels the guide does not state (CPU 70%, privileged time 8%, CPU queue 3, page file 4%) are removed. A virtual machine under the guide's 50% CPU floor still reads Advisory.
-- Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects Â· M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
+- Score FillDB on the four checks named in NFR PRF-BIG-30 (version 11.x.4, page 25), by Duncan's 10-19 ruling. Good or Great meets the standard and earns 100. Poor earns 0. Other objects stay in the table and chart, colored by the analyzer's rating, and are not scored. Good shows as Healthy. How This Score Is Calculated cites the guide. The Infographic header reads "N objects Ã‚Â· M assessed" (FD-01), and an Objects Not Healthy block names any object rated Poor (FD-03).
 - Score client loops in four groups, by Duncan's 10-19 ruling on Design's review. Healthy is under 15 minutes (100 points), Good is 15 to 30 (85), Warning is 30 to 60 (67) and Critical is over 60 or no usable data (34). The Infographic draws no usable data as a hatched part of Critical, and the Loop Health table gives it its own row. Excel adds Good rows and a Good Threshold. `--good-threshold` joins `--healthy-threshold`, whose default is now 00:15:00.
 - Use one set of score cut-offs in all three Mini Reports: 90 to 100 Healthy, 70 to 89 Needs Attention or Warning, 0 to 69 Critical. PerfMon and FillDB move from 85 and 60.
 - Require the Deployment_Information folder for Client Performance. The builder marks the module Needs A File without it, the Get script warns when it is missing, and the collection task, guide and documentation say so.

@@ -28,15 +28,33 @@ folder, then run `uv run --frozen python -m pytest -q Tests/test_client_delivery
 Without the setting, the fast known-answer checks still run; browser builds
 are explicitly skipped. Production Get, workbook, Word and chart code is used.
 
+## FillDB score checks
+
+`Tests/test_filldb_guide_checks.py` checks known scores for Healthy, Needs
+Attention, Critical, partially assessed and unassessed inputs. Unrated guide
+checks stay out of the denominator. Unrelated object ratings cannot change the
+score. On Windows, the bundled analyzer also processes synthetic raw logs with
+sparse activity, healthy throughput and poor throughput.
+
+A short live lab run verifies capture and processing. If the analyzer returns
+Not enough data on every guide check, the expected score is Not Assessed.
+Such a run does not exercise a numeric score or establish customer assessment
+coverage. Verify the source dates, assessed-check count, chart score and delivered
+Word tables together. Retain scored controls separately from live lab evidence.
+
 ## Before a release
 
 Manually run **Delivery and release validation** in GitHub Actions. It builds
 the real ZIP, verifies its checksum, commit and complete file manifest, installs
 only its runtime requirements in a new environment, constructs its hidden UI,
 and generates a report using the extracted application. The following Linux
-job renders the report with LibreOffice/PDFium and saves page images, extracted
-text, layout findings and pagination review notes. Review those images before release. This renderer
-checks a representative layout; final Word review is still needed.
+job currently renders the report with LibreOffice/PDFium. Its page images and
+layout findings do not count as document verification.
+
+For the required visual check, open the report in Microsoft Word, update its
+table of contents, export to PDF from Word, and inspect the affected pages at
+delivery size. Retain that PDF and the review result. If Word export fails,
+the check is incomplete. Do not substitute LibreOffice pagination.
 
 No workflow publishes a release. Packaging and PDF dependencies are in the
 `validation` dependency group and uv.lock; they are not runtime dependencies.

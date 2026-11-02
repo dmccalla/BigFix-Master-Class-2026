@@ -126,7 +126,9 @@ def test_loop_measurements_are_preserved_except_corrected_root_core_example():
             next(folder.glob("Client_Loop*.csv")).open(newline="", encoding="utf-8-sig")
         )
     )
-    with ZipFile(SAMPLE / META.get("loop_originals_archive", META["originals_archive"])) as archive:
+    with ZipFile(
+        SAMPLE / META.get("loop_originals_archive", META["originals_archive"])
+    ) as archive:
         name = next(
             n
             for n in archive.namelist()

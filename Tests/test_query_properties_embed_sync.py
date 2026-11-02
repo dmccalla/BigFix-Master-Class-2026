@@ -25,7 +25,7 @@ TASK = (
     / "Individual Tasks"
     / "BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes"
 )
-SAMPLE = PROJECT / "SampleData" / "BigFix Master Class 2026" / "Results" / "Client_Loop"
+SAMPLE = PROJECT / "SampleData" / "BigFix Master Class 2026" / "Client_Loop"
 
 
 def _embedded() -> str:
@@ -53,11 +53,11 @@ def _rows(path: Path) -> list[list[str]]:
 
 
 @pytest.mark.skipif(POWERSHELL is None, reason="PowerShell is not available")
-@pytest.mark.skipif(
-    not (SAMPLE / "Client_Loop_10-06-2026_2130.xml").exists(),
-    reason="The class sample capture is not tracked, so check it when present",
-)
 def test_standalone_reproduces_the_server_csvs_from_the_sample(tmp_path: Path) -> None:
+    loop_xmls = list(SAMPLE.glob("Client_Loop_*.xml"))
+    udp_xmls = list(SAMPLE.glob("UDP_Notifications_*.xml"))
+    assert len(loop_xmls) == len(udp_xmls) == 1
+    loop_xml, udp_xml = loop_xmls[0], udp_xmls[0]
     loop_csv = tmp_path / "loop.csv"
     udp_csv = tmp_path / "udp.csv"
     result = subprocess.run(
@@ -69,9 +69,9 @@ def test_standalone_reproduces_the_server_csvs_from_the_sample(tmp_path: Path) -
             "-File",
             str(UTILITY),
             "-LoopXml",
-            str(SAMPLE / "Client_Loop_10-06-2026_2130.xml"),
+            str(loop_xml),
             "-UdpXml",
-            str(SAMPLE / "UDP_Notifications_10-06-2026_2130.xml"),
+            str(udp_xml),
             "-OutputLoopCsv",
             str(loop_csv),
             "-OutputUdpCsv",
@@ -88,5 +88,5 @@ def test_standalone_reproduces_the_server_csvs_from_the_sample(tmp_path: Path) -
     )
 
     assert result.returncode == 0, result.stdout + result.stderr
-    assert _rows(loop_csv) == _rows(SAMPLE / "Client_Loop_10-06-2026_2130.csv")
+    assert _rows(loop_csv) == _rows(loop_xml.with_suffix(".csv"))
     assert _rows(udp_csv) == _rows(SAMPLE / "udp-notification-results.csv")

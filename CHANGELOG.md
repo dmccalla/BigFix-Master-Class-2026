@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Cap every input. Captures are limited to 1 GiB, PerfMon files to 4 GiB, Office and zip files to 250 MB stored with a decompression bomb guard, and JSON settings to 16 MiB. A capture holds at most 2,000,000 endpoint rows and a selected data folder at most 50,000 files and folders. Typed paths stop at 1,024 characters and other text at 2,000. A module that runs more than 3 hours or gives no output for 60 minutes is now stopped. This replaces the 2026-10-27 ruling that input files get no size cap, after the security design review. The setting `BIGFIX_HC_INPUT_LIMIT_MULTIPLIER` raises the file size limits for a genuine outlier and the run log records it.
+
 - Organize Docs the same way in all three repositories. Docs holds only README.md and folders: User Guide, Lab Guide, Reference for living documents, Records for dated ones, and Design for handoffs. Getting Started and Data Collection moved into Reference. A new test fails on loose files in Docs or a broken relative Markdown link.
 
 - Limit typed whole numbers to ASCII digits, nine digits at most. Cap PerfMon logical processors and disks at 4,096. Warn under the Run Name field when a name passes 60 characters. The name is shortened in folder and file names and the run is not blocked.

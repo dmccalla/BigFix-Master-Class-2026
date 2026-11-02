@@ -68,6 +68,11 @@ from run_diagnostics import (  # noqa: E402
 )
 
 from Lib.Core import app_version  # noqa: E402
+from Lib.Core.input_limits import (  # noqa: E402
+    MAX_FIELD_TEXT_CHARS,
+    MAX_PATH_TEXT_CHARS,
+    bind_text_limit,
+)
 from Lib.Core.input_utils import (  # noqa: E402
     DEFAULT_WORK_DIR,
     clean_user_path,
@@ -788,8 +793,11 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
 
         self.step = 1
         self.data_root_var = ctk.StringVar(value="")
+        bind_text_limit(self.data_root_var, MAX_PATH_TEXT_CHARS)
         self.output_folder_var = ctk.StringVar(value=_display_path(DEFAULT_WORK_DIR))
+        bind_text_limit(self.output_folder_var, MAX_PATH_TEXT_CHARS)
         self.run_name_var = ctk.StringVar(value="")
+        bind_text_limit(self.run_name_var, MAX_FIELD_TEXT_CHARS)
         self.dark_mode_var = ctk.BooleanVar(value=False)
         self.scan_confirmation_var = ctk.StringVar(value="")
         self.scan_missing_var = ctk.StringVar(value="")
@@ -802,6 +810,8 @@ class DiagnosticsWorkbenchUI(ctk.CTk):
             for field in mod.inputs_schema
             if field.kind in BROWSABLE_INPUT_KINDS
         }
+        for override_var in self.module_input_override_vars.values():
+            bind_text_limit(override_var, MAX_PATH_TEXT_CHARS)
         self.date_field_vars = {
             (mod.key, field.key): ctk.StringVar()
             for mod in MODULES

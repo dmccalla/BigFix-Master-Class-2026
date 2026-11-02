@@ -42,6 +42,7 @@ import re
 import socket
 import subprocess
 import sys
+import threading
 import time
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -63,6 +64,15 @@ from Lib.Core.build_provenance import (
     build_commit,
     provenance_comment,
     set_document_comments,
+)
+from Lib.Core.input_limits import (
+    ARCHIVE_SUFFIXES,
+    InputLimitError,
+    archive_problem,
+    bounded_walk,
+    file_size_problem,
+    override_note,
+    read_json_file,
 )
 from Lib.Core.input_utils import (
     DEFAULT_WORK_DIR,
@@ -394,7 +404,29 @@ def _parse_optional_datetime(value: object | None, label: str) -> str:
     raise ValueError(f"{label} must be a date/time like 05-01-2026 13:45.")
 
 
+def _validate_input_folder(path: Path, label: str) -> None:
+    """Refuse a folder that is implausibly large or holds an over-limit file."""
+    try:
+        every_file = bounded_walk(path)
+    except InputLimitError as exc:
+        raise ValueError(f"{label} is too large to scan. {exc}") from exc
+    for candidate in every_file:
+        try:
+            problem = file_size_problem(candidate, candidate.name)
+            if not problem and candidate.suffix.lower() in ARCHIVE_SUFFIXES:
+                problem = archive_problem(candidate, candidate.name)
+        except OSError:
+            continue
+        if problem:
+            raise ValueError(problem)
+
+
 def _validate_input_file(mod: Module, input_field: InputField, path: Path) -> None:
+    problem = file_size_problem(path, input_field.label)
+    if not problem and path.suffix.lower() in ARCHIVE_SUFFIXES:
+        problem = archive_problem(path, input_field.label)
+    if problem:
+        raise ValueError(problem)
     if mod.key == "loop" and input_field.key == mod.file_key:
         loop_validation = validate_loop_workbook(path)
         if not loop_validation.ok:
@@ -424,6 +456,8 @@ def _resolve_input_value_from_config(
 
     elif kind == "folder_optional":
         value = resolve_existing_folder(raw, input_field.label) if raw else None
+        if value is not None:
+            _validate_input_folder(value, input_field.label)
 
     elif kind == "int":
         value = (
@@ -525,6 +559,7 @@ def discover_module_input(folder: Path, mod: Module) -> Path | None:
 
 def scan_input_folder(folder: Path) -> dict[str, Path | None]:
     """Discover the primary input for every module under one data root."""
+    bounded_walk(folder)
     return {mod.key: discover_module_input(folder, mod) for mod in MODULES}
 
 
@@ -788,6 +823,50 @@ def find_script(filename: str) -> Path:
     raise FileNotFoundError(f"{filename} was not found under Get, Inject, or App.")
 
 
+# A module that never finishes must not hold the build forever. The overall
+# deadline is far above the longest measured run (12 minutes at 300,000
+# endpoints). The stall limit catches a module that stops producing output.
+RUN_PYTHON_DEADLINE_SECONDS = 3 * 60 * 60
+RUN_PYTHON_STALL_SECONDS = 60 * 60
+_WATCHDOG_POLL_SECONDS = 5.0
+
+
+def _kill_process_tree(process: subprocess.Popen) -> None:
+    """Stop a child and everything it started, such as the chart browser."""
+    if sys.platform == "win32":
+        try:
+            subprocess.run(
+                ["taskkill", "/PID", str(process.pid), "/T", "/F"],
+                capture_output=True,
+                stdin=subprocess.DEVNULL,
+                timeout=30,
+                check=False,
+                **_SUBPROCESS_KWARGS,
+            )
+        except (OSError, subprocess.SubprocessError):
+            pass
+    if process.poll() is None:
+        process.kill()
+
+
+def _watch_child(
+    process: subprocess.Popen, state: dict, stop: threading.Event, started: float
+) -> None:
+    while not stop.wait(_WATCHDOG_POLL_SECONDS):
+        now = time.monotonic()
+        if now - started > RUN_PYTHON_DEADLINE_SECONDS:
+            state["reason"] = (
+                f"ran longer than {RUN_PYTHON_DEADLINE_SECONDS / 3600:g} hours"
+            )
+        elif now - state["last_output"] > RUN_PYTHON_STALL_SECONDS:
+            state["reason"] = (
+                f"gave no output for {RUN_PYTHON_STALL_SECONDS / 60:g} minutes"
+            )
+        if state["reason"]:
+            _kill_process_tree(process)
+            return
+
+
 def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
     """Stream a Python child's output, raising if it exits unsuccessfully."""
     python_exe = sys.executable
@@ -807,6 +886,8 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
     # stdin=DEVNULL prevents child scripts from blocking on interactive prompts.
     started = time.perf_counter()
     returncode: int | None = None
+    state = {"last_output": time.monotonic(), "reason": ""}
+    stop_watchdog = threading.Event()
     try:
         process = subprocess.Popen(
             cmd,
@@ -821,14 +902,26 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
         if process.stdout is None:
             raise RuntimeError(f"{script.name} started without a readable stdout pipe.")
         pending_child_line: str | None = None
+        started_at = time.monotonic()
+        state["last_output"] = started_at
+        watchdog = threading.Thread(
+            target=_watch_child,
+            args=(process, state, stop_watchdog, started_at),
+            daemon=True,
+        )
+        watchdog.start()
         for raw_line in process.stdout:
+            state["last_output"] = time.monotonic()
             line = raw_line.rstrip("\r\n")
             pending_child_line = _emit_normalized_child_output(
                 line, pending_child_line, log
             )
         _flush_child_output(pending_child_line, log)
         returncode = process.wait()
+        stop_watchdog.set()
+        watchdog.join(timeout=10)
     finally:
+        stop_watchdog.set()
         if log is not None and log.diagnostics is not None:
             log.diagnostics.record(
                 "Child script",
@@ -837,6 +930,11 @@ def run_python(script: Path, args: list[str], log: RunLog | None = None) -> int:
                 return_code=returncode,
             )
 
+    if state["reason"]:
+        raise RuntimeError(
+            f"{script.name} was stopped because it {state['reason']}. "
+            "Check the input size and the log, then run it again."
+        )
     if returncode != 0:
         raise RuntimeError(f"{script.name} exited with code {returncode}")
     return returncode
@@ -1742,12 +1840,14 @@ def load_config(path: str) -> dict:
             f"Config file was not found: {config_path.resolve(strict=False)}"
         )
     try:
-        with config_path.open("r", encoding="utf-8-sig") as handle:
-            return json.load(handle)
+        config = read_json_file(config_path, "Config file")
     except OSError as exc:
         raise ValueError(f"Could not read config file: {exc}") from exc
     except json.JSONDecodeError as exc:
         raise ValueError(f"Config file is invalid JSON: {exc}") from exc
+    if not isinstance(config, dict):
+        raise ValueError("Config file must hold a JSON object.")
+    return config
 
 
 def _parse_module_inputs_from_config(
@@ -1960,6 +2060,8 @@ def main() -> int:
 
         log = RunLog(diagnostics)
         log.header(APP_TITLE)
+        if override_note():
+            log.warn(override_note())
         log.info("Run name", context.run_name or "(none)")
         log.info("File prefix", file_prefix)
         log.info("Run folder", str(run_folder))

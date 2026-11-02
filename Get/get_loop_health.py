@@ -79,6 +79,7 @@ from Lib.Core.document_stamp import (
     stamp_from_args,
     stamp_worksheet,
 )
+from Lib.Core.input_limits import endpoint_rows_problem
 from Lib.Core.input_utils import (
     clean_user_path as shared_clean_user_path,
 )
@@ -697,6 +698,15 @@ def _load_loop_csv_text(csv_text: str) -> pd.DataFrame:
 
 
 def load_loop_input(input_file: Path) -> pd.DataFrame:
+    """Load the Client Performance export within the endpoint row ceiling."""
+    frame = _read_loop_input(input_file)
+    problem = endpoint_rows_problem(len(frame), "The Client Performance capture")
+    if problem:
+        raise ValueError(problem)
+    return frame
+
+
+def _read_loop_input(input_file: Path) -> pd.DataFrame:
     """Load the Client Performance Counters - Basic export.
 
     Accepts the raw BESAPI .xml capture (whose answer lines are the CSV

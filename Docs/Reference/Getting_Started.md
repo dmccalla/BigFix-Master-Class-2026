@@ -119,6 +119,35 @@ Collect the files described in [Data Collection](Data_Collection.md), put
 them in a folder that follows the layout shown there, and point the Data
 Folder at it. Everything else is the same as the sample run.
 
+## Input Limits
+
+Every input has a ceiling, so a wrong selection fails with a clear message
+instead of running out of memory or time.
+
+| Input | Limit |
+| --- | --- |
+| XML, CSV, text and log captures | 1 GiB each |
+| PerfMon `.blg` captures | 4 GiB |
+| Word, Excel and zip files | 250 MB stored. A 2 GiB expanded size, 100 to 1 expansion ratio and 10,000 entries also apply |
+| Configuration and other JSON files | 16 MiB, 12 levels deep. Text values 2,000 characters, path values 1,024 |
+| Endpoint rows in one capture | 2,000,000 |
+| The selected data folder | 50,000 files and folders, 12 levels deep. Links are not followed |
+| Typed paths | 1,024 characters. Other typed text 2,000 |
+
+The largest measured inputs are a 396 MB PerfMon capture, a 142 MB Top 10 capture
+and a 36 MB Client Performance capture at 300,000 endpoints, so real collections
+sit well under these limits. A run name over 60 characters still warns and is
+shortened rather than refused.
+
+For a genuine outlier such as a week-long PerfMon capture, set the
+`BIGFIX_HC_INPUT_LIMIT_MULTIPLIER` environment variable to a whole number from 2
+to 8 and start the app again. It raises the file size limits by that factor and
+the run log records it. The other limits do not change.
+
+A module that runs for more than 3 hours, or gives no output for 60 minutes, is
+stopped and the build fails with a message. The longest measured run is about 12
+minutes at 300,000 endpoints.
+
 ## If Something Goes Wrong
 
 - The build reports a failed module: open **View Logs**. The log names the

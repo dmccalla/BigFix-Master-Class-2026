@@ -1,0 +1,34 @@
+Capture version: 2.0
+Captured: Sun 14 Jun 2026 18:52:55 -0400
+Host name: BFROOT1
+Primary role: RootServer
+Server roles: RootServer WebReports ServerAutomation MCPServer
+BES Root Server installed: Yes
+BES Web Reports installed: Yes
+BES WebUI installed: No
+BES Plugin Portal installed: No
+BES Explorer installed: No
+Server Automation Plan Engine installed: Yes
+BES MCP Server installed: Yes
+BES Relay installed: No
+Logical processors: 4
+Physical sockets: 1
+Cores per socket: 4
+CPU description: 12th Gen Intel(R) Core(TM) i9-12900H
+CPU max clock (MHz): 2918
+Is virtual: Yes
+Physical memory (MB): 12288
+BigFix server directory: C:\Program Files (x86)\BigFix Enterprise\BES Server
+BigFix storage path: C:\Program Files (x86)\BigFix Enterprise\BES Server\
+BigFix webui directory: Not collected
+BigFix plugin portal directory: Not collected
+BigFix web reports directory: C:\Program Files (x86)\BigFix Enterprise\BES Server\
+BigFix explorer directory: Not collected
+BigFix server automation directory: C:\Program Files (x86)\BigFix Enterprise\BES Client\Applications\PlanEngine
+BigFix mcp server directory: C:\Program Files (x86)\BigFix Enterprise\BES MCP Server
+Drive C total (MB): 203710
+Drive E total (MB): 102381
+Drive F total (MB): 102381
+Drive C free (MB): 129946
+Drive E free (MB): 82139
+Drive F free (MB): 102286

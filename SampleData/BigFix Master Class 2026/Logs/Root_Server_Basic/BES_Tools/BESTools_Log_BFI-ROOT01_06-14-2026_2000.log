@@ -1,0 +1,401 @@
+Thu, 09 Apr 2026 13:32:29 -0400 -- BES Computer Remover set 0 computers as deleted.
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_actionresults( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_actionresults( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_questionresults( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_questionresults( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_fixletresults( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_fixletresults( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_administrators( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_administrators( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_comments( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_comments( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_roles( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_roles( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_groups( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_groups( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call purge_inactive_computer_sites( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_sites( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_deleted_computers( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_computers( ?, ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_registration_for_deleted_computers( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_registration_for_deleted_computers( ?, ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_certificate_for_deleted_computers( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_certificate_for_deleted_computers( ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_deleted_from_correlations( ? , ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_from_correlations( ? , ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_single_correlation( ? , ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_single_correlation( ? , ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_mailbox_entries_for_deleted_computers( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:29 -0400 -- Deleted 0 rows from database while executing query '{call remove_mailbox_entries_for_deleted_computers( ?, ? )}'
+Thu, 09 Apr 2026 13:32:29 -0400 -- Executing {call remove_deleted_uploads( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:30 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_uploads( ?, ? )}'
+Thu, 09 Apr 2026 13:32:30 -0400 -- Executing {call remove_uploads_availability_for_deleted_uploads( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:30 -0400 -- Deleted 0 rows from database while executing query '{call remove_uploads_availability_for_deleted_uploads( ?, ? )}'
+Thu, 09 Apr 2026 13:32:30 -0400 -- Executing {call remove_upload_references_for_deleted_uploads( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 13:32:30 -0400 -- Deleted 0 rows from database while executing query '{call remove_upload_references_for_deleted_uploads( ?, ? )}'
+Thu, 09 Apr 2026 13:32:30 -0400 -- Erasing uploaded files and directories for removed computers ...
+Thu, 09 Apr 2026 13:32:30 -0400 -- Deleted 0 uploaded files ...
+Thu, 09 Apr 2026 13:32:35 -0400 -- BES Computer Remover deleted 0 duplicated computers.
+Thu, 09 Apr 2026 13:32:35 -0400 -- Successfully requested full report for deleted computers.
+Thu, 09 Apr 2026 13:32:35 -0400 -- BES Computer Remover removed 0 rows and 0 files.
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_contenthistory( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_contenthistory( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_actionhistory( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_actionhistory( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_relaydatfile( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_relaydatfile( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: audittrailget_old_uploads_names  with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 files 
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcertificates( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcertificates( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_oldlod( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_oldlod( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_latestlod( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_latestlod( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_actions( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_actions( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_settings( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_settings( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_settings_user_groups( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_settings_user_groups( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_success( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_success( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_fields( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_fields( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_relevance( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_relevance( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlets( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlets( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_action_settings( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_action_settings( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_action_settings_user_groups( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_action_settings_user_groups( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_actions( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_actions( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_action_success( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_action_success( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_components( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_components( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_groups( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_groups( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_fields( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_fields( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_relevance( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_relevance( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baselines( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baselines( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_fields( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_fields( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_relevance( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_relevance( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_properties( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_properties( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analyses( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analyses( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedanalysis_activations( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedanalysis_activations( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedproperties( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedproperties( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedgroups( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedgroups( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_versions( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_versions( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_fxcomments( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_fxcomments( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_fxresults( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_fxresults( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_qresults( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_qresults( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_lqresults( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_lqresults( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_statbins( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_statbins( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_statsamples( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_statsamples( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_defs( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_defs( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_flags( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_flags( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_versions( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_versions( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_comments( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_comments( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_result( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_result( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_user_groups( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_user_groups( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_target_static( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_target_static( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_target_names( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_target_names( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_parameters( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_parameters( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_fields( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_fields( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_orphanedsubactions( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_orphanedsubactions( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_orphanedsubactions_actions( ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_orphanedsubactions_actions( ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_flags( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_flags( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_version( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_version( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_defs( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_defs( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_flags( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_flags( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions( ?, ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions( ?, ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxfiles( ?, ?, ? )} with batch size 100000
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxfiles( ?, ?, ? )}
+Thu, 09 Apr 2026 14:32:35 -0400 -- Deleting audit log files ...
+Thu, 09 Apr 2026 14:32:35 -0400 -- Deleted 0 audit log files ...
+Thu, 09 Apr 2026 14:32:35 -0400 -- BES Audit Trail Cleaner removed 0 rows and 0 files.
+Fri, 10 Apr 2026 13:32:39 -0400 -- BES Computer Remover set 0 computers as deleted.
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_actionresults( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_actionresults( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_questionresults( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_questionresults( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_fixletresults( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_fixletresults( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_administrators( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_administrators( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_comments( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_comments( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_roles( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_roles( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_groups( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_groups( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call purge_inactive_computer_sites( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_sites( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call remove_deleted_computers( ?, ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_computers( ?, ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call remove_registration_for_deleted_computers( ?, ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call remove_registration_for_deleted_computers( ?, ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call remove_certificate_for_deleted_computers( ?, ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call remove_certificate_for_deleted_computers( ?, ? )}'
+Fri, 10 Apr 2026 13:32:39 -0400 -- Executing {call remove_deleted_from_correlations( ? , ? )} with batch size 100000
+Fri, 10 Apr 2026 13:32:39 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_from_correlations( ? , ? )}'
+... [snip] ...
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:49 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:49 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:50 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:50 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxfiles( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 18:54:50 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxfiles( ?, ?, ? )}
+Sun, 14 Jun 2026 18:54:50 -0400 -- Deleting audit log files ...
+Sun, 14 Jun 2026 18:54:50 -0400 -- Deleted 0 audit log files ...
+Sun, 14 Jun 2026 18:54:50 -0400 -- BES Audit Trail Cleaner removed 0 rows and 0 files.
+Sun, 14 Jun 2026 19:04:50 -0400 -- BES Computer Remover set 0 computers as deleted.
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_actionresults( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_actionresults( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_questionresults( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_questionresults( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_longquestionresults( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_fixletresults( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_fixletresults( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_administrators( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_administrators( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_comments( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_comments( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_roles( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_roles( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_groups( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_groups( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call purge_inactive_computer_sites( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call purge_inactive_computer_sites( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_deleted_computers( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_computers( ?, ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_registration_for_deleted_computers( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_registration_for_deleted_computers( ?, ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_certificate_for_deleted_computers( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_certificate_for_deleted_computers( ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_deleted_from_correlations( ? , ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_from_correlations( ? , ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_single_correlation( ? , ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_single_correlation( ? , ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_mailbox_entries_for_deleted_computers( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_mailbox_entries_for_deleted_computers( ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_deleted_uploads( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_deleted_uploads( ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_uploads_availability_for_deleted_uploads( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_uploads_availability_for_deleted_uploads( ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Executing {call remove_upload_references_for_deleted_uploads( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 rows from database while executing query '{call remove_upload_references_for_deleted_uploads( ?, ? )}'
+Sun, 14 Jun 2026 19:04:50 -0400 -- Erasing uploaded files and directories for removed computers ...
+Sun, 14 Jun 2026 19:04:50 -0400 -- Deleted 0 uploaded files ...
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Computer Remover deleted 0 duplicated computers.
+Sun, 14 Jun 2026 19:04:52 -0400 -- Successfully requested full report for deleted computers.
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Computer Remover removed 0 rows and 0 files.
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_contenthistory( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_contenthistory( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_actionhistory( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_actionhistory( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_relaydatfile( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_relaydatfile( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: audittrailget_old_uploads_names  with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 files 
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcertificates( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcertificates( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_oldlod( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_oldlod( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_latestlod( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_latestlod( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_actions( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_actions( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_settings( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_settings( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_settings_user_groups( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_settings_user_groups( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_action_success( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_action_success( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_fields( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_fields( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlet_relevance( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlet_relevance( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_fixlets( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_fixlets( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_action_settings( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_action_settings( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_action_settings_user_groups( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_action_settings_user_groups( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_actions( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_actions( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_action_success( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_action_success( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_components( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_components( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_component_groups( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_component_groups( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_fields( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_fields( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baseline_relevance( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baseline_relevance( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_baselines( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_baselines( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_fields( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_fields( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_relevance( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_relevance( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analysis_properties( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analysis_properties( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcustom_analyses( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcustom_analyses( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedanalysis_activations( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedanalysis_activations( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedproperties( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedproperties( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedgroups( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedgroups( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_computer_groups( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_computer_groups( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_versions( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_versions( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_fxcomments( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_fxcomments( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_fxresults( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_fxresults( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_qresults( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_qresults( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_lqresults( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_lqresults( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_statbins( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_statbins( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_statsamples( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_statsamples( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedcontent_content_types( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedcontent_content_types( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_defs( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_defs( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_flags( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_flags( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_versions( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_versions( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_comments( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_comments( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions_result( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions_result( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_user_groups( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_user_groups( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_target_static( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_target_static( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_target_names( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_target_names( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_parameters( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_parameters( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedaction_fields( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedaction_fields( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_deletedactions( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_deletedactions( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_orphanedsubactions( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_orphanedsubactions( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_orphanedsubactions_actions( ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_orphanedsubactions_actions( ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_flags( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_flags( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_version( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:52 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_version( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:52 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_defs( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_defs( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_flags( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_flags( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_version( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions_legacy_defs( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_user_groups( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_static( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_target_names( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_parameters( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenaction_fields( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_hiddenactions( ?, ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_hiddenactions( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxcomputerfiles( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- BESAuditTrailCleaner: Executing {call audittrailclean_mailboxfiles( ?, ?, ? )} with batch size 100000
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner deleted 0 rows from database while executing query {call audittrailclean_mailboxfiles( ?, ?, ? )}
+Sun, 14 Jun 2026 19:04:53 -0400 -- Deleting audit log files ...
+Sun, 14 Jun 2026 19:04:53 -0400 -- Deleted 0 audit log files ...
+Sun, 14 Jun 2026 19:04:53 -0400 -- BES Audit Trail Cleaner removed 0 rows and 0 files.

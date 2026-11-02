@@ -1,0 +1,7 @@
+Configuration option 'show advanced options' changed from 1 to 1. Run the RECONFIGURE statement to install.
+name                                minimum     maximum     config_value run_value  
+----------------------------------- ----------- ----------- ------------ -----------
+max degree of parallelism                     0       32767            4           4
+name                                minimum     maximum     config_value run_value  
+----------------------------------- ----------- ----------- ------------ -----------
+cost threshold for parallelism                0       32767           50          50

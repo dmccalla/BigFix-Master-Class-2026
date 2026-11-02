@@ -1,0 +1,628 @@
+Changed database context to 'BFEnterprise'.
+DBCC results for 'BFEnterprise'.
+Service Broker Msg 9675, State 1: Message Types analyzed: 14.
+Service Broker Msg 9676, State 1: Service Contracts analyzed: 6.
+Service Broker Msg 9667, State 1: Services analyzed: 3.
+Service Broker Msg 9668, State 1: Service Queues analyzed: 3.
+Service Broker Msg 9669, State 1: Conversation Endpoints analyzed: 0.
+Service Broker Msg 9674, State 1: Conversation Groups analyzed: 0.
+Service Broker Msg 9670, State 1: Remote Service Bindings analyzed: 0.
+Service Broker Msg 9605, State 1: Conversation Priorities analyzed: 0.
+DBCC results for 'sys.sysrscols'.
+There are 3896 rows in 85 pages for object "sys.sysrscols".
+DBCC results for 'sys.sysrowsets'.
+There are 439 rows in 6 pages for object "sys.sysrowsets".
+DBCC results for 'sys.sysclones'.
+There are 0 rows in 0 pages for object "sys.sysclones".
+DBCC results for 'sys.sysallocunits'.
+There are 646 rows in 11 pages for object "sys.sysallocunits".
+DBCC results for 'sys.sysfiles1'.
+There are 2 rows in 1 pages for object "sys.sysfiles1".
+DBCC results for 'sys.sysseobjvalues'.
+There are 0 rows in 0 pages for object "sys.sysseobjvalues".
+DBCC results for 'sys.syspriorities'.
+There are 0 rows in 0 pages for object "sys.syspriorities".
+DBCC results for 'sys.sysdbfrag'.
+There are 0 rows in 0 pages for object "sys.sysdbfrag".
+DBCC results for 'sys.sysfgfrag'.
+There are 0 rows in 0 pages for object "sys.sysfgfrag".
+DBCC results for 'sys.sysdbfiles'.
+There are 2 rows in 1 pages for object "sys.sysdbfiles".
+DBCC results for 'sys.syspru'.
+There are 0 rows in 0 pages for object "sys.syspru".
+DBCC results for 'sys.sysbrickfiles'.
+There are 0 rows in 0 pages for object "sys.sysbrickfiles".
+DBCC results for 'sys.sysphfg'.
+There are 1 rows in 1 pages for object "sys.sysphfg".
+DBCC results for 'sys.sysprufiles'.
+There are 2 rows in 1 pages for object "sys.sysprufiles".
+DBCC results for 'sys.sysftinds'.
+There are 0 rows in 0 pages for object "sys.sysftinds".
+DBCC results for 'sys.sysowners'.
+There are 15 rows in 1 pages for object "sys.sysowners".
+DBCC results for 'sys.sysdbreg'.
+There are 0 rows in 0 pages for object "sys.sysdbreg".
+DBCC results for 'sys.sysprivs'.
+There are 191 rows in 1 pages for object "sys.sysprivs".
+DBCC results for 'sys.sysschobjs'.
+There are 3723 rows in 59 pages for object "sys.sysschobjs".
+DBCC results for 'sys.syscsrowgroups'.
+There are 0 rows in 0 pages for object "sys.syscsrowgroups".
+DBCC results for 'sys.sysextsources'.
+There are 0 rows in 0 pages for object "sys.sysextsources".
+DBCC results for 'sys.sysexttables'.
+There are 0 rows in 0 pages for object "sys.sysexttables".
+DBCC results for 'sys.sysextfileformats'.
+There are 0 rows in 0 pages for object "sys.sysextfileformats".
+DBCC results for 'sys.sysmultiobjvalues'.
+There are 0 rows in 0 pages for object "sys.sysmultiobjvalues".
+DBCC results for 'sys.syscolpars'.
+There are 6172 rows in 126 pages for object "sys.syscolpars".
+DBCC results for 'sys.sysxlgns'.
+There are 0 rows in 0 pages for object "sys.sysxlgns".
+DBCC results for 'sys.sysxsrvs'.
+There are 0 rows in 0 pages for object "sys.sysxsrvs".
+DBCC results for 'sys.sysnsobjs'.
+There are 1 rows in 1 pages for object "sys.sysnsobjs".
+DBCC results for 'sys.sysusermsgs'.
+There are 0 rows in 0 pages for object "sys.sysusermsgs".
+DBCC results for 'sys.syscerts'.
+There are 0 rows in 0 pages for object "sys.syscerts".
+DBCC results for 'sys.sysrmtlgns'.
+There are 0 rows in 0 pages for object "sys.sysrmtlgns".
+DBCC results for 'sys.syslnklgns'.
+There are 0 rows in 0 pages for object "sys.syslnklgns".
+DBCC results for 'sys.sysxprops'.
+There are 0 rows in 0 pages for object "sys.sysxprops".
+DBCC results for 'sys.sysscalartypes'.
+There are 34 rows in 1 pages for object "sys.sysscalartypes".
+DBCC results for 'sys.systypedsubobjs'.
+There are 0 rows in 0 pages for object "sys.systypedsubobjs".
+DBCC results for 'sys.sysidxstats'.
+There are 1004 rows in 19 pages for object "sys.sysidxstats".
+DBCC results for 'sys.sysiscols'.
+There are 1561 rows in 13 pages for object "sys.sysiscols".
+DBCC results for 'sys.sysendpts'.
+There are 0 rows in 0 pages for object "sys.sysendpts".
+DBCC results for 'sys.syswebmethods'.
+There are 0 rows in 0 pages for object "sys.syswebmethods".
+DBCC results for 'sys.sysbinobjs'.
+There are 23 rows in 1 pages for object "sys.sysbinobjs".
+DBCC results for 'sys.sysaudacts'.
+There are 0 rows in 0 pages for object "sys.sysaudacts".
+DBCC results for 'sys.sysobjvalues'.
+There are 1765 rows in 504 pages for object "sys.sysobjvalues".
+DBCC results for 'sys.syscscolsegments'.
+There are 0 rows in 0 pages for object "sys.syscscolsegments".
+DBCC results for 'sys.syscsdictionaries'.
+There are 0 rows in 0 pages for object "sys.syscsdictionaries".
+DBCC results for 'sys.sysclsobjs'.
+There are 20 rows in 1 pages for object "sys.sysclsobjs".
+DBCC results for 'sys.sysrowsetrefs'.
+There are 0 rows in 0 pages for object "sys.sysrowsetrefs".
+DBCC results for 'sys.sysremsvcbinds'.
+There are 0 rows in 0 pages for object "sys.sysremsvcbinds".
+DBCC results for 'sys.sysxmitqueue'.
+There are 0 rows in 0 pages for object "sys.sysxmitqueue".
+DBCC results for 'sys.sysrts'.
+There are 1 rows in 1 pages for object "sys.sysrts".
+DBCC results for 'sys.sysconvgroup'.
+There are 0 rows in 0 pages for object "sys.sysconvgroup".
+DBCC results for 'sys.sysdesend'.
+There are 0 rows in 0 pages for object "sys.sysdesend".
+DBCC results for 'sys.sysdercv'.
+There are 0 rows in 0 pages for object "sys.sysdercv".
+DBCC results for 'sys.syssingleobjrefs'.
+There are 505 rows in 3 pages for object "sys.syssingleobjrefs".
+DBCC results for 'sys.sysmultiobjrefs'.
+There are 5132 rows in 43 pages for object "sys.sysmultiobjrefs".
+DBCC results for 'sys.sysguidrefs'.
+There are 0 rows in 0 pages for object "sys.sysguidrefs".
+DBCC results for 'sys.sysfoqueues'.
+There are 0 rows in 0 pages for object "sys.sysfoqueues".
+DBCC results for 'sys.syschildinsts'.
+There are 0 rows in 0 pages for object "sys.syschildinsts".
+DBCC results for 'sys.syscompfragments'.
+There are 0 rows in 0 pages for object "sys.syscompfragments".
+DBCC results for 'sys.sysftsemanticsdb'.
+There are 0 rows in 0 pages for object "sys.sysftsemanticsdb".
+DBCC results for 'sys.sysftstops'.
+There are 0 rows in 0 pages for object "sys.sysftstops".
+DBCC results for 'sys.sysftproperties'.
+There are 0 rows in 0 pages for object "sys.sysftproperties".
+DBCC results for 'sys.sysxmitbody'.
+There are 0 rows in 0 pages for object "sys.sysxmitbody".
+DBCC results for 'sys.sysfos'.
+There are 0 rows in 0 pages for object "sys.sysfos".
+DBCC results for 'sys.sysqnames'.
+There are 98 rows in 1 pages for object "sys.sysqnames".
+DBCC results for 'sys.sysxmlcomponent'.
+There are 100 rows in 1 pages for object "sys.sysxmlcomponent".
+DBCC results for 'sys.sysxmlfacet'.
+There are 112 rows in 1 pages for object "sys.sysxmlfacet".
+DBCC results for 'sys.sysxmlplacement'.
+There are 19 rows in 1 pages for object "sys.sysxmlplacement".
+DBCC results for 'sys.sysobjkeycrypts'.
+There are 0 rows in 0 pages for object "sys.sysobjkeycrypts".
+DBCC results for 'sys.sysasymkeys'.
+There are 0 rows in 0 pages for object "sys.sysasymkeys".
+DBCC results for 'sys.syssqlguides'.
+There are 0 rows in 0 pages for object "sys.syssqlguides".
+DBCC results for 'sys.sysbinsubobjs'.
+There are 3 rows in 1 pages for object "sys.sysbinsubobjs".
+DBCC results for 'sys.syssoftobjrefs'.
+There are 1420 rows in 52 pages for object "sys.syssoftobjrefs".
+DBCC results for 'REPLICATION_EDGE_WEIGHTS'.
+There are 0 rows in 0 pages for object "REPLICATION_EDGE_WEIGHTS".
+DBCC results for 'webui.IVR_IMPORTED_VULNERABILITY_META'.
+There are 0 rows in 0 pages for object "webui.IVR_IMPORTED_VULNERABILITY_META".
+DBCC results for 'EXTERNAL_FIXLET_TRANSLATIONS'.
+There are 3389490 rows in 1698928 pages for object "EXTERNAL_FIXLET_TRANSLATIONS".
+DBCC results for 'EXTERNAL_SITE_TRANSLATIONS'.
+There are 1030 rows in 14 pages for object "EXTERNAL_SITE_TRANSLATIONS".
+DBCC results for 'webui.PREDEFINED_PROPERTIES_TRANSLATIONS'.
+There are 60 rows in 1 pages for object "webui.PREDEFINED_PROPERTIES_TRANSLATIONS".
+DBCC results for 'webui.IVR_IMPORT_JOB_STATUS'.
+There are 0 rows in 0 pages for object "webui.IVR_IMPORT_JOB_STATUS".
+DBCC results for 'SITE_LISTINGS'.
+There are 43 rows in 1 pages for object "SITE_LISTINGS".
+DBCC results for 'webui.COMPUTED_DEVICE_PROPERTIES'.
+There are 13 rows in 1 pages for object "webui.COMPUTED_DEVICE_PROPERTIES".
+DBCC results for 'webui.RESERVED_AGGREGATED_PROPERTIES_TRANSLATIONS'.
+There are 380 rows in 7 pages for object "webui.RESERVED_AGGREGATED_PROPERTIES_TRANSLATIONS".
+DBCC results for 'EXTERNAL_FIXLETS'.
+There are 338949 rows in 7437 pages for object "EXTERNAL_FIXLETS".
+DBCC results for 'sys.sqlagent_jobs'.
+There are 0 rows in 0 pages for object "sys.sqlagent_jobs".
+DBCC results for 'STATISTICAL_SAMPLES'.
+There are 0 rows in 0 pages for object "STATISTICAL_SAMPLES".
+DBCC results for 'sys.sqlagent_jobsteps'.
+There are 0 rows in 0 pages for object "sys.sqlagent_jobsteps".
+DBCC results for 'webui.ACTION_APP'.
+There are 1058 rows in 7 pages for object "webui.ACTION_APP".
+DBCC results for 'EXTERNAL_FIXLET_ACTION_SETTINGS'.
+There are 127 rows in 6 pages for object "EXTERNAL_FIXLET_ACTION_SETTINGS".
+DBCC results for 'sys.sqlagent_job_history'.
+There are 0 rows in 0 pages for object "sys.sqlagent_job_history".
+DBCC results for 'UPLOADS'.
+There are 118 rows in 7 pages for object "UPLOADS".
+DBCC results for 'sys.sqlagent_jobsteps_logs'.
+There are 0 rows in 0 pages for object "sys.sqlagent_jobsteps_logs".
+DBCC results for 'PEER_NEST_DATA'.
+There are 0 rows in 0 pages for object "PEER_NEST_DATA".
+DBCC results for 'webui.CUSTOM_COMPUTED_FIXLET_COUNTS'.
+There are 0 rows in 0 pages for object "webui.CUSTOM_COMPUTED_FIXLET_COUNTS".
+DBCC results for 'COMPUTER_REGISTRATIONS'.
+There are 25 rows in 4 pages for object "COMPUTER_REGISTRATIONS".
+DBCC results for 'EXTERNAL_FIXLET_ACTION_SETTINGS_USER_GROUPS'.
+There are 0 rows in 0 pages for object "EXTERNAL_FIXLET_ACTION_SETTINGS_USER_GROUPS".
+DBCC results for 'sys.plan_persist_query_text'.
+There are 0 rows in 0 pages for object "sys.plan_persist_query_text".
+DBCC results for 'webui.COMPUTED_FIXLET_COUNTS'.
+There are 0 rows in 0 pages for object "webui.COMPUTED_FIXLET_COUNTS".
+DBCC results for 'VISUALIZATIONPRESETS'.
+There are 0 rows in 0 pages for object "VISUALIZATIONPRESETS".
+DBCC results for 'sys.plan_persist_query'.
+There are 0 rows in 0 pages for object "sys.plan_persist_query".
+DBCC results for 'webui.COMPUTED_DEVICE_COUNTS'.
+There are 0 rows in 0 pages for object "webui.COMPUTED_DEVICE_COUNTS".
+DBCC results for 'EXTERNAL_FIXLET_ACTION_SUCCESS'.
+There are 219448 rows in 1789 pages for object "EXTERNAL_FIXLET_ACTION_SUCCESS".
+DBCC results for 'sys.plan_persist_plan'.
+There are 0 rows in 0 pages for object "sys.plan_persist_plan".
+DBCC results for 'PEER_NEST_GATHER_DATA'.
+There are 0 rows in 0 pages for object "PEER_NEST_GATHER_DATA".
+DBCC results for 'webui.SWD_COMPUTED_FIXLET_COUNTS'.
+There are 0 rows in 0 pages for object "webui.SWD_COMPUTED_FIXLET_COUNTS".
+DBCC results for 'sys.plan_persist_runtime_stats'.
+There are 0 rows in 0 pages for object "sys.plan_persist_runtime_stats".
+DBCC results for 'DEPLOYMENT_METRICS'.
+There are 0 rows in 0 pages for object "DEPLOYMENT_METRICS".
+DBCC results for 'webui.agent_type_properties'.
+There are 10 rows in 1 pages for object "webui.agent_type_properties".
+DBCC results for 'EXTERNAL_FIXLET_ACTIONS'.
+There are 828473 rows in 410035 pages for object "EXTERNAL_FIXLET_ACTIONS".
+DBCC results for 'sys.plan_persist_runtime_stats_interval'.
+There are 0 rows in 0 pages for object "sys.plan_persist_runtime_stats_interval".
+DBCC results for 'NAMEDFILTERS'.
+There are 4 rows in 1 pages for object "NAMEDFILTERS".
+DBCC results for 'sys.plan_persist_context_settings'.
+There are 0 rows in 0 pages for object "sys.plan_persist_context_settings".
+DBCC results for 'FIXLET_TAGS'.
+There are 0 rows in 0 pages for object "FIXLET_TAGS".
+DBCC results for 'CORRELATIONS'.
+There are 0 rows in 0 pages for object "CORRELATIONS".
+DBCC results for 'EXTERNAL_FIXLET_FIELDS'.
+There are 2277125 rows in 64798 pages for object "EXTERNAL_FIXLET_FIELDS".
+DBCC results for 'sys.plan_persist_query_hints'.
+There are 0 rows in 0 pages for object "sys.plan_persist_query_hints".
+DBCC results for 'sys.plan_persist_query_template_parameterization'.
+There are 0 rows in 0 pages for object "sys.plan_persist_query_template_parameterization".
+DBCC results for 'webui.COMPUTED_DEVICE_DEPLOYMENT_COUNTS'.
+There are 0 rows in 0 pages for object "webui.COMPUTED_DEVICE_DEPLOYMENT_COUNTS".
+DBCC results for 'webui.REPORT_STAGING'.
+There are 0 rows in 0 pages for object "webui.REPORT_STAGING".
+DBCC results for 'webui.PROPERTIES_SOURCES_TRANSLATIONS'.
+There are 20 rows in 1 pages for object "webui.PROPERTIES_SOURCES_TRANSLATIONS".
+DBCC results for 'EXTERNAL_FIXLET_RELEVANCE'.
+There are 1641945 rows in 111397 pages for object "EXTERNAL_FIXLET_RELEVANCE".
+DBCC results for 'sys.plan_persist_wait_stats'.
+There are 0 rows in 0 pages for object "sys.plan_persist_wait_stats".
+DBCC results for 'REPLICATION_GRAPH_VIEW_NODES'.
+There are 0 rows in 0 pages for object "REPLICATION_GRAPH_VIEW_NODES".
+DBCC results for 'sys.persistent_version_store'.
+There are 0 rows in 0 pages for object "sys.persistent_version_store".
+DBCC results for 'webui.USER_CACHE'.
+There are 0 rows in 0 pages for object "webui.USER_CACHE".
+DBCC results for 'CORRELATION_KEYS'.
+There are 2 rows in 1 pages for object "CORRELATION_KEYS".
+DBCC results for 'EXTERNAL_ANALYSES'.
+There are 13187 rows in 146 pages for object "EXTERNAL_ANALYSES".
+DBCC results for 'BESTOOLSSCHEDULES'.
+There are 1 rows in 1 pages for object "BESTOOLSSCHEDULES".
+DBCC results for 'sys.persistent_version_store_long_term'.
+There are 0 rows in 0 pages for object "sys.persistent_version_store_long_term".
+DBCC results for 'webui.USER_HASHES'.
+There are 0 rows in 0 pages for object "webui.USER_HASHES".
+DBCC results for 'SITE_LISTINGS_PROPAGATED'.
+There are 43 rows in 1 pages for object "SITE_LISTINGS_PROPAGATED".
+DBCC results for 'TOKENS'.
+There are 0 rows in 0 pages for object "TOKENS".
+DBCC results for 'EXTERNAL_ANALYSIS_PROPERTIES'.
+There are 20513 rows in 4351 pages for object "EXTERNAL_ANALYSIS_PROPERTIES".
+DBCC results for 'BESTOOLSTASKS'.
+There are 1 rows in 1 pages for object "BESTOOLSTASKS".
+DBCC results for 'webui.CONTENT_COMPUTED_OPEN_DEPLOYMENT_COUNTS'.
+There are 0 rows in 0 pages for object "webui.CONTENT_COMPUTED_OPEN_DEPLOYMENT_COUNTS".
+DBCC results for 'AGENT_TYPES_PRIORITY'.
+There are 3 rows in 1 pages for object "AGENT_TYPES_PRIORITY".
+DBCC results for 'webui.apMAG'.
+There are 11 rows in 1 pages for object "webui.apMAG".
+DBCC results for 'UNMANAGEDASSET_FIELDS_TYPES'.
+There are 16 rows in 1 pages for object "UNMANAGEDASSET_FIELDS_TYPES".
+DBCC results for 'EXTERNAL_ANALYSIS_FIELDS'.
+There are 51354 rows in 1179 pages for object "EXTERNAL_ANALYSIS_FIELDS".
+DBCC results for 'webui.COMPUTED_ACTION_RESULTS'.
+There are 0 rows in 0 pages for object "webui.COMPUTED_ACTION_RESULTS".
+DBCC results for 'USER_LOGIN'.
+There are 16 rows in 1 pages for object "USER_LOGIN".
+DBCC results for 'cust_avp_io_stat_logger_interval_v4'.
+There are 0 rows in 0 pages for object "cust_avp_io_stat_logger_interval_v4".
+DBCC results for 'webui.apENGINEDATA'.
+There are 1 rows in 1 pages for object "webui.apENGINEDATA".
+DBCC results for 'EXTERNAL_ANALYSIS_RELEVANCE'.
+There are 27040 rows in 1780 pages for object "EXTERNAL_ANALYSIS_RELEVANCE".
+DBCC results for 'webui.COMPUTED_DEVICE_GROUPS'.
+There are 0 rows in 0 pages for object "webui.COMPUTED_DEVICE_GROUPS".
+DBCC results for 'UNMANAGEDASSET_SOURCES'.
+There are 1 rows in 1 pages for object "UNMANAGEDASSET_SOURCES".
+DBCC results for 'APPS'.
+There are 13 rows in 1 pages for object "APPS".
+DBCC results for 'CORRELATED_GROUPS_REFRESH_TIMES'.
+There are 0 rows in 0 pages for object "CORRELATED_GROUPS_REFRESH_TIMES".
+DBCC results for 'webui.apPOLICY'.
+There are 2 rows in 1 pages for object "webui.apPOLICY".
+DBCC results for 'UNMANAGEDASSET_ASSETS'.
+There are 7 rows in 1 pages for object "UNMANAGEDASSET_ASSETS".
+DBCC results for 'APP_USERS'.
+There are 0 rows in 0 pages for object "APP_USERS".
+DBCC results for 'APP_ROLES'.
+There are 39 rows in 1 pages for object "APP_ROLES".
+DBCC results for 'UPLOADS_AVAILABILITY'.
+There are 118 rows in 9 pages for object "UPLOADS_AVAILABILITY".
+DBCC results for 'sys.wpr_bucket_table'.
+There are 0 rows in 0 pages for object "sys.wpr_bucket_table".
+DBCC results for 'webui.apENGINEJOB'.
+There are 15 rows in 1 pages for object "webui.apENGINEJOB".
+DBCC results for 'EXTERNAL_SITE_VISIBILITY'.
+There are 8 rows in 1 pages for object "EXTERNAL_SITE_VISIBILITY".
+DBCC results for 'CONTENT_TYPES'.
+There are 7016 rows in 53 pages for object "CONTENT_TYPES".
+DBCC results for 'SAML_SETTINGS'.
+There are 0 rows in 0 pages for object "SAML_SETTINGS".
+DBCC results for 'HISTORICAL_FIXLET_COUNTS'.
+There are 18918 rows in 137 pages for object "HISTORICAL_FIXLET_COUNTS".
+DBCC results for 'webui.apSCHEDULE'.
+There are 4 rows in 1 pages for object "webui.apSCHEDULE".
+DBCC results for 'QUERIES'.
+There are 0 rows in 1 pages for object "QUERIES".
+DBCC results for 'SITE_SUPPORTING_CERTIFICATES'.
+There are 215 rows in 4 pages for object "SITE_SUPPORTING_CERTIFICATES".
+DBCC results for 'QUERYRESULTINFO'.
+There are 0 rows in 1 pages for object "QUERYRESULTINFO".
+DBCC results for 'QUERYRESULTTEXT'.
+There are 0 rows in 1 pages for object "QUERYRESULTTEXT".
+DBCC results for 'APP_CERTIFICATES'.
+There are 5 rows in 1 pages for object "APP_CERTIFICATES".
+DBCC results for 'FIXLET_COMMENTS'.
+There are 0 rows in 0 pages for object "FIXLET_COMMENTS".
+DBCC results for 'webui.apTARGET'.
+There are 2 rows in 1 pages for object "webui.apTARGET".
+DBCC results for 'COMPUTER_SITES'.
+There are 1038 rows in 7 pages for object "COMPUTER_SITES".
+DBCC results for 'QUESTIONRESULTS'.
+There are 9522 rows in 278 pages for object "QUESTIONRESULTS".
+DBCC results for 'webui.apPREVIEW'.
+There are 2 rows in 2 pages for object "webui.apPREVIEW".
+DBCC results for 'UNMANAGEDASSET_FIELDS'.
+There are 83 rows in 2 pages for object "UNMANAGEDASSET_FIELDS".
+DBCC results for 'ACTIONS'.
+There are 1058 rows in 474 pages for object "ACTIONS".
+DBCC results for 'ACTION_FLAGS'.
+There are 1062 rows in 8 pages for object "ACTION_FLAGS".
+DBCC results for 'ACTION_FIELDS'.
+There are 29 rows in 2 pages for object "ACTION_FIELDS".
+DBCC results for 'USER_FIXLET_VISIBILITY'.
+There are 0 rows in 0 pages for object "USER_FIXLET_VISIBILITY".
+DBCC results for 'webui.PPS_PERMISSION_DEFINITIONS'.
+There are 14 rows in 1 pages for object "webui.PPS_PERMISSION_DEFINITIONS".
+DBCC results for 'ACTION_COMMENTS'.
+There are 0 rows in 0 pages for object "ACTION_COMMENTS".
+DBCC results for 'ACTION_PARAMETERS'.
+There are 983 rows in 11 pages for object "ACTION_PARAMETERS".
+DBCC results for 'LDAP_SERVERS'.
+There are 1 rows in 1 pages for object "LDAP_SERVERS".
+DBCC results for 'ACTION_TARGET_NAMES'.
+There are 0 rows in 0 pages for object "ACTION_TARGET_NAMES".
+DBCC results for 'webui.PPS_TRANSLATIONS'.
+There are 200 rows in 8 pages for object "webui.PPS_TRANSLATIONS".
+DBCC results for 'LOCAL_OBJECT_DEFS'.
+There are 2625 rows in 92 pages for object "LOCAL_OBJECT_DEFS".
+DBCC results for 'AGGREGATEDBY'.
+There are 1 rows in 1 pages for object "AGGREGATEDBY".
+DBCC results for 'ACTION_TARGET_STATIC'.
+There are 1449 rows in 12 pages for object "ACTION_TARGET_STATIC".
+DBCC results for 'REPLICATION_EDGE_CONNECTIVITY'.
+There are 0 rows in 0 pages for object "REPLICATION_EDGE_CONNECTIVITY".
+DBCC results for 'ACTION_USER_GROUPS'.
+There are 0 rows in 0 pages for object "ACTION_USER_GROUPS".
+DBCC results for 'webui.PPS_ROLES'.
+There are 0 rows in 0 pages for object "webui.PPS_ROLES".
+DBCC results for 'ACTIONPRESETS'.
+There are 3 rows in 1 pages for object "ACTIONPRESETS".
+DBCC results for 'CUSTOM_ANALYSES'.
+There are 86 rows in 26 pages for object "CUSTOM_ANALYSES".
+DBCC results for 'EXPLORER_INSTANCES'.
+There are 0 rows in 0 pages for object "EXPLORER_INSTANCES".
+DBCC results for 'webui.mdmUBMGroups'.
+There are 0 rows in 0 pages for object "webui.mdmUBMGroups".
+DBCC results for 'webui.mdmUBMGroupsMaster'.
+There are 0 rows in 0 pages for object "webui.mdmUBMGroupsMaster".
+DBCC results for 'CUSTOM_ANALYSIS_FIELDS'.
+There are 61 rows in 3 pages for object "CUSTOM_ANALYSIS_FIELDS".
+DBCC results for 'ROLE_USER_ASSIGNMENTS'.
+There are 7 rows in 1 pages for object "ROLE_USER_ASSIGNMENTS".
+DBCC results for 'ACTION_DEFS'.
+There are 1448 rows in 50 pages for object "ACTION_DEFS".
+DBCC results for 'webui.mdmCerts'.
+There are 1 rows in 1 pages for object "webui.mdmCerts".
+DBCC results for 'webui.mdmPolicyDetails'.
+There are 0 rows in 0 pages for object "webui.mdmPolicyDetails".
+DBCC results for 'CUSTOM_ANALYSIS_PROPERTIES'.
+There are 440 rows in 47 pages for object "CUSTOM_ANALYSIS_PROPERTIES".
+DBCC results for 'ROLES'.
+There are 7 rows in 1 pages for object "ROLES".
+DBCC results for 'ACTIONRESULTS'.
+There are 1501 rows in 15 pages for object "ACTIONRESULTS".
+DBCC results for 'COMPUTER_GROUPS'.
+There are 53 rows in 1 pages for object "COMPUTER_GROUPS".
+DBCC results for 'CUSTOM_ANALYSIS_RELEVANCE'.
+There are 138 rows in 9 pages for object "CUSTOM_ANALYSIS_RELEVANCE".
+DBCC results for 'webui.mdmPolicyDDF'.
+There are 0 rows in 0 pages for object "webui.mdmPolicyDDF".
+DBCC results for 'webui.mdmUBMAttributes'.
+There are 0 rows in 0 pages for object "webui.mdmUBMAttributes".
+DBCC results for 'SERVERDATA_SESSIONS'.
+There are 2 rows in 1 pages for object "SERVERDATA_SESSIONS".
+DBCC results for 'COMPUTERS'.
+There are 25 rows in 1 pages for object "COMPUTERS".
+DBCC results for 'CUSTOM_BASELINES'.
+There are 17 rows in 1 pages for object "CUSTOM_BASELINES".
+DBCC results for 'STATISTICAL_BINS'.
+There are 0 rows in 0 pages for object "STATISTICAL_BINS".
+DBCC results for 'webui.mdmUploads'.
+There are 0 rows in 0 pages for object "webui.mdmUploads".
+DBCC results for 'CUSTOM_BASELINE_FIELDS'.
+There are 2 rows in 1 pages for object "CUSTOM_BASELINE_FIELDS".
+DBCC results for 'REPLICATION_SEQUENCES'.
+There are 1 rows in 1 pages for object "REPLICATION_SEQUENCES".
+DBCC results for 'webui.mdmSmartGroup'.
+There are 0 rows in 0 pages for object "webui.mdmSmartGroup".
+DBCC results for 'PROPERTYIDMAP'.
+There are 5668 rows in 65 pages for object "PROPERTYIDMAP".
+DBCC results for 'ACTIONSTATESTRINGS'.
+There are 58 rows in 1 pages for object "ACTIONSTATESTRINGS".
+DBCC results for 'CUSTOM_BASELINE_RELEVANCE'.
+There are 2 rows in 1 pages for object "CUSTOM_BASELINE_RELEVANCE".
+DBCC results for 'SITENAMEMAP'.
+There are 577 rows in 35 pages for object "SITENAMEMAP".
+DBCC results for 'webui.mdmPolicyGroupApplications'.
+There are 0 rows in 0 pages for object "webui.mdmPolicyGroupApplications".
+DBCC results for 'ADMINFIELDS'.
+There are 48 rows in 12 pages for object "ADMINFIELDS".
+DBCC results for 'CUSTOM_BASELINE_COMPONENTS'.
+There are 534 rows in 351 pages for object "CUSTOM_BASELINE_COMPONENTS".
+DBCC results for 'USERINFO'.
+There are 16 rows in 1 pages for object "USERINFO".
+DBCC results for 'CUSTOM_BASELINE_COMPONENT_GROUPS'.
+There are 17 rows in 1 pages for object "CUSTOM_BASELINE_COMPONENT_GROUPS".
+DBCC results for 'BLOBFIELDS'.
+There are 3428 rows in 59 pages for object "BLOBFIELDS".
+DBCC results for 'webui.mdmUBMAttributesMaster'.
+There are 0 rows in 0 pages for object "webui.mdmUBMAttributesMaster".
+DBCC results for 'webui.mdmPolicyGroups'.
+There are 0 rows in 0 pages for object "webui.mdmPolicyGroups".
+DBCC results for 'CUSTOM_BASELINE_COMPONENT_ACTIONS'.
+There are 166 rows in 34 pages for object "CUSTOM_BASELINE_COMPONENT_ACTIONS".
+DBCC results for 'webui.mdmPolicyGroupPolicies'.
+There are 0 rows in 0 pages for object "webui.mdmPolicyGroupPolicies".
+DBCC results for 'CERTIFICATES'.
+There are 6 rows in 3 pages for object "CERTIFICATES".
+DBCC results for 'CUSTOM_BASELINE_ACTION_SETTINGS'.
+There are 1 rows in 1 pages for object "CUSTOM_BASELINE_ACTION_SETTINGS".
+DBCC results for 'webui.SCHEMA_VERSION'.
+There are 1 rows in 5 pages for object "webui.SCHEMA_VERSION".
+DBCC results for 'COMPUTER_ADMINISTRATORS'.
+There are 66 rows in 1 pages for object "COMPUTER_ADMINISTRATORS".
+DBCC results for 'CUSTOM_BASELINE_ACTION_SETTINGS_USER_GROUPS'.
+There are 0 rows in 0 pages for object "CUSTOM_BASELINE_ACTION_SETTINGS_USER_GROUPS".
+DBCC results for 'VERSIONS'.
+There are 48227 rows in 805 pages for object "VERSIONS".
+DBCC results for 'webui.mdmAppleDeviceAttribute'.
+There are 0 rows in 0 pages for object "webui.mdmAppleDeviceAttribute".
+DBCC results for 'CUSTOM_BASELINE_COMPONENT_ACTION_SUCCESS'.
+There are 166 rows in 2 pages for object "CUSTOM_BASELINE_COMPONENT_ACTION_SUCCESS".
+DBCC results for 'COMPUTER_ROLES'.
+There are 66 rows in 1 pages for object "COMPUTER_ROLES".
+DBCC results for 'DBINFO'.
+There are 1 rows in 1 pages for object "DBINFO".
+DBCC results for 'webui.mdmVppLocations'.
+There are 0 rows in 0 pages for object "webui.mdmVppLocations".
+DBCC results for 'webui.mdmAppstoreLicenses'.
+There are 0 rows in 0 pages for object "webui.mdmAppstoreLicenses".
+DBCC results for 'CUSTOM_FIXLETS'.
+There are 545 rows in 75 pages for object "CUSTOM_FIXLETS".
+DBCC results for 'ROLE_CUSTOM_SITE_ASSIGNMENTS'.
+There are 7 rows in 1 pages for object "ROLE_CUSTOM_SITE_ASSIGNMENTS".
+DBCC results for 'webui.SWD_PACKAGES'.
+There are 13 rows in 4 pages for object "webui.SWD_PACKAGES".
+DBCC results for 'webui.mdmPolicyNext'.
+There are 1 rows in 1 pages for object "webui.mdmPolicyNext".
+DBCC results for 'ROLE_EXTERNAL_SITE_ASSIGNMENTS'.
+There are 50 rows in 1 pages for object "ROLE_EXTERNAL_SITE_ASSIGNMENTS".
+DBCC results for 'CUSTOM_SITE_READERS'.
+There are 10 rows in 1 pages for object "CUSTOM_SITE_READERS".
+DBCC results for 'CUSTOM_FIXLET_FIELDS'.
+There are 501 rows in 26 pages for object "CUSTOM_FIXLET_FIELDS".
+DBCC results for 'ROLE_GROUP_ASSIGNMENTS'.
+There are 2 rows in 1 pages for object "ROLE_GROUP_ASSIGNMENTS".
+DBCC results for 'CUSTOM_FIXLET_ACTIONS'.
+There are 615 rows in 256 pages for object "CUSTOM_FIXLET_ACTIONS".
+DBCC results for 'webui.mdmPolicy'.
+There are 0 rows in 0 pages for object "webui.mdmPolicy".
+DBCC results for 'LDAP_SETTINGS'.
+There are 2 rows in 1 pages for object "LDAP_SETTINGS".
+DBCC results for 'COMPUTER_COMMENTS'.
+There are 0 rows in 0 pages for object "COMPUTER_COMMENTS".
+DBCC results for 'CUSTOM_FIXLET_ACTION_SUCCESS'.
+There are 150 rows in 3 pages for object "CUSTOM_FIXLET_ACTION_SUCCESS".
+DBCC results for 'PENDING_PROPAGATIONS'.
+There are 0 rows in 8 pages for object "PENDING_PROPAGATIONS".
+DBCC results for 'webui.mdmMobileAppConfigurations'.
+There are 0 rows in 0 pages for object "webui.mdmMobileAppConfigurations".
+DBCC results for 'CUSTOM_FIXLET_ACTION_SETTINGS'.
+There are 5 rows in 1 pages for object "CUSTOM_FIXLET_ACTION_SETTINGS".
+DBCC results for 'FILEONLY_CUSTOM_SITE_AUTHORIZATIONS'.
+There are 0 rows in 0 pages for object "FILEONLY_CUSTOM_SITE_AUTHORIZATIONS".
+DBCC results for 'CUSTOM_SITE_WRITERS'.
+There are 4 rows in 1 pages for object "CUSTOM_SITE_WRITERS".
+DBCC results for 'webui.mdmAppstoreAssociations'.
+There are 0 rows in 0 pages for object "webui.mdmAppstoreAssociations".
+DBCC results for 'CUSTOM_FIXLET_ACTION_SETTINGS_USER_GROUPS'.
+There are 0 rows in 0 pages for object "CUSTOM_FIXLET_ACTION_SETTINGS_USER_GROUPS".
+DBCC results for 'webui.apCONTROL'.
+There are 28 rows in 5 pages for object "webui.apCONTROL".
+DBCC results for 'COMPUTER_CERTIFICATES'.
+There are 25 rows in 1 pages for object "COMPUTER_CERTIFICATES".
+DBCC results for 'CUSTOM_FIXLET_RELEVANCE'.
+There are 1259 rows in 84 pages for object "CUSTOM_FIXLET_RELEVANCE".
+DBCC results for 'MAILBOX_FILES'.
+There are 824 rows in 27 pages for object "MAILBOX_FILES".
+DBCC results for 'FIXLETRESULTS'.
+There are 79202 rows in 880 pages for object "FIXLETRESULTS".
+DBCC results for 'webui.PRFMGR_PROFILES'.
+There are 0 rows in 0 pages for object "webui.PRFMGR_PROFILES".
+DBCC results for 'ANALYSIS_ACTIVATIONS'.
+There are 384 rows in 9 pages for object "ANALYSIS_ACTIVATIONS".
+DBCC results for 'dss.schema_migrations'.
+There are 11 rows in 1 pages for object "dss.schema_migrations".
+DBCC results for 'webui.IVR_CVE_FIXLET_MAP'.
+There are 0 rows in 1 pages for object "webui.IVR_CVE_FIXLET_MAP".
+DBCC results for 'CUSTOM_SITES'.
+There are 31 rows in 1 pages for object "CUSTOM_SITES".
+DBCC results for 'dss.schema_info'.
+There are 1 rows in 1 pages for object "dss.schema_info".
+DBCC results for 'webui.IVR_CVE_FIXLET_CACHE'.
+There are 0 rows in 0 pages for object "webui.IVR_CVE_FIXLET_CACHE".
+DBCC results for 'PROPERTIES'.
+There are 69 rows in 9 pages for object "PROPERTIES".
+DBCC results for 'MAILBOX_COMPUTER_FILES'.
+There are 1365 rows in 8 pages for object "MAILBOX_COMPUTER_FILES".
+DBCC results for 'webui.REPORT_FAVORITES'.
+There are 0 rows in 0 pages for object "webui.REPORT_FAVORITES".
+DBCC results for 'EXTERNAL_OBJECT_DEFS'.
+There are 45937 rows in 2423 pages for object "EXTERNAL_OBJECT_DEFS".
+DBCC results for 'GROUPS'.
+There are 13 rows in 1 pages for object "GROUPS".
+DBCC results for 'webui.mdmAppstoreDeveloperAccount'.
+There are 0 rows in 0 pages for object "webui.mdmAppstoreDeveloperAccount".
+DBCC results for 'MAILBOX_COMPUTERS'.
+There are 31 rows in 1 pages for object "MAILBOX_COMPUTERS".
+DBCC results for 'HISTORICAL_COMPUTER_COUNTS'.
+There are 1055 rows in 5 pages for object "HISTORICAL_COMPUTER_COUNTS".
+DBCC results for 'webui.REPORT_INFO'.
+There are 0 rows in 0 pages for object "webui.REPORT_INFO".
+DBCC results for 'WEBUI_TABLES'.
+There are 49 rows in 31 pages for object "WEBUI_TABLES".
+DBCC results for 'webui.IVR_SCANNER_COUNT'.
+There are 0 rows in 1 pages for object "webui.IVR_SCANNER_COUNT".
+DBCC results for 'RELAYSTATUS'.
+There are 262 rows in 8 pages for object "RELAYSTATUS".
+DBCC results for 'PROPERTY_RESULTS_EXCLUSIONS'.
+There are 0 rows in 0 pages for object "PROPERTY_RESULTS_EXCLUSIONS".
+DBCC results for 'webui.mdmOdjCerts'.
+There are 0 rows in 0 pages for object "webui.mdmOdjCerts".
+DBCC results for 'UPLOAD_REFERENCES'.
+There are 131 rows in 9 pages for object "UPLOAD_REFERENCES".
+DBCC results for 'REPLICATION_GRAPH_VIEW_SETTINGS'.
+There are 1 rows in 1 pages for object "REPLICATION_GRAPH_VIEW_SETTINGS".
+DBCC results for 'CLIENTS_FILE_TRACKER'.
+There are 0 rows in 0 pages for object "CLIENTS_FILE_TRACKER".
+DBCC results for 'webui.IVR_VULNERABILITY_FIXLET_MAP'.
+There are 0 rows in 1 pages for object "webui.IVR_VULNERABILITY_FIXLET_MAP".
+DBCC results for 'webui.WEBUI_REQUEST_QUEUE'.
+There are 2 rows in 5 pages for object "webui.WEBUI_REQUEST_QUEUE".
+DBCC results for 'DASHBOARDDATA'.
+There are 437 rows in 13 pages for object "DASHBOARDDATA".
+DBCC results for 'webui.REPORT_EXPORT'.
+There are 0 rows in 0 pages for object "webui.REPORT_EXPORT".
+DBCC results for 'webui.IVR_VULNERABILITY_META'.
+There are 0 rows in 1 pages for object "webui.IVR_VULNERABILITY_META".
+DBCC results for 'WEBUI_SITES'.
+There are 20 rows in 1 pages for object "WEBUI_SITES".
+DBCC results for 'sys.queue_messages_1977058079'.
+There are 0 rows in 0 pages for object "sys.queue_messages_1977058079".
+DBCC results for 'LANG_IDS'.
+There are 10 rows in 1 pages for object "LANG_IDS".
+DBCC results for 'FIXLET_VISIBILITY'.
+There are 0 rows in 0 pages for object "FIXLET_VISIBILITY".
+DBCC results for 'sys.queue_messages_2009058193'.
+There are 0 rows in 0 pages for object "sys.queue_messages_2009058193".
+DBCC results for 'WEBUI_DATA'.
+There are 65 rows in 2 pages for object "WEBUI_DATA".
+DBCC results for 'dss.schema_migration_api'.
+There are 5 rows in 1 pages for object "dss.schema_migration_api".
+DBCC results for 'sys.queue_messages_2041058307'.
+There are 0 rows in 0 pages for object "sys.queue_messages_2041058307".
+DBCC results for 'SITES'.
+There are 155 rows in 8 pages for object "SITES".
+DBCC results for 'LONGQUESTIONRESULTS'.
+There are 107 rows in 3 pages for object "LONGQUESTIONRESULTS".
+DBCC results for 'sys.filestream_tombstone_2073058421'.
+There are 0 rows in 0 pages for object "sys.filestream_tombstone_2073058421".
+DBCC results for 'EXTERNAL_ANALYSIS_PROPERTY_TRANSLATIONS'.
+There are 210620 rows in 3231 pages for object "EXTERNAL_ANALYSIS_PROPERTY_TRANSLATIONS".
+DBCC results for 'sys.syscommittab'.
+There are 0 rows in 0 pages for object "sys.syscommittab".
+DBCC results for 'webui.IVR_IMPORTED_CVE_FIXLET_MAP'.
+There are 0 rows in 0 pages for object "webui.IVR_IMPORTED_CVE_FIXLET_MAP".
+DBCC results for 'REPLICATION_SERVERS'.
+There are 1 rows in 1 pages for object "REPLICATION_SERVERS".
+DBCC results for 'sys.filetable_updates_2105058535'.
+There are 0 rows in 0 pages for object "sys.filetable_updates_2105058535".
+DBCC results for 'EXTERNAL_ANALYSIS_TRANSLATIONS'.
+There are 131870 rows in 24309 pages for object "EXTERNAL_ANALYSIS_TRANSLATIONS".
+DBCC results for 'EXTERNAL_FIXLET_ACTION_TRANSLATIONS'.
+There are 8285180 rows in 237899 pages for object "EXTERNAL_FIXLET_ACTION_TRANSLATIONS".
+CHECKDB found 0 allocation errors and 0 consistency errors in database 'BFEnterprise'.
+DBCC execution completed. If DBCC printed error messages, contact your system administrator.

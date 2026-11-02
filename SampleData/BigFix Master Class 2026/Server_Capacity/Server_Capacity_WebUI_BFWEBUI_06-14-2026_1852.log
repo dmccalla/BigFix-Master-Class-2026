@@ -1,0 +1,30 @@
+Capture version: 2.0
+Captured: Sun 14 Jun 2026 18:52:55 -0400
+Host name: BFWEBUI
+Primary role: WebUI
+Server roles: WebUI
+BES Root Server installed: No
+BES Web Reports installed: No
+BES WebUI installed: Yes
+BES Plugin Portal installed: No
+BES Explorer installed: No
+Server Automation Plan Engine installed: No
+BES MCP Server installed: No
+BES Relay installed: No
+Logical processors: 2
+Physical sockets: 2
+Cores per socket: 1
+CPU description: 12th Gen Intel(R) Core(TM) i9-12900H
+CPU max clock (MHz): 2918
+Is virtual: Yes
+Physical memory (MB): 8095
+BigFix server directory: Not collected
+BigFix storage path: Not collected
+BigFix webui directory: C:\Program Files (x86)\BigFix Enterprise\BES WebUI\
+BigFix plugin portal directory: Not collected
+BigFix web reports directory: Not collected
+BigFix explorer directory: Not collected
+BigFix server automation directory: Not collected
+BigFix mcp server directory: Not collected
+Drive C total (MB): 61109
+Drive C free (MB): 37494

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+<Answer type="string">BFRELAY001, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY002, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY003, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY004, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY005, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY006, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY007, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY008, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY009, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY010, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY011, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY012, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY013, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY014, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY015, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY016, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY017, Not Set, Missing, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 52400, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY018, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY019, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY020, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY021, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY022, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY023, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+<Answer type="string">BFRELAY024, 30, 5120, 11.0.6.137, Running, Off, C:\Program Files (x86)\BigFix Enterprise\BES Relay\wwwrootbes\, 2, 2, 1, 12th Gen Intel(R) Core(TM) i9-12900H, 2918, 4095, 512000, Yes, Drive C total (MB): 102069, Drive C free (MB): 59978, Windows Server 2022</Answer>
+</Result>
+		<Evaluation>
+			<Time>733.453ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

@@ -1,0 +1,38 @@
+DEPLOYMENT OVERVIEW DASHBOARD
+ 
+Report Generated: Sun, 14 Jun 2026 20:28:32 -0400
+ 
+Deployment Information
+Deployment Version :: 11.0.6.137
+Total Managed Devices :: 2537
+Native Agent Count :: 2537
+Relays Deployed :: 24
+Console Installed :: 6
+Clients Reported Today :: 2477
+Native Agents Reported Today :: 2477
+License Seat Count :: 999999
+License Seat Usage :: Unrestricted
+License Expiration Date :: Thu, 24 Apr 2036 15:46:10 -0400
+Operator Information
+Total Operators :: 3
+Non-Master Operators :: 2
+Master Operators :: 1
+Usage Statistics
+Days Using BigFix :: 45
+Actions -- All Total :: 612
+Actions -- All Open :: 10
+Content Information
+Number of External Sites: 42
+Number of Custom Sites: 14
+Number of Fixlets: 2161 / 44297
+Number of Tasks: 498 / 1896
+Number of Analyses: 32 / 4400
+Number of Actived Properties: 244
+Number of Custom Properties: 0
+Relay Statistics
+Relays Reported Today :: 24
+Relay Selection -- Manual :: 137
+Relay Selection -- Automatic  :: 2400
+Distance to Relay
+0|137
+1|2400

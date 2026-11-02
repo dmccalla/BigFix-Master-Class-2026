@@ -11,6 +11,8 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+- Use one complete demonstration dataset across the main, TA and MC workbenches: 2,537 client records, 24 relays, 25 subnets and 244 active property intervals. Align shared inputs, deployment dashboards and capacity examples, preserve original evidence, and verify the complete dataset by file fingerprints.
+
 - Point shortened Client Performance relay, subnet, and evaluation previews to the exact worksheet in the existing Excel workbook. Use the delivered workbook filename and retain the complete captured evaluation list in Evaluation Offenders. No additional workbook is created.
 
 - Cap every input. Captures are limited to 1 GiB, PerfMon files to 4 GiB, Office and zip files to 250 MB stored with a decompression bomb guard, and JSON settings to 16 MiB. A capture holds at most 2,000,000 endpoint rows and a selected data folder at most 50,000 files and folders. Typed paths stop at 1,024 characters and other text at 2,000. A module that runs more than 3 hours or gives no output for 60 minutes is now stopped. This replaces the 2026-10-27 ruling that input files get no size cap, after the security design review. The setting `BIGFIX_HC_INPUT_LIMIT_MULTIPLIER` raises the file size limits for a genuine outlier and the run log records it.

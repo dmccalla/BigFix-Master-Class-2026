@@ -1,0 +1,104 @@
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- GetStatisticalPropertyIDs: 455 ms
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- select top 0 * from EXTERNAL_OBJECT_DEFS
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- {? = CALL sp_getapplock( ?, ? )}
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- select M.SiteID, P.ID 
+from LOCAL_OBJECT_DEFS P, VERSIONS V, SITENAMEMAP M 
+where P.IsFixlet = 0 
+  and P.ID = V.ID and P.Version = V.LatestVersion and V.IsFixlet = P.IsFixlet and M.Sitename = V.Sitename 
+  and M.Sitename = 'ActionSite' 
+  and P.Sequence BETWEEN ? and ? 
+union all
+select M.SiteID, A.ID 
+from ACTION_DEFS A, VERSIONS V, SITENAMEMAP M 
+where M.Sitename = 'ActionSite' 
+  and A.ID = V.ID and A.Version = V.LatestVersion and V.IsFixlet = 0 and M.Sitename = V.Sitename 
+  and A.Sequence BETWEEN ? and ? 
+
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- GetNonReportingFixlets: 58 ms
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+create table #VISIBLE_COMPUTERS ( ComputerID int not null primary key )
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- {call populateVisibleComputers( ? )}
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- select CC.ComputerID from COMPUTER_CERTIFICATES CC 
+Sun, 14 Jun 2026 20:01:43 -0400 -- 2592 -- if OBJECT_ID( N'tempdb..#FILTERED_COMPUTERS', N'U' ) is not null 
+    drop table #FILTERED_COMPUTERS 
+
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- GetComputersWithCertificates: 386 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- select OldSiteID, ContentID, SiteID, Type from CONTENT_TYPES where Sequence BETWEEN ? and ? 
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- GetContentTypes: 293 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- select g.ContentID, v.LatestVersion from GROUPS g join VERSIONS v on   v.Sitename = 'ActionSite' and   g.ContentID = v.ID and   g.Version = v.LatestVersion where g.Sequence BETWEEN ? and ? 
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- GetFixletGroupsVersion: 414 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- select ID, URL from SITES
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- UpdateSiteURLMap: 40 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 --  select PrimaryAgentType, SecondaryAgentType, ProviderName, CorrelationKey, CorrelatedKey, IsEnabled  from CORRELATION_KEYS  where Sequence BETWEEN ? and ? 
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- GetAssetCorrelationKeys: 67 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 --  select ComputerID from CORRELATIONS where IsDeleted = 1 and Sequence BETWEEN ? and ? 
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- GetComputerIDsOfSoftDeletedCorrelations: 38 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 --  select ComputerID from COMPUTERS where IsDeleted = 1 and Sequence BETWEEN ? and ? 
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- UpdateMappings complete in: 2129 ms
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- The Fixlet with SiteID 8150 and ContentID 12003 is unknown...
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- The Fixlet with SiteID 8150 and ContentID 12004 is unknown...
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- The content with SiteID 2299764711 and ContentID 7 is unknown...
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- The content with SiteID 1 and ContentID 582 is unknown...
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- The content with SiteID 15545 and ContentID 1002 is unknown...
+Sun, 14 Jun 2026 20:01:44 -0400 -- 2592 -- Parsing: 1 messages in 7 ms: 142 messages/sec
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- {call update_computers(?,?,?)}
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- computer sequences: 1 rows in 3 ms: 333 rows/sec
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- update COMPUTERS set LastReportSent = ? where ComputerID = ? 
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- computer properties: 1 rows in 137 ms: 7 rows/sec
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- {call update_fixletresults(?,?,?,?,?,?,?,?)}
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- ExecuteBatchWithProgress: commitSize = 1456355, maxBatchSize = 500; Committing at i = 2 over 2 rows
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- Fixlet results: 2 rows in 176 ms: 11 rows/sec
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:45 -0400 -- 2592 -- merge into QUESTIONRESULTS as q using ( values (?,?,?,?,?,?,?,?,?,?)) as v(siteid,analysisid, propertyid, computerid, isfailure, isplural, resultscount, resultstext, reportnumber, webuisiteid) on q.SiteID=v.siteid and q.AnalysisID=v.analysisid and q.PropertyID=v.propertyid and q.ComputerID=v.computerid when matched then update set IsFailure=v.isfailure, 		IsPlural=v.isplural, 		ResultsCount=v.resultscount, 		ResultsText=v.resultstext, 		ReportNumber=v.reportnumber, 		WebuiSiteID=v.webuisiteid, 		OriginServerID=NULL, 		OriginSequence=NULL when not matched then insert(SiteID,AnalysisID, PropertyID, ComputerID, IsFailure, IsPlural, ResultsCount, ResultsText, ReportNumber, WebuiSiteID) values(v.siteid,v.analysisid, v.propertyid, v.computerid, v.isfailure, v.isplural, v.resultscount, v.resultstext, v.reportnumber, v.webuisiteid);
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- short property results: 5 rows in 74 ms: 67 rows/sec
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- ----------- Batch Complete: 1 messages in 3245 ms: 0 messages/sec
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 --                             0.0% full reports
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select ServerID from DBINFO
+Sun, 14 Jun 2026 20:01:46 -0400 -- 3156 -- FillDB Stop Requested.
+Sun, 14 Jun 2026 20:01:46 -0400 -- 7176 -- Stopping FastQueryManager
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 20:01:46 -0400 -- 4088 -- UploadDirectoryMonitor: dirEventQSize = 0  fileCommitQSize = 0  nextScanTime = 1781484153
+Sun, 14 Jun 2026 20:01:46 -0400 -- 4088 -- Stopping UploadDirectoryMonitor
+Sun, 14 Jun 2026 20:01:46 -0400 -- 7608 -- Stopping UploadMonitor
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select ServerID from DBINFO
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select Weights.SrcServerID,								
+		Weights.DstServerID,								
+		Weights.EdgeWeight,									
+		Connectivity.IsConnected,							
+		Connectivity.LastReplicationTime,					
+		Connectivity.LastError								
+from   REPLICATION_EDGE_WEIGHTS Weights LEFT OUTER JOIN	
+		REPLICATION_EDGE_CONNECTIVITY Connectivity			
+on   ( Weights.SrcServerID = Connectivity.SrcServerID		
+	and Weights.DstServerID	= Connectivity.DstServerID )	
+ where Weights.EdgeWeight != 0								
+   and Weights.DstServerID in ( select ServerID from REPLICATION_SERVERS where IsDeleted = 0 ) 
+	and Weights.SrcServerID in ( select ServerID from REPLICATION_SERVERS where IsDeleted = 0 ) 
+
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select ServerID, DNS, URL, IntervalSeconds from REPLICATION_SERVERS where IsDeleted = 0 
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- {call getComputerSequences( ?, ? )}
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- GetComputerSequences: 22 ms
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- SELECT UndecoratedSitename, dbo.fn_GetVersionFromSitename( Sitename ) FROM SITENAMEMAP WHERE IsDeleted = 0
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- SELECT DISTINCT Sitename FROM EXTERNAL_OBJECT_DEFS P
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- DeleteUnusedSites: 55 ms
+Sun, 14 Jun 2026 20:01:46 -0400 -- 2592 -- Disconnecting from database.

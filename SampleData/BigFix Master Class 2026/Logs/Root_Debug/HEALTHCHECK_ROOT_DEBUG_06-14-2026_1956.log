@@ -1,0 +1,423 @@
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - BES Root Server version 11.0.6.137 built for WINVER 10.0 x86_64 running on WINVER 10.0.20348 i386, starting
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - FXF character set is windows-1252
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Control Flow Guard is disabled.
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Using cURL library - 8.18.0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - OpenSSL Initialized (FIPS Mode)
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Using OpenSSL crypto library OpenSSL 3.5.5 27 Jan 2026
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Opening socket with IP address: ::
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Successfully connected to database
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Signature Algorithms: sha384, sha256
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Download Algorithms: sha256, sha1
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - TLS Cipher List: HIGH:!ADH:!AECDH:!kDH:!kECDH:!kRSA:!PSK:!SRP:!SHA1
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:20 -0400 - Main Thread (240) - Successfully read server signing key
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successfully read client CA key
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select LdapID, Name, ActiveDirectory, GlobalCatalog, UseSSL, BaseDN, UIDAttr,        UserFilter, GroupFilter, GUIDAttr, Username, EncryptedPassword, SignedData from LDAP_SETTINGS where IsDeleted = 0 AND ActiveDirectory < ?
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select   ID, Issuer, EntryPoint, IsDisabled, SigningCertificate, SignedData from SAML_SETTINGS
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Reloading download whitelist file C:\Program Files (x86)\BigFix Enterprise\BES Server\Mirror Server\config\DownloadWhitelist.txt
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select count(*) from REPLICATION_SERVERS where IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select SiteTag, ManyVersion from SITE_LISTINGS WHERE OriginServerID = (SELECT ServerID FROM DBINFO)
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 19:56:21 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - insert into PENDING_PROPAGATIONS ( SiteType, Name ) values ( ?, ? )
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Entering DatabaseConnectionPool::ReconnectIfNecessary
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) -   Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Exiting DatabaseConnectionPool::ReconnectIfNecessary (22 ms)
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - ExtendedCaBundleManager (5840) - Starting ExtendedCaBundleManager
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - {call webui_site_subscribe( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:56:22 -0400 - ExtendedCaBundleManager (5840) - Added BigFix certificates to the ca bundle
+Sun, 14 Jun 2026 19:56:22 -0400 - ExtendedCaBundleManager (5840) - Added C:\Program Files (x86)\BigFix Enterprise\BES Server\wwwrootbes\bfmirror\bfsites\enterprisemirror_3_1512\ca-bundle.crt to the ca bundle
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - PostFileCleanup enabled, delete files older than 120 hours
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - PostFileTransientCleanup enabled, delete files older than 72 hours
+Sun, 14 Jun 2026 19:56:22 -0400 - ExtendedCaBundleManager (5840) - The extended CA bundle file has been created
+Sun, 14 Jun 2026 19:56:22 -0400 - ExtendedCaBundleManager (5840) - ExtendedCaBundleManager running
+Sun, 14 Jun 2026 19:56:22 -0400 - 7500 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 7500 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 7500 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 4084 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 4084 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 7500 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 4084 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 336 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 336 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 7436 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 7436 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - 336 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 4084 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - 7436 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - DatabasePropagator (7500) - MEMORY USAGE: 98.359/134213456.000/4176.258/132480176.000; peak 98.359/2048.000/4176.258/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 19:56:22 -0400 - 336 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - 4084 - Entering LDAPGroupMembershipRefresher::operator ()
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 7436 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - DatabasePropagator (7500) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) - Entering RelaysFileUpdater::operator ()
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   select top 0 * from EXTERNAL_OBJECT_DEFS
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   {? = CALL sp_getapplock( ?, ? )}
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   select P.Name, S.SiteID, P.ID, P.Fields from LOCAL_OBJECT_DEFS P, VERSIONS V, SITENAMEMAP S where P.ID = V.ID and S.Sitename = V.Sitename and P.Version = V.LatestVersion and P.ContentType = 5 and S.Sitename = 'ActionSite' and P.ParentID = 0 and dbo.fn_ExtractField( 'IsReserved', 0, P.Fields ) = 'Yes' 
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - Main Thread (240) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select Certificate 
+from CERTIFICATES 
+where Subject = ? 
+
+Sun, 14 Jun 2026 19:56:22 -0400 - 8172 - Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BFEnterprise'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 19:56:22 -0400 - 8172 - select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 19:56:22 -0400 - 8172 - select Version from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 8172 - select CreationTime from LOCAL_OBJECT_DEFS where ID = 0 
+Sun, 14 Jun 2026 19:56:22 -0400 - 8172 - Entering LicenseUpdater::operator ()
+Sun, 14 Jun 2026 19:56:22 -0400 - LicenseUpdater (8172) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - LDAPGroupMembershipRefresher (4084) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - LicenseUpdater (8172) -   Entering POST https://gatherer.bigfix.com/cgi-bin/LicenseServerFrontend.pl
+Sun, 14 Jun 2026 19:56:22 -0400 - LicenseUpdater (8172) -     Enabling Host verification for connection with url https://gatherer.bigfix.com/cgi-bin/LicenseServerFrontend.pl
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   {call fetch_computersOfProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 19:56:22 -0400 - RelaysFileUpdater (336) -   {call fetch_propertyResultsOfPropertyAndComputer( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 19:56:22 -0400 - DatabasePropagator (7500) - select Value from DASHBOARDDATA where IsDeleted = 0 and Username = '' and IsPrivate = 0 and DashboardID = 'TagsPropagationSite' and Name = 'SiteName'
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - DatabasePropagator (7500) - select ServerID from DBINFO
+Sun, 14 Jun 2026 19:56:22 -0400 - 7976 - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 19:56:22 -0400 - DatabasePropagator (7500) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+... [snip] ...
+Sun, 14 Jun 2026 19:56:26 -0400 - /api/query (1236) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:56:55 -0400 - /api/query (8000) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:57:24 -0400 - /api/query (3856) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:57:54 -0400 - /api/query (4012) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:58:09 -0400 - 5856 - Socket shutdown error: Socket Error: Windows Error 0x2746%: An existing connection was forcibly closed by the remote host.
+... [snip] ...
+Sun, 14 Jun 2026 19:58:24 -0400 - /api/query (8044) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:58:55 -0400 - /api/query (6444) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:59:12 -0400 - Main Thread (240) - Socket shutdown error: Socket Error: Windows Error 0x2746%: An existing connection was forcibly closed by the remote host.
+... [snip] ...
+Sun, 14 Jun 2026 19:59:24 -0400 - /api/query (3332) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 19:59:54 -0400 - /api/query (5832) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 20:00:24 -0400 - /api/query (3016) - Failed to retrieve query results.
+... [snip] ...
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deleted-objects (512) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deleted-objects (512) - {call fetch_deletedObjects( ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/certificates - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/certificates (5872) - Running plugin /data/certificates with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/certificates (5872) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/certificates (5872) - select SiteType, SiteTag, S.SHA1Hash, Certificate 
+from SITE_SUPPORTING_CERTIFICATES S inner join CERTIFICATES C 
+on S.SHA1Hash = C.SHA1Hash where S.IsDeleted = 0 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (8040) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (8040) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (8040) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/actions - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - Running plugin /data/actions with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+create table #VISIBLE_COMPUTERS ( ComputerID int not null primary key )
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - {call populateVisibleComputers( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - {call fetch_actionIDs( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - {call fetch_actions( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - if OBJECT_ID( N'tempdb..#FILTERED_COMPUTERS', N'U' ) is not null 
+    drop table #FILTERED_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/actions (8008) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6732) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6732) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6732) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/fixlet-visibility/global?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/global (3000) - Running plugin /data/fixlet-visibility/global?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/global (3000) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/global (3000) - select SiteID, FixletID, IsVisible from FIXLET_VISIBILITY where Sequence between ? and ? 
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7104) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7104) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7104) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/fixlet-visibility/local?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/local (3224) - Running plugin /data/fixlet-visibility/local?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/local (3224) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/fixlet-visibility/local (3224) - select SiteID, FixletID, IsVisible from USER_FIXLET_VISIBILITY where Sequence between ? and ?   and Username = ? 
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/deployment-options/DefaultFixletVisibility - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/DefaultFixletVisibility (8048) - Running plugin /data/deployment-options/DefaultFixletVisibility with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/DefaultFixletVisibility (8048) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/DefaultFixletVisibility (8048) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/deployment-options/Z:defaultHiddenFixletSiteIDs - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/Z:defaultHiddenFixletSiteIDs (5244) - Running plugin /data/deployment-options/Z:defaultHiddenFixletSiteIDs with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/Z:defaultHiddenFixletSiteIDs (5244) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/deployment-options/Z:defaultHiddenFixletSiteIDs (5244) - select FieldContents from ADMINFIELDS where FieldName = ? and IsDeleted = 0
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/time - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/time (3868) - Running plugin /data/time with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/time (3868) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7172) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7172) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7172) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/dashboard-variables?sequence=(1214482173,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/dashboard-variables (7096) - Running plugin /data/dashboard-variables?sequence=(1214482173,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/dashboard-variables (7096) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/dashboard-variables (7096) - select DashboardID, Name, IsDeleted, Value 
+from DASHBOARDDATA 
+where IsPrivate = 0 
+ AND Sequence BETWEEN ? AND ? 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/computers - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/computers (4888) - Running plugin /data/computers with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/computers (4888) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/computers (4888) - {call fetch_allRepresentations( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/asset-correlations - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/asset-correlations (2936) - Running plugin /data/asset-correlations with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/asset-correlations (2936) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/asset-correlations (2936) - {call fetch_visibleCorrelations( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (960) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (960) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (960) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/differenced-fixlet-results?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - Running plugin /data/differenced-fixlet-results?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+create table #VISIBLE_COMPUTERS ( ComputerID int not null primary key )
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - {call populateVisibleComputers( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - {call fetch_fixletResults( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - select ComputerID from #VISIBLE_COMPUTERS
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - if OBJECT_ID( N'tempdb..#FILTERED_COMPUTERS', N'U' ) is not null 
+    drop table #FILTERED_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-fixlet-results (6368) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7136) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7136) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7136) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/differenced-property-results?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - Running plugin /data/differenced-property-results?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+create table #VISIBLE_COMPUTERS ( ComputerID int not null primary key )
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call populateVisibleComputers( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - IF OBJECT_ID( N'tempdb..#PROPERTY_RESULTS_PROPERTIES', N'U' ) IS NOT NULL 
+		drop table #PROPERTY_RESULTS_PROPERTIES 
+IF OBJECT_ID( N'tempdb..#PROPERTY_RESULTS_COMPUTERS', N'U' ) IS NOT NULL  
+		drop table #PROPERTY_RESULTS_COMPUTERS	 
+
+create table #PROPERTY_RESULTS_PROPERTIES 
+( 
+	SiteID int, 
+	AnalysisID int, 
+	PropertyID int, 
+	PRIMARY KEY (SiteID, AnalysisID, PropertyID) 
+) 
+create table #PROPERTY_RESULTS_COMPUTERS 
+( 
+	ComputerID int, 
+	PRIMARY KEY (ComputerID) 
+) 
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call addSessionPropertyResultsProperty( ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - {call fetch_propertyResultsChanges( ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - select ComputerID from #VISIBLE_COMPUTERS
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - IF OBJECT_ID( N'tempdb..#PROPERTY_RESULTS_PROPERTIES', N'U' ) IS NOT NULL 
+		drop table #PROPERTY_RESULTS_PROPERTIES 
+IF OBJECT_ID( N'tempdb..#PROPERTY_RESULTS_COMPUTERS', N'U' ) IS NOT NULL  
+		drop table #PROPERTY_RESULTS_COMPUTERS	 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - if OBJECT_ID( N'tempdb..#FILTERED_COMPUTERS', N'U' ) is not null 
+    drop table #FILTERED_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-property-results (7372) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7588) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7588) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (7588) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/differenced-action-results?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - Running plugin /data/differenced-action-results?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+create table #VISIBLE_COMPUTERS ( ComputerID int not null primary key )
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - {call populateVisibleComputers( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - {call fetch_actionResults( ?, ?, ?, ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - select ComputerID from #VISIBLE_COMPUTERS
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - if OBJECT_ID( N'tempdb..#FILTERED_COMPUTERS', N'U' ) is not null 
+    drop table #FILTERED_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/differenced-action-results (616) - if OBJECT_ID( N'tempdb..#VISIBLE_COMPUTERS', N'U' ) is not null 
+    drop table #VISIBLE_COMPUTERS 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (1748) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (1748) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (1748) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/comments/action?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/action (3244) - Running plugin /data/comments/action?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/action (3244) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/action (3244) - select ActionID, CommentTime, UserID, IsDeleted, RowID, Comment 
+from ACTION_COMMENTS 
+where Sequence BETWEEN ? AND ? 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6396) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6396) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (6396) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/comments/fixlet?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/fixlet (536) - Running plugin /data/comments/fixlet?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/fixlet (536) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/fixlet (536) - select SiteID, ID, CommentTime, UserID, IsDeleted, RowID, Comment 
+from FIXLET_COMMENTS 
+where Sequence BETWEEN ? AND ? 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/sequence - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (2644) - Running plugin /data/sequence with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (2644) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/sequence (2644) - {call get_LastUsedSequence( ? )}
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - /data/comments/computer?sequence=(1214482587,1214482587) - 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/computer (1060) - Running plugin /data/comments/computer?sequence=(1214482587,1214482587) with client 192.168.4.3
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/computer (1060) - select Token from SERVERDATA_SESSIONS WHERE Token = ?
+Sun, 14 Jun 2026 20:00:44 -0400 - /data/comments/computer (1060) - select ComputerID, CommentTime, UserID, IsDeleted, RowID, Comment 
+from COMPUTER_COMMENTS 
+where Sequence BETWEEN ? AND ? 
+
+Sun, 14 Jun 2026 20:00:44 -0400 - 5268 - BES Root Server received stop request
+Sun, 14 Jun 2026 20:00:44 -0400 - ExtendedCaBundleManager (5840) - Stopping ExtendedCaBundleManager
+Sun, 14 Jun 2026 20:00:44 -0400 - Main Thread (240) - BES Root Server shutting down

@@ -441,13 +441,13 @@
 	<Query>
 		<Result>
 			<Tuple>
-				<Answer type="string">__RelaySelect_Automatic = 1</Answer>
-				<Answer type="string">2400</Answer>
-			</Tuple>
+<Answer type="string">__RelaySelect_Automatic = 1</Answer>
+<Answer type="string">2400</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">__RelaySelect_Automatic = 0</Answer>
-				<Answer type="string">137</Answer>
-			</Tuple>
+<Answer type="string">__RelaySelect_Automatic = 0</Answer>
+<Answer type="string">137</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>11.551ms</Time>
@@ -474,9 +474,9 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MaximumTTLToPing&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MaximumTTLToPing&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Undefined</Answer>
-				<Answer type="string">2400</Answer>
-			</Tuple>
+<Answer type="string">Undefined</Answer>
+<Answer type="string">2400</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>14.339ms</Time>
@@ -503,9 +503,9 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_IntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_IntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Undefined</Answer>
-				<Answer type="string">2400</Answer>
-			</Tuple>
+<Answer type="string">Undefined</Answer>
+<Answer type="string">2400</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>9.302ms</Time>
@@ -532,9 +532,9 @@
 	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MaxRetryIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MaxRetryIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Undefined</Answer>
-				<Answer type="string">2400</Answer>
-			</Tuple>
+<Answer type="string">Undefined</Answer>
+<Answer type="string">2400</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>7.338ms</Time>
@@ -561,9 +561,9 @@
 	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_MinRetryIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_MinRetryIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Undefined</Answer>
-				<Answer type="string">2400</Answer>
-			</Tuple>
+<Answer type="string">Undefined</Answer>
+<Answer type="string">2400</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>8.951ms</Time>
@@ -590,13 +590,13 @@
 	<Query Resource=" (item 0 of it, item 1 of it as string) of ((&quot;Undefined&quot;,((number of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot; and value of it as string = &quot;1&quot; ) of it AND NOT(exist client setting whose ( name of it  = ((&quot;_BESClient_RelaySelect_ResistFailureIntervalSeconds&quot;) ) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it  =(&quot;_BESClient_RelaySelect_ResistFailureIntervalSeconds&quot; )) of bes computers whose (exist client setting whose ( name of it = &quot;__RelaySelect_Automatic&quot;) of it)))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Undefined</Answer>
-				<Answer type="string">2219</Answer>
-			</Tuple>
+<Answer type="string">Undefined</Answer>
+<Answer type="string">2219</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">21600</Answer>
-				<Answer type="string">181</Answer>
-			</Tuple>
+<Answer type="string">21600</Answer>
+<Answer type="string">181</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>9.878ms</Time>
@@ -623,13 +623,13 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose (name of it as lowercase = ((&quot;_BESClient_Report_MinimumInterval&quot;) as lowercase) and exist value of it) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Report_MinimumInterval&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">2356</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">2356</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">3600</Answer>
-				<Answer type="string">181</Answer>
-			</Tuple>
+<Answer type="string">3600</Answer>
+<Answer type="string">181</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>10.15ms</Time>
@@ -656,9 +656,9 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose (name of it as lowercase = ((&quot;_BESClient_Resource_InterruptSeconds&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_InterruptSeconds&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">2537</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">2537</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>10.706ms</Time>
@@ -724,9 +724,13 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Comm_CommandPollInterval&quot;)as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Comm_CommandPollInterval&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">1918</Answer><Answer type="string">1</Answer><Answer type="string">619</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">1918</Answer>
+</Tuple>
+<Tuple>
+<Answer type="string">1</Answer>
+<Answer type="string">619</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>11.319ms</Time>
@@ -753,17 +757,14 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT(exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Comm_CommandPollIntervalSeconds&quot;)as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Comm_CommandPollIntervalSeconds&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">1918</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">1918</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">3600</Answer>
-				<Answer type="string">619</Answer>
-			</Tuple>
-			<Tuple>
-				
-				
-			</Tuple>
+<Answer type="string">3600</Answer>
+<Answer type="string">619</Answer>
+</Tuple>
+			
 		</Result>
 		<Evaluation>
 			<Time>6.511ms</Time>
@@ -829,9 +830,9 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_WorkNormal&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_WorkNormal&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">2537</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">2537</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>11.236ms</Time>
@@ -858,9 +859,9 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_SleepNormal&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_SleepNormal&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">2537</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">2537</Answer>
+</Tuple>
 		</Result>
 		<Evaluation>
 			<Time>17.144ms</Time>
@@ -887,17 +888,14 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_SleepIdle&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_SleepIdle&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">60</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">60</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">400</Answer>
-				<Answer type="string">2477</Answer>
-			</Tuple>
-			<Tuple>
-				
-				
-			</Tuple>
+<Answer type="string">400</Answer>
+<Answer type="string">2477</Answer>
+</Tuple>
+			
 		</Result>
 		<Evaluation>
 			<Time>12.401ms</Time>
@@ -924,17 +922,14 @@
 	<Query Resource="(item 0 of it, item 1 of it as string) of ((&quot;Default&quot;,((number of bes computers whose (NOT (exist client setting whose ( name of it as lowercase = ((&quot;_BESClient_Resource_WorkIdle&quot;) as lowercase) and exist value of it ) of it))) as string));(((it) as string,(multiplicity of it) as string) of unique values of values of client settings whose (name of it as lowercase = (&quot;_BESClient_Resource_WorkIdle&quot; as lowercase)) of bes computers))">
 		<Result>
 			<Tuple>
-				<Answer type="string">Default</Answer>
-				<Answer type="string">60</Answer>
-			</Tuple>
+<Answer type="string">Default</Answer>
+<Answer type="string">60</Answer>
+</Tuple>
 			<Tuple>
-				<Answer type="string">100</Answer>
-				<Answer type="string">2477</Answer>
-			</Tuple>
-			<Tuple>
-				
-				
-			</Tuple>
+<Answer type="string">100</Answer>
+<Answer type="string">2477</Answer>
+</Tuple>
+			
 		</Result>
 		<Evaluation>
 			<Time>10.475ms</Time>

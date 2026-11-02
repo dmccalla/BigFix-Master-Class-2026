@@ -1,120 +1,277 @@
 {
   "schema_version": 1,
-  "validated_on": "2026-10-24",
-  "dataset": "BigFix Master Class 2026",
-  "provenance": "Synthetic June 2026 assessment. See DEMO_SNAPSHOT.json for exact transformations and preserved originals. Historical logs and saved enrichment retain source dates. Not a live collection.",
+  "validated_on": "2026-11-02",
+  "dataset": "shared-demo-2026-11-02",
+  "provenance": "Complete shared demonstration assessment. See DEMO_SNAPSHOT.json and Originals for sources and transformations. Not a live collection.",
   "hash_policy": "UTF-8 text uses LF-normalized line endings; binary files use raw bytes.",
-  "report_code_commit": "887e496aa75fbf8e8cca880dd6c7d29ccd43a06a",
+  "report_code_commit": "4de94e28",
   "reports_built": [
-    "Client Performance",
-    "PerfMon",
-    "FillDB Performance"
+    "Main full report: all 15 assessment modules, with generated scorecard",
+    "TA: Client Performance, FillDB and PerfMon, automatic and manual discovery",
+    "MC: Client Performance, FillDB and PerfMon, automatic and manual discovery"
   ],
   "checks": {
-    "folder_auto_discovery": "passed",
-    "loop_csv_xml_parity": "passed",
+    "shared_input_fingerprints": "passed: all 99 files agree across all three active demos",
+    "folder_auto_discovery": "passed in all three workbenches",
     "loop_source_rows": 2537,
+    "usable_loop_rows": 2477,
+    "loop_not_reported": 60,
+    "udp_capture_rows": 2400,
     "active_property_intervals": 244,
-    "minimum_analysis_intervals": [
-      {
-        "seconds": 1800,
-        "devices": 1
-      },
-      {
-        "seconds": 600,
-        "devices": 2
-      }
-    ],
-    "top10_entries": 10,
-    "retrieved_property_example": true,
-    "top10_timing_consistency": "passed",
+    "loop_csv_xml_parity": "passed",
     "udp_csv_xml_parity": "passed",
-    "filldb_source_rows": 24,
-    "perfmon_readings": 60,
-    "all_three_report_builds": "passed",
-    "cpu_idle_configured_unset_all_unset": "passed",
-    "overlapping_deployment_snapshots": "Reconciled actions, root identity and hardware. Different reporting windows and check populations remain distinct."
+    "client_settings_xml_log_parity": "passed after tuple-wrapper repair with unchanged answer values",
+    "top10_entries": 10,
+    "main_full_report_build": "passed",
+    "ta_sample_module_builds": "7 passed; both Client Performance input modes repeated after tuple repair",
+    "mc_sample_module_builds": "7 passed; both Client Performance input modes repeated after tuple repair",
+    "main_supporting_data_rows": {
+      "UDP Issues by Relay": 24,
+      "UDP Issues by Subnet": 24,
+      "Command Polling by Relay": 25,
+      "Command Polling by Subnet": 25
+    },
+    "sample_workbook_references": "4 verified in each Client Performance report; complete lists present",
+    "main_regression_tests": "537 passed, 2 optional tests skipped",
+    "validation_scope": "Generation and data consistency. Consultant review and release acceptance are separate. Existing delivery-test failures and RSD-20 readiness contradiction are recorded in the main repository Docs/Records/Supporting_Data_Verification_2026-11-02.md.",
+    "main_report_previews": "All four final report previews match the module report after the reference-heading fix"
   },
   "collector_sources": [
     {
-      "path": "Tasks and Analyses/Analyses/BigFix Master Class -- Client Performance Counters - Basic (2.0).bes",
-      "sha256": "651f07641a41cae8b3459445a7f2e2a0f96aeae34c01c9bdefbf4ca0ead00f09"
+      "path": "Tasks and Analyses/Analyses/BigFix Platform Health Check -- Client Performance Counters - Basic (2.0).bes",
+      "sha256": "397a3247e97cbefdf96c9d32d7cc1cdb3c8a3e7461695fff45a87286abe53dd4"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Client Performance Counter Analysis Data (2.0).bes",
-      "sha256": "d06d610e5caf986133db9fa042e78880135ad1d324056ed901e5f92af47b17bb"
+      "path": "Tasks and Analyses/Analyses/BigFix Platform Health Check -- Relay Server Capacity Data (2.0).bes",
+      "sha256": "a6f2b675b308d6af55ef05933166163c148fdec4083d646871866e5b444ca626"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Collect Deployment Information (2.0).bes",
-      "sha256": "f4c4f55e12a9011651120f741117f5f4b9f976a13aee9cb62df272401463cf79"
+      "path": "Tasks and Analyses/Combined/BigFix Platform Health Check -- Day 1 - Deployment Data Collection (2.0).bes",
+      "sha256": "5c4f0542c8fe4d23d558464ca5036f0b414f06145501b2136c84ee557c14b15b"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable Client CPU Multicore Scaling (2.0).bes",
-      "sha256": "aea5e4ad0f682cd01f2512048569fcb460fc0b35b4d0b2994b4e6929eebb1198"
+      "path": "Tasks and Analyses/Combined/BigFix Platform Health Check -- Day 2 - Performance Capture (PerfMon & FillDB) (2.0).bes",
+      "sha256": "85f5691456adc81379ecc0625b59f831e7cb4d56298dc5e2874e1b5411f6f713"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable Client FastHashVerify Setting (Default - 25% Single Core) (2.0).bes",
-      "sha256": "f3cfbab6989bae7146e37d0d06b7bceb2a785f283870237c41d7710f3a2ef990"
+      "path": "Tasks and Analyses/Combined/BigFix Platform Health Check -- Day 3 - Basic Log Collection and Extended Logging (2.0).bes",
+      "sha256": "d21b55c18e9ccefe2a1ae6023cb63c78686acd5b1b5176b71e49e6470641eca7"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
-      "sha256": "78c7a0581055e40b69018ef2d0df417d7d449abc9fedab28eec4a6fda3db295e"
+      "path": "Tasks and Analyses/Combined/BigFix Platform Health Check -- Day 4 - Client Performance_Server Capacity Data Collection & Logging Cleanup (2.0).bes",
+      "sha256": "5daaaf3e5fdc92e8b4b7f57fc7301cb3edf7a3f124b6971ab80f5f7a1f1746f7"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set Command Polling to 10 Minutes over Average Evaluation Time (2.0).bes",
-      "sha256": "c8f4b61881e4cbcc50c63b30c9ae11a4d5cb55280b84e8e22cb4db5ab38deef5"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Client Performance Counter Analysis Data (2.0).bes",
+      "sha256": "332347909fdbc8080db2959d7b579667a0efe039755b5f0a73bde19c812e9a88"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set CPU Utilization to 2% on Windows Multi-Core Systems (2.0).bes",
-      "sha256": "ddc3bf5d41404cc670747036a8789e0569f5e0c7316b534745fd62787f559ad3"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Deployment Health Checks Dashboard Data (2.0).bes",
+      "sha256": "3e14258fb8bba5cc8066a37556d2b33293c271623870bc148d82abfaf3be664f"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Set CPU Utilization to 20% (2.0).bes",
-      "sha256": "f4dd0b2aaf5f1be357e718986217c1ec2ab2bd58b417f4446127d71963f086ae"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Deployment Information (2.0).bes",
+      "sha256": "bdbe0735c24279071096aab8ff80f29b76a8cd418ac7780a39e576f1caeaf199"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Setup and Run Perfmon Counters (2.0).bes",
-      "sha256": "9e062d34ae10a5f8a9b886949f0aa9a38b62ade55433e2aded7aa88e9cddb304"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Deployment Overview Dashboard Data (2.0).bes",
+      "sha256": "b7e8169515641542b3176ed34e881cf321984a735e90cdd275f88165e96b0f4f"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- FillDB Performance Logging is Enabled (2.0).bes",
-      "sha256": "9e7a20cf81cc1e139e6b5ac8aa7232acf736f0f7ae57f68746a85b4b97b35ae3"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Relay Server Capacity Analysis Data (2.0).bes",
+      "sha256": "6d46c37d7d1ce64e0f47cb84fe96c9b336f32e7a9fe5dc0bde622148971d923b"
     },
     {
-      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
-      "sha256": "0b319113aae3de56c8bfb4f23a479fcb2333fcd602be5197456cb9a06a785ffd"
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Server Capacity Analysis Data (2.0).bes",
+      "sha256": "77b7aedc5545c95f7d072c828d910971f4fccca7b3f0804b58ca1d43647ffeef"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect SQL Server Information (2.0).bes",
+      "sha256": "d32eecd24892073fb24554560432e87937b158591e9c4dc908aea30d9f4b7922"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Collect Standard BigFix Server Log Files (2.0).bes",
+      "sha256": "f51e6524d5f85a5f55574fae0cc82557d6d54286a26f7884c351d016269dd884"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable Explorer Verbose Logging (2.0).bes",
+      "sha256": "8353724b4c2a76ad2195da8305fbd255fbc11ad932246019c6d5865d7d1f2ae8"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable FillDB Debug Logging (2.0).bes",
+      "sha256": "02ea31e932645fd1e764b2a40f07ff314eda3887d066abdebd831f0abb11da33"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable FillDB Performance Logging (2.0).bes",
+      "sha256": "3002479088e3e75ac95e5c80b0bdd51978d79a1a70adfce11e9c30f8376f5da5"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable MCP Server File Logging (2.0).bes",
+      "sha256": "d37cae7ff8f2b910439aace8c96999f7de015c5d7b4c4f3220f1c34b67228f27"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable Plugin Portal Debug Logging (2.0).bes",
+      "sha256": "09a5ba2f8f89d7a30d15e879681165af4a7f72fc0b3316b991d53996efd8229d"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable Relay Server Debug Logging (2.0).bes",
+      "sha256": "ae29a5d72a442a6b918154d9af20db6f921579cc1a5dd5cbadbcd16ce8fca821"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable Root Server Debug Logging (2.0).bes",
+      "sha256": "b61cf63556d4375b14f67f828c05cc2dd5ae812d978f1fc60a02c49cd586e24c"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable Web Reports Debug Logging (2.0).bes",
+      "sha256": "f954d623edac61e90a6e119ba2afc6fa6904dc5677b3bb1e136bb40635ee21e1"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Enable WebUI Debug Logging (2.0).bes",
+      "sha256": "49a682ec9d5a4a4ba681aee1373388fd5c863ca92f5158a1dd92049934ce6b69"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Log File Upload Monitor (2.0).bes",
+      "sha256": "482abad52b3ac856ad0ac671c7ba4c55b0cce69164d84e0dfe564e2bb3b91480"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Setup and Run Perfmon Counters (2.0).bes",
+      "sha256": "2bd078e95b82788f48dd415b04847bf4e91ee19d3a9b9d4d28578d328a17377e"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload Explorer Logs (2.0).bes",
+      "sha256": "8de7bfd6ba2ef93040635d7e9d150570c030284b883307f044c998f0dc845810"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload MCP Server Logs (2.0).bes",
+      "sha256": "5f39bb712c89dc0d62985fe8ad64826fd5a12e42375523c93431b5994559acba"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload Plugin Portal Logs - Cloud Management (2.0).bes",
+      "sha256": "7744651ae39bb01022b48470402e9ec281b47c5ecec207c85e973f853f5c811c"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload Plugin Portal Service Logs (2.0).bes",
+      "sha256": "23dbeb3ccaa7f6deb01e18d47547d2f617e77382fb50f28517b52d4ba18af056"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload Web Reports Logs (2.0).bes",
+      "sha256": "a161cdfe704a61e6c623edc28cdbb4b14753daee34c2328b3d8fd60bf4434efb"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/BigFix Platform Health Check -- Upload WebUI Server Logs (2.0).bes",
+      "sha256": "9d13ed61ef88fa5e4ac423fca1d6bf238dca1525cbadba9d531ea698862e3a7d"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- Explorer Verbose Logging is Enabled (2.0).bes",
+      "sha256": "429eb6cdf0c2bb84085972ce62603fae477012faa5b9198bc5c5032d3da199a5"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- FillDB Debug Logging is Enabled (2.0).bes",
+      "sha256": "014116006661baea7a2cf1f4185a9c7be9e6a5d3ec009f045aae4a9404590a7e"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- FillDB Performance Logging is Enabled (2.0).bes",
+      "sha256": "349bfc3752246882859aed96da6fbee890a9e1408372719df3177ef45b99e765"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- MCP Server Health Check Logging is Enabled (2.0).bes",
+      "sha256": "fa0db5e84f14eb4747101e78c885e83440c23ce04badb8e4567c39a3cf7e1077"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- Plugin Portal Debug Logging is Enabled (2.0).bes",
+      "sha256": "438c52d1d77a6c92733d2741fb3a6267be239881a545c9f3956006bca836046b"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - Explorer Logging Set to Non-Default (2.0).bes",
+      "sha256": "69d905c86f4f59d75ae5543b7974f3cc825bf7a7ba0511bd12c088c034d7828a"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
+      "sha256": "00505d992e029180512a7ceb2b0ee88a433f5f9088722c57c3068e087ff540d0"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - MCP Server Logging Set to Non-Default (2.0).bes",
+      "sha256": "a561d632833f4f5bc3b0dc02cba54aec113c8cd3031a4e23ccbde1245d8b3a2d"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - Plugin Portal Logging Set to Non-Default (2.0).bes",
+      "sha256": "3131198298ce712f539dc9eecedf9625953a5238580fbb27318b6d5121e6492c"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - Relay Server Logging Set to Non-Default (2.0).bes",
+      "sha256": "949ab74d78ebb179b20bbdfc47778d9049a87a512101eb430905145e4aec52cd"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - Root Server Logging Set to Non-Default (2.0).bes",
+      "sha256": "679092da1559c9cab2594fefdb2ad2abb7a1290d31564518c51e624715ab36c3"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - Web Reports Logging Set to Non-Default (2.0).bes",
+      "sha256": "b266e7bacb0113d14eda9a95aaabf8c00f188e862d10906f0d6b291e4aeaa878"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- POST HEALTH CHECK ONLY - WebUI Logging Filter Set to Non-Default (2.0).bes",
+      "sha256": "5a08b334697650ec0bda884912167c9b90b89c5a39cc2af4433d824bc1b71723"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- Relay Server Debug Logging is Enabled (2.0).bes",
+      "sha256": "e0e36aeb9d10317568985ce9c6d9159f329c1dfe0b0c84a339822dc73d743f5b"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- Root Server Debug Logging is Enabled (2.0).bes",
+      "sha256": "2df2ef4805aad0ff255565d8f2bcbd4cfbedc4acda0375dc9b649ee44829da34"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- Web Reports Logging is Enabled (2.0).bes",
+      "sha256": "2218221a00e272d45e30adde1238211312212a745d4533b07bb980e3ca9f5b5c"
+    },
+    {
+      "path": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Platform Health Check -- WebUI Debug Logging is Enabled (2.0).bes",
+      "sha256": "4214861daf6a0bfbf6bcdcdaf3c019b31d9d790f41ce7313cb5fb82b41191427"
     }
   ],
   "input_files": [
     {
-      "path": "Client_Loop/Client_Loop_06-14-2026_2130.csv",
+      "path": "Client_loop/Client_Loop_06-14-2026_2130.csv",
       "bytes_for_hash": 364267,
       "hash_mode": "utf8_lf",
       "sha256": "76af5e29758014501ea8da6cb06cc90f7abeb52edd705282869df9b20706e8e0"
     },
     {
-      "path": "Client_Loop/Client_Loop_06-14-2026_2130.xml",
+      "path": "Client_loop/Client_Loop_06-14-2026_2130.xml",
       "bytes_for_hash": 401941,
       "hash_mode": "utf8_lf",
       "sha256": "ff881df0a769954e45dfdd87287704f112592ef5871664b8c75c88f1d526017e"
     },
     {
-      "path": "Client_Loop/top10-query-results.csv",
+      "path": "Client_loop/top10-query-results.csv",
       "bytes_for_hash": 1350,
       "hash_mode": "utf8_lf",
       "sha256": "dce20ddb1d4bc0fda4650fe0450194e56ea868ecd7fa8220d625b0da686884e9"
     },
     {
-      "path": "Client_Loop/udp-notification-results.csv",
+      "path": "Client_loop/udp-notification-results.csv",
       "bytes_for_hash": 152787,
       "hash_mode": "utf8_lf",
       "sha256": "eebc6c77c02de0b2b2b4468494607a665aeadec733b51d69776037cdd65013b0"
     },
     {
-      "path": "Client_Loop/UDP_Notifications_06-14-2026_2130.xml",
+      "path": "Client_loop/UDP_Notifications_06-14-2026_2130.xml",
       "bytes_for_hash": 244164,
       "hash_mode": "utf8_lf",
       "sha256": "103d7d52af0d95258d5ab7b872553d09cdb0c568a389d51098c2a78cb733120d"
+    },
+    {
+      "path": "Deployment_Healthcheck_Dashboard/Deployment_Healthcheck_Dashboard_BFROOT1_06-14-2026_2018.xml",
+      "bytes_for_hash": 66980,
+      "hash_mode": "utf8_lf",
+      "sha256": "c2df619086c42db7279d5afcb4049f283527505b6bdae04bf959d4b7d03cdc3d"
+    },
+    {
+      "path": "Deployment_Healthcheck_Dashboard/Deployment_Healthcheck_Dashboard_Data.log",
+      "bytes_for_hash": 4485,
+      "hash_mode": "utf8_lf",
+      "sha256": "e6d181c796d038bc30e026030b415873c47538f0d0d81c6abeeea53df28513f7"
     },
     {
       "path": "Deployment_Information/Clients/Client_Info_BFROOT1_06-14-2026_0821.log",
@@ -136,9 +293,9 @@
     },
     {
       "path": "Deployment_Information/Clients/Client_Settings_Info_BFROOT1_06-14-2026_0821.xml",
-      "bytes_for_hash": 41680,
+      "bytes_for_hash": 41392,
       "hash_mode": "utf8_lf",
-      "sha256": "d016f45023e265c81f861ccb1933e04576022c4e5045e3a7d70482fe0b5e0354"
+      "sha256": "79851c8925e0d313e464eb916c88fb3f0c086e63a5b270efed4106f8a510c937"
     },
     {
       "path": "Deployment_Information/Content/Action_Info_BFROOT1_06-14-2026_0821.log",
@@ -154,15 +311,15 @@
     },
     {
       "path": "Deployment_Information/Content/Content_Info_BFROOT1_06-14-2026_0821.log",
-      "bytes_for_hash": 8561,
+      "bytes_for_hash": 8486,
       "hash_mode": "utf8_lf",
-      "sha256": "a02bc896f8f4245de04c967141d59d7a42f09953d11273c932fd9f5bbe892b76"
+      "sha256": "5fdf62ff1b05e71b7b6a0df38c316d50c2a70d7387d100cd7d833df7189252d5"
     },
     {
       "path": "Deployment_Information/Content/Content_Info_BFROOT1_06-14-2026_0821.xml",
-      "bytes_for_hash": 39264,
+      "bytes_for_hash": 39129,
       "hash_mode": "utf8_lf",
-      "sha256": "41cd6b71ee35b2c2533e0255962dfa029e331e86f03481feb73d0238b941d671"
+      "sha256": "b260788b8d38099d3a6278d413da087b514959d16203f0fa8f11136f5d8a12d4"
     },
     {
       "path": "Deployment_Information/Content/Property_Info_BFROOT1_06-14-2026_0821.log",
@@ -226,15 +383,15 @@
     },
     {
       "path": "Deployment_Information/Relays/Relay_Server_Info_BFROOT1_06-14-2026_0821.log",
-      "bytes_for_hash": 2972,
+      "bytes_for_hash": 2907,
       "hash_mode": "utf8_lf",
-      "sha256": "5c79fe67e4bafd71e13e124934a998a1367be04c3347ca92f98d6657daa578f5"
+      "sha256": "3409d67d1947357eee05f30a1de4f3ac50636e95177436a977b1ad0a7808a524"
     },
     {
       "path": "Deployment_Information/Relays/Relay_Server_Info_BFROOT1_06-14-2026_0821.xml",
-      "bytes_for_hash": 24026,
+      "bytes_for_hash": 23931,
       "hash_mode": "utf8_lf",
-      "sha256": "afbc5ac330e0fb1aa4e33fe6e23e8f0c077cd11748c1c98fcd178e38a29a7566"
+      "sha256": "2f673b58c6df89c4b1b35ff39e62a998d944bbe9e77d3d458544abf1dd032a92"
     },
     {
       "path": "Deployment_Information/Server/Root_Server_Info_BFROOT1_06-14-2026_0821.log",
@@ -249,18 +406,420 @@
       "sha256": "e688f51a2ec5c023ba1d18eb66791eff8aa5ab795dacdea9d2cb0368fbf925df"
     },
     {
+      "path": "Deployment_Overview_Dashboard/Deployment_Overview_Dashboard_BFROOT1_06-14-2026_2018.xml",
+      "bytes_for_hash": 20342,
+      "hash_mode": "utf8_lf",
+      "sha256": "c3ab6d53e4ac3882df2ffe81bc059a197b5831a222d30cdaa8cdbe1dde0613ae"
+    },
+    {
+      "path": "Deployment_Overview_Dashboard/Deployment_Overview_Dashboard_Data.log",
+      "bytes_for_hash": 996,
+      "hash_mode": "utf8_lf",
+      "sha256": "97f5244e9eb9e1d19d75759612d6418ea178a5e19a4e86e15804f404c666f035"
+    },
+    {
       "path": "FillDB_Performance/FillDBPerf_analysis.csv",
       "bytes_for_hash": 1147,
       "hash_mode": "utf8_lf",
       "sha256": "f89b4190e861b6b10797fd8c5f0e59ec4c3e22252fefad99b6cb38678ea30ca7"
     },
     {
+      "path": "Logs/FillDB_Debug/HEALTHCHECK_FILLDB_DEBUG_06-14-2026_1942.log",
+      "bytes_for_hash": 8565,
+      "hash_mode": "utf8_lf",
+      "sha256": "496dc8ce6ee27bbc7826102c3b2d56501f55fb2c09a4f5602c9d10d7b2959a4f"
+    },
+    {
+      "path": "Logs/FillDB_Debug/HEALTHCHECK_FILLDB_DEBUG_06-14-2026_2001.log",
+      "bytes_for_hash": 83396,
+      "hash_mode": "utf8_lf",
+      "sha256": "2e54e74730711d0f12791e181d597d93fa540bbdd58ee89906cfe2f659f07f75"
+    },
+    {
+      "path": "Logs/FillDB_Debug/HEALTHCHECK_FILLDB_DEBUG_README.txt",
+      "bytes_for_hash": 407,
+      "hash_mode": "utf8_lf",
+      "sha256": "b2a8b99b7c2899937f4fccbfc7eaec637dad6a2d5adf77648c2ff39f7475a4a2"
+    },
+    {
+      "path": "Logs/Root_Debug/HEALTHCHECK_ROOT_DEBUG_06-14-2026_1956.log",
+      "bytes_for_hash": 39614,
+      "hash_mode": "utf8_lf",
+      "sha256": "bf75b90d8fe7c226f66241f577713ba7cb92b5bbaa48a3d9b51ece5213d05d70"
+    },
+    {
+      "path": "Logs/Root_Debug/HEALTHCHECK_ROOT_DEBUG_06-14-2026_2000.log",
+      "bytes_for_hash": 52915,
+      "hash_mode": "utf8_lf",
+      "sha256": "f0533918a8a12e57e52a17b4a55eda68b49402d5a867205178c0542f83b98b61"
+    },
+    {
+      "path": "Logs/Root_Debug/HEALTHCHECK_ROOT_DEBUG_06-14-2026_2000.log_0",
+      "bytes_for_hash": 98680,
+      "hash_mode": "utf8_lf",
+      "sha256": "d9227d92f8699e5d5fd19341394b0c743afb9203d1cde0efea7b1ad61475be81"
+    },
+    {
+      "path": "Logs/Root_Debug/HEALTHCHECK_ROOT_DEBUG_README.txt",
+      "bytes_for_hash": 422,
+      "hash_mode": "utf8_lf",
+      "sha256": "9c2dac72946086552c01896150ec4bd71b327251bc346ee3c49e53e3100f0e32"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/BES_Tools/BESTools_Log_BFI-ROOT01_06-14-2026_2000.log",
+      "bytes_for_hash": 59391,
+      "hash_mode": "utf8_lf",
+      "sha256": "977b702c5c702b1c813a149eef4e9a0432c4b3a0c7c7b0c65a3bd174873aee35"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/FillDB/FillDB_Log_BFI-ROOT01_06-14-2026_2000.log",
+      "bytes_for_hash": 10866,
+      "hash_mode": "utf8_lf",
+      "sha256": "3e08e4d3f9d3e1c23272a97123a3424667e961b617b941a901047878808cadba"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/GatherDB/GatherDB_Log_BFI-ROOT01_06-14-2026_2000.log",
+      "bytes_for_hash": 1035158,
+      "hash_mode": "utf8_lf",
+      "sha256": "fe4eb4ddb84509c31efa0e4112839d3a70347f2718a504995e17a07707f08c5d"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/installRestoretrace.log",
+      "bytes_for_hash": 0,
+      "hash_mode": "utf8_lf",
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-14-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "b64f60dfb5db46c27ce5c88839f7c1ea080917d74e61b7e3ffadc483fdd2724c"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-15-2026.log",
+      "bytes_for_hash": 13100,
+      "hash_mode": "utf8_lf",
+      "sha256": "af3625e58c1e2a043c9f059b7a2e52f0dc56372f25260082586909b2dcb1cf07"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-20-2026.log",
+      "bytes_for_hash": 11615,
+      "hash_mode": "utf8_lf",
+      "sha256": "4af8cf6c4534c458e3c2d2137049e87775342008df8200b8db2bf769f38daa7e"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-21-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "e7a6e17f5109ae7a54f8fde2f8c5663fa1d66c8eb2454f37a370ce1cdf8b2367"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-22-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "5bb9f7b5a6bde26a8ae10d77818583834a6cc2795e214810376c729c725033e1"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-23-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "c9fa30d479e619a1e32279e937cc23d0c7801c1ceeb0247237b046a66241a4d4"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-24-2026.log",
+      "bytes_for_hash": 28311,
+      "hash_mode": "utf8_lf",
+      "sha256": "a2b068027c08fcd06e4083376b724a0da03bc5a48ee15be7e435c4974f2ce295"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-25-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "9f6a8afcdfa455a1e46acfe49c70f977562659aaab2a80dee57ca2c0e115ef84"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-26-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "4b457364038e73c672a2ae25ac87f4339dff2e5bcf22f8573724b1e8d3baf8fd"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-27-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "bfa7083af63bd70eb569442978483930ba5311dd5d17d08f8dbbc3b42580ab1d"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-28-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "59fee45858260bb838cc382d31d803854c8c4ac61d24ada0feb9560ae6284fd3"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-29-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "cf137fe1ffb9b244dced2875ea1a66bf57e25c362674d080b08b690ad5dd79f3"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-30-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "003957183f70e62f6ed9191928dd264088bbcb91d097bd219425d202411cd654"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-05-31-2026.log",
+      "bytes_for_hash": 28608,
+      "hash_mode": "utf8_lf",
+      "sha256": "fe0b33bdfe4379924a0ea9dad0582a5fd8a53bb0d322667283ff433d446d97dd"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-01-2026.log",
+      "bytes_for_hash": 28224,
+      "hash_mode": "utf8_lf",
+      "sha256": "970df7977adf5fd79a0da63141e77cb74a7142f516fc9e74c97dbedc96cd98cb"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-02-2026.log",
+      "bytes_for_hash": 27931,
+      "hash_mode": "utf8_lf",
+      "sha256": "112890f1481471525ae4178925c4294f7c3818381c41adaeaa1592a70b3dfc52"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-03-2026.log",
+      "bytes_for_hash": 20008,
+      "hash_mode": "utf8_lf",
+      "sha256": "7b6a07df4cbcf56a48f74b977aa74a25ec5da18497e7ce1636bc5c1c0abf3067"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-04-2026.log",
+      "bytes_for_hash": 28224,
+      "hash_mode": "utf8_lf",
+      "sha256": "96468d223ae07d63f4c09aebc8c5c7884c6a810e2f46b89438847b038c1aea58"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-05-2026.log",
+      "bytes_for_hash": 17351,
+      "hash_mode": "utf8_lf",
+      "sha256": "bc3f2b8abb8e26229f7c3e0b42958d84618741940f48796f788c4cecf3c21c1d"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/mdm-fde-06-14-2026.log",
+      "bytes_for_hash": 3564,
+      "hash_mode": "utf8_lf",
+      "sha256": "da2402d5a029a632d5579c81da9a9844c7612b7790c1f1bd616d49f90908d279"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/MFS.Log",
+      "bytes_for_hash": 66114,
+      "hash_mode": "utf8_lf",
+      "sha256": "55e78cbeb1c580476fd17d00eb4d7e1a70dd392fefa0e1b491b76b5385c39269"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/ns-apps.log",
+      "bytes_for_hash": 32635,
+      "hash_mode": "utf8_lf",
+      "sha256": "173a805c6586c405160c61494fd9f3b8b678205aeefcc0cd8f9a621dc3992c77"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/ns-monitor-app.log",
+      "bytes_for_hash": 77446,
+      "hash_mode": "utf8_lf",
+      "sha256": "3759454bffc95c23c4fa889a67c3dd70b9d45ae4e3f94add8cb16e5bb88c80d4"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/ns-notifier-app.log",
+      "bytes_for_hash": 19290,
+      "hash_mode": "utf8_lf",
+      "sha256": "38e9479c7f1f8a4448502e7c3c04392bd769e41f3dfd8a2859ac31f1eaa91514"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/MFS/pe_console.log",
+      "bytes_for_hash": 63360,
+      "hash_mode": "utf8_lf",
+      "sha256": "fe92be86c04bba54502768cdd292b36029daa7a0661226a2c3231566a228df48"
+    },
+    {
+      "path": "Logs/Root_Server_Basic/Root_Server/NO_LOG_FOUND.txt",
+      "bytes_for_hash": 152,
+      "hash_mode": "utf8_lf",
+      "sha256": "aa719a1615d3b1a4e3edfb0883d432ef1a0f9baacfaa72ee94ec688779f46723"
+    },
+    {
+      "path": "Logs/Web_Reports/HEALTHCHECK_WEBREPORTS_LOGGING_README.txt",
+      "bytes_for_hash": 359,
+      "hash_mode": "utf8_lf",
+      "sha256": "824d4d8d73cd55ba52664c8a11a57a00890ee0911f897aeb4807a68448dca8d0"
+    },
+    {
+      "path": "Logs/Web_Reports/HEALTHCHECK_WEBREPORTS_LOGS_BFI-ROOT01_06-14-2026_1941.log",
+      "bytes_for_hash": 244,
+      "hash_mode": "utf8_lf",
+      "sha256": "6a6297791ed99a58b51daf3a0418e55e358e1f31b85753fb09edcf1a3bc79da0"
+    },
+    {
+      "path": "Logs/Web_Reports/HEALTHCHECK_WEBREPORTS_LOGS_BFI-ROOT01_06-14-2026_2001.log",
+      "bytes_for_hash": 54366,
+      "hash_mode": "utf8_lf",
+      "sha256": "5bb3edc891a49f52eaaa6c0c29e735a0c16914f8179761e3e43d9d409547f08d"
+    },
+    {
+      "path": "Originals/Platform_20261024.zip",
+      "bytes_for_hash": 33287,
+      "hash_mode": "raw",
+      "sha256": "264fb52f63f4a118f355597f9ab6d9a243f184036f4768215e0fd606ac448131"
+    },
+    {
+      "path": "Originals/TA_20261024.zip",
+      "bytes_for_hash": 90093,
+      "hash_mode": "raw",
+      "sha256": "eb4b620329ec2e529c587703b64c22a0c370639f96a4eeae150de6c0b1ce8e26"
+    },
+    {
       "path": "Perfmon/server.blg",
       "bytes_for_hash": 14680064,
-      "hash_mode": "raw_bytes",
+      "hash_mode": "raw",
       "sha256": "50f786d60cda1ca0a5f0295dd68dd53436db637d5f90dff20f8e87dd11f29e22"
+    },
+    {
+      "path": "Relay_Capacity/Relay_Server_Capacity_Analysis_06-14-2026_0805.xml",
+      "bytes_for_hash": 7230,
+      "hash_mode": "utf8_lf",
+      "sha256": "90a30e628b4c38cb170ed2d786a5aff6d824898bcffa09c4fe1a901c2787dc4c"
+    },
+    {
+      "path": "Release_Intelligence/release_intelligence_11_0_6_137_20260828_135511.csv",
+      "bytes_for_hash": 62,
+      "hash_mode": "utf8_lf",
+      "sha256": "6383bcbb7f208673f156472d687514a29aab12a9120e9bde1bfb1d0216577347"
+    },
+    {
+      "path": "Release_Intelligence/release_intelligence_11_0_6_137_20260828_135511.json",
+      "bytes_for_hash": 1009,
+      "hash_mode": "utf8_lf",
+      "sha256": "835784b630e8c7591506f33aeaeb7484ef2b269494c04cff046f3eadcadca517"
+    },
+    {
+      "path": "Server_Capacity/Server_Capacity_PluginPortal_BFPLUGINPORTAL_06-14-2026_1852.log",
+      "bytes_for_hash": 1051,
+      "hash_mode": "utf8_lf",
+      "sha256": "1a5033decff59c59e89613640193c0e83871c98d41f07a509421841c571b7659"
+    },
+    {
+      "path": "Server_Capacity/Server_Capacity_RootServer_BFROOT1_06-14-2026_1852.log",
+      "bytes_for_hash": 1313,
+      "hash_mode": "utf8_lf",
+      "sha256": "663a42078237514da9b601f0a1475fbfd7bc3be3c2531e88a33fa86cfe7d84d3"
+    },
+    {
+      "path": "Server_Capacity/Server_Capacity_ServerAutomation_BFRELAY001_06-14-2026_1852.log",
+      "bytes_for_hash": 1042,
+      "hash_mode": "utf8_lf",
+      "sha256": "3acf24614a9633900fa57244fc8ea3a497947de38ed995a76e7269e3237a9bc0"
+    },
+    {
+      "path": "Server_Capacity/Server_Capacity_WebReports_BFWEBRPT02_06-14-2026_1553.log",
+      "bytes_for_hash": 1007,
+      "hash_mode": "utf8_lf",
+      "sha256": "0ff2d643450333a96b3405a5b8c68c9ec3abdbe9a25e95aadad323d22a829fd7"
+    },
+    {
+      "path": "Server_Capacity/Server_Capacity_WebUI_BFWEBUI_06-14-2026_1852.log",
+      "bytes_for_hash": 972,
+      "hash_mode": "utf8_lf",
+      "sha256": "8e1128f4ede763d35bc874a642d4478cada16af392553dff971e3a349ed8a9c7"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_checkdb.txt",
+      "bytes_for_hash": 33168,
+      "hash_mode": "utf8_lf",
+      "sha256": "db884b43e0c930f52a3f4076093e978888ba04fe4447b2becd1c4daaa7c133ee"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_database_info.csv",
+      "bytes_for_hash": 4304,
+      "hash_mode": "utf8_lf",
+      "sha256": "f960fc7d998c5d51900fa7ab1104dc56c634c9a9f934cdcaad422d24fc094718"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_deadlock_info.csv",
+      "bytes_for_hash": 1582,
+      "hash_mode": "utf8_lf",
+      "sha256": "77e419cc64a5eec7235215f909ba2c082a4573d22687f570a6dda0239b0aee56"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_frag_levels.csv",
+      "bytes_for_hash": 16768,
+      "hash_mode": "utf8_lf",
+      "sha256": "e01cfa8ba04646d923cab0a070a25bf8984ed8d6ba64fedaf55d997db0862693"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_large_properties.csv",
+      "bytes_for_hash": 3028,
+      "hash_mode": "utf8_lf",
+      "sha256": "86e9c8d3ef10f7ef5742cef2506680bc48e0bb6f5028d4aabd081094b6de72e5"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_maintenance_plan_history.csv",
+      "bytes_for_hash": 53540,
+      "hash_mode": "utf8_lf",
+      "sha256": "1bba988fb5b4419f49ff589953f35c5a80615bb89844d803ad1e604f03664aa2"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_maxdopcftp_settings.txt",
+      "bytes_for_hash": 618,
+      "hash_mode": "utf8_lf",
+      "sha256": "41846f5185da6e3b51c1eb3d266dc49b7e50a39ae39e8b19e95f0bde22fef2c2"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_package_cache.csv",
+      "bytes_for_hash": 182334,
+      "hash_mode": "utf8_lf",
+      "sha256": "46f2fd9efda53de772fa02d641fd783e1e3a1ed79960a5c59a52a88420903300"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_registrations.csv",
+      "bytes_for_hash": 377,
+      "hash_mode": "utf8_lf",
+      "sha256": "93dfbbe32f6e9b89c8c0e514edb901ee1957d9c5f05509ec82da3ddd5071ac3d"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_settings.csv",
+      "bytes_for_hash": 2716244,
+      "hash_mode": "utf8_lf",
+      "sha256": "bd71b8fd6392c81eb95ce0c6455618580cb8cfcfb17fc06dc53b6870e9b46478"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_table_sizes.csv",
+      "bytes_for_hash": 52595,
+      "hash_mode": "utf8_lf",
+      "sha256": "9badebe9d18668679daa2f229db19169ef69c24c8a702df3a58b5da97a0f3ded"
+    },
+    {
+      "path": "SQL/SQL_Information/localhost_06142026_sql_version_info.txt",
+      "bytes_for_hash": 922,
+      "hash_mode": "utf8_lf",
+      "sha256": "289d0a0206d2feeddec6e0f10f54d03af385daa743afce56d5a1b97635b739bc"
     }
   ],
-  "report_source_state": "Uncommitted working copy. The commit identifies the base, not all tested source.",
-  "demo_snapshot": "DEMO_SNAPSHOT.json"
+  "capacity_installation_paths": {
+    "verified_lab_paths": [
+      "BFPLUGINPORTAL: Plugin Portal, Explorer",
+      "BFWEBUI: WebUI",
+      "BFROOT1: Web Reports, Server Automation, MCP"
+    ],
+    "unverified_role_paths": [
+      "BFRELAY001: Server Automation",
+      "BFWEBRPT02: Web Reports, Explorer, MCP"
+    ],
+    "missing_paths": "Retained as Not collected; do not infer installation drives."
+  },
+  "report_source_state": "Application commits listed above, with the shared-demo input update and main Reference Data heading-matching fix in the working copies.",
+  "demo_snapshot": "DEMO_SNAPSHOT.json",
+  "report_code_commits": {
+    "main": "4de94e28",
+    "ta": "d8f45d7",
+    "mc": "bc512af"
+  },
+  "collector_source_note": "Preserved collector fingerprints from the main repository validation on 2026-10-24. These identify the archived source basis, not the current TA or MC collector files."
 }

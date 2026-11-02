@@ -1,0 +1,401 @@
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Initializing Web Reports version 11.0.6.137
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Using cURL library - 8.18.0
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- OpenSSL Initialized (FIPS Mode)
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Using OpenSSL crypto library OpenSSL 3.5.5 27 Jan 2026
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- FXF character set is windows-1252
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- TLS Cipher List: HIGH:!ADH:!AECDH:!kDH:!kECDH:!kRSA:!PSK:!SRP:!SHA1
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Entering WebReportsConfiguration::UpdateAllValues
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Exiting WebReportsConfiguration::UpdateAllValues (5 ms)
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BESReporting'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 -- Entering DatabaseConnectionPool::ReconnectIfNecessary
+Sun, 14 Jun 2026 20:01:29 -0400 -- 8172 --   Successful ODBC call returned:
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed database context to 'BESReporting'. (01000: 5,701)
+[Microsoft][ODBC Driver 18 for SQL Server][SQL Server]Changed language setting to us_english. (01000: 5,703)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting DatabaseConnectionPool::ReconnectIfNecessary (22 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- select Value from DBINFO where Name = 'Version'
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Begin web reports scheduling thread...
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Begin web reports background thread...
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- select Name, Token, ServerURL, IsDisabled, ReverseToken from DATA_SOURCES
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Connecting to datasource: (local)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/database-version
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/database-version (81 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/deployment-options/Masthead
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/deployment-options/Masthead (112 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/deployment-options/Masthead
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/deployment-options/Masthead (116 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/database-installation-time
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/database-installation-time (8 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/database-version
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/database-version (13 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering DomainStore::AddSource
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 --   XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 --   XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting DomainStore::AddSource (12 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/is-windows-server
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/is-windows-server (8 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/is-saml-enabled
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/is-saml-enabled (17 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/deployment-options/SiteCertificate
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/deployment-options/SiteCertificate (134 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/deployment-options/PendingSiteCertificates
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Exiting GET data/deployment-options/PendingSiteCertificates (226 ms)
+Sun, 14 Jun 2026 20:01:30 -0400 -- 8172 -- Entering GET data/sites
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Exiting GET data/sites (723 ms)
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Entering GET data/sequence
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Exiting GET data/sequence (20 ms)
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Entering GET data/analysis-property-mapping
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Exiting GET data/analysis-property-mapping (73 ms)
+Sun, 14 Jun 2026 20:01:31 -0400 -- 8172 -- Entering GET data/deployment-options
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Exiting GET data/deployment-options (563 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Entering GET data/deployment-options/MinimumRefreshSeconds
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Exiting GET data/deployment-options/MinimumRefreshSeconds (56 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Entering GET data/action-site-epoch
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Exiting GET data/action-site-epoch (20 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- select Name, Token, ServerURL, IsDisabled, ReverseToken from DATA_SOURCES
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Starting background thread for (local) (2299764711)
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Beginning WebReportsSession::RefreshStores (full refresh)...
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 0 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task struct UserRoleRefresh::Refresh
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 1 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task struct UserRefresh::Refresh
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- RunOneBackgroundTask: 2 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 1 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task class SiteRefresh::Task
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 2 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task class ActionSiteStoreRefresh::Task
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- Entering struct UserRoleRefresh::Refresh
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 3 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Entering GET data/roles
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task class ActionRefresh::Task
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 4 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task class FixletVisibilityRefresh::Task
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 5 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Queued bg task struct RegistrationServerRefresh
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Entering GET data/deployment-options
+Sun, 14 Jun 2026 20:01:32 -0400 -- HTTPRedirect Server Thread (2708) -- Opening socket with IP address: ::
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Opening socket with IP address: ::
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Attempting to load certificate and private key file assuming PEM encoding/formatting...
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- Certificate and Private Key load successful
+Sun, 14 Jun 2026 20:01:32 -0400 -- 8172 -- HTTPS server on port 8083 uses the following TLS ciphers: TLS_AES_256_GCM_SHA384 TLS_AES_128_GCM_SHA256 ECDHE-ECDSA-AES256-GCM-SHA384 ECDHE-RSA-AES256-GCM-SHA384 DHE-DSS-AES256-GCM-SHA384 DHE-RSA-AES256-GCM-SHA384 ECDHE-ECDSA-AES256-CCM DHE-RSA-AES256-CCM ECDHE-ECDSA-AES128-GCM-SHA256 ECDHE-RSA-AES128-GCM-SHA256 DHE-DSS-AES128-GCM-SHA256 DHE-RSA-AES128-GCM-SHA256 ECDHE-ECDSA-AES128-CCM DHE-RSA-AES128-CCM ECDHE-ECDSA-AES256-SHA384 ECDHE-RSA-AES256-SHA384 DHE-RSA-AES256-SHA256 DHE-DSS-AES256-SHA256 ECDHE-ECDSA-AES128-SHA256 ECDHE-RSA-AES128-SHA256 DHE-RSA-AES128-SHA256 DHE-DSS-AES128-SHA256
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Exiting GET data/roles (199 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Queued fg task struct UserRoleRefresh::Complete
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- Exiting struct UserRoleRefresh::Refresh (200 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- RunOneBackgroundTask: 6 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- Entering struct UserRefresh::Refresh
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Entering GET data/users
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Exiting GET data/users (65 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Entering GET data/deleted-usernames
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Exiting GET data/deleted-usernames (7 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 1 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Queued fg task struct UserRefresh::Complete
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- Exiting struct UserRefresh::Refresh (73 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- RunOneBackgroundTask: 5 tasks in queue
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) -- Entering class SiteRefresh::Task
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --   Entering SiteRefresh::Task::Run
+Sun, 14 Jun 2026 20:01:32 -0400 -- Background (1824) --     Entering GET data/sites
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Exiting GET data/deployment-options (550 ms)
+Sun, 14 Jun 2026 20:01:32 -0400 -- 4084 -- Entering GET data/deployment-options/MinimumRefreshSeconds
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Exiting GET data/deployment-options/MinimumRefreshSeconds (60 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Entering POST data/sync-revocations
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Exiting POST data/sync-revocations (110 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 4 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class UnmanagedAssetRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 5 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class LicenseUpdateRefreshTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 6 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class DashboardDataRefresh::RefreshTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 7 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class ComputerRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 8 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class FixletResultRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 9 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class PropertyResultRefresh::RefreshTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 10 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class ActionResultRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 11 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class CommentStoreRefreshTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 12 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class ComputerGroupRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 13 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class HistoricalComputerRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 14 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class HistoricalFixletRefresh::Task
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 15 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task struct `anonymous namespace'::Refresh
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 16 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class PeerNestDataRefresh::RefreshTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- ThreadedTaskManager::Queue(): 17 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Queued bg task class FireSignalTask
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Exiting WebReportsSession::RefreshStores...
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- RunOneForegroundTask(): 2 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Entering struct UserRoleRefresh::Complete
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --   Entering UserRoleStore::SendChangedSignal
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --     Entering EffectivePermissionStore::SendChangedSignal
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --       Entering DomainStore::AddSource
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --         XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --         XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --       Exiting DomainStore::AddSource (8 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --     Exiting EffectivePermissionStore::SendChangedSignal (8 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --   Exiting UserRoleStore::SendChangedSignal (8 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Exiting struct UserRoleRefresh::Complete (8 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- MEMORY USAGE: 105.004/134213464.000/4155.020/132169696.000; peak 105.004/2048.000/4155.020/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/sites (501 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Entering GET data/site-readers
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Entering struct UserRefresh::Complete
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --   Entering EffectivePermissionStore::SendChangedSignal
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --     Entering DomainStore::AddSource
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --       XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --       XML parsing error: unable to open primary document entity 'BESDomain_4_0.xsd' Line 0, Character 0
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --     Exiting DomainStore::AddSource (7 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 --   Exiting EffectivePermissionStore::SendChangedSignal (7 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- Exiting struct UserRefresh::Complete (7 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/site-readers (22 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Entering GET data/custom-site-writers
+Sun, 14 Jun 2026 20:01:33 -0400 -- 4084 -- MEMORY USAGE: 105.004/134213464.000/4155.027/132169696.000; peak 105.004/2048.000/4155.027/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/custom-site-writers (141 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Entering GET data/certificates
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/certificates (191 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Entering GET data/deployment-options/Masthead
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/deployment-options/Masthead (110 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Entering GET data/authenticating
+Sun, 14 Jun 2026 20:01:33 -0400 -- Background (1824) --     Exiting GET data/authenticating (8 ms)
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #0 (7820) -- Entering site #1 'BES Support'
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #0 (7820) --   SiteRefresh() - Getting fixlets and files of site BES Support
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #0 (7820) --   Entering GetExternalFixletsAndFiles
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #0 (7820) --     Entering GET external-site-data
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #1 (4480) -- Entering site #2 'Patches for Windows'
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #1 (4480) --   SiteRefresh() - Getting fixlets and files of site Enterprise Security
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #1 (4480) --   Entering GetExternalFixletsAndFiles
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #1 (4480) --     Entering GET external-site-data
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #2 (5832) -- Entering site #75 'Client Manager for Endpoint Protection'
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #2 (5832) --   SiteRefresh() - Getting fixlets and files of site Client Manager for Anti-Virus
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #2 (5832) --   Entering GetExternalFixletsAndFiles
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #2 (5832) --     Entering GET external-site-data
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #3 (4900) -- Entering site #3093 'BES Inventory and License'
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #3 (4900) --   SiteRefresh() - Getting fixlets and files of site BES Inventory and License
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #3 (4900) --   Entering GetExternalFixletsAndFiles
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #3 (4900) --     Entering GET external-site-data
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #3 (4900) --       GetExternalFixletsAndFiles() - Decompressing the site content in the temp dir..
+Sun, 14 Jun 2026 20:01:33 -0400 -- SiteFetcher #2 (5832) --       GetExternalFixletsAndFiles() - Decompressing the site content in the temp dir..
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --     Exiting GET external-site-data (519 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Exiting GetExternalFixletsAndFiles (519 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Entering VerifyExternalSite
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --     VerifyExternalSite() - verifying site BES Inventory and License
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --     VerifyExternalSite() - VerifySubscription SubscribeSMIME
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --     VerifyExternalSite() - VerifySubscription UnsubscribeSMIME
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --     VerifyExternalSite() - each file of the site has been verified successfully.
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Exiting VerifyExternalSite (132 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Entering LoadSiteFormatContext
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Exiting LoadSiteFormatContext (10 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #3 (4900) --   Entering XlateSiteFiles
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #2 (5832) --     Exiting GET external-site-data (785 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #2 (5832) --   Exiting GetExternalFixletsAndFiles (785 ms)
+Sun, 14 Jun 2026 20:01:34 -0400 -- SiteFetcher #2 (5832) --   Entering VerifyExternalSite
+... [snip] ...
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/sequence (19 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/differenced-action-results
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1754.570/134211800.000/4175.316/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/differenced-action-results (38 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     0 rows, 0 sec
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     0 rows/sec
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting ActionResultCache::Update (67 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class ForegroundTaskFunction
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class ActionResultRefresh::Task (67 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 7 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class CommentStoreRefreshTask
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class ForegroundTaskFunction
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 --   ActionResultStore::ProcessResultRefreshComplete -- 690 results in store.
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class ForegroundTaskFunction (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/sequence (16 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/comments/action
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/comments/action (17 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/sequence (13 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/comments/fixlet
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/comments/fixlet (15 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.285/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/sequence (17 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/comments/computer
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/comments/computer (15 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class CommentStoreRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class CommentStoreRefreshTask (96 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 6 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class ComputerGroupRefresh::Task
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering ComputerGroupRefresh::Task::Run
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class CommentStoreRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class CommentStoreRefreshComplete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/sequence (14 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/correlated-groups-refresh-times
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/correlated-groups-refresh-times (17 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/sequence (15 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Entering GET data/differenced-correlated-group-members
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.324/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Exiting GET data/differenced-correlated-group-members (27 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --     Queued fg task class ComputerGroupRefresh::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting ComputerGroupRefresh::Task::Run (75 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class ComputerGroupRefresh::Task (75 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 5 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class HistoricalComputerRefresh::Task
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/historical-computer-counts
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class ComputerGroupRefresh::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 --   Entering ComputerGroupStore::ProcessCorrelatedGroupRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 --     Entering CorrelatedGroupMembersDatabase::ProcessRefresh
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 --     Exiting CorrelatedGroupMembersDatabase::ProcessRefresh (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 --   Exiting ComputerGroupStore::ProcessCorrelatedGroupRefreshComplete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class ComputerGroupRefresh::Complete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/historical-computer-counts (38 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class HistoricalComputerRefresh::HistoricalComputerRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class HistoricalComputerRefresh::Task (39 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 4 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class HistoricalFixletRefresh::Task
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/historical-fixlet-counts
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.328/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class HistoricalComputerRefresh::HistoricalComputerRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class HistoricalComputerRefresh::HistoricalComputerRefreshComplete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/historical-fixlet-counts (129 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class HistoricalFixletRefresh::HistoricalFixletRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class HistoricalFixletRefresh::Task (129 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 3 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering struct `anonymous namespace'::Refresh
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/idp-directories
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/idp-directories (41 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/deployment-options/Masthead
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.270/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class HistoricalFixletRefresh::HistoricalFixletRefreshComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class HistoricalFixletRefresh::HistoricalFixletRefreshComplete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/deployment-options/Masthead (58 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task struct `anonymous namespace'::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting struct `anonymous namespace'::Refresh (122 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 2 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class PeerNestDataRefresh::RefreshTask
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/sequence (7 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/peer-next
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.297/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/peer-next (15 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/sequence
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering struct `anonymous namespace'::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting struct `anonymous namespace'::Complete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/sequence (15 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Entering GET data/peer-next
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Exiting GET data/peer-next (16 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 0 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class PeerNestDataRefresh::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class PeerNestDataRefresh::RefreshTask (56 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- RunOneBackgroundTask: 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Entering class FireSignalTask
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   ForegroundTaskQueue::Receive(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) --   Queued fg task class FireSignalTaskComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- Background (1824) -- Exiting class FireSignalTask (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.316/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 2 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class PeerNestDataRefresh::Complete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class PeerNestDataRefresh::Complete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.328/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- servicing foreground task for: (local)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- RunOneForegroundTask(): 1 tasks in queue
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Entering class FireSignalTaskComplete
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- Exiting class FireSignalTaskComplete (0 ms)
+Sun, 14 Jun 2026 21:18:22 -0400 -- 4084 -- MEMORY USAGE: 1746.176/134211808.000/4175.293/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select ScheduledID, UserID, Type, Options, ScheduleInterval, StartTime, EndTime, NextAttempt, NextAttemptDST, IsDisabled, ReportSiteID, ReportLanguage, ReportPath, TypeParameters from SCHEDULED_ACTIVITY
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select LastAnswers from SCHEDULED_ACTIVITY_RELEVANCE_ANSWERS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select ScheduledID, UserID, Type, Options, ScheduleInterval, StartTime, EndTime, NextAttempt, NextAttemptDST, IsDisabled, ReportSiteID, ReportLanguage, ReportPath, TypeParameters from SCHEDULED_ACTIVITY where IsDisabled = 0
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select OptionName, OptionValue from SCHEDULED_ACTIVITY_OPTIONS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:23 -0400 -- 7796 -- select Time, Message from SCHEDULED_ACTIVITY_ERRORS where ScheduledID = ?
+Sun, 14 Jun 2026 21:18:25 -0400 -- 8172 -- /relevance - ::1
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Running plugin /relevance with client ::1
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- MEMORY USAGE: 1745.203/134211808.000/4176.234/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Loading translation files for ENU
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering WebReportsConfiguration::UpdateAllValues
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting WebReportsConfiguration::UpdateAllValues (6 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Request from ::1 : POST /relevance
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- --- printing parameters from 
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- query=(id of it, name of it as trimmed string, state of it, (parenthesized part of matches (regex "\/\/\s*NOTIFICATION_START(.*)\s*\/\/\s*NOTIFICATION_END") of action script of it) , /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it, (if (group member flag of it and exists parent group of it) then ((id of it, name of it as trimmed string, state of it, /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it) of parent group of it) else (-1, "", "", -1, -1, -1, -1))) of bes actions whose ((it contains "NOTIFICATION_START" AND it contains "NOTIFICATION_END") of action script of it AND exists results of it AND state of it ="Open" AND (if (exists parent group of it AND not(name of parent group of it starts with "#{IEMPlan ")) then(state of parent group of it = "Open") else (true)))
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- --- done.
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- select DatabasePropertyEx( db_name(), 'collation' )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- select Value from DBINFO where Name = 'Version'
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- select Name from DATA_SOURCES where Name=?
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- select Name, Token, ServerURL, IsDisabled, ReverseToken from DATA_SOURCES where Name=?
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( computer )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( computer ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( computer with extensions )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( computer with extensions ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( action result counts )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( action result counts ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( fixlet )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( fixlet ) (41 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( action )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( action ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( all action )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( all action ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( site )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( site ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( peer prefetch traffic )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( peer prefetch traffic ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering ResetHashes( peer gather traffic )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting ResetHashes( peer gather traffic ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering WebReportsDB::SetupPrivilegesFilterAndCheckValidity
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( computer )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( computer ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( fixlet )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( fixlet ) (23 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( action )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( action ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( action )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( action ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( site )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( site ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( peer prefetch traffic )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( peer prefetch traffic ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering CalculateHashes( peer gather traffic )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting CalculateHashes( peer gather traffic ) (0 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting WebReportsDB::SetupPrivilegesFilterAndCheckValidity (24 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Entering Relevance Query: (id of it, name of it as trimmed string, state of it, (parenthesized part of matches (regex "\/\/\s*NOTIFICATION_START(.*)\s*\/\/\s*NOTIFICATION_END") of action script of it) , /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it, (if (group member flag of it and exists parent group of it) then ((id of it, name of it as trimmed string, state of it, /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it) of parent group of it) else (-1, "", "", -1, -1, -1, -1))) of bes actions whose ((it contains "NOTIFICATION_START" AND it contains "NOTIFICATION_END") of action script of it AND exists results of it AND state of it ="Open" AND (if (exists parent group of it AND not(name of parent group of it starts with "#{IEMPlan ")) then(state of parent group of it = "Open") else (true)))
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Entering EvaluateRelevanceXML
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --     Entering WebReportsRelevanceEvaluator::Evaluate( (id of it, name of it as trimmed string, state of it, (parenthesized part of matches (regex "\/\/\s*NOTIFICATION_START(.*)\s*\/\/\s*NOTIFICATION_END") of action script of it) , /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it, (if (group member flag of it and exists parent group of it) then ((id of it, name of it as trimmed string, state of it, /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it) of parent group of it) else (-1, "", "", -1, -1, -1, -1))) of bes actions whose ((it contains "NOTIFICATION_START" AND it contains "NOTIFICATION_END") of action script of it AND exists results of it AND state of it ="Open" AND (if (exists parent group of it AND not(name of parent group of it starts with "#{IEMPlan ")) then(state of parent group of it = "Open") else (true))) )
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --     Exiting WebReportsRelevanceEvaluator::Evaluate( (id of it, name of it as trimmed string, state of it, (parenthesized part of matches (regex "\/\/\s*NOTIFICATION_START(.*)\s*\/\/\s*NOTIFICATION_END") of action script of it) , /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it, (if (group member flag of it and exists parent group of it) then ((id of it, name of it as trimmed string, state of it, /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it) of parent group of it) else (-1, "", "", -1, -1, -1, -1))) of bes actions whose ((it contains "NOTIFICATION_START" AND it contains "NOTIFICATION_END") of action script of it AND exists results of it AND state of it ="Open" AND (if (exists parent group of it AND not(name of parent group of it starts with "#{IEMPlan ")) then(state of parent group of it = "Open") else (true))) ) (112 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) --   Exiting EvaluateRelevanceXML (114 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- Exiting Relevance Query: (id of it, name of it as trimmed string, state of it, (parenthesized part of matches (regex "\/\/\s*NOTIFICATION_START(.*)\s*\/\/\s*NOTIFICATION_END") of action script of it) , /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it, (if (group member flag of it and exists parent group of it) then ((id of it, name of it as trimmed string, state of it, /*TARGETED*/ number of targeted computers of it, /*REPORTED*/ number of results of it, /*UNFIXED*/ number of results whose (not (set of (bes action status fixed as string; bes action status irrelevant as string; bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string)) of it, /*FAILED*/ number of results whose (set of (bes action status error as string; bes action status failed as string; bes action status user cancelled as string; bes action status download failed as string; bes action status invalid signature as string; bes action status expired as string; bes action status locked as string; bes action status constrained as string) contains status of it as string) of it) of parent group of it) else (-1, "", "", -1, -1, -1, -1))) of bes actions whose ((it contains "NOTIFICATION_START" AND it contains "NOTIFICATION_END") of action script of it AND exists results of it AND state of it ="Open" AND (if (exists parent group of it AND not(name of parent group of it starts with "#{IEMPlan ")) then(state of parent group of it = "Open") else (true))) (114 ms)
+Sun, 14 Jun 2026 21:18:25 -0400 -- /relevance (8096) -- MEMORY USAGE: 1745.457/134211808.000/4175.980/132167416.000; peak 2669.453/2048.000/4177.164/2048.000 [commit/free/reserve/maxFreeBlock, in MB]
+Sun, 14 Jun 2026 21:18:25 -0400 -- 8172 -- Connection closed by remote host -- ::1

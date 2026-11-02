@@ -340,7 +340,7 @@
 <BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
 	<Query Resource="&quot;Number of Automatic Computer Groups: &quot; &amp; number of bes computer groups whose (Automatic flag of it) as string">
 		<Result>
-			<Answer type="string">Number of Automatic Computer Groups: 1</Answer>
+			
 		</Result>
 		<Evaluation>
 			<Time>0.367ms</Time>
@@ -353,7 +353,7 @@
 <BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
 	<Query Resource="&quot;Number of Manual Computer Groups: &quot; &amp; number of bes computer groups whose (NOT(Automatic flag of it)) as string">
 		<Result>
-			<Answer type="string">Number of Manual Computer Groups: 0</Answer>
+			
 		</Result>
 		<Evaluation>
 			<Time>0.15ms</Time>

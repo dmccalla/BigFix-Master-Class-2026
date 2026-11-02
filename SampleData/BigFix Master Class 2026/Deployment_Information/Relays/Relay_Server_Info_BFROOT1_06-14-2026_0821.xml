@@ -288,7 +288,7 @@
 <BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
 	<Query Resource="&quot;Number of relays that have not reported within the last 1 day: &quot; &amp; number of bes computers whose (last report time of it &lt; (now - (10080 * minute)) and relay server flag of it) as string">
 		<Result>
-			<Answer type="string">Number of relays that have not reported within the last 1 day: 0</Answer>
+			
 		</Result>
 		<Evaluation>
 			<Time>0.245ms</Time>

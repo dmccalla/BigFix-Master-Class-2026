@@ -1,0 +1,133 @@
+Mon, 17 Nov 2025 16:16:04 -0500 -- 2192 -- FillDB Stop Requested.
+Mon, 17 Nov 2025 16:18:02 -0500 -- 4748 -- FillDB version 11.0.4.60 starting...
+Mon, 17 Nov 2025 16:18:02 -0500 -- 4748 -- Using cURL library - 8.9.1-DEV
+Mon, 17 Nov 2025 16:18:02 -0500 -- 4748 -- OpenSSL Initialized (FIPS Mode)
+Mon, 17 Nov 2025 16:18:02 -0500 -- 4748 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Mon, 17 Nov 2025 16:18:03 -0500 -- 4748 -- Signature Algorithms: sha384, sha256
+Mon, 17 Nov 2025 16:18:03 -0500 -- 4748 -- Download Algorithms: sha256, sha1
+Mon, 17 Nov 2025 16:36:13 -0500 -- 4348 -- FillDB Stop Requested.
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- FillDB version 11.0.4.60 starting...
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- Using cURL library - 8.9.1-DEV
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- OpenSSL Initialized (FIPS Mode)
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- Signature Algorithms: sha384, sha256
+Mon, 17 Nov 2025 16:36:14 -0500 -- 372 -- Download Algorithms: sha256, sha1
+Tue, 18 Nov 2025 11:05:35 -0500 -- 1136 -- FillDB Stop Requested.
+Tue, 18 Nov 2025 11:05:36 -0500 -- 6216 -- FillDB version 11.0.4.60 starting...
+Tue, 18 Nov 2025 11:05:36 -0500 -- 6216 -- Using cURL library - 8.9.1-DEV
+Tue, 18 Nov 2025 11:05:36 -0500 -- 6216 -- OpenSSL Initialized (FIPS Mode)
+Tue, 18 Nov 2025 11:05:36 -0500 -- 6216 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Tue, 18 Nov 2025 11:05:37 -0500 -- 6216 -- Signature Algorithms: sha384, sha256
+Tue, 18 Nov 2025 11:05:37 -0500 -- 6216 -- Download Algorithms: sha256, sha1
+Tue, 18 Nov 2025 11:06:35 -0500 -- 7612 -- FillDB Stop Requested.
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- FillDB version 11.0.4.60 starting...
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- Using cURL library - 8.9.1-DEV
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- OpenSSL Initialized (FIPS Mode)
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- Signature Algorithms: sha384, sha256
+Tue, 18 Nov 2025 11:11:32 -0500 -- 5260 -- Download Algorithms: sha256, sha1
+Tue, 18 Nov 2025 11:58:21 -0500 -- 1100 -- FillDB Stop Requested.
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- FillDB version 11.0.4.60 starting...
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- Using cURL library - 8.9.1-DEV
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- OpenSSL Initialized (FIPS Mode)
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- Signature Algorithms: sha384, sha256
+Tue, 18 Nov 2025 12:05:56 -0500 -- 4444 -- Download Algorithms: sha256, sha1
+Tue, 18 Nov 2025 12:20:23 -0500 -- 4140 -- FillDB Stop Requested.
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- FillDB version 11.0.4.60 starting...
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- Using cURL library - 8.9.1-DEV
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- OpenSSL Initialized (FIPS Mode)
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- Signature Algorithms: sha384, sha256
+Tue, 18 Nov 2025 12:20:37 -0500 -- 3512 -- Download Algorithms: sha256, sha1
+Tue, 18 Nov 2025 12:25:34 -0500 -- 7872 -- FillDB Stop Requested.
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- FillDB version 11.0.4.60 starting...
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- Using cURL library - 8.9.1-DEV
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- OpenSSL Initialized (FIPS Mode)
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- Signature Algorithms: sha384, sha256
+Tue, 18 Nov 2025 12:25:47 -0500 -- 6052 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 10:05:15 -0500 -- 696 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 10:05:29 -0500 -- 7180 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 10:34:36 -0500 -- 5320 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 10:34:49 -0500 -- 7784 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 12:15:46 -0500 -- 1108 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 12:16:00 -0500 -- 7012 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 12:23:07 -0500 -- 3004 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 12:23:21 -0500 -- 7224 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 12:23:21 -0500 -- 7224 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 12:23:22 -0500 -- 7224 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 12:23:22 -0500 -- 7224 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 12:23:22 -0500 -- 7224 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 12:23:22 -0500 -- 7224 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 12:54:44 -0500 -- 6136 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 12:54:58 -0500 -- 7472 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 13:16:34 -0500 -- 3324 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 13:16:47 -0500 -- 6364 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 13:16:47 -0500 -- 6364 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 13:16:47 -0500 -- 6364 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 13:16:47 -0500 -- 6364 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 13:16:48 -0500 -- 6364 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 13:16:48 -0500 -- 6364 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 14:43:11 -0500 -- 5436 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 14:43:25 -0500 -- 7152 -- Download Algorithms: sha256, sha1
+Wed, 19 Nov 2025 15:47:47 -0500 -- 3508 -- FillDB Stop Requested.
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- FillDB version 11.0.4.60 starting...
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- Using cURL library - 8.9.1-DEV
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- OpenSSL Initialized (FIPS Mode)
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- Using OpenSSL crypto library OpenSSL 3.2.4 11 Feb 2025
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- Signature Algorithms: sha384, sha256
+Wed, 19 Nov 2025 15:48:19 -0500 -- 5556 -- Download Algorithms: sha256, sha1
+Thu, 20 Nov 2025 10:56:52 -0500 -- 3972 -- FillDB Stop Requested.
+Sun, 14 Jun 2026 17:50:08 -0400 -- 1596 -- FillDB Stop Requested.
+Sun, 14 Jun 2026 18:34:06 -0400 -- 2936 -- FillDB version 11.0.6.137 starting...
+Sun, 14 Jun 2026 18:34:06 -0400 -- 2936 -- Using cURL library - 8.18.0
+Sun, 14 Jun 2026 18:34:08 -0400 -- 2936 -- OpenSSL Initialized (FIPS Mode)
+Sun, 14 Jun 2026 18:34:08 -0400 -- 2936 -- Using OpenSSL crypto library OpenSSL 3.5.5 27 Jan 2026
+Sun, 14 Jun 2026 18:34:24 -0400 -- 2936 -- Unable to connect to database: Database Error: [Microsoft][ODBC Driver 18 for SQL Server]Named Pipes Provider: Could not open a connection to SQL Server [2].  (08001: 2)
+[Microsoft][ODBC Driver 18 for SQL Server]A network-related or instance-specific error has occurred while establishing a connection to (local). Server is not found or not accessible. Check if instance name is correct and if SQL Server is configured to allow remote connections. For more information see SQL Server Books Online. (08001: 2)
+[Microsoft][ODBC Driver 18 for SQL Server]Shared Memory Provider: Timeout error [258].  (08001: 258)
+[Microsoft][ODBC Driver 18 for SQL Server]Unable to complete login process due to delay in login response (08001: 258)
+[Microsoft][ODBC Driver 18 for SQL Server]Login timeout expired (S1T00: 0)
+Sun, 14 Jun 2026 18:34:35 -0400 -- 2936 -- Signature Algorithms: sha384, sha256
+Sun, 14 Jun 2026 18:34:35 -0400 -- 2936 -- Download Algorithms: sha256, sha1
+Sun, 14 Jun 2026 18:48:54 -0400 -- 2728 -- FillDB Stop Requested.
+Sun, 14 Jun 2026 18:50:32 -0400 -- 1148 -- FillDB version 11.0.6.137 starting...
+Sun, 14 Jun 2026 18:50:32 -0400 -- 1148 -- Using cURL library - 8.18.0
+Sun, 14 Jun 2026 18:50:32 -0400 -- 1148 -- OpenSSL Initialized (FIPS Mode)
+Sun, 14 Jun 2026 18:50:32 -0400 -- 1148 -- Using OpenSSL crypto library OpenSSL 3.5.5 27 Jan 2026
+Sun, 14 Jun 2026 18:50:33 -0400 -- 1148 -- Signature Algorithms: sha384, sha256
+Sun, 14 Jun 2026 18:50:33 -0400 -- 1148 -- Download Algorithms: sha256, sha1
+Sun, 14 Jun 2026 18:55:42 -0400 -- 2836 -- FillDB Stop Requested.
+Sun, 14 Jun 2026 18:56:37 -0400 -- 2964 -- FillDB version 11.0.6.137 starting...
+Sun, 14 Jun 2026 18:56:37 -0400 -- 2964 -- Using cURL library - 8.18.0
+Sun, 14 Jun 2026 18:56:38 -0400 -- 2964 -- OpenSSL Initialized (FIPS Mode)
+Sun, 14 Jun 2026 18:56:38 -0400 -- 2964 -- Using OpenSSL crypto library OpenSSL 3.5.5 27 Jan 2026
+Sun, 14 Jun 2026 18:56:38 -0400 -- 2964 -- Signature Algorithms: sha384, sha256
+Sun, 14 Jun 2026 18:56:38 -0400 -- 2964 -- Download Algorithms: sha256, sha1
+Sun, 14 Jun 2026 19:42:16 -0400 -- 2540 -- FillDB Stop Requested.

@@ -1,0 +1,21 @@
+{
+  "generated_at_utc": "2026-08-28T13:55:11.049040+00:00",
+  "collector_name": "Release Intelligence Collector",
+  "collector_version": "1.1.0",
+  "installed_version": "11.0.6.137",
+  "changelist_source": "https://support.bigfix.com/bes/changes/fullchangelist-110.txt",
+  "release_notes_url": "https://support.bigfix.com/bes/changes/fullchangelist-110.txt",
+  "scope_note": "Optional review aid. Not scored by itself.",
+  "release_intelligence": [],
+  "capabilities": [],
+  "capability_status": "collected",
+  "capability_message": "",
+  "capability_source": "https://forum.bigfix.com/c/release-announcements/platform-releases/66",
+  "capability_source_label": "BigFix Forum, Platform (Release Announcements)",
+  "demo_provenance": {
+    "operation": "Offline filtering of the saved snapshot, not a new online collection.",
+    "original_installed_version": "11.0.4",
+    "original_snapshot_sha256": "222be37464f75617b9d6c23511d2439198d816787420ff928b903fb1121d84f6",
+    "reconciled_on": "2026-10-23"
+  }
+}

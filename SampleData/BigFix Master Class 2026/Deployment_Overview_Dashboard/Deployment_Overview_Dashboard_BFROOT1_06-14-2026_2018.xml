@@ -1,0 +1,514 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;DEPLOYMENT OVERVIEW DASHBOARD&quot;">
+		<Result>
+			<Answer type="string">DEPLOYMENT OVERVIEW DASHBOARD</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.66ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.50ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Sun, 14 Jun 2026 20:28:32 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.97ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="%&quot;Report Version: 1.0&quot;">
+		<Result></Result>
+		<Error>This expression contained a character which is not allowed.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.30ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Deployment Information&quot;">
+		<Result>
+			<Answer type="string">Deployment Information</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.40ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource=" &quot;Deployment Version :: &quot; &amp; (it as string) of unique value of values whose (it contains &quot;.&quot;) of results whose (not error flag of it and exists value of it) of bes property whose (name of it = &quot;BES Server Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;)">
+		<Result>
+			<Answer type="string">Deployment Version :: 11.0.6.137</Answer>
+		</Result>
+		<Evaluation>
+			<Time>92.66ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Total Managed Devices :: &quot; &amp; (number of bes computers) as string)">
+		<Result>
+			<Answer type="string">Total Managed Devices :: 2537</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.143ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Native Agent Count :: &quot; &amp; (number of bes computers whose (agent type of it = &quot;Native&quot;)) as string)">
+		<Result>
+			<Answer type="string">Native Agent Count :: 2537</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.206ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relays Deployed :: &quot; &amp; (number of computers of results whose (exists it AND value of it as lowercase contains &quot;yes&quot;) of bes property whose (name of it = &quot;BES Relay Service Installed&quot; AND reserved flag of it)) as string)">
+		<Result>
+			<Answer type="string">Relays Deployed :: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>100.274ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Console Installed :: &quot; &amp; (number of computers of results whose (value of it as string contains &quot;.&quot;) of bes property &quot;BES Console Version&quot;) as string)">
+		<Result>
+			<Answer type="string">Console Installed :: 6</Answer>
+		</Result>
+		<Evaluation>
+			<Time>20.113ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Clients Reported Today :: &quot; &amp; (number of computers of results whose ((now - (value of it as time)) &lt; 1 * day) of bes property whose (reserved flag of it and name of it = &quot;Last Report Time&quot;)) as string)">
+		<Result>
+			<Answer type="string">Clients Reported Today :: 2477</Answer>
+		</Result>
+		<Evaluation>
+			<Time>51.3ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Native Agents Reported Today :: &quot; &amp; (number of computers whose (agent type of it = &quot;Native&quot;) of results whose ((now - (value of it as time)) &lt; 1 * day) of bes property whose (reserved flag of it and name of it = &quot;Last Report Time&quot;)) as string)">
+		<Result>
+			<Answer type="string">Native Agents Reported Today :: 2477</Answer>
+		</Result>
+		<Evaluation>
+			<Time>76.805ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;License Seat Count :: &quot; &amp; (maximum seat count of bes license) as string)">
+		<Result>
+			<Answer type="string">License Seat Count :: 999999</Answer>
+		</Result>
+		<Evaluation>
+			<Time>46.3ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;License Seat Usage :: &quot; &amp; (seat count state of bes license) as string)">
+		<Result>
+			<Answer type="string">License Seat Usage :: Unrestricted</Answer>
+		</Result>
+		<Evaluation>
+			<Time>26.475ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;License Site Number :: &quot; &amp; (site number of bes license))">
+		<Result></Result>
+		<Error>The operator "concatenate" is not defined.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;License Expiration Date :: &quot; &amp; (last 11 of first 16 of (expiration date of bes license as string)))">
+		<Result>
+			<Answer type="string">License Expiration Date :: Thu, 24 Apr 2036 15:46:10 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>47.724ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Wake-on-LAN Status :: &quot; &amp; (enabled of bes wakeonlan statuses))">
+		<Result></Result>
+		<Error>The operator "concatenate" is not defined.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Operator Information&quot;">
+		<Result>
+			<Answer type="string">Operator Information</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.55ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Total Operators :: &quot; &amp; ((number of bes users) as string))">
+		<Result>
+			<Answer type="string">Total Operators :: 3</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.162ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Non-Master Operators :: &quot; &amp; (number of bes users whose (master flag of it = false)) as string)">
+		<Result>
+			<Answer type="string">Non-Master Operators :: 2</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.381ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Master Operators :: 1</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.194ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Usage Statistics&quot;">
+		<Result>
+			<Answer type="string">Usage Statistics</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.97ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Days Using BigFix :: &quot; &amp; (((now - (minimum of (creation times of bes users))) / day )) as string)">
+		<Result>
+			<Answer type="string">Days Using BigFix :: 45</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.280ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Actions -- All Total :: &quot; &amp; (number of top level bes actions) as string)">
+		<Result>
+			<Answer type="string">Actions -- All Total :: 612</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.525ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Actions -- All Open :: &quot; &amp; (number of top level bes actions whose (state of it as string as lowercase = &quot;open&quot;)) as string)">
+		<Result>
+			<Answer type="string">Actions -- All Open :: 10</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2.252ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Content Information&quot;">
+		<Result>
+			<Answer type="string">Content Information</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.52ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of External Sites: &quot; &amp; (number of bes sites as string)">
+		<Result>
+			<Answer type="string">Number of External Sites: 42</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.423ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Custom Sites: &quot; &amp; number of bes custom sites as string">
+		<Result>
+			<Answer type="string">Number of Custom Sites: 14</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.282ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Fixlets: &quot; &amp; ((number of bes fixlets whose (fixlet flag of it = true AND applicable computer count of it &gt; 0 AND globally visible flag of it = true ) as string) &amp; &quot; / &quot; &amp; (number of bes fixlets whose (fixlet flag of it = true AND globally visible flag of it = true) as string)) as string">
+		<Result>
+			<Answer type="string">Number of Fixlets: 2161 / 44297</Answer>
+		</Result>
+		<Evaluation>
+			<Time>265.557ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Tasks: &quot; &amp; ((number of bes fixlets whose (task flag of it = true AND applicable computer count of it &gt; 0 AND globally visible flag of it = true ) as string) &amp; &quot; / &quot; &amp; (number of bes fixlets whose (task flag of it = true AND globally visible flag of it = true ) as string)) as string">
+		<Result>
+			<Answer type="string">Number of Tasks: 498 / 1896</Answer>
+		</Result>
+		<Evaluation>
+			<Time>179.799ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Analyses: &quot; &amp; ((number of bes fixlets whose (analysis flag of it = true AND (exists best activation whose (active flag of it = true) of it) AND globally visible flag of it = true ) as string) &amp; &quot; / &quot; &amp; (number of bes fixlets whose (analysis flag of it = true AND globally visible flag of it = true ) as string)) as string">
+		<Result>
+			<Answer type="string">Number of Analyses: 32 / 4400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>250.925ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Actived Properties: &quot; &amp; number of properties of bes fixlets whose (analysis flag of it AND exists activation of it AND exists active flags of activations of it) as string">
+		<Result>
+			<Answer type="string">Number of Actived Properties: 244</Answer>
+		</Result>
+		<Evaluation>
+			<Time>12860.526ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Custom Properties: &quot; &amp; number of bes properties whose (custom flag of it) as string">
+		<Result>
+			<Answer type="string">Number of Custom Properties: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>93.860ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Relay Statistics&quot;">
+		<Result>
+			<Answer type="string">Relay Statistics</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.65ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relays Reported Today :: &quot; &amp; (number of computers of results from (bes property whose (reserved flag of it and name of it = &quot;Last Report Time&quot;)) whose ((now - value of it as time) &lt; 1 * day) of (computers of results whose (exists it AND value of it as lowercase contains &quot;yes&quot;) of bes property whose (name of it = &quot;BES Relay Service Installed&quot; AND reserved flag of it))) as string)">
+		<Result>
+			<Answer type="string">Relays Reported Today :: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>268.837ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Hop Count Distribution :: &quot; &amp; ((it as string &amp; &quot;|&quot; &amp; multiplicity of it as string) of (unique values of values of results of bes property whose (name of it = &quot;Distance to BES Relay&quot; AND reserved flag of it));&quot;255|&quot; &amp; (number of results whose (error flag of it) of bes property whose (name of it = &quot;Distance to BES Relay&quot; AND reserved flag of it)) as string))">
+		<Result></Result>
+		<Error>A singular expression is required.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relay Selection -- Manual :: &quot; &amp; (number of values whose (exists it AND it = &quot;Manual&quot;) of results of bes property &quot;BES Relay Selection Method&quot;) as string)">
+		<Result>
+			<Answer type="string">Relay Selection -- Manual :: 137</Answer>
+		</Result>
+		<Evaluation>
+			<Time>7.861ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="(&quot;Relay Selection -- Automatic  :: &quot; &amp; ((number of values whose (exists it AND it = &quot;Automatic&quot;) of results of bes property &quot;BES Relay Selection Method&quot;) as string))">
+		<Result>
+			<Answer type="string">Relay Selection -- Automatic  :: 2400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>8.478ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Distance to Relay&quot;">
+		<Result>
+			<Answer type="string">Distance to Relay</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.63ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="((it as string &amp; &quot;|&quot; &amp; multiplicity of it as string) of(unique values of values of results of bes property whose (name of it = &quot;Distance to BES Relay&quot; AND reserved flag of it)); &quot;255|&quot; &amp; (number of results whose (error flag of it) of bes property whose (name of it = &quot;Distance to BES Relay&quot; AND reserved flag of it)) as string)">
+		<Result>
+			<Answer type="string">0|137</Answer>
+			<Answer type="string">1|2400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>192.669ms</Time>
+			<Plurality>Plural</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

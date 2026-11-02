@@ -1,0 +1,59 @@
+DEPLOYMENT HEALTHCHECK DASHBOARD
+ 
+Report Generated: Sun, 14 Jun 2026 20:29:50 -0400
+ 
+BES Relay Health
+Relays Not Reported in Last 24 Hours :: Passed :: High :: All Relays Reported
+Number of Clients Per Relay :: Passed :: High :: No Excessive Client Counts on Relays
+Relay Versions :: Passed :: Medium :: Current Root Server Version: 11.0.6.137 :: BFRELAY017: 11.0.6.137 || BFRELAY001: 11.0.6.137
+Relays Services Stopped :: Passed :: High :: All Relays Services Running
+Download Folders :: Passed :: Critical :: No Excessive Download Folders Found
+Relays with Low Drive Space :: Passed :: High :: BFRELAY017: Drive Space OK || BFRELAY001: Drive Space OK
+FillDB BufferDir Counts :: Passed :: Critical :: BFROOT1: 0
+Actionsite Versions :: Failed :: Medium :: Current Actionsite Version: 230 || BFRELAY017 - 226
+ 
+BES Console Health
+Too Many Offline Computers :: Passed :: Critical :: 60 (2.4%)
+Stopped and Expired Actions :: Passed :: Medium :: Total Stopped\Expired Actions: 613 || Top Level Stopped\Expired Actions: 602 || Baseline Stopped\Expired Actions: 11
+Stopped and Expired Hidden Actions :: Passed ::  Medium  :: Total Stopped\Expired Hidden Actions: 0
+BES Console Version :: Warning :: Medium :: Current BES Server Version: 11.0.6.137 || BFROOT1: 11.0.6.137 || DC1: 11.0.6.137 || BFRELAY017: 11.0.6.137 || BFRELAY001: 11.0.6.137 || DM1WIN1103: 11.0.3.82
+Expired Computers :: Passed ::  Medium  :: Expired Computer Count: 60
+Duplicate Computers :: Passed :: Medium :: Duplicate Computer Count: 0
+ 
+BES Server Health
+Root Server System Drive Free Disk Space :: Passed ::  Critical :: Root Server System Drive Free Space: 129946 MB
+Root Server Application Drive Free Disk Space :: Passed ::  Critical :: Root Server Application Drive Free Space: 129946 MB
+Number of Clients on Root Server :: Passed :: High :: Clients on Root Server: 137
+Number of Relays on Root Server :: Passed :: High :: Relays on Root Server: 24
+FillDB Log size :: Passed :: Medium :: Current FillDB Log Size: 28 KB
+BES Server SQL Server Agent Status :: Passed :: High :: BFROOT1: Running
+Web Reports Security Configuration :: Passed :: High :: None
+ 
+BES Client Health
+WMI Properties :: Warning :: Medium :: Bad WMI Thing || Bad WMI Thing 2
+BES Client Distance from BES Relays :: Passed :: High :: 0
+Actions Targeted Using Lists :: Passed :: Medium :: No Actions
+Location Properties :: Passed :: Medium :: No problematic Location Properties detected.
+Actionsite Size :: Passed :: Medium :: BFROOT1:  4189 KB
+BES Client Helper Status :: Passed :: Medium :: BES Clients Restarted: 0 || BES Clients Fixed With Revocation File: 0 || BES Clients Fixed With Data Directory: 0 || BES Clients Failing To Restart: 0
+ 
+Deployment Optimization
+Deprecated Fixlet Sites :: Passed :: Low :: No Deprecated Sites Detected
+Open Actions :: Passed :: High :: Total Open Actions: 10 || Open Top Level Actions: 10 || Open Baseline Component Actions:  0
+Open Hidden Actions :: Passed :: High :: Total Open Hidden Actions: 0
+Console Operators Have Never Logged In :: Passed :: Low :: snow || nmo2@bigfixinc.lab || swd_sync_1@bigfixinc.lab || svc_bf@bigfixinc.lab || test || apiuser
+Console Operator Accounts Not Being Used :: Passed :: Low :: snow || nmo2@bigfixinc.lab || swd_sync_1@bigfixinc.lab || svc_bf@bigfixinc.lab || test || apiuser
+Components Per Baseline :: Failed :: Medium :: August MS Critical
+Action Applicability Too Large :: Passed :: Medium :: No Large Actions Found
+Operators Using Policy Actions :: Passed :: High :: No Operators found with more than 10 open policy actions.
+Support Analysis Activation :: Passed :: Medium :: No Analyses Require Activation
+Policy Actions Not Targeted By Property :: Passed :: Medium :: BES Console Operator: bigfix&lt;ul&gt;&lt;li&gt;Deploy KEV Scanner&lt;/li&gt;&lt;li&gt;Deploy KEV Scanner&lt;/li&gt;&lt;li&gt;[POLICY BASELINE] Microsoft Patching - Jan 2026 - Security Updates - Critical&lt;/li&gt;&lt;li&gt;Initiate Software Scan on Shared Disks (11.0.6.0)&lt;/li&gt;&lt;li&gt;Change 'Staples_Patch_Exclusion' Setting&lt;/li&gt;&lt;/ul&gt;
+Superseded Fixlets :: Passed :: Medium :: There are no open actions from Superseded Fixlets
+Statistical Property Evaluation Period :: Passed :: High :: Statistical Property Name: Evaluation Interval&lt;br&gt;
+License Expiration :: Passed :: High :: License Expiration Date: 4/24/2036 3:46:10 PM&lt;br&gt;Days Left: 3601
+ 
+BES Server Components Log Status
+Server :: Enabled
+GatherDB :: Disabled
+FillDB :: Enabled
+BES Client :: Enabled

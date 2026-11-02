@@ -1,0 +1,783 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;DEPLOYMENT HEALTHCHECK DASHBOARD&quot;">
+		<Result>
+			<Answer type="string">DEPLOYMENT HEALTHCHECK DASHBOARD</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.23ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.56ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Report Generated: &quot; &amp; now as string">
+		<Result>
+			<Answer type="string">Report Generated: Sun, 14 Jun 2026 20:29:50 -0400</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.123ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="%&quot;Report Version: 1.0&quot;">
+		<Result></Result>
+		<Error>This expression contained a character which is not allowed.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.33ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Relay Health&quot;">
+		<Result>
+			<Answer type="string">BES Relay Health</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.36ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Relays Not Reported in Last 24 Hours :: &quot; &amp; ((if ( it &gt; 3) then (&quot;Failed&quot;) else (if ( it &lt;=3 and  it &gt;0) then (&quot;Warning&quot;) else (&quot;Passed&quot;))) of number of bes computers whose ((value of results (bes properties whose (name of it = &quot;Last Report Time&quot;), it) as time &lt; (now - 24*hour) AND (relay server flag of it = true))))  &amp; &quot; :: High :: &quot; &amp; (concatenation &quot; || &quot; of (if (exists names of bes computers whose ((value of results (bes properties whose (name of it = &quot;Last Report Time&quot;), it) as time &lt; (now - 24*hour) AND (relay server flag of it = true)))) then (names of bes computers whose ((value of results (bes properties whose (name of it = &quot;Last Report Time&quot;), it) as time &lt; (now - 24*hour) AND (relay server flag of it = true)))) else (&quot;All Relays Are Reporting In&quot;)))">
+		<Result>
+			<Answer type="string">Relays Not Reported in Last 24 Hours :: Passed :: High :: All Relays Reported</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2483.973ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Clients Per Relay :: &quot; &amp; (if (exists unique values whose (multiplicity of it &gt; 4999) of (values of results whose (agent type of computer of it starts with &quot;Native&quot;) of bes property &quot;relay&quot;)) then (html (&quot;Failed&quot;)) else ((html (&quot;Passed&quot; )))) &amp; &quot; :: High :: &quot; &amp; concatenation &quot; || &quot; of (if (exists (((it &amp; &quot; - &quot; &amp; multiplicity of it as string) of unique values whose (multiplicity of it &gt; 4999) of (values of results whose (agent type of computer of it starts with &quot;Native&quot;) of bes property &quot;relay&quot;)))) then ((((it &amp; &quot; - &quot; &amp; multiplicity of it as string) of unique values whose (multiplicity of it &gt; 4999) of (values of results whose (agent type of computer of it starts with &quot;Native&quot;) of bes property &quot;relay&quot;))) ) else (&quot;No Excessive Client Counts on Relays&quot;))">
+		<Result>
+			<Answer type="string">Number of Clients Per Relay :: Passed :: High :: No Excessive Client Counts on Relays</Answer>
+		</Result>
+		<Evaluation>
+			<Time>11.217ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Relay Versions :: &quot; &amp; ((if (it contains &quot;Failed&quot;) then (&quot;Failed&quot;) else if (it contains &quot;Warning&quot;) then ( &quot;Warning&quot;) else (&quot;Passed&quot; )) of concatenation of ( if ((preceding text of last &quot;.&quot; of preceding text of last &quot;.&quot; of item 0 of it) = (preceding text of last &quot;.&quot; of preceding text of last &quot;.&quot; of value of item 1 of it)) then (&quot;Passed&quot;) else (&quot;Warning&quot;) ) of ((preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)) , results whose (value of it != &quot;Not Installed&quot;) of BES Property &quot;BES Relay Version&quot;)) &amp; &quot; :: Medium :: &quot; &amp; &quot;Current Root Server Version: &quot; &amp; (preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)) &amp; &quot; :: &quot; &amp; (concatenation (&quot; || &quot;) of ((name of computer of item 1 of it &amp; &quot;: &quot; &amp; (if (preceding text of first &quot;.&quot; of version string &quot;ProductVersion&quot; of module &quot;BESSessionInspect.dll&quot; = &quot;6&quot;) then ((value of item 1 of it)) else if ((preceding text of last &quot;.&quot; of preceding text of last &quot;.&quot; of item 0 of it) = (preceding text of last &quot;.&quot; of preceding text of last &quot;.&quot; of value of item 1 of it)) then ((value of item 1 of it)) else (value of item 1 of it as string))) of ((preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)) , results whose (value of it != &quot;Not Installed&quot;) of BES Property &quot;BES Relay Version&quot;)))  ">
+		<Result>
+			<Answer type="string">Relay Versions :: Passed :: Medium :: Current Root Server Version: 11.0.6.137 :: BFRELAY017: 11.0.6.137 || BFRELAY001: 11.0.6.137</Answer>
+		</Result>
+		<Evaluation>
+			<Time>30.566ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Relays Services Stopped :: &quot; &amp; ( (if (not exists results whose (value of it as lowercase contains &quot;yes - stopped&quot;) of bes property &quot;BES Relay Service Installed&quot;) then ( &quot;Passed&quot;) else (&quot;Failed&quot;)) of bes property &quot;BES Relay Service Installed&quot;) &amp; &quot; :: High :: &quot; &amp;  concatenation &quot; || &quot; of (if (not exists results whose (value of it as lowercase contains &quot;yes - stopped&quot;) of bes property &quot;BES Relay Service Installed&quot;) then &quot;All Relays Services Running&quot; else (name of computers of results whose (value of it as lowercase contains &quot;yes - stopped&quot;) of bes property &quot;BES Relay Service Installed&quot;))">
+		<Result>
+			<Answer type="string">Relays Services Stopped :: Passed :: High :: All Relays Services Running</Answer>
+		</Result>
+		<Evaluation>
+			<Time>12.892ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Download Folders :: &quot; &amp; (if (applicable computer count of BES Fixlets whose (name of site of it = &quot;BES Support&quot; and id of it = 535 ) &gt; 0) then (&quot;Failed&quot;) else (&quot;Passed&quot;)) &amp; &quot; :: Critical :: &quot; &amp; concatenation &quot; || &quot; of (if (number of applicable computers of BES Fixlets whose (name of site of it = &quot;BES Support&quot; and id of it = 535) &gt; 0) then (names of applicable computers of BES Fixlets whose (name of site of it = &quot;BES Support&quot; and id of it = 535) ) else (&quot;No Excessive Download Folders Found&quot;))">
+		<Result>
+			<Answer type="string">Download Folders :: Passed :: Critical :: No Excessive Download Folders Found</Answer>
+		</Result>
+		<Evaluation>
+			<Time>226.253ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Relays with Low Drive Space :: &quot; &amp;  (if (exist preceding texts whose (it as integer &lt; 5000) of firsts &quot; &quot; of values whose (it as string != &quot;N/A&quot;) of results whose (exists value of it) of bes properties whose (name of it = &quot;BES Health Checks::BES Relay Free Disk Space&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then (&quot;Failed&quot; ) else if (exist preceding texts whose (it as integer &lt; 10000) of firsts &quot; &quot; of values whose (it as string != &quot;N/A&quot;) of results of bes properties whose (name of it = &quot;BES Health Checks::BES Relay Free Disk Space&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then ( &quot;Warning&quot; ) else (&quot;Passed&quot; ) ) &amp; &quot; :: High :: &quot; &amp; concatenation &quot; || &quot; of ((name of computer of it &amp; &quot;: &quot; &amp; (if ((preceding text of first &quot; &quot; of value of it) as integer &lt; 10000) then (value of it as string) else (&quot;Drive Space OK&quot;))) of results whose (exists value of it and value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::BES Relay Free Disk Space&quot; and name of site of source analysis of it = &quot;BES Support&quot;) )">
+		<Result>
+			<Answer type="string">Relays with Low Drive Space :: Passed :: High :: BFRELAY017: Drive Space OK || BFRELAY001: Drive Space OK</Answer>
+		</Result>
+		<Evaluation>
+			<Time>319.87ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;FillDB BufferDir Counts :: &quot; &amp; (if (exists values whose (it as integer &gt; 50) of results whose (exists value of it AND value of it != &quot;N/A&quot;) of (bes properties whose (name of it = &quot;BES Health Checks::Number of Files in FillDB Bufferdir&quot;))) then ((&quot;Failed&quot;)) else ((&quot;Passed&quot;))) &amp; &quot; :: Critical :: &quot; &amp;concatenation &quot; || &quot; of (((if (exists name of computer of it) then (name of computer of it) else (&quot;n/a&quot;))&amp; &quot;: &quot; &amp; (if (value of it as integer &gt; 50) then (value of it) else (value of it))) of (results whose (exists value of it AND value of it != &quot;N/A&quot;) of (bes properties whose (name of it = &quot;BES Health Checks::Number of Files in FillDB Bufferdir&quot; and name of site of source analysis of it = &quot;BES Support&quot;))))">
+		<Result>
+			<Answer type="string">FillDB BufferDir Counts :: Passed :: Critical :: BFROOT1: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>223.530ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result></Result>
+		<Error>The operator "lastrequestedtime" is not defined.</Error>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Actionsite Versions :: &quot; &amp; ((if (it contains &quot;Failed&quot;) then (&quot;Failed&quot; ) else if (it contains &quot;Warning&quot;) then ( &quot;Warning&quot; ) else (&quot;Passed&quot; )) of concatenation &quot;&quot; of (if (value of item 1 of it as integer &lt; item 0 of it as integer - 1) then &quot;Failed&quot; else if (value of item 1 of it as integer &lt;= item 0 of it as integer - 1) then &quot;Warning&quot; else &quot;Passed&quot;) of (maximum of ((values of results from (bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) of bes computers whose (root server flag of it = TRUE)) as integer), results whose (exists value of it) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;))) &amp; &quot; :: Medium :: &quot; &amp; &quot;Current Actionsite Version: &quot; &amp; (maximum of ((values of results from (bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) of bes computers whose (root server flag of it = TRUE)) as integer)) as string &amp; &quot; || &quot; &amp; (concatenation ( &quot; || &quot;) of ((name of computer of item 1 of it &amp; &quot; - &quot; &amp; value of item 1 of it)) of (maximum of ((values of results from (bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) of bes computers whose (root server flag of it = TRUE)) as integer) , results whose (exists value of it) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Version&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) whose (value of item 1 of it as integer &lt; item 0 of it as integer))">
+		<Result>
+			<Answer type="string">Actionsite Versions :: Failed :: Medium :: Current Actionsite Version: 230 || BFRELAY017 - 226</Answer>
+		</Result>
+		<Evaluation>
+			<Time>471.294ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.54ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Console Health&quot;">
+		<Result>
+			<Answer type="string">BES Console Health</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.51ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Too Many Offline Computers :: &quot; &amp; ( if ((number of results whose (exists value of it and (now - value of it as local time &gt; 3 * hour)) of bes property &quot;Last Report Time&quot;) &gt; ((Number of BES Computers) * (4 / 5 as floating point))) then (&quot;Failed&quot;) else (&quot;Passed&quot;)) &amp; (&quot; :: Critical :: &quot;) &amp; ( it as string &amp; &quot; (&quot; &amp; ((relative significance place 2 of (it as floating point / (number of BES Computers)) * 100) as string) &amp; &quot;%25&quot; &amp; &quot;)&quot;) of (number of results whose (exists value of it and (now - value of it as local time &gt; 1*hour)) of bes property &quot;Last Report Time&quot;)">
+		<Result>
+			<Answer type="string">Too Many Offline Computers :: Passed :: Critical :: 60 (2.4%)</Answer>
+		</Result>
+		<Evaluation>
+			<Time>8.294ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Stopped and Expired Actions :: Passed :: Medium :: Total Stopped\Expired Actions: 613 || Top Level Stopped\Expired Actions: 602 || Baseline Stopped\Expired Actions: 11</Answer>
+		</Result>
+		<Evaluation>
+			<Time>3.294ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Stopped and Expired Hidden Actions :: &quot; &amp; ( if ((number of Hidden BES Actions whose ((Exists parent group whose (state of it = &quot;Expired&quot; or state of it = &quot;Stopped&quot;) of it) or (not exists parent group of it and (state of it = &quot;Expired&quot; or state of it = &quot;Stopped&quot;)))) &gt; 1000) then (&quot;Failed&quot;) else ( &quot;Passed&quot; )) &amp; &quot; ::  Medium  :: &quot; &amp; ( &quot;Total Stopped\Expired Hidden Actions: &quot; &amp; (number of Hidden BES Actions whose ((Exists parent group whose (state of it = &quot;Expired&quot; or state of it = &quot;Stopped&quot;) of it) or  (not exists parent group of it and (state of it = &quot;Expired&quot; or state of it = &quot;Stopped&quot;)))) as string)">
+		<Result>
+			<Answer type="string">Stopped and Expired Hidden Actions :: Passed ::  Medium  :: Total Stopped\Expired Hidden Actions: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.253ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Console Version :: &quot; &amp; ((if (it contains &quot;Failed&quot;) then &quot;Failed&quot; else if (it contains &quot;Warning&quot;) then &quot;Warning&quot; else &quot;Passed&quot;) of concatenation of (if (((preceding text of first &quot;.&quot; of item 1 of it) as integer &lt; (preceding text of first &quot;.&quot; of item 0 of it) as integer) OR (((preceding text of first &quot;.&quot; of item 1 of it) as integer = (preceding text of first &quot;.&quot; of item 0 of it) as integer) AND ((preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of item 1 of it) as integer &lt; (preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of item 0 of it) as integer)) ) then &quot;Failed&quot; else if (((preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 1 of it) as integer &lt; (preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 0 of it) as integer) OR (((preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 1 of it) as integer = (preceding text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 0 of it) as integer) AND ((following text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 1 of it) as integer &lt; (following text of first &quot;.&quot; of following text of first &quot;.&quot; of following text of first &quot;.&quot; of item 0 of it) as integer))) then &quot;Warning&quot; else &quot;Passed&quot;) of ((preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)), values whose (it != &quot;Not Installed&quot; AND it != &quot;N/A&quot;) of results of BES Property &quot;BES Console Version&quot;)) &amp; &quot; :: Medium :: &quot; &amp; (&quot;Current BES Server Version: &quot; &amp; (preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)) &amp; &quot; || &quot; &amp; concatenation &quot; || &quot; of (name of computer of item 1 of it &amp; &quot;: &quot; &amp; (if (preceding text of first &quot;.&quot; of version string &quot;ProductVersion&quot; of module &quot;BESSessionInspect.dll&quot; = &quot;6&quot;) then ((value of item 1 of it)) else if ((item 0 of it) as version &gt; (value of item 1 of it) as version) then (( value of item 1 of it )) else ( (value of item 1 of it)))) of ((preceding text of first &quot;,&quot; of ((concatenation &quot;,&quot; of (values whose (it != &quot;Not Installed&quot;) of results of BES Property &quot;BES Server Version&quot;)) &amp; &quot;,&quot;)) , results whose (value of it != &quot;Not Installed&quot; and value of it != &quot;N/A&quot;) of BES Property &quot;BES Console Version&quot;))">
+		<Result>
+			<Answer type="string">BES Console Version :: Warning :: Medium :: Current BES Server Version: 11.0.6.137 || BFROOT1: 11.0.6.137 || DC1: 11.0.6.137 || BFRELAY017: 11.0.6.137 || BFRELAY001: 11.0.6.137 || DM1WIN1103: 11.0.3.82</Answer>
+		</Result>
+		<Evaluation>
+			<Time>36.801ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Expired Computers :: &quot; &amp; ((if (it contains &quot;Failed&quot;) then (&quot;Failed&quot;) else if (it contains &quot;Warning&quot;) then (&quot;Warning&quot;) else ( &quot;Passed&quot;)) of concatenation of (if (it contains &quot;Failed&quot; and multiplicity of it &gt; 100) then &quot;Failed&quot; else if (it contains &quot;Warning&quot; and multiplicity of it &gt; 100) then &quot;Warning&quot; else &quot;Passed&quot;) of unique values of ( if (now - (it as local time) &gt; 90 * Day) then &quot;Failed&quot; else if (now - (it as local time) &gt; 30 * Day) then &quot;Warning&quot; else &quot;Passed&quot; ) of values of results of bes property &quot;Last Report Time&quot;) &amp; &quot; ::  Medium  :: &quot; &amp; (&quot;Expired Computer Count: &quot; &amp; (number of computers of results whose (now - (value of it as local time) &gt; 30 * Day) of bes property &quot;Last Report Time&quot;) as string)">
+		<Result>
+			<Answer type="string">Expired Computers :: Passed ::  Medium  :: Expired Computer Count: 60</Answer>
+		</Result>
+		<Evaluation>
+			<Time>13.33ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Duplicate Computers :: &quot; &amp; (if (exists unique values whose (multiplicity of it &gt; 25) of values of results of bes property &quot;Computer Name&quot;) then ( if (exists unique values whose (multiplicity of it &gt; 100) of values of results of bes property &quot;Computer Name&quot;) then ( &quot;Failed&quot; ) else (&quot;Warning&quot; )  ) else (&quot;Passed&quot;)) &amp; &quot; :: Medium :: &quot; &amp; (&quot;Duplicate Computer Count: &quot; &amp; (number of items 1 of (&quot;;;&quot; &amp; (concatenation &quot;;;&quot; of (unique values whose (multiplicity of it &gt; 1) of names of bes computers)) &amp; &quot;;;&quot;, bes computers) whose (item 0 of it contains (&quot;;;&quot; &amp; name of item 1 of it &amp; &quot;;;&quot;))) as string)">
+		<Result>
+			<Answer type="string">Duplicate Computers :: Passed :: Medium :: Duplicate Computer Count: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>4.171ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.50ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server Health&quot;">
+		<Result>
+			<Answer type="string">BES Server Health</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.42ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Root Server System Drive Free Disk Space :: &quot; &amp; (if (exists values whose ((preceding text of first &quot; &quot; of it) as integer &lt; 1000) of results from (bes property &quot;Free Space on System Drive&quot;) of (computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;BES Relay Service installed&quot;)) then (&quot;Failed&quot;) else if (exists values whose ((preceding text of first &quot; &quot; of it) as integer &lt; 2000) of results from (bes property &quot;Free Space on System Drive&quot;) of (computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;BES Relay Service installed&quot;)) then (&quot;Warning&quot;) else (&quot;Passed&quot;)) &amp; &quot; ::  Critical :: &quot; &amp; (&quot;Root Server System Drive Free Space: &quot; &amp; ((value of result (it, (BES Property &quot;Free Space on System Drive&quot;)))) of computer of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;BES Relay Service installed&quot;)">
+		<Result>
+			<Answer type="string">Root Server System Drive Free Disk Space :: Passed ::  Critical :: Root Server System Drive Free Space: 129946 MB</Answer>
+		</Result>
+		<Evaluation>
+			<Time>48.173ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Root Server Application Drive Free Disk Space :: &quot; &amp; (if (preceding text of first &quot; &quot; of following text of first &quot;- &quot; of ((value of result (it, (BES Property &quot;BES Relay Drive Info&quot;)))) of computer of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;BES Relay Service installed&quot; as integer &lt; 25000) then (&quot;Failed&quot; ) else (&quot;Passed&quot; )) &amp; &quot; ::  Critical :: &quot; &amp; (&quot;Root Server Application Drive Free Space: &quot; &amp; preceding text of first &quot; &quot; of following text of first &quot;- &quot; of ((value of result (it, (BES Property &quot;BES Relay Drive Info&quot;)))) of computer of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;BES Relay Service installed&quot; &amp; &quot; MB&quot;)">
+		<Result>
+			<Answer type="string">Root Server Application Drive Free Disk Space :: Passed ::  Critical :: Root Server Application Drive Free Space: 129946 MB</Answer>
+		</Result>
+		<Evaluation>
+			<Time>69.10ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Clients on Root Server :: &quot; &amp; ((if (it &lt; 500) then (&quot;Passed&quot;) else if (it &lt; 1000) then (&quot;Warning&quot;) else (&quot;Failed&quot;)) of number of unique values of items 1 of ((it, (if (number of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it &gt; 1) then (concatenation of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it) else (value whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it|&quot;No Result&quot;)),preceding text of first &quot;:&quot; of substring after &quot;://&quot; of gather url of bes license as lowercase) of computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;relay&quot;, bes computers) whose ((value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains (item 2 of item 0 of it)) OR (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains value of result from (bes property &quot;DNS Name&quot;) of item 0 of item 0 of it as lowercase) OR (item 0 of item 0 of it = item 1 of it) OR (if ((item 1 of item 0 of it) does not equal &quot;No Result&quot;) then (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains item 1 of item 0 of it) else false))  ) &amp; &quot; :: High :: &quot; &amp; (&quot;Clients on Root Server: &quot; &amp; (number of unique values of items 1 of ((it, (if (number of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it &gt; 1) then (concatenation of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it) else (value whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it|&quot;No Result&quot;)),preceding text of first &quot;:&quot; of substring after &quot;://&quot; of gather url of bes license as lowercase) of computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;relay&quot;, bes computers) whose ((value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains (item 2 of item 0 of it)) OR (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains value of result from (bes property &quot;DNS Name&quot;) of item 0 of item 0 of it as lowercase) OR (item 0 of item 0 of it = item 1 of it) OR (if ((item 1 of item 0 of it) does not equal &quot;No Result&quot;) then (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains item 1 of item 0 of it) else false)) as string)  )">
+		<Result>
+			<Answer type="string">Number of Clients on Root Server :: Passed :: High :: Clients on Root Server: 137</Answer>
+		</Result>
+		<Evaluation>
+			<Time>680.713ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Number of Relays on Root Server :: &quot; &amp; ( (if (it &lt; 50) then (&quot;Passed&quot;) else if (it &lt; 100) then (&quot;Warning&quot;) else (&quot;Failed&quot;)) of number of unique values of items 1 of ((it, (if (number of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it &gt; 1) then (concatenation of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it) else (value whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it|&quot;No Result&quot;)),preceding text of first &quot;:&quot; of substring after &quot;://&quot; of gather url of bes license as lowercase) of computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;relay&quot;, bes computers whose (value of result from (bes property &quot;BES Relay Service Installed&quot;) of it contains &quot;Yes&quot;)) whose ((value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains (item 2 of item 0 of it)) OR (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains value of result from (bes property &quot;DNS Name&quot;) of item 0 of item 0 of it as lowercase) OR (item 0 of item 0 of it = item 1 of it) OR (if ((item 1 of item 0 of it) does not equal &quot;No Result&quot;) then (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains item 1 of item 0 of it) else false))) &amp; &quot; :: High :: &quot; &amp; ( &quot;Relays on Root Server: &quot; &amp; number of unique values of items 1 of ((it, (if (number of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it &gt; 1) then (concatenation of values whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it) else (value whose (it contains &quot;_BESClient_Relay_NameOverride&quot;) of property results of it|&quot;No Result&quot;)),preceding text of first &quot;:&quot; of substring after &quot;://&quot; of gather url of bes license as lowercase) of computers of results whose (value of it = &quot;Main BES Server&quot; or value of it = &quot;BES Root Server&quot;) of bes property &quot;relay&quot;, bes computers whose (value of result from (bes property &quot;BES Relay Service Installed&quot;) of it contains &quot;Yes&quot;)) whose ((value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains (item 2 of item 0 of it)) OR (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains value of result from (bes property &quot;DNS Name&quot;) of item 0 of item 0 of it as lowercase) OR (item 0 of item 0 of it = item 1 of it) OR (if ((item 1 of item 0 of it) does not equal &quot;No Result&quot;) then (value of result from (bes property &quot;Relay&quot;) of item 1 of it as lowercase contains item 1 of item 0 of it) else false)) as string)">
+		<Result>
+			<Answer type="string">Number of Relays on Root Server :: Passed :: High :: Relays on Root Server: 24</Answer>
+		</Result>
+		<Evaluation>
+			<Time>388.511ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;FillDB Log size :: &quot; &amp; (if (exists values whose ((following text of first &quot; &quot; of it as string = &quot;MB&quot;) AND (preceding text of first &quot; &quot; of it as integer &gt; 500)) of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::FillDB Log File Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;) ) then (if ((following text of first &quot; &quot; of it as string = &quot;MB&quot;) AND (exists values whose (preceding text of first &quot; &quot; of it as integer &gt; 1000)) of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::FillDB Log File Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then  (&quot;Failed&quot;) else (&quot;Warning&quot;)) else (&quot;Passed&quot;) ) &amp; &quot; :: Medium :: &quot; &amp; (&quot;Current FillDB Log Size: &quot;  &amp;  (value of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::FillDB Log File Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) as string )">
+		<Result>
+			<Answer type="string">FillDB Log size :: Passed :: Medium :: Current FillDB Log Size: 28 KB</Answer>
+		</Result>
+		<Evaluation>
+			<Time>478.41ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server SQL Server Agent Status :: &quot; &amp;  (if (exists results whose (value of it = &quot;HTTP&quot;) of bes properties whose (name of it = &quot;BES Health Checks::WebReports SSL Configuration&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then &quot;Failed&quot; else &quot;Passed&quot;) &amp;  &quot; :: High :: &quot; &amp; concatenation &quot; || &quot; of (name of computer of it &amp; &quot;: &quot; &amp; (if (value of it contains &quot;Not Running&quot;) then (value of it ) else ((value of it)))) of results whose (exists value of it and value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::SQL Server Agent Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;)">
+		<Result>
+			<Answer type="string">BES Server SQL Server Agent Status :: Passed :: High :: BFROOT1: Running</Answer>
+		</Result>
+		<Evaluation>
+			<Time>275.477ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Web Reports Security Configuration :: &quot; &amp; ((if (exists results whose (value of it = &quot;HTTP&quot;) of bes properties whose (name of it = &quot;BES Health Checks::WebReports SSL Configuration&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then &quot;Failed&quot; else &quot;Passed&quot;))  &amp; &quot; :: High :: &quot; &amp; (if (exists results whose (value of it = &quot;HTTP&quot;) of bes properties whose (name of it = &quot;BES Health Checks::WebReports SSL Configuration&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then ((name of computer of result whose (value of it = &quot;HTTP&quot;) of bes properties whose (name of it = &quot;BES Health Checks::WebReports SSL Configuration&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) as string) else ((&quot;None&quot;)))">
+		<Result>
+			<Answer type="string">Web Reports Security Configuration :: Passed :: High :: None</Answer>
+		</Result>
+		<Evaluation>
+			<Time>167.472ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.75ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Client Health&quot;">
+		<Result>
+			<Answer type="string">BES Client Health</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.44ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;WMI Properties :: &quot; &amp; (if (exists BES Properties whose (custom flag of it AND (it contains &quot;wmi&quot; AND (it contains &quot;win32_printer&quot; or it contains &quot;win32_logicaldisk&quot; or it contains &quot;win32_share&quot; or it contains &quot;win32_diskdrive&quot; or it contains &quot;win32_networkadapter&quot; or it contains &quot;win32_ntlogevent&quot; or it contains &quot;win32_operatingsystem&quot;)) of (definition of it as lowercase))) then  (&quot;Warning&quot; ) else  (&quot;Passed&quot; )) &amp; &quot; :: Medium :: &quot; &amp;  concatenation &quot; || &quot; of ( names of BES Properties whose (custom flag of it AND (it contains &quot;wmi&quot; AND (it contains &quot;win32_printer&quot; or it contains &quot;win32_logicaldisk&quot; or it contains &quot;win32_share&quot; or it contains &quot;win32_diskdrive&quot; or it contains &quot;win32_networkadapter&quot; or it contains &quot;win32_ntlogevent&quot; or it contains &quot;win32_operatingsystem&quot;)) of (definition of it as lowercase)))">
+		<Result>
+			<Answer type="string">WMI Properties :: Warning :: Medium :: Bad WMI Thing || Bad WMI Thing 2</Answer>
+		</Result>
+		<Evaluation>
+			<Time>160.952ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Client Distance from BES Relays :: &quot; &amp;  ((if (it &gt; 1000) then (&quot;Failed&quot;) else (if (it &gt; 100) then (&quot;Warning&quot;) else (&quot;Passed&quot;))) of number of (values whose (it != &quot;&lt;n/a&gt;&quot; AND it as integer &gt; 5) of results of bes property &quot;Distance to BES Relay&quot;))  &amp;  &quot; :: High :: &quot; &amp; ((number of ids of computers of results whose (value of it != &quot;&lt;n/a&gt;&quot; AND value of it as integer &gt; 5) of bes property &quot;Distance to BES Relay&quot;) as string)">
+		<Result>
+			<Answer type="string">BES Client Distance from BES Relays :: Passed :: High :: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>4.915ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Actions Targeted Using Lists :: &quot; &amp;  ( if (exists top level BES Actions whose (state of it = &quot;Open&quot; and ((targeted by list flag of it and number of targeted names of it &gt; 1000) OR (targeted by id flag of it and number of targeted computers of it &gt; 1000)))) then ( &quot;Failed&quot;)  else if (number of top level BES Actions whose (state of it = &quot;Open&quot; and ((targeted by list flag of it and number of targeted names of it &gt; 50) OR (targeted by id flag of it and number of targeted computers of it &gt; 50))) &gt; 50) then (&quot;Warning&quot; ) else ( &quot;Passed&quot;))  &amp;  &quot; :: Medium :: &quot; &amp; (if (not exists top level BES Actions whose (state of it = &quot;Open&quot; and ((targeted by list flag of it and number of targeted names of it &gt; 50) OR (targeted by id flag of it and number of targeted computers of it &gt; 50)))) then HTML &quot;No Actions&quot; else (unordered list of links of top level BES Actions whose (state of it = &quot;Open&quot; and ((targeted by list flag of it and number of targeted names of it &gt; 50) OR (targeted by id flag of it and number of targeted computers of it &gt; 50)))))">
+		<Result>
+			<Answer type="string">Actions Targeted Using Lists :: Passed :: Medium :: No Actions</Answer>
+		</Result>
+		<Evaluation>
+			<Time>5.861ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Location Properties :: Passed :: Medium :: No problematic Location Properties detected.</Answer>
+		</Result>
+		<Evaluation>
+			<Time>242.404ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Actionsite Size :: &quot; &amp;  (if (exists values whose (preceding text of first &quot; &quot; of it as integer &gt; 25000) of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then (if (exists values whose (preceding text of first &quot; &quot; of it as integer &gt; 50000) of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then (&quot;Failed&quot;) else (&quot;Warning&quot;)) else (&quot;Passed&quot;)) &amp; &quot; :: Medium :: &quot; &amp;  concatenation (&quot;&lt;br&gt;&quot;) of ((name of computer of it) &amp; &quot;:  &quot; &amp; (value of it)) of results whose (value of it != &quot;N/A&quot;) of bes properties whose (name of it = &quot;BES Health Checks::Actionsite Size&quot; and name of site of source analysis of it = &quot;BES Support&quot;) ">
+		<Result>
+			<Answer type="string">Actionsite Size :: Passed :: Medium :: BFROOT1:  4189 KB</Answer>
+		</Result>
+		<Evaluation>
+			<Time>380.335ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Client Helper Status :: &quot; &amp; (if (exists results whose (exists value of it and value of it contains &quot;Restart Failed&quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then (&quot;Failed&quot;) else if (exists results whose (exists value of it and value of it contains &quot;Restarted Successfully - &quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;)) then ( &quot;Warning&quot; ) else (&quot;Passed&quot;)) &amp; &quot; :: Medium :: &quot; &amp;  (&quot;BES Clients Restarted: &quot; &amp; number of results whose (exists value of it and value of it = &quot;Restarted Successfully&quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string &amp; &quot; || BES Clients Fixed With Revocation File: &quot; &amp; number of results whose (exists value of it and value of it contains &quot;Restarted Successfully - Removed Revocation File&quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string &amp; &quot; || BES Clients Fixed With Data Directory: &quot; &amp; number of results whose (exists value of it and value of it contains &quot;Restarted Successfully - Removed BESData Directory&quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string &amp; &quot; || BES Clients Failing To Restart: &quot; &amp; number of results whose (exists value of it and value of it contains &quot;Restart Failed&quot;) of bes properties whose (name of it = &quot;BES Client Helper Service::BES Client Helper Status&quot; and name of site of source analysis of it = &quot;BES Support&quot;) as string)">
+		<Result>
+			<Answer type="string">BES Client Helper Status :: Passed :: Medium :: BES Clients Restarted: 0 || BES Clients Fixed With Revocation File: 0 || BES Clients Fixed With Data Directory: 0 || BES Clients Failing To Restart: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>660.363ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.15ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Deployment Optimization&quot;">
+		<Result>
+			<Answer type="string">Deployment Optimization</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.43ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Deprecated Fixlet Sites :: Passed :: Low :: No Deprecated Sites Detected</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.481ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Open Actions :: &quot; &amp; ((if (it &gt; 5000) then (&quot;Failed&quot; ) else if (it &gt; 2500) then ( &quot;Warning&quot;) else (&quot;Passed&quot; )) of number of BES Actions whose ((Exists parent group whose (state of it = &quot;Open&quot;) of it) or (not exists parent group of it and state of it = &quot;Open&quot;))) &amp; &quot; :: High :: &quot; &amp;  (&quot;Total Open Actions: &quot; &amp; number of BES Actions whose ((exists parent group whose (state of it = &quot;Open&quot;) of it) or  (not exists parent group of it and state of it = &quot;Open&quot;)) as string &amp;  &quot; || &quot; &amp; &quot;Open Top Level Actions: &quot; &amp; number of BES Actions whose (not exists parent group of it and state of it = &quot;Open&quot;) as string &amp; &quot; || &quot; &amp; &quot;Open Baseline Component Actions:  &quot; &amp; number of BES Actions whose (Exists parent group whose (state of it = &quot;Open&quot;) of it) as string)">
+		<Result>
+			<Answer type="string">Open Actions :: Passed :: High :: Total Open Actions: 10 || Open Top Level Actions: 10 || Open Baseline Component Actions:  0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>5.605ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Open Hidden Actions :: &quot; &amp; (if ((number of Hidden BES Actions whose ((Exists parent group whose (state of it = &quot;Open&quot;) of it) or (not exists parent group of it and state of it = &quot;Open&quot;))) &gt; 1000) then (&quot;Failed&quot;) else (&quot;Passed&quot;)) &amp; &quot; :: High :: &quot; &amp;  (&quot;Total Open Hidden Actions: &quot; &amp; number of Hidden BES Actions whose ((Exists parent group whose (state of it = &quot;Open&quot;) of it) or  (not exists parent group of it and state of it = &quot;Open&quot;)) as string)">
+		<Result>
+			<Answer type="string">Open Hidden Actions :: Passed :: High :: Total Open Hidden Actions: 0</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.830ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Console Operators Have Never Logged In :: Passed :: Low :: snow || nmo2@bigfixinc.lab || swd_sync_1@bigfixinc.lab || svc_bf@bigfixinc.lab || test || apiuser</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.592ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Console Operator Accounts Not Being Used :: &quot; &amp; (if (number of bes users &lt; 30) then (&quot;Passed&quot;) else (if (exists bes users whose (exists last login time of it and (now - last login time of it &gt; 30 * day))) then (&quot;Passed&quot;) else (&quot;Failed&quot;))) &amp; &quot; :: Low :: &quot; &amp; (if (not exists bes users whose (exists last login time of it and (now - last login time of it &gt; 30 * day))) then  &quot;All BES Console Operators Are Active&quot; else (concatenation &quot; || &quot; of names of bes users whose (exists last login time of it and (now - last login time of it &gt; 30 * day))))">
+		<Result>
+			<Answer type="string">Console Operator Accounts Not Being Used :: Passed :: Low :: snow || nmo2@bigfixinc.lab || swd_sync_1@bigfixinc.lab || svc_bf@bigfixinc.lab || test || apiuser</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.533ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Components Per Baseline :: &quot; &amp; (  if (exists BES Fixlets whose ((baseline flag of it) and (100 &lt; number of child nodes whose (node name of it = &quot;BaselineComponent&quot;) of child nodes whose (node name of it = &quot;BaselineComponentGroup&quot;) of child nodes whose (node name of it = &quot;BaselineComponentCollection&quot;) of xml documents of components xmls of it))) then (&quot;Failed&quot;) else ( &quot;Failed&quot;) ) &amp; &quot; :: Medium :: &quot; &amp; ( if (not exists BES Fixlets whose ((baseline flag of it) and (100 &lt; number of child nodes whose (node name of it = &quot;BaselineComponent&quot;) of child nodes whose (node name of it = &quot;BaselineComponentGroup&quot;) of child nodes whose (node name of it = &quot;BaselineComponentCollection&quot;) of xml documents of components xmls of it))) then &quot;No Large Baselines Found&quot; else (concatenation &quot; || &quot; of names of BES Fixlets whose ((baseline flag of it) and (100 &lt; number of child nodes whose (node name of it = &quot;BaselineComponent&quot;) of child nodes whose (node name of it = &quot;BaselineComponentGroup&quot;) of child nodes whose (node name of it = &quot;BaselineComponentCollection&quot;) of xml documents of components xmls of it))))">
+		<Result>
+			<Answer type="string">Components Per Baseline :: Failed :: Medium :: August MS Critical</Answer>
+		</Result>
+		<Evaluation>
+			<Time>507.68ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Action Applicability Too Large :: &quot; &amp; (if (exists bes actions whose (not exists parent group of it AND length of applicability relevance of it &gt; 50000 AND (if (exists source fixlet of it) then ((not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;) of source fixlet of it) else (if (version string &quot;ProductVersion&quot; of module &quot;BESSessionInspect.dll&quot; as version &lt; &quot;9.1&quot;) then (true) else (not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;))))) then (&quot;Failed&quot;) else (&quot;Passed&quot;) ) &amp; &quot; :: Medium :: &quot; &amp; ( if (not exists bes actions whose (length of applicability relevance of it &gt; 50000 AND (if (exists source fixlet of it) then ((not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;) of source fixlet of it) else if (version string &quot;ProductVersion&quot; of module &quot;BESSessionInspect.dll&quot; as version &lt; &quot;9.1&quot;) then (true) else (not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;)))) then HTML &quot;No Large Actions Found&quot; else (concatenation (html &quot;&lt;br&gt;&quot;) of names of bes actions whose (not exists parent group of it AND length of applicability relevance of it &gt; 50000 AND (if (exists source fixlet of it) then ((not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;) of source fixlet of it) else if (version string &quot;ProductVersion&quot; of module &quot;BESSessionInspect.dll&quot; as version &lt; &quot;9.1&quot;) then (true) else (not exists mime field &quot;no-relevance-health-check&quot; of it OR mime field &quot;no-relevance-health-check&quot; of it = &quot;false&quot;)))))">
+		<Result>
+			<Answer type="string">Action Applicability Too Large :: Passed :: Medium :: No Large Actions Found</Answer>
+		</Result>
+		<Evaluation>
+			<Time>38.207ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Operators Using Policy Actions :: &quot; &amp; (if (exists unique values whose (multiplicity of it &gt; 10) of (links of issuers of top level BES Actions whose (not master flag of issuer of it and not exists end date of it and state of it = &quot;Open&quot;) as string)) then (&quot;Failed&quot;) else (&quot;Passed&quot;)) &amp; &quot; :: High :: &quot; &amp; ( if ( not exists unique values whose (multiplicity of it &gt; 10) of (links of issuers of top level BES Actions whose (not master flag of issuer of it and not exists end date of it and state of it = &quot;Open&quot;) as string)) then &quot;No Operators found with more than 10 open policy actions.&quot; else (concatenation &quot; || &quot;  of unique values whose (multiplicity of it &gt; 10) of (names of issuers of top level BES Actions whose (not master flag of issuer of it and not exists end date of it and state of it = &quot;Open&quot;) as string)))">
+		<Result>
+			<Answer type="string">Operators Using Policy Actions :: Passed :: High :: No Operators found with more than 10 open policy actions.</Answer>
+		</Result>
+		<Evaluation>
+			<Time>3.213ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Support Analysis Activation :: Passed :: Medium :: No Analyses Require Activation</Answer>
+		</Result>
+		<Evaluation>
+			<Time>63.968ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Policy Actions Not Targeted By Property :: &quot; &amp; (if (it &gt; 100) then (&quot;Failed&quot;) else (if (it &gt; 10) then (&quot;Warning&quot;) else (&quot;Passed&quot;))) of number of top level BES Actions whose (not exists end date of it and not targeted by property flag of it and state of it = &quot;Open&quot;)  &amp; &quot; :: Medium :: &quot; &amp; ( (if ((number of top level BES Actions whose (not exists end date of it and not targeted by property flag of it and state of it = &quot;Open&quot;)) &gt; 0) then ( concatenation &quot; ||&quot; of (((&quot;BES Console Operator: &quot; &amp; name of it &amp; unordered list of (( name of it) of items 1 of (name of it, top level BES Actions whose (not exists end date of it and not targeted by property flag of it and state of it = &quot;Open&quot;)) whose (item 0 of it = name of issuer of item 1 of it) ) ) of BES Users) whose (it as string contains &quot;&lt;li&gt;&quot;)) as string) else (&quot;There are no open Policy actions targeting computers using Computer Lists or Computer Names.&quot;)) )">
+		<Result>
+			<Answer type="string">Policy Actions Not Targeted By Property :: Passed :: Medium :: BES Console Operator: bigfix&lt;ul&gt;&lt;li&gt;Deploy KEV Scanner&lt;/li&gt;&lt;li&gt;Deploy KEV Scanner&lt;/li&gt;&lt;li&gt;[POLICY BASELINE] Microsoft Patching - Jan 2026 - Security Updates - Critical&lt;/li&gt;&lt;li&gt;Initiate Software Scan on Shared Disks (11.0.6.0)&lt;/li&gt;&lt;li&gt;Change 'Staples_Patch_Exclusion' Setting&lt;/li&gt;&lt;/ul&gt;</Answer>
+		</Result>
+		<Evaluation>
+			<Time>4.968ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Superseded Fixlets :: &quot; &amp; (if (exists bes actions whose (state of it = &quot;Open&quot; and name of source fixlet of it as string as lowercase contains &quot;superseded&quot; and (not exists parent group of it or state of parent group of it = &quot;Open&quot;))) then ( &quot;Warning&quot;)  else (&quot;Passed&quot;)) &amp; &quot; :: Medium :: &quot; &amp; ( if (exists bes actions whose (state of it = &quot;Open&quot; and name of source fixlet of it as string as lowercase contains &quot;superseded&quot; and (not exists parent group of it or state of parent group of it = &quot;Open&quot;))) then &quot;Action Names: &quot; &amp; (concatenation &quot; || &quot; of names of bes actions whose (state of it = &quot;Open&quot; and name of source fixlet of it as string as lowercase contains &quot;superseded&quot; and (not exists parent group of it or state of parent group of it = &quot;Open&quot;))) else &quot;There are no open actions from Superseded Fixlets&quot;)">
+		<Result>
+			<Answer type="string">Superseded Fixlets :: Passed :: Medium :: There are no open actions from Superseded Fixlets</Answer>
+		</Result>
+		<Evaluation>
+			<Time>2.345ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">Statistical Property Evaluation Period :: Passed :: High :: Statistical Property Name: Evaluation Interval&lt;br&gt;</Answer>
+		</Result>
+		<Evaluation>
+			<Time>157.535ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">License Expiration :: Passed :: High :: License Expiration Date: 4/24/2036 3:46:10 PM&lt;br&gt;Days Left: 3601</Answer>
+		</Result>
+		<Evaluation>
+			<Time>235.387ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot; &quot;">
+		<Result>
+			<Answer type="string"> </Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.29ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Server Components Log Status&quot;">
+		<Result>
+			<Answer type="string">BES Server Components Log Status</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.54ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;Server :: &quot; &amp; ( ((if (it = &quot;True&quot;) then (&quot;Enabled&quot;) else (&quot;Disabled&quot;)) of (if (exists value of it whose (name of it = &quot;_BESRelay_Log_Verbose&quot;) of client settings of bes computer whose (root server flag of it = true))  then  (if ((value of it whose (name of it = &quot;_BESRelay_Log_Verbose&quot;) of client settings of bes computer whose (root server flag of it = true)) as string is &quot;1&quot;) then &quot;True&quot; else &quot;False&quot;) else &quot;False&quot;)))">
+		<Result>
+			<Answer type="string">Server :: Enabled</Answer>
+		</Result>
+		<Evaluation>
+			<Time>1.33ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query>
+		<Result>
+			<Answer type="string">GatherDB :: Disabled</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.725ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;FillDB :: &quot; &amp; ( if (relevant flag of (result from (bes computer whose (root server flag of it = true )) of (fixlet 4589 of bes site whose (name of it = &quot;BES Support&quot;)))) then (&quot;Enabled&quot;) else (&quot;Disabled&quot;))">
+		<Result>
+			<Answer type="string">FillDB :: Enabled</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.752ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+
+<?xml version="1.0" encoding="UTF-8"?>
+<BESAPI xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="BESAPI.xsd">
+	<Query Resource="&quot;BES Client :: &quot; &amp; (if (relevant flag of (result from (bes computer whose (root server flag of it = true )) of (fixlet 196 of bes site whose (name of it = &quot;BES Support&quot;)))) then (&quot;Enabled&quot;) else (&quot;Disabled&quot;)) ">
+		<Result>
+			<Answer type="string">BES Client :: Enabled</Answer>
+		</Result>
+		<Evaluation>
+			<Time>0.817ms</Time>
+			<Plurality>Singular</Plurality>
+		</Evaluation>
+	</Query>
+</BESAPI>
+

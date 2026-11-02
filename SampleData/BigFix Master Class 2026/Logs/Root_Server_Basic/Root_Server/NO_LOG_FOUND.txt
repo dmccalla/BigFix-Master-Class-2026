@@ -1,0 +1,1 @@
+The Root Server log was not found.  It should be C:\BigFix_Health_Check\Platform\Results\\Logs\\Root_Debug\HEALTHCHECK_ROOT_DEBUG_06-14-2026_1956.log. 

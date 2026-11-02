@@ -1,0 +1,30 @@
+Capture version: 2.0
+Captured: Sun 14 Jun 2026 18:52:55 -0400
+Host name: BFRELAY001
+Primary role: ServerAutomation
+Server roles: ServerAutomation Relay
+BES Root Server installed: No
+BES Web Reports installed: No
+BES WebUI installed: No
+BES Plugin Portal installed: No
+BES Explorer installed: No
+Server Automation Plan Engine installed: Yes
+BES MCP Server installed: No
+BES Relay installed: Yes
+Logical processors: 2
+Physical sockets: 2
+Cores per socket: 1
+CPU description: 12th Gen Intel(R) Core(TM) i9-12900H
+CPU max clock (MHz): 2918
+Is virtual: Yes
+Physical memory (MB): 4095
+BigFix server directory: C:\Program Files (x86)\BigFix Enterprise\BES Relay
+BigFix storage path: C:\Program Files (x86)\BigFix Enterprise\BES Relay\
+BigFix webui directory: Not collected
+BigFix plugin portal directory: Not collected
+BigFix web reports directory: Not collected
+BigFix explorer directory: Not collected
+BigFix server automation directory: Not collected
+BigFix mcp server directory: Not collected
+Drive C total (MB): 102069
+Drive C free (MB): 62894

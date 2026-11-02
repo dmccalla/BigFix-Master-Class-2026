@@ -53,8 +53,10 @@ charts and all nine native Word pages were verified. See
 - Generated reports still need consultant review and manual assessment input.
 - Existing type-check and static-scanner advisories remain visible in the
   quality records. A passing test suite is not a clean security audit.
-- The optional large PerfMon companion ZIP was not built because its source
-  asset is unavailable. The normal demo and fresh lab captures were tested.
+- The retained large PerfMon capture is available under the neutral filename
+  `Perfmon_24_Hour.blg`. It contains 1,252 readings over 20:51:07 and is
+  packaged as the separate large-sample download. The earlier validation
+  command explicitly skipped this download; the source was not missing.
 - Package validation used a short output path to avoid Windows path-length
   limits. Source changes were subsequently committed and pushed. No release was published.
 

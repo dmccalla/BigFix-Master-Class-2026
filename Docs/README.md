@@ -13,3 +13,5 @@ Docs holds this file and folders. Every other file lives in the folder that matc
 - [2 November release validation](Records/Release_Validation_2026-11-02.md): full suite, live lab collection, tool output, Word review and package evidence.
 
 - [FillDB score verification](Records/FillDB_Score_Verification_2026-11-02.md): live data sufficiency, score controls, date checks and recovery of the interrupted MC capture.
+
+- [Release 2.2](Releases/2.2.md): downloads, changes and setup.

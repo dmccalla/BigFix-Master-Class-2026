@@ -62,8 +62,8 @@ charts and all nine native Word pages were verified. See
 
 ## Evidence
 
-The local evidence folder is `Report Builder/Temp/Release_Validation_20261102`
-in the main repository. Use its `mc` folder for the full suite log and
+The local evidence folder is `Temp/Release_Validation_20261102`
+under the main application folder. Use its `mc` folder for the full suite log and
 JUnit results, lab task receipts, downloaded capture, tool run log, dependency
 checks, runtime SBOM, source fingerprints and package result. The top-level
 README links the current results across all three repositories.

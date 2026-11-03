@@ -1,5 +1,7 @@
 # Master Class Diagnostics Workbench
 
+[Download release 2.2](https://github.com/dmccalla/BigFix-Master-Class-2026/releases/tag/v2.2). Read the [User Guide (PDF)](https://github.com/dmccalla/BigFix-Master-Class-2026/releases/download/v2.2/Master_Class_Diagnostics_Workbench_User_Guide.pdf) before using the tool.
+
 Automated performance and configuration analysis for BigFix.
 
 The Workbench takes data collected from a BigFix deployment, runs the selected

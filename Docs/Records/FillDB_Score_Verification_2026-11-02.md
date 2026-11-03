@@ -76,8 +76,8 @@ were analyzed successfully. The application reports the analyzer failure.
 The reproducer is retained in `filldb-score-review/analyzer-edge`. No analyzer
 binary or application behavior was changed for this separate issue.
 
-Local evidence is in the Main repository's
-`Report Builder/Temp/Release_Validation_20261102`: the three
+Local evidence is in the main application's
+`Temp/Release_Validation_20261102`: the three
 `filldb-score-regression.xml` results, `filldb-score-review` controls and Word
 exports, and each product's `filldb-live-checks.json`. MC's recovery receipts
 are in `mc/lab`. No score formula or customer-facing report prose changed.

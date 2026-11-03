@@ -11,6 +11,12 @@ the project release process for the steps to cut a release.
 
 ## [Unreleased]
 
+## [2.2] - 2026-11-02
+
+- Add the guide delivery tables and their current Microsoft Word PDF exports.
+
+- Provide the separate large PerfMon sample with neutral embedded server identifiers while preserving capture measurements and timing.
+
 - Add FillDB known-answer score tests, real-analyzer controls and delivered-output checks for assessed, partial and insufficient data. Record live capture dates and recover the MC performance capture after the lab reboot.
 
 - Record the 2 November release validation with full automated suites, live lab collection, fresh tool output, Microsoft Word review and package evidence.

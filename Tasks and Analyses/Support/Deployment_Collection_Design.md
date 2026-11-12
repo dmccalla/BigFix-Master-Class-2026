@@ -17,7 +17,7 @@ combined task.
   Include the schema-required Evaluation element, with Time explicitly marked
   `Not applicable: local capture` and Plurality `Singular`. Do not invent a server
   evaluation duration for locally generated data.
-- Preserve all 178 real Session Relevance expressions. With all sections selected,
+- Preserve all 182 real Session Relevance expressions. With all sections selected,
   pacing alone adds about 15 minutes at the default, plus request execution time.
   The two admin requests run whenever the General section is collected, even when readable logs are off.
 - Keep the 13 existing client relevance expressions: Actionsite Size and the 12 root
@@ -42,7 +42,19 @@ to 180. The five-second pacing and existing failure policy are unchanged.
 
 Query-contract SHA-256, recomputed from the ordered encoded queries and capture
 destinations in the standalone task and checked against the helper:
-`04177cfc60da51a5ac968d6dee8e3cf837157ae2be43169412d8af16643e3b73`.
+`3d304c868585586526c22255a3bbe38d05ad111e74b62e6d0e3827adb70d56d7`.
+
+## Component version queries, 2026-11-11
+
+DI-181 to DI-184 add the per-host versions of Web Reports, WebUI, Plugin Portal and
+BigFix Explorer to the General capture, so the report can judge each component
+against the root server. They bring the shipped contract to 182 real Session
+Relevance requests and 184 requests with all options selected. Each one reads the
+exact `BES Support` analysis property, keeps only hosts that report a version
+("Not Installed" is dropped) and writes one `HOST = VERSION` entry per instance,
+because a deployment can run several Web Reports or WebUI hosts. The MCP Server
+has no version property in the BES Support site yet, so it is not collected.
+The query contract hash above is the value for the 182 queries.
 
 The October 19 action IDs, counts, fingerprints and test results below describe
 the validated version at that date. They are preserved as historical evidence.

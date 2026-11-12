@@ -39,11 +39,11 @@ def test_real_api_queries_are_unchanged_and_literals_do_not_reach_server():
         ).groups()
         for line in commands
     ]
-    assert len(entries) == 178
+    assert len(entries) == 182
     digest = hashlib.sha256(
         json.dumps(entries, separators=(",", ":")).encode()
     ).hexdigest()
-    assert digest == "04177cfc60da51a5ac968d6dee8e3cf837157ae2be43169412d8af16643e3b73"
+    assert digest == "3d304c868585586526c22255a3bbe38d05ad111e74b62e6d0e3827adb70d56d7"
     # The helper's diagnostics name the query contract the task ships with.
     helper = ROOT / "Tasks and Analyses/Support/DeploymentApiRequest.ps1"
     assert f"QueryContractSha256 = '{digest}'" in helper.read_text(encoding="utf-8")
@@ -64,7 +64,7 @@ def test_each_real_api_request_retains_its_pause_and_local_text_has_none():
         for i, line in enumerate(lines)
         if line.startswith("waithidden ") and "ping -n" in line
     ]
-    assert len(requests) == 180
+    assert len(requests) == 184
     assert pauses == [i + 4 for i in requests]
 
 
@@ -138,7 +138,7 @@ def test_fatal_helper_codes_are_checked_before_pacing_can_overwrite_them():
         if line.startswith("waithidden powershell.exe ")
         and '-File "{parameter "diRequestHelper"}"' in line
     ]
-    assert len(helpers) == 183  # init, login, 180 requests, finish
+    assert len(helpers) == 187  # init, login, 184 requests, finish
     assert all(
         lines[i + 1 : i + 4]
         == ["if {exit code of action != 0}", "exit {exit code of action}", "endif"]

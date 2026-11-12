@@ -1,5 +1,55 @@
 # Copyright (c) 2026 Duncan McCalla
 # SPDX-License-Identifier: MIT
+# ------------------------------------------------------------------------------
+# WHY THIS SCRIPT EXISTS
+# This helper runs ONE BigFix IEM CLI request for the Deployment Information
+# task, saves the answer, and records whether the request worked.
+#
+# BigFix ActionScript can start a program and read its exit code. It cannot
+# read an HTTP status, check that an XML answer is complete, time a request, or
+# remember anything between the 184 separate requests this task makes. Without
+# those four things the task cannot tell a failed request from an empty answer.
+# It would keep sending requests to a server that is refusing the login or is
+# down, and the capture could look complete when it is not. Before this helper
+# each query was a single cmd.exe line with no check of the result.
+#
+# WHAT IT DOES NOT DO
+# - It makes no network connection of its own. It only starts the local IEM CLI
+#   whose path the task passes in with -IemPath.
+# - It never receives the user name or password. The task logs in with iem login.
+# - It does not download, install or run any other code.
+# - It does not change the queries. The task passes each relevance query in
+#   unchanged and a test locks all 182 of them by hash.
+# - It does not change system settings. It writes only the capture file, the
+#   diagnostics files next to -StateFile, and one temporary response file that
+#   it deletes.
+#
+# SAFEGUARDS
+# - XML answers are parsed with DTD processing prohibited and no resolver.
+# - Hardware facts come from a short allowlist of CIM properties with a 3
+#   second timeout. A failure there is noted and never stops the collection.
+# - Raw CLI output, arguments and exception text are never written to the
+#   diagnostics files.
+#
+# HOW TO REVIEW IT
+# - This text is identical to Tasks and Analyses/Support/DeploymentApiRequest.ps1.
+#   A test requires the copy embedded in the task to match that file exactly.
+# - The SHA-256 of this script is written to the summary of every run.
+#
+# MODES (the task calls this script four ways)
+#   Init     Create the diagnostics files and record the start. No request.
+#   Login    Record whether iem login worked. Exit 24001 if it did not.
+#   Request  Run one query or resource, append the answer, classify the result.
+#   Finish   Mark the run Completed or Incomplete and write the final summary.
+#
+# EXIT CODES (returned to BigFix so the action shows the real result)
+#   0      Everything worked.
+#   24001  Login failed. No query was sent.
+#   24002  The server answered 401 (authentication failed). Stopped at once.
+#   24003  Three availability failures in a row. Stopped to avoid piling on.
+#   24004  Finished, but at least one query failed. The capture is incomplete.
+#   24005  This helper itself failed (for example it could not write a file).
+# ------------------------------------------------------------------------------
 param(
     [ValidateSet('Init','Login','Request','Finish')][string]$Mode,
     [string]$IemPath,
@@ -17,8 +67,13 @@ param(
     [string]$OtherModules = '',
     [string]$ClientVersion = ''
 )
+# Stop on any error. An unexpected problem is then reported with exit code
+# 24005 instead of being ignored.
 $ErrorActionPreference = 'Stop'
 $utf8 = New-Object System.Text.UTF8Encoding($false)
+# LOCAL CONTEXT. Reads the hardware of the machine this task runs on (the
+# root server) so the summary can say what the collection ran on. It is
+# used for the diagnostics summary only. It is not part of the collected data.
 # Environment discovery is local only. Copy an allowlist, never entire CIM objects.
 function Get-LocalContext {
     $hardware = [ordered]@{
@@ -65,19 +120,25 @@ function Get-LocalContext {
         Sources = [pscustomobject]@{}
     }
 }
+# Removes control characters and caps text at 512 characters before it is
+# written to the diagnostics.
 function Limit-ContextText($value) {
     if ($null -eq $value) { return $null }
     $clean = ([string]$value -replace '[\x00-\x1f\x7f]', ' ').Trim()
     if ($clean.Length -gt 512) { $clean = $clean.Substring(0, 512) + ' [truncated]' }
     return $clean
 }
+# Shows 'Unavailable' instead of a blank so a missing value is never read as zero.
 function Format-Known($value) {
     if ($null -eq $value -or [string]::IsNullOrWhiteSpace([string]$value)) { return 'Unavailable' }
     return [string]$value
 }
+# Turns milliseconds into hh:mm:ss text for the summary.
 function Format-Duration($milliseconds) {
     return [TimeSpan]::FromMilliseconds([Math]::Max(0, [double]$milliseconds)).ToString('c')
 }
+# Reads the evaluation time the server reports (for example 12 ms or 1.5 s)
+# and converts it to milliseconds. Returns nothing if the text is not a time.
 function Convert-EvaluationMs($value) {
     $match = [regex]::Match([string]$value, '^\s*(\d+(?:\.\d+)?)\s*(ms|s|us|milliseconds?|seconds?)\s*$', 'IgnoreCase,CultureInvariant')
     if (-not $match.Success) { return $null }
@@ -87,9 +148,12 @@ function Convert-EvaluationMs($value) {
     if ($unit -eq 's' -or $unit.StartsWith('second')) { return $number * 1000 }
     return $number
 }
+# RUN RECORD. Created once at Init. Holds the start time, the sections the
+# operator selected, how many requests are planned, and the SHA-256 of this
+# script and of the query list so a reviewer can tie a run to the exact code.
 function New-RunContext {
     # Counts are verified against the unchanged task requests by offline contracts.
-    $counts = [ordered]@{ General = 26; Root = 8; Relays = 25; RelayAffiliation = 3; Clients = 21; ClientSettings = 17; Operators = 19; Content = 28; Properties = 12; Actions = 19 }
+    $counts = [ordered]@{ General = 30; Root = 8; Relays = 25; RelayAffiliation = 3; Clients = 21; ClientSettings = 17; Operators = 19; Content = 28; Properties = 12; Actions = 19 }
     $selected = @()
     foreach ($item in $SelectedSections.Split(';')) {
         $pair = $item.Split('=')
@@ -115,13 +179,17 @@ function New-RunContext {
         SelectedSections = $selected; SelectionProvided = ($SelectedSections -ne '')
         PlannedRequests = $planned; PauseSeconds = $PauseSeconds; DataLogs = $DataLogs
         HelperSha256 = $helperHash
-        QueryContractSha256 = '04177cfc60da51a5ac968d6dee8e3cf837157ae2be43169412d8af16643e3b73'
+        QueryContractSha256 = '3d304c868585586526c22255a3bbe38d05ad111e74b62e6d0e3827adb70d56d7'
         QueryEngine = 'Root API automatic selection; engine identity/version not observed'
         RequestWallTimeMs = 0; PausesScheduled = 0; ServerEvaluationMs = 0
         ParsedEvaluationCount = 0; UnparsedEvaluationCount = 0
         SlowestRequests = @(); FailureExamples = @(); Sections = [pscustomobject]@{}
     }
 }
+# After every request: adds its timing and outcome to the run totals and the
+# per-section totals, keeps the 10 slowest requests and the first 20 failures,
+# and copies a few aggregate counts (computers, relays, server version) into
+# the summary. Only query numbers are kept, never capture names or answers.
 function Update-RequestContext($outcome, $elapsed, $evaluation, $answer) {
     if ($null -eq $state.Run) { return }
     $run = $state.Run
@@ -161,6 +229,8 @@ function Update-RequestContext($outcome, $elapsed, $evaluation, $answer) {
         }
     }
 }
+# Writes the plain-text diagnostics summary next to the state file. A person
+# can read it without opening the JSON or the CSV.
 function Write-Summary($value) {
     $run = $value.Run
     if ($null -eq $run) { return }
@@ -218,6 +288,8 @@ function Write-Summary($value) {
     $summary = Join-Path ([IO.Path]::GetDirectoryName($StateFile)) ([IO.Path]::GetFileNameWithoutExtension($StateFile) + '_Summary.txt')
     [IO.File]::WriteAllLines($summary, $lines, $utf8)
 }
+# The query numbers whose answers are reused in the summary: query number,
+# field name, the label the answer starts with, and whether it is a count.
 $contextFields = @{
     14 = @('ComputerCount', 'Number of Computers:', 'count')
     15 = @('ActiveComputerCount', 'Number of Active Computers:', 'count')
@@ -229,6 +301,8 @@ $contextFields = @{
     35 = @('RootServersReportedOs', 'BES Server OS:', 'text')
 }
 
+# Saves the run state as JSON after every request and rewrites the summary.
+# State is kept in a file because each request is a separate process.
 function Save-State($value) {
     if ($null -ne $value.Run) {
         $now = [DateTime]::UtcNow
@@ -244,6 +318,8 @@ function Save-State($value) {
     [IO.File]::WriteAllText($StateFile, ($value | ConvertTo-Json -Depth 8), $utf8)
     Write-Summary $value
 }
+# Appends one row per request to the CSV log: query number, outcome, CLI exit
+# code, HTTP status, elapsed time and the server's evaluation time.
 function Write-Row($outcome, $cliCode, $httpCode, $elapsed, $evaluation) {
     [pscustomobject][ordered]@{
         Utc = [DateTime]::UtcNow.ToString('o')
@@ -258,7 +334,11 @@ function Write-Row($outcome, $cliCode, $httpCode, $elapsed, $evaluation) {
         ConsecutiveAvailabilityFailures = $state.ConsecutiveAvailabilityFailures
     } | Export-Csv -LiteralPath $CsvFile -NoTypeInformation -Append -Encoding UTF8
 }
+# MAIN. Everything below runs inside one try so any unexpected failure ends
+# in the catch block at the bottom with exit code 24005.
 try {
+    # INIT: create the run record and the local context, write the first state
+    # and summary, and exit. No request is sent to the server.
     if ($Mode -eq 'Init') {
         $run = New-RunContext
         $environment = Get-LocalContext
@@ -272,7 +352,10 @@ try {
         Write-Row 'Initialized' 0 '' 0 ''
         exit 0
     }
+    # Every mode after Init starts by reloading the state saved by the last call.
     $state = Get-Content -LiteralPath $StateFile -Raw | ConvertFrom-Json
+    # LOGIN: the task ran iem login and passes its exit code in. Record it. A
+    # failed login sets 24001 so the task stops before any query is sent.
     if ($Mode -eq 'Login') {
         $state.LastOutcome = if ($NativeExitCode -eq 0) { 'LoginSucceeded' } else { 'LoginFailed' }
         if ($NativeExitCode -ne 0) { $state.FinalCode = 24001; $state.Run.Status = 'Stopped' }
@@ -280,6 +363,8 @@ try {
         Write-Row $state.LastOutcome $NativeExitCode '' 0 ''
         exit $state.FinalCode
     }
+    # FINISH: if any request failed the run ends with 24004 so the action shows
+    # as failed and the gap in the capture is visible. Otherwise it is Completed.
     if ($Mode -eq 'Finish') {
         if ($state.Errors -gt 0 -and $state.FinalCode -eq 0) { $state.FinalCode = 24004 }
         $state.LastOutcome = if ($state.FinalCode -eq 0) { 'Completed' } else { 'Incomplete' }
@@ -288,6 +373,8 @@ try {
         Write-Row $state.LastOutcome 0 '' 0 ''
         exit $state.FinalCode
     }
+    # REQUEST: run the IEM CLI once for this query (or resource) and time it.
+    # The only program started is the one named by -IemPath.
     if ($null -eq $state.Run.FirstRequestUtc) { $state.Run.FirstRequestUtc = [DateTime]::UtcNow.ToString('o') }
     $watch = [Diagnostics.Stopwatch]::StartNew()
     $start = New-Object Diagnostics.ProcessStartInfo
@@ -313,6 +400,8 @@ try {
     $process.WaitForExit()
     $stdout = $outTask.Result
     $stderr = $errTask.Result
+    # Append the CLI's native XML answer to the capture file byte for byte and
+    # add a newline. Earlier answers in the same file are kept as they are.
     $captureStream = [IO.File]::Open($Capture, [IO.FileMode]::OpenOrCreate, [IO.FileAccess]::ReadWrite, [IO.FileShare]::Read)
     $responseOffset = $captureStream.Length
     $captureStream.Position = $responseOffset
@@ -338,6 +427,9 @@ try {
     if ($stdoutPrefix -notmatch '^\s*(?:<\?xml|<BESAPI)') { $statusText += "`n" + $stdoutPrefix }
     $httpMatch = [regex]::Match($statusText, '(?im)^.*(?:HTTP|status)[^\r\n]*?\b([45]\d\d)\b')
     if ($httpMatch.Success) { $httpCode = $httpMatch.Groups[1].Value }
+    # Check that the answer is a complete BESAPI document and pick out its
+    # evaluation time and any error element. DTDs are prohibited and no external
+    # resolver is used, so the answer cannot pull in anything from elsewhere.
     $evaluation = ''
     $contextAnswer = $null
     $validResponse = $false
@@ -371,6 +463,10 @@ try {
         if ($null -ne $reader) { $reader.Dispose() }
         if ($null -ne $responseStream) { $responseStream.Dispose() }
     }
+    # OUTCOME RULES. 401 authentication failure. 403 permission failure. 408, 429
+    # and 5xx availability failure. Any other HTTP error request failure. An
+    # error inside a valid answer is a query failure. A non-zero CLI exit code or
+    # an incomplete answer is an availability failure. Anything else is success.
     if ($httpCode -eq '401') { $outcome = 'AuthenticationFailure' }
     elseif ($httpCode -eq '403') { $outcome = 'PermissionFailure' }
     elseif ($httpCode -eq '408' -or $httpCode -eq '429' -or $httpCode -match '^5\d\d$') { $outcome = 'AvailabilityFailure' }
@@ -378,6 +474,10 @@ try {
     elseif ($queryError) { $outcome = 'QueryFailure' }
     elseif ($cliCode -ne 0 -or -not $validResponse) { $outcome = 'AvailabilityFailure' }
     else { $outcome = 'Success' }
+    # STOP RULES. Permission and query failures are counted and the run goes on,
+    # because one bad query should not lose the rest. A 401 stops the run (24002).
+    # Three availability failures in a row stop it (24003). Any success resets
+    # the consecutive count.
     $state.LastOutcome = $outcome
     if ($outcome -eq 'AvailabilityFailure') {
         $state.AvailabilityFailures++
@@ -391,6 +491,8 @@ try {
         if ($state.ConsecutiveAvailabilityFailures -ge 3) { $state.FinalCode = 24003 }
     }
     if ($outcome -ne 'Success') {
+        # Put a visible ERROR line in the capture so the gap is obvious to the
+        # Report Builder and to a person reading the file.
         $marker = 'ERROR: Query line {0} failed: {1}; CLI exit {2}; HTTP {3}. See deployment collector diagnostics.' -f $QueryNumber, $outcome, $cliCode, $httpCode
         [IO.File]::AppendAllText($Capture, $marker + "`r`n", $utf8)
     }
@@ -402,6 +504,8 @@ try {
     if ([IO.File]::Exists($responseFile)) { [IO.File]::Delete($responseFile) }
     exit $state.FinalCode
 } catch {
+    # Any unexpected failure of this helper ends here: record it as 24005, clean
+    # up, and exit. The details of the exception are deliberately not recorded.
     # Do not print raw CLI output, arguments, or exception details into diagnostics.
     try {
         if ($responseFile -and [IO.File]::Exists($responseFile)) { [IO.File]::Delete($responseFile) }

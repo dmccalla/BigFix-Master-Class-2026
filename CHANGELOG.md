@@ -5,6 +5,10 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Collect the Web Reports, WebUI, Plugin Portal, and BigFix Explorer versions for every host that reports one, so deployment findings can judge component versions against the root server.
+
+- Explain the Collect Deployment Information task with comments only: why its PowerShell helper exists, what it does and does not do, and what each query asks. No query or behavior changed.
+
 ## [2.2] - 2026-11-02
 
 - Expand Client Performance property evaluation and client-setting context. Name the delivered Excel worksheet when a report preview is shortened and retain the complete dataset.

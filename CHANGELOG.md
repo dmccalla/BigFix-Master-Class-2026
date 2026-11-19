@@ -5,6 +5,8 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Use Client instead of Agent in the Client Performance guidance text.
+
 - Show advisory PerfMon counter values in amber on the scorecard.
 
 - Use the dedicated UDP capture for Client Loop UDP diagnostics. Calculate combined UDP and polling checks from devices with both results and leave missing observations blank.

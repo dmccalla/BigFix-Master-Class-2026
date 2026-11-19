@@ -20,7 +20,7 @@
         },
         {
           "name": "No central FillDB performance path is active",
-          "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_master_class\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
           "equals": "True"
         }
       ],
@@ -45,13 +45,18 @@
             },
             {
               "name": "FillDB performance path uses the central folder",
-              "query": "exists value \"PerformanceDataPath\" whose (it as string as lowercase = \"c:\\bigfix_health_check\\platform\\results\\logs\\filldb_performance\\filldbperf.log\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "query": "exists value \"PerformanceDataPath\" whose (it as string as lowercase = \"c:\\bigfix_master_class\\platform\\results\\logs\\filldb_performance\\filldbperf.log\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
               "equals": "True"
             },
             {
               "name": "No performance expiration is set",
               "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
               "equals": "False"
+            },
+            {
+              "name": "FillDB is Running after the restart",
+              "query": "if exists service \"filldb\" then state of service \"filldb\" as lowercase else \"missing\"",
+              "equals": "running"
             }
           ],
           "forbidden_generated_action": {
@@ -73,7 +78,7 @@
             },
             {
               "name": "Central performance path is no longer active",
-              "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_master_class\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
               "equals": "True"
             },
             {
@@ -85,6 +90,11 @@
               "name": "Performance expiration marker value is removed",
               "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
               "equals": "False"
+            },
+            {
+              "name": "FillDB is Running after the restart",
+              "query": "if exists service \"filldb\" then state of service \"filldb\" as lowercase else \"missing\"",
+              "equals": "running"
             }
           ]
         }
@@ -133,7 +143,7 @@
               },
               {
                 "name": "Generated disable clears the central performance path",
-                "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_health_check\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+                "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_master_class\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
                 "equals": "True"
               },
               {
@@ -150,9 +160,106 @@
                 "name": "Generated disable removes the performance expiration marker value",
                 "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
                 "equals": "False"
+              },
+              {
+                "name": "FillDB is Running after the restart",
+                "query": "if exists service \"filldb\" then state of service \"filldb\" as lowercase else \"missing\"",
+                "equals": "running"
               }
             ]
           }
+        }
+      ],
+      "enabled": true
+    },
+    {
+      "name": "filldb-performance-defaults-reset",
+      "computer_id": 8317784,
+      "preconditions": [
+        {
+          "name": "FillDB performance logging is disabled",
+          "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "equals": "True"
+        },
+        {
+          "name": "No central FillDB performance path is active",
+          "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_master_class\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+          "equals": "True"
+        }
+      ],
+      "steps": [
+        {
+          "name": "enable-without-auto-disable",
+          "task_file": "Tasks and Analyses/Individual Tasks/BigFix Master Class -- Enable FillDB Performance Logging (2.0).bes",
+          "parameters": {
+            "restart": "Y",
+            "rootServerName": "BFROOT1.dmc.lab",
+            "fillDBPerfLogsSizeMB": "1000",
+            "fillDBPerfLogsSizeByte": "1048576000",
+            "fillDBPerfLogsSizeNoLimit": "0",
+            "fillDBPerfLogsDuration": "1",
+            "fillDBPerfLogsNoDisable": "-1"
+          },
+          "assertions": [
+            {
+              "name": "FillDB performance logging is enabled",
+              "query": "exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "FillDB performance path uses the central folder",
+              "query": "exists value \"PerformanceDataPath\" whose (it as string as lowercase = \"c:\\bigfix_master_class\\platform\\results\\logs\\filldb_performance\\filldbperf.log\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "No performance expiration is set",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
+              "equals": "False"
+            },
+            {
+              "name": "FillDB is Running after the restart",
+              "query": "if exists service \"filldb\" then state of service \"filldb\" as lowercase else \"missing\"",
+              "equals": "running"
+            }
+          ],
+          "forbidden_generated_action": {
+            "title_contains": "Disable FillDB Performance Logging",
+            "observation_seconds": 45
+          }
+        },
+        {
+          "name": "reset-to-defaults",
+          "task_file": "Tasks and Analyses/Individual Tasks/WARNING_ BigFix Master Class -- POST HEALTH CHECK ONLY - FillDB Performance Logging Set to Non-Default (2.0).bes",
+          "parameters": {
+            "restart": "Y"
+          },
+          "assertions": [
+            {
+              "name": "FillDB performance logging is disabled",
+              "query": "not exists value \"EnablePerformanceLogging\" whose (it as string = \"1\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "Central performance path is no longer active",
+              "query": "not exists value \"PerformanceDataPath\" whose (it as string as lowercase contains \"\\bigfix_master_class\\\") of key \"HKEY_LOCAL_MACHINE\\SOFTWARE\\BigFix\\Enterprise Server\\FillDB\" of x32 registry",
+              "equals": "True"
+            },
+            {
+              "name": "Performance backup marker value is removed",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Backup_Value\" of client",
+              "equals": "False"
+            },
+            {
+              "name": "Performance expiration marker value is removed",
+              "query": "exists values of settings \"__FillDB_Perf_Logs_Expiration\" of client",
+              "equals": "False"
+            },
+            {
+              "name": "FillDB is Running after the restart",
+              "query": "if exists service \"filldb\" then state of service \"filldb\" as lowercase else \"missing\"",
+              "equals": "running"
+            }
+          ]
         }
       ],
       "enabled": true

@@ -803,7 +803,7 @@ try {{
     }
     if ($outcome -ne 'Success') {{
         # Put a visible ERROR line in the capture so the gap is obvious to the
-        # Report Builder and to a person reading the file.
+        # workbench and to a person reading the file.
         $marker = 'ERROR: Query line {{0} failed: {{1}; CLI exit {{2}; HTTP {{3}. See deployment collector diagnostics.' -f $QueryNumber, $outcome, $cliCode, $httpCode
         [IO.File]::AppendAllText($Capture, $marker + "`r`n", $utf8)
     }

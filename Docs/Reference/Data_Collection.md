@@ -108,3 +108,9 @@ set, including rollover files.
 When a capture window is longer than the class session, the task run can be
 demonstrated live and the instructor-provided sanitized capture can be used for
 the analysis portion of the exercise.
+
+## Service restarts
+
+Enabling and disabling FillDB logging restarts FillDB. Review the
+[service restart and recovery guidance](Service_Restarts.md) before collection.
+Verify that generated cleanup completes and that FillDB is Running afterward.

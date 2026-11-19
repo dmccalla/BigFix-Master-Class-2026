@@ -5,6 +5,14 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Refresh service restart planning, failure recovery and cleanup guidance in the current guides and lab scenarios. Verify the revised Word PDFs, live FillDB lifecycles and an actual 22-minute service shutdown.
+
+- Wait for actual Windows service transitions in FillDB logging and cleanup tasks. Record progress, attempt recovery after stop errors, and preserve failure status. Correct restart guidance and add native PowerShell long-transition tests.
+
+- Refresh locked runtime and developer dependencies with the seven-day cooldown for the 13 November weekly code sweep. Correct the deployment helper comment so the product naming check passes.
+
+- Use Findings in Client Performance and PerfMon Mini Reports. Present findings and supporting evidence in the consultant's assessment voice.
+
 - Collect the Web Reports, WebUI, Plugin Portal, and BigFix Explorer versions for every host that reports one, so deployment findings can judge component versions against the root server.
 
 - Explain the Collect Deployment Information task with comments only: why its PowerShell helper exists, what it does and does not do, and what each query asks. No query or behavior changed.

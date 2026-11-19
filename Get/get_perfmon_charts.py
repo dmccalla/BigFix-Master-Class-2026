@@ -766,7 +766,7 @@ def observation_for_findings(section: str, section_findings: list[dict]) -> dict
         "warnings": warnings,
         "samples": samples,
         "peak_violation_window": peak_window,
-        # For the Automated Findings and Assessment by Area wording.
+        # For the Findings and Assessment by Area wording.
         "unit": unit,
         "limit_text": limit,
         "range_floor": floor_ceiling[0] if floor_ceiling else "",

@@ -5006,10 +5006,10 @@ def generate_word(
             else []
         )
         if finding_rows:
-            client_heading("Automated Findings", "Automated Findings", 3)
+            client_heading("Findings", "Findings", 3)
             build_word_table(
                 document,
-                ["Finding ID", "Automated Finding"],
+                ["Finding ID", "Finding"],
                 finding_rows,
             )
 
@@ -5412,7 +5412,7 @@ def main() -> int:
     parser.add_argument(
         "--include-automated-findings",
         action="store_true",
-        help="Include the automated findings table in the Mini Report Word document.",
+        help="Include the findings table in the Mini Report Word document.",
     )
     parser.add_argument("--companion-workbook-name", default="", help=argparse.SUPPRESS)
     add_stamp_arguments(parser)

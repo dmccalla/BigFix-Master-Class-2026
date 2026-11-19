@@ -1271,7 +1271,7 @@ def test_perfmon_automated_findings_table_matches_scorecard_ids() -> None:
         ),
     ]
     xml = inject_perfmon_charts.build_perfmon_automated_findings_table_xml(observations)
-    assert "Automated Findings" in xml
+    assert "Findings" in re.findall(r"<w:t[^>]*>(.*?)</w:t>", xml)
     assert "Finding ID" in xml
     assert "Area" in xml
     assert "Review Context" in xml
@@ -1439,7 +1439,7 @@ def test_append_perfmon_capture_section_adds_supplemental_content(
         < doc_xml.rindex("CPU Utilization")
     )
     assert "CPU Utilization" in doc_xml
-    assert doc_xml.index("Automated Findings") < doc_xml.index("PRF-INF-04")
+    assert doc_xml.index("Findings") < doc_xml.index("PRF-INF-04")
     assert doc_xml.index("PRF-INF-04") < doc_xml.rindex("CPU Utilization")
     assert any("perfmon_supplemental_" in name for name in media_files)
 
@@ -1740,7 +1740,7 @@ def test_append_capture_follows_the_section_7_order(monkeypatch, tmp_path: Path)
     positions = [
         doc_xml.index("How This Score Is Calculated"),
         _heading_at(doc_xml, "Assessment by Area", 3),
-        _heading_at(doc_xml, "Automated Findings", 3),
+        _heading_at(doc_xml, "Findings", 3),
         _heading_at(doc_xml, "Capture Summary", 3),
         doc_xml.index("Of the 1 counters reviewed"),
         doc_xml.index("Analyzed system: BFSQL01."),

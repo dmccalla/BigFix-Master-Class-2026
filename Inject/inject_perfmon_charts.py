@@ -1126,7 +1126,7 @@ def _perfmon_finding_number(value: object) -> str:
 
 
 def perfmon_finding_context(section_data: dict) -> str:
-    """Return the compact observed evidence behind one automated finding."""
+    """Return the compact observed evidence behind one finding."""
     status = str(section_data.get("status", "")).strip()
     label = status_label(status)
     section = re.sub(r"\s+", " ", str(section_data.get("section", ""))).strip()
@@ -1217,7 +1217,7 @@ def build_perfmon_automated_findings_table_xml(observations: dict) -> str:
         return ""
 
     widths = [1600, 2300, 6100]
-    xml = heading_paragraph_xml("Automated Findings", level=3)
+    xml = heading_paragraph_xml("Findings", level=3)
     xml += (
         "<w:tbl><w:tblPr>"
         '<w:tblStyle w:val="BigFixContent"/>'

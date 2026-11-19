@@ -146,7 +146,11 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
         table for table in doc.tables if table.cell(0, 0).text == "Finding ID"
     )
 
-    assert headings.index("Automated Findings") < headings.index("Loop Health")
+    assert headings.index("Findings") < headings.index("Loop Health")
+    assert [cell.text for cell in findings_table.rows[0].cells] == [
+        "Finding ID",
+        "Finding",
+    ]
     assert [cell.text for cell in findings_table.rows[1].cells] == [
         "CLT-01",
         "High.\nThe client loop health score is below 90. See Loop Health.",
@@ -164,7 +168,7 @@ def test_loop_mini_report_includes_only_raised_automated_findings(
         for paragraph in Document(str(healthy_output)).paragraphs
         if paragraph.style.name.startswith("Heading")
     ]
-    assert "Automated Findings" not in healthy_headings
+    assert "Findings" not in healthy_headings
 
 
 def test_parse_actionsite_pressure_from_deployment_logs(tmp_path: Path) -> None:

@@ -20,6 +20,8 @@ from pathlib import Path
 
 import pytest
 
+from Utilities.service_transition_commands import service_command
+
 HERE = Path(__file__).resolve()
 SITE = next(
     p / "Tasks and Analyses" for p in HERE.parents if (p / "Tasks and Analyses").is_dir()
@@ -50,18 +52,18 @@ def test_every_service_stop_and_start_waits_and_is_checked(path: Path) -> None:
     lines = _lines(path)
     for i, line in enumerate(lines):
         if "powershell.exe" in line and "Get-Service" in line:
-            stop = "Stop-Service" in line
-            start = "Start-Service" in line
-            assert stop != start, line.strip()[:120]
-            assert (
-                "WaitForStatus('Stopped','00:20:00')" in line
-                if stop
-                else "WaitForStatus('Running','00:05:00')" in line
-            )
-            assert "$ErrorActionPreference='Stop'" in line
-            assert GATE.match(_next_nonblank(lines, i)), (
-                f"no failure check after: {line.strip()[:100]}"
-            )
+            gate = _next_nonblank(lines, i)
+            assert GATE.match(gate), f"no failure check after: {line.strip()[:100]}"
+            identity = re.search(r"\$Name='([^']+)'; \$Target='(Stopped|Running)';", line)
+            assert identity, f"Unmanaged service command: {line.strip()[:120]}"
+            passes = 2 if "{{exit code" in gate else 1
+            assert line.strip() == service_command(*identity.groups(), passes)
+            assert "WaitForStatus(" not in line
+
+
+def test_inline_service_commands_fit_windows_command_lines() -> None:
+    for target in ("Stopped", "Running"):
+        assert len(service_command("BES Web Reports Server", target, 2)) < 8191
 
 
 @pytest.mark.parametrize("path", TASKS, ids=lambda p: p.name[-60:])

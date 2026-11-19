@@ -438,6 +438,7 @@ def apply_client_layout(
     score = heading("How the Score Is Calculated")
     loop = (
         heading("Reading the Infographic")
+        or heading("Findings")
         or heading("Automated Findings")
         or heading("Loop Health")
     )

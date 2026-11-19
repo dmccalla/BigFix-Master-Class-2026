@@ -84,3 +84,9 @@ Lab content and actions are retained for diagnosis by default.
 Repository-site SSH access delivers content. Lab REST credentials run and verify
 tests; these are separate connections. A repository site does not replace this
 test runner. No lab actions run during ordinary CI or on pull requests.
+
+## Service restart checks
+
+Run the [controller behavior and task checks](Service_Restarts.md#verification)
+before live collection tests. Keep simulated long-transition results separate
+from actual lab timings.

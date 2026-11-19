@@ -279,7 +279,7 @@ def test_word_report_places_evaluation_frequency_inside_loop_cost(
     doc = Document(str(word_output))
     headings = [p.text for p in doc.paragraphs if p.style.name.startswith("Heading")]
     order = [
-        "Automated Findings",
+        "Findings",
         "Loop Health",
         "Loop Cost",
         "Top 10 Most Expensive Evaluations",
@@ -317,7 +317,7 @@ def test_word_report_omits_evaluation_frequency_without_the_data(
         if p.style.name.startswith("Heading")
     ]
     assert "Evaluation Frequency" not in headings
-    assert "Automated Findings" not in headings
+    assert "Findings" not in headings
 
 
 # --- 10-18 review wording -------------------------------------------------------------

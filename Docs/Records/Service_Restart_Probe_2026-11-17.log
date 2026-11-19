@@ -1,0 +1,60 @@
+2026-11-17T17:50:12.0607472Z [HCServiceRestartProbe20261117] Requested Running; initial state=Stopped
+2026-11-17T17:50:12.5123827Z [HCServiceRestartProbe20261117] Running after 0 seconds
+2026-11-17T17:50:12.5504725Z [HCServiceRestartProbe20261117] Requested Stopped; initial state=Running
+2026-11-17T17:50:12.6935010Z [HCServiceRestartProbe20261117] ERROR: Injected lab error after the real stop request was accepted
+2026-11-17T17:50:12.7019797Z [HCServiceRestartProbe20261117] Recovery: waiting for the outstanding stop before restoring Running
+2026-11-17T17:50:12.7146361Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=0 seconds
+2026-11-17T17:50:17.8129590Z [HCServiceRestartProbe20261117] Stopped after 5 seconds
+2026-11-17T17:50:17.8177746Z [HCServiceRestartProbe20261117] Recovery: restoring Running after the failed operation
+2026-11-17T17:50:17.9119867Z [HCServiceRestartProbe20261117] Waiting for Running; state=StartPending; elapsed=0 seconds
+2026-11-17T17:50:18.9309510Z [HCServiceRestartProbe20261117] Running after 1 seconds
+2026-11-17T17:50:18.9353623Z [HCServiceRestartProbe20261117] FAILED operation; final state=Running
+2026-11-17T17:50:19.0003673Z [HCServiceRestartProbe20261117] Requested Stopped; initial state=Running
+2026-11-17T17:50:19.0049990Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=0 seconds
+2026-11-17T17:50:49.1958779Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=30 seconds
+2026-11-17T17:51:19.4232137Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=60 seconds
+2026-11-17T17:51:49.6731573Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=90 seconds
+2026-11-17T17:52:19.8759548Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=120 seconds
+2026-11-17T17:52:50.1780610Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=151 seconds
+2026-11-17T17:53:20.4299732Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=181 seconds
+2026-11-17T17:53:50.6859871Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=211 seconds
+2026-11-17T17:54:21.0426496Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=242 seconds
+2026-11-17T17:54:51.9080803Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=272 seconds
+2026-11-17T17:55:22.1033385Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=303 seconds
+2026-11-17T17:55:52.3679306Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=333 seconds
+2026-11-17T17:56:22.6462890Z [HCServiceRestartProbe20261117] Waiting for Stopped;state=StopPending; elapsed=363 seconds
+2026-11-17T17:56:52.8358397Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=393 seconds
+2026-11-17T17:57:23.0364803Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=424 seconds
+2026-11-17T17:57:53.2320887Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=454 seconds
+2026-11-17T17:58:23.3914865Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=484 seconds
+2026-11-17T17:58:53.6186808Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=514 seconds
+2026-11-17T17:59:23.9775641Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=544 seconds
+2026-11-17T17:59:54.1906259Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=575 seconds
+2026-11-17T18:00:24.3085398Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=605 seconds
+2026-11-17T18:00:54.5339837Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=635 seconds
+2026-11-17T18:01:24.9605321Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=665 seconds
+2026-11-17T18:01:55.1355290Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=696 seconds
+2026-11-17T18:02:25.3177980Z[HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=726 seconds
+2026-11-17T18:02:55.5549355Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=756 seconds
+2026-11-17T18:03:25.7696021Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=786 seconds
+2026-11-17T18:03:55.9903007Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=816 seconds
+2026-11-17T18:04:26.1615308Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=847 seconds
+2026-11-17T18:04:56.3869368Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=877 seconds
+2026-11-17T18:05:26.5939370Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=907 seconds
+2026-11-17T18:05:56.8291815Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=937 seconds
+2026-11-17T18:06:27.0718352Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=968 seconds
+2026-11-17T18:06:57.2397061Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=998 seconds
+2026-11-17T18:07:27.3893598Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1028 seconds
+2026-11-17T18:07:57.6460341Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1058 seconds
+2026-11-17T18:08:27.8377319Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1088 seconds
+2026-11-17T18:08:58.0740346Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1119 seconds
+2026-11-17T18:09:28.2710882Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1149 seconds
+2026-11-17T18:09:58.5248905Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1179 seconds
+2026-11-17T18:10:28.7204188Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1209 seconds
+2026-11-17T18:10:58.9174684Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1239 seconds
+2026-11-17T18:11:29.1670134Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1270 seconds
+2026-11-17T18:11:59.6939145Z [HCServiceRestartProbe20261117] Waiting for Stopped; state=StopPending; elapsed=1300 seconds
+2026-11-17T18:12:19.8328547Z [HCServiceRestartProbe20261117] Stopped after 1320 seconds
+2026-11-17T18:12:19.9288103Z [HCServiceRestartProbe20261117] Requested Running; initial state=Stopped
+2026-11-17T18:12:20.0441963Z [HCServiceRestartProbe20261117] Waiting for Running; state=StartPending; elapsed=0 seconds
+2026-11-17T18:12:21.0629858Z [HCServiceRestartProbe20261117] Running after 1 seconds

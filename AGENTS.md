@@ -11,9 +11,9 @@ tool, used in the BigFix Master Class lab. It takes Client Performance, PerfMon
 and FillDB evidence from a BigFix deployment and builds a mini report for each
 one.
 
-It is one of three sibling repos. The BigFix Platform Health Check is the main
-Workbench. The TA Health Check is the Technical Advisor copy. Shared
-module content stays consistent across all three. Naming and branding differ.
+It is one of three sibling repos: the main Workbench, a Technical Advisor copy
+and this training copy. Shared module content stays consistent across all
+three. Naming and branding differ.
 
 **A fix made here stays here.** Port a change to or from another repo only
 when asked. Do not add modules or features on your own.

@@ -495,7 +495,7 @@ def test_infographic_key_uses_infographic_values() -> None:
             rank=1,
             occurrences=15,
             total_client_processing_seconds=630,
-            max_client_processing_seconds=0,
+            max_client_processing_seconds=73,
             avg_client_processing_seconds=42,
             result="Background Evaluation of Custom Site: Resolve",
         )
@@ -521,12 +521,82 @@ def test_infographic_key_uses_infographic_values() -> None:
     # Built with the old two thresholds, so there is no Good group.
     assert values["Loop distribution"] == "8 · 2 · 0 · 0"
     assert values["Average loop time"] == "5m 00s"
-    assert values["Slowest evaluation"] == loop.format_loop_offender_strip_seconds(42)
+    assert values["Slowest evaluation"] == "73.0 s"
     assert values["Devices averaging over 120 min"] == "0"
     assert values["Devices reporting"] == "10 / 10"
     assert values["No UDP pings received"] == "2 / 4"
     assert values["Relay with most UDP issues"] == "2 / 3 on relay-a"
     assert values["Findings raised"] == "None raised"
+
+
+def test_slowest_evaluation_uses_the_peak_even_when_outside_the_report_rows(
+    monkeypatch, tmp_path: Path
+) -> None:
+    timing = pd.DataFrame(
+        [
+            {
+                "Result": "High average",
+                "AvgClientProcessingSeconds": 42,
+                "MaxClientProcessingSeconds": 73,
+            },
+            {
+                "Result": "Peak evaluation",
+                "AvgClientProcessingSeconds": 18,
+                "MaxClientProcessingSeconds": 201.8,
+            },
+        ]
+    )
+    offenders = loop.aggregate_loop_offenders(timing, top_count=0)
+    assert [item.result for item in offenders] == ["High average", "Peak evaluation"]
+    captured = {}
+
+    def capture_chart(_kind, data, _output):
+        captured.update(data)
+
+    monkeypatch.setattr("Lib.Design.html_charts.render_chart", capture_chart)
+    png = tmp_path / "loop.png"
+    metrics = _sample_loop_metrics()
+    loop.generate_png(metrics, png, loop_offenders=offenders)
+    footer = next(
+        tile for tile in captured["footer"] if tile["label"] == "Slowest evaluation"
+    )
+    assert footer == {
+        "label": "Slowest evaluation",
+        "value": "201.8 s",
+        "caption": "Peak evaluation",
+    }
+
+    word = tmp_path / "loop.docx"
+    loop.generate_word(
+        metrics, png, word, loop_offenders=offenders[:1], all_loop_offenders=offenders
+    )
+    doc = Document(word)
+    key = next(
+        table for table in doc.tables if table.cell(0, 0).text == "Infographic tile"
+    )
+    row = next(row for row in key.rows if row.cells[0].text == "Slowest evaluation")
+    assert row.cells[1].text == "201.8 s"
+    assert (
+        row.cells[2].text == "Longest single evaluation in the supplied timing capture."
+    )
+
+
+def test_slowest_evaluation_uses_only_recorded_maxima() -> None:
+    timing = pd.DataFrame(
+        [
+            {"Result": "Average only", "AvgClientProcessingSeconds": 42},
+            {"Result": "Rounded zero", "MaxClientProcessingSeconds": 0},
+        ]
+    )
+    offenders = loop.aggregate_loop_offenders(timing, top_count=0)
+    assert offenders[0].max_client_processing_seconds is None
+    metrics = _sample_loop_metrics()
+    rows = loop.client_loop_infographic_key_rows(metrics, offenders[:1])
+    values = {row[0]: row[1] for row in rows}
+    assert values["Slowest evaluation"] == "Not available"
+    rows = loop.client_loop_infographic_key_rows(metrics, offenders)
+    values = {row[0]: row[1] for row in rows}
+    assert values["Slowest evaluation"] == "0.0 s"
 
 
 def test_infographic_key_names_clt_01_when_loop_health_is_low() -> None:

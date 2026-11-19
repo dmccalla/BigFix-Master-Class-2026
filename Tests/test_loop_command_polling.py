@@ -13,6 +13,7 @@ import get_loop_health as loop
 import pandas as pd
 from docx import Document
 from openpyxl import load_workbook
+from PIL import Image
 
 _HEADER = (
     '<?xml version="1.0" encoding="UTF-8"?>\n'
@@ -118,6 +119,113 @@ def test_command_polling_analysis_groups_by_relay_and_subnet() -> None:
     assert slow_client.command_polling_review == (
         "Current polling interval is below the average loop time."
     )
+
+
+def test_udp_polling_gap_requires_a_dedicated_udp_observation() -> None:
+    data = pd.DataFrame(
+        {
+            "Computer Name": [
+                "captured-no",
+                "captured-error",
+                "absent",
+                "captured-yes",
+            ],
+            "Maximum Cycle Minutes": [30] * 4,
+            "Average Cycle Minutes": [10] * 4,
+            "Receiving UDP Pings": ["True", "False", "False", "False"],
+            "Command Polling Enabled": ["0"] * 4,
+        }
+    )
+    dedicated = {
+        "captured-no": {"receiving": "No", "relay": "relay-no"},
+        "captured-error": {"receiving": "Unknown", "relay": "relay-error"},
+        "captured-yes": {"receiving": "Yes", "relay": "relay-yes"},
+    }
+
+    def process(udp_data):
+        rows, _, _ = loop.process_rows(
+            data,
+            "Computer Name",
+            "Maximum Cycle Minutes",
+            "Average Cycle Minutes",
+            udp_data=udp_data,
+            command_polling_enabled_column="Command Polling Enabled",
+        )
+        summary = loop.analyze_command_polling(rows)
+        assert summary is not None
+        return rows, summary
+
+    rows, summary = process(dedicated)
+    assert [row.receiving_udp_pings for row in rows] == ["No", "Unknown", "", "Yes"]
+    assert summary.udp_polling_assessed_count == 2
+    assert loop.command_polling_coverage_rows(summary)[-1][1:] == ["1 / 2", "50.0%"]
+    relay_counts = {row[0]: row[8] for row in summary.relay_rows}
+    assert relay_counts == {
+        "relay-no": "1",
+        "relay-yes": "0",
+        "relay-error": "Not collected",
+        "Not reported": "Not collected",
+    }
+    assert rows[2].command_polling_review == ""
+
+    rows, summary = process(None)
+    assert all(not row.receiving_udp_pings for row in rows)
+    assert "Receiving UDP Pings" not in loop.processed_to_dataframe(rows).columns
+    assert loop.command_polling_coverage_rows(summary)[-1][1:] == ["Not collected", ""]
+    assert summary.relay_rows[0][8] == "Not collected"
+
+
+def test_header_only_udp_capture_has_no_observations(tmp_path: Path) -> None:
+    capture = tmp_path / "udp-notification-results.csv"
+    capture.write_text("Computer Name,IPv4 Addresses,Relay,UDP Pings\n", encoding="utf-8")
+
+    assert loop.load_udp_notification_summary(capture) is None
+
+
+def test_unknown_udp_capture_status_has_no_headline_count(tmp_path: Path) -> None:
+    capture = tmp_path / "udp-notification-results.csv"
+    capture.write_text(
+        "Computer Name,IPv4 Addresses,Relay,UDP Pings\nclient,192.168.0.10,relay,Error\n",
+        encoding="utf-8",
+    )
+    summary = loop.load_udp_notification_summary(capture)
+    assert summary is not None
+    assert summary.unknown_count == 1
+    metrics, _ = _sample_metrics(_sample_polling_rows())
+    tiles = loop.context_strip_tiles(metrics, udp_summary=summary)
+
+    assert {tile["label"]: tile["value"] for tile in tiles}[
+        "No UDP pings received"
+    ] == "Not collected"
+
+
+def test_polling_checks_chart_uses_the_observed_udp_population(
+    monkeypatch, tmp_path: Path
+) -> None:
+    rows = _sample_polling_rows()
+    rows[2].receiving_udp_pings = ""
+    summary = loop.analyze_command_polling(rows)
+    metrics, _ = _sample_metrics(rows)
+    png = tmp_path / "loop.png"
+    Image.new("RGB", (1, 1)).save(png)
+    captured = {}
+
+    def render_charts(jobs):
+        for _, data, path in jobs:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_bytes(png.read_bytes())
+            captured[path.stem] = data
+
+    monkeypatch.setattr("Lib.Design.html_charts.render_charts", render_charts)
+    loop.generate_word(
+        metrics, png, tmp_path / "loop.docx", command_polling_summary=summary
+    )
+
+    assert captured["reported_polling_checks"]["checks"][-1] == {
+        "label": "No UDP and Polling Disabled/Not Set",
+        "count": 1,
+        "total": 2,
+    }
 
 
 def test_command_polling_workbook_tabs_are_written(tmp_path: Path) -> None:

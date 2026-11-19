@@ -16,9 +16,9 @@ from get_loop_health import (
 def test_numeric_minutes_columns_are_converted_to_hhmmss_before_processing():
     df = pd.DataFrame(
         {
-            "Computer Name": ["client-1"],
-            "Maximum Cycle Minutes": [90],
-            "Average Cycle Minutes": [45],
+            "Computer Name": ["client-1", "client-2"],
+            "Maximum Cycle Minutes": [90, 8.2],
+            "Average Cycle Minutes": [45, 8.19],
         }
     )
 
@@ -36,6 +36,9 @@ def test_numeric_minutes_columns_are_converted_to_hhmmss_before_processing():
     assert normalized.loc[0, "Average Cycle Minutes"] == "00:45:00"
     assert processed[0].max_seconds == 5400
     assert processed[0].avg_seconds == 2700
+    assert normalized.loc[1, "Maximum Cycle Minutes"] == "00:08:12"
+    assert processed[1].max_seconds == 492
+    assert processed[1].avg_seconds == 491
     assert not_reported == 0
     assert errors == 0
 

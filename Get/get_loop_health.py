@@ -203,7 +203,7 @@ class LoopOffenderSummary:
     rank: int
     occurrences: int
     total_client_processing_seconds: float
-    max_client_processing_seconds: float
+    max_client_processing_seconds: float | None
     avg_client_processing_seconds: float
     result: str
 
@@ -235,6 +235,7 @@ class CommandPollingSummary:
     no_udp_polling_gap_count: int
     relay_rows: list[list[str]]
     subnet_rows: list[list[str]]
+    udp_polling_assessed_count: int = 0
 
 
 @dataclass
@@ -461,7 +462,8 @@ def convert_to_hhmmss(seconds: float | None) -> str:
     except TypeError:
         return "00:00:00"
 
-    total = int(math.floor(float(seconds)))
+    # Decimal minutes can convert to one float below a whole second.
+    total = math.floor(math.nextafter(float(seconds), math.inf))
     hours = total // 3600
     minutes = (total % 3600) // 60
     secs = total % 60
@@ -2151,14 +2153,20 @@ def actionsite_pressure_rows(pressure: ActionSitePressure) -> list[list[str]]:
     ]
 
 
-def _float_from_row(row: pd.Series, *names: str) -> float:
+def _optional_float_from_row(row: pd.Series, *names: str) -> float | None:
     for name in names:
         if name in row and not pd.isna(row[name]):
             try:
-                return float(str(row[name]).replace(",", "").strip())
+                value = float(str(row[name]).replace(",", "").strip())
             except ValueError:
                 continue
-    return 0.0
+            if math.isfinite(value):
+                return value
+    return None
+
+
+def _float_from_row(row: pd.Series, *names: str) -> float:
+    return _optional_float_from_row(row, *names) or 0.0
 
 
 def _int_from_row(row: pd.Series, *names: str) -> int:
@@ -2283,7 +2291,7 @@ def aggregate_loop_offenders(
                     rank=0,
                     occurrences=occurrences,
                     total_client_processing_seconds=total_seconds,
-                    max_client_processing_seconds=_float_from_row(
+                    max_client_processing_seconds=_optional_float_from_row(
                         row,
                         "MaxClientProcessingSeconds",
                         "MaxClientEvaluationSeconds",
@@ -2300,18 +2308,21 @@ def aggregate_loop_offenders(
             result_text = str(result).strip()
             if not result_text:
                 continue
-            seconds = [
-                _float_from_row(row, "ClientProcessingSeconds", "ClientEvaluationSeconds")
+            samples = [
+                _optional_float_from_row(
+                    row, "ClientProcessingSeconds", "ClientEvaluationSeconds"
+                )
                 for _, row in group.iterrows()
             ]
+            seconds = [sample for sample in samples if sample is not None]
             total = sum(seconds)
-            occurrences = len(seconds)
+            occurrences = len(samples)
             rows.append(
                 LoopOffenderSummary(
                     rank=0,
                     occurrences=occurrences,
                     total_client_processing_seconds=total,
-                    max_client_processing_seconds=max(seconds) if seconds else 0.0,
+                    max_client_processing_seconds=max(seconds, default=None),
                     avg_client_processing_seconds=total / occurrences
                     if occurrences
                     else 0.0,
@@ -2330,7 +2341,7 @@ def aggregate_loop_offenders(
                     rank=0,
                     occurrences=occurrences,
                     total_client_processing_seconds=float(occurrences),
-                    max_client_processing_seconds=0.0,
+                    max_client_processing_seconds=None,
                     avg_client_processing_seconds=0.0,
                     result=result,
                 )
@@ -2354,6 +2365,23 @@ def aggregate_loop_offenders(
         row.rank = idx
 
     return rows
+
+
+def _slowest_timed_offender(
+    offenders: list[LoopOffenderSummary] | None,
+) -> LoopOffenderSummary | None:
+    timed_offenders = (
+        item
+        for item in offenders or []
+        if (seconds := item.max_client_processing_seconds) is not None
+        and math.isfinite(seconds)
+        and seconds >= 0
+    )
+    return max(
+        timed_offenders,
+        key=lambda item: item.max_client_processing_seconds or 0.0,
+        default=None,
+    )
 
 
 def load_loop_offenders(
@@ -2427,7 +2455,7 @@ def format_loop_offender_strip_seconds(seconds: float | None) -> str:
         seconds_float = float(seconds)
     except (TypeError, ValueError):
         return "Not available"
-    if math.isnan(seconds_float) or seconds_float <= 0:
+    if not math.isfinite(seconds_float) or seconds_float < 0:
         return "Not available"
     return f"{seconds_float:,.1f} s"
 
@@ -2581,17 +2609,6 @@ def auto_detect_agent_cpu_idle_columns(
     return (
         _column_lookup_normalized(df, AGENT_CPU_WORK_IDLE_COLUMN_NAMES),
         _column_lookup_normalized(df, AGENT_CPU_SLEEP_IDLE_COLUMN_NAMES),
-    )
-
-
-def auto_detect_udp_receiving_column(df: pd.DataFrame) -> str | None:
-    return _column_lookup_normalized(
-        df,
-        (
-            "Receiving UDP Pings",
-            "Platform Health Check - Receiving UDP Pings",
-            "UDP Pings",
-        ),
     )
 
 
@@ -2796,8 +2813,10 @@ def suggested_command_polling_seconds(avg_loop_seconds: float) -> int:
     )
 
 
-def is_udp_not_receiving(value: Any) -> bool:
-    return parse_udp_receiving(value) is False
+def _udp_polling_gap(udp_status: bool | None, polling_status: str) -> bool | None:
+    if udp_status is None or polling_status not in {"Enabled", "Disabled", "Not Set"}:
+        return None
+    return udp_status is False and polling_status in {"Disabled", "Not Set"}
 
 
 def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary | None:
@@ -2836,7 +2855,7 @@ def load_udp_notification_summary(path: Path | None) -> UdpNotificationSummary |
         "Platform Health Check - Receiving UDP Pings",
         "UDP Pings",
     )
-    if not all([computer_col, ip_col, relay_col, udp_col]):
+    if df.empty or not all([computer_col, ip_col, relay_col, udp_col]):
         return None
 
     rows: list[dict[str, Any]] = []
@@ -3018,6 +3037,7 @@ def command_polling_coverage_rows(
 ) -> list[list[str]]:
     total = summary.total_devices
     denominator = total if total else 1
+    udp_assessed = summary.udp_polling_assessed_count
     return [
         [
             "Command Polling Enabled",
@@ -3051,8 +3071,10 @@ def command_polling_coverage_rows(
         ],
         [
             "No UDP and Polling Disabled/Not Set",
-            count_with_denominator(summary.no_udp_polling_gap_count, total),
-            pct(summary.no_udp_polling_gap_count / denominator),
+            count_with_denominator(summary.no_udp_polling_gap_count, udp_assessed)
+            if udp_assessed
+            else "Not collected",
+            pct(summary.no_udp_polling_gap_count / udp_assessed) if udp_assessed else "",
         ],
     ]
 
@@ -3179,7 +3201,6 @@ def process_rows(
     processed: list[ProcessedRow] = []
     not_reported_count = 0
     error_count = 0
-    inline_udp_column = auto_detect_udp_receiving_column(df)
     if not command_polling_enabled_column and not command_polling_interval_column:
         command_polling_enabled_column, command_polling_interval_column = (
             auto_detect_command_polling_columns(df)
@@ -3225,13 +3246,6 @@ def process_rows(
                 receiving_udp = udp_row.get("receiving", "")
                 relay = udp_row.get("relay", "")
                 subnet = udp_row.get("subnet", "")
-            elif inline_udp_column:
-                udp_status = parse_udp_receiving(row.get(inline_udp_column))
-                receiving_udp = (
-                    "Yes"
-                    if udp_status is True
-                    else ("No" if udp_status is False else "Unknown")
-                )
 
             polling_status = ""
             polling_interval = ""
@@ -3342,12 +3356,17 @@ def _command_polling_group_rows(
     output: list[list[str]] = []
     for key, group in groups.items():
         status_counts = Counter(row.command_polling_enabled or "Unknown" for row in group)
-        no_udp_polling_gap = sum(
-            1
+        udp_polling_results = [
+            gap
             for row in group
-            if is_udp_not_receiving(row.receiving_udp_pings)
-            and row.command_polling_enabled in {"Disabled", "Not Set"}
-        )
+            if (
+                gap := _udp_polling_gap(
+                    parse_udp_receiving(row.receiving_udp_pings),
+                    row.command_polling_enabled,
+                )
+            )
+            is not None
+        ]
         enabled_missing_interval = sum(
             1
             for row in group
@@ -3372,13 +3391,15 @@ def _command_polling_group_rows(
                 f"{status_counts['Unknown']:,}",
                 f"{enabled_missing_interval:,}",
                 f"{below_loop:,}",
-                f"{no_udp_polling_gap:,}",
+                f"{sum(udp_polling_results):,}"
+                if udp_polling_results
+                else "Not collected",
             ]
         )
 
     output.sort(
         key=lambda row: (
-            -_parse_int_text(row[8]),
+            -_parse_int_text(row[8]) if row[8] != "Not collected" else 0,
             -_parse_int_text(row[7]),
             -_parse_int_text(row[6]),
             -(_parse_int_text(row[3]) + _parse_int_text(row[4])),
@@ -3404,10 +3425,13 @@ def analyze_command_polling(
     enabled_missing_interval_count = 0
     interval_below_loop_count = 0
     no_udp_polling_gap_count = 0
+    udp_polling_assessed_count = 0
 
     for row in polling_rows:
         status = row.command_polling_enabled or "Unknown"
-        no_udp = is_udp_not_receiving(row.receiving_udp_pings)
+        udp_status = parse_udp_receiving(row.receiving_udp_pings)
+        udp_polling_gap = _udp_polling_gap(udp_status, status)
+        udp_polling_assessed_count += udp_polling_gap is not None
 
         if status == "Enabled":
             enabled_count += 1
@@ -3431,18 +3455,18 @@ def analyze_command_polling(
         ):
             interval_below_loop_count += 1
             review = "Current polling interval is below the average loop time."
-        elif no_udp and status in {"Disabled", "Not Set"}:
+        elif udp_polling_gap:
             no_udp_polling_gap_count += 1
             review = (
                 "No UDP received and polling is disabled or not set. Review for "
                 "command polling if faster response is required."
             )
-        elif no_udp:
+        elif udp_status is False:
             review = (
                 "No UDP received. Review relay, subnet, and polling fields in "
                 "the workbook with customer network context."
             )
-        else:
+        elif udp_status is not None or status == "Enabled":
             review = "No immediate polling issue detected."
 
         row.command_polling_review = review
@@ -3458,6 +3482,7 @@ def analyze_command_polling(
         no_udp_polling_gap_count=no_udp_polling_gap_count,
         relay_rows=_command_polling_group_rows(polling_rows, "relay"),
         subnet_rows=_command_polling_group_rows(polling_rows, "subnet"),
+        udp_polling_assessed_count=udp_polling_assessed_count,
     )
 
 
@@ -4026,17 +4051,17 @@ def generate_png(
         [{"id": LOOP_FINDING_ID, "text": loop_finding_text(reasons)}] if reasons else []
     )
 
-    top_offender = loop_offenders[0] if loop_offenders else None
-    if top_offender:
+    peak_offender = _slowest_timed_offender(loop_offenders)
+    if peak_offender is not None:
         slow_value = format_loop_offender_strip_seconds(
-            top_offender.avg_client_processing_seconds
+            peak_offender.max_client_processing_seconds
         )
         slow_detail = compact_loop_offender_label(
-            format_loop_offender_evaluation(top_offender.result, property_intervals)
+            format_loop_offender_evaluation(peak_offender.result, property_intervals)
         )
     else:
         slow_value = "Not available"
-        slow_detail = "Top 10 data not provided"
+        slow_detail = "" if loop_offenders else "Top 10 data not provided"
 
     data = {
         "title": "Client Performance",
@@ -4211,7 +4236,9 @@ def generate_excel(
                 ("Command Polling Not Set", command_polling_summary.not_set_count),
                 (
                     "No UDP and Polling Disabled/Not Set",
-                    command_polling_summary.no_udp_polling_gap_count,
+                    command_polling_summary.no_udp_polling_gap_count
+                    if command_polling_summary.udp_polling_assessed_count
+                    else "Not collected",
                 ),
                 (
                     "Command Polling Interval Below Average Loop",
@@ -4588,7 +4615,7 @@ def context_strip_tiles(
     udp_summary: UdpNotificationSummary | None = None,
 ) -> list[dict[str, object]]:
     score_total = metrics.score_total_devices
-    if udp_summary:
+    if udp_summary and (udp_summary.receiving_count or udp_summary.not_receiving_count):
         udp_value = count_with_denominator(
             udp_summary.not_receiving_count, udp_summary.total_devices
         )
@@ -4709,11 +4736,10 @@ def client_loop_infographic_key_rows(
         if udp_summary and udp_summary.relay_rows
         else str(relay_tile["value"])
     )
+    peak_offender = _slowest_timed_offender(loop_offenders)
     slowest = (
-        format_loop_offender_strip_seconds(
-            loop_offenders[0].avg_client_processing_seconds
-        )
-        if loop_offenders
+        format_loop_offender_strip_seconds(peak_offender.max_client_processing_seconds)
+        if peak_offender is not None
         else "Not available"
     )
     raised = bool(loop_finding_reasons(metrics, property_intervals))
@@ -4759,7 +4785,7 @@ def client_loop_infographic_key_rows(
         [
             "Slowest evaluation",
             slowest,
-            "Top entry in Top 10 Most Expensive Evaluations.",
+            "Longest single evaluation in the supplied timing capture.",
         ],
         [
             "Devices averaging over 120 min",
@@ -4918,6 +4944,8 @@ def generate_word(
     include_automated_findings: bool = False,
     companion_workbook_name: str = "",
     total_evaluation_count: int = 0,
+    *,
+    all_loop_offenders: list[LoopOffenderSummary] | None = None,
 ) -> None:
     if Document is None:
         raise RuntimeError(
@@ -4988,7 +5016,10 @@ def generate_word(
         document,
         ["Infographic tile", "Value", "What it means"],
         client_loop_infographic_key_rows(
-            metrics, loop_offenders, udp_summary, property_intervals
+            metrics,
+            loop_offenders if all_loop_offenders is None else all_loop_offenders,
+            udp_summary,
+            property_intervals,
         ),
     )
 
@@ -5685,7 +5716,9 @@ def main() -> int:
             )
             log.detail(
                 "No UDP and polling disabled/not set",
-                command_polling_summary.no_udp_polling_gap_count,
+                command_polling_summary.no_udp_polling_gap_count
+                if command_polling_summary.udp_polling_assessed_count
+                else "Not collected",
             )
         if fast_hash_verify_summary:
             log.detail("FastHashVerify enabled", fast_hash_verify_summary.enabled_count)
@@ -5706,7 +5739,7 @@ def main() -> int:
         generate_png(
             metrics,
             png_output,
-            loop_offenders=loop_offenders,
+            loop_offenders=all_loop_offenders,
             udp_summary=udp_summary,
             property_intervals=property_intervals,
         )
@@ -5738,6 +5771,7 @@ def main() -> int:
                 word_output,
                 actionsite_pressure=actionsite_pressure,
                 loop_offenders=loop_offenders,
+                all_loop_offenders=all_loop_offenders,
                 udp_summary=udp_summary,
                 command_polling_summary=command_polling_summary,
                 fast_hash_verify_summary=fast_hash_verify_summary,

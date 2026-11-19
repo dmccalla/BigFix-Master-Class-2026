@@ -391,7 +391,14 @@ def apply_client_layout(
             for i, r in enumerate(source[:4])
             if _count(r[1])
         ]
-        checks = [{"label": r[0], "count": _count(r[1])} for r in source[4:]]
+        checks = [
+            {
+                "label": label,
+                "count": _count(devices) if rate else None,
+                "total": _count(devices.partition("/")[2].strip()),
+            }
+            for label, devices, rate in source[4:]
+        ]
         replace_table(
             "Command Polling",
             "distribution",

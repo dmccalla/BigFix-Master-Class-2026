@@ -5,6 +5,12 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Use the dedicated UDP capture for Client Loop UDP diagnostics. Calculate combined UDP and polling checks from devices with both results and leave missing observations blank.
+
+- Show the longest single recorded evaluation in the Client Loop infographic and its key, including timing results outside the report table preview.
+
+- Correct a one-second loss when converting Client Loop durations from decimal minutes.
+
 - Refresh service restart planning, failure recovery and cleanup guidance in the current guides and lab scenarios. Verify the revised Word PDFs, live FillDB lifecycles and an actual 22-minute service shutdown.
 
 - Wait for actual Windows service transitions in FillDB logging and cleanup tasks. Record progress, attempt recovery after stop errors, and preserve failure status. Correct restart guidance and add native PowerShell long-transition tests.

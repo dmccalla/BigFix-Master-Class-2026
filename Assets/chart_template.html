@@ -1135,10 +1135,11 @@ function buildPerfmon(d){
   const score = d.score;
   const color = standardStatusColor(d.scoreColor || srcColor(score));
   const right = miniScoreLockup(score, color, scoreStatusWord(d));
+  const counterColors = {pass:SRC_HEALTHY, warn:SRC_ATTENTION, fail:SRC_CRITICAL, cannot:SRC_INK};
   const cards = (d.counters || []).map(([name,peak,thr,res])=>`
     <div style="border:1px solid ${SRC_LINE};border-radius:12px;padding:22px 24px;">
       <div style="font-size:38px;font-weight:700;letter-spacing:0.04em;">${srcText(name).toUpperCase()}</div>
-      <div style="font-size:64px;font-weight:700;color:${res==='fail'?SRC_CRITICAL:res==='cannot'?SRC_INK:SRC_HEALTHY};margin-top:10px;">${srcText(peak)}</div>
+      <div style="font-size:64px;font-weight:700;color:${counterColors[res] || SRC_INK};margin-top:10px;">${srcText(peak)}</div>
       <div style="font-size:38px;margin-top:8px;">${srcText(res==='cannot'?(/memory/i.test(name)?'Physical memory not supplied. Earns 25 points.':'Cannot verify.'):srcPerfmonCaption(name, thr))}</div>
     </div>`).join('');
   return srcHeader('PerfMon Counters', `${(d.counters || []).length} checks against thresholds &middot; values are capture averages`, right)

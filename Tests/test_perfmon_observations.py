@@ -1338,6 +1338,7 @@ def test_perfmon_scorecard_payload_carries_finding_summary(
         "cannotVerify": 0,
     }
     assert data["findingIds"] == ["PRF-INF-02", "PRF-INF-09"]
+    assert [counter[3] for counter in data["counters"]] == ["pass", "fail", "warn"]
 
 
 def test_insert_perfmon_scorecard_skips_toc_entry() -> None:

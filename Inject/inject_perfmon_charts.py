@@ -1335,14 +1335,16 @@ def render_perfmon_scorecard(observations: dict, output_path: Path) -> Path | No
         status = str(section_data.get("status", "")).strip().lower()
         if status in ("ok", "pass", "passed", "healthy"):
             res = "pass"
+        elif status in ("warning", "warn", "advisory", "needs attention"):
+            res = "warn"
         elif status in ("not available", "cannot verify"):
             res = "cannot"
         else:
             res = "fail"
         if res != "pass":
-            if status in ("warning", "warn", "advisory", "needs attention"):
+            if res == "warn":
                 findings_summary["warning"] += 1
-            elif status in ("not available", "cannot verify"):
+            elif res == "cannot":
                 findings_summary["cannotVerify"] += 1
             else:
                 findings_summary["critical"] += 1

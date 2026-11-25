@@ -5,6 +5,8 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Correct the 90-day action age label in deployment collection.
+
 - Use Client instead of Agent in the Client Performance guidance text.
 
 - Show advisory PerfMon counter values in amber on the scorecard.

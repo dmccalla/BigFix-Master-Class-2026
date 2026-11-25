@@ -52,4 +52,4 @@ Running after each restart, restored logging settings after cleanup, action
 status, and controller log entries. A simulated long transition is not a
 measured lab restart. Retain real timings separately.
 
-The [17 November lab verification](../Records/Service_Restart_Cross_Repo_Verification_2026-11-17.md) records nine passing FillDB lifecycle scenarios and the measured 22-minute shutdown.
+The 17 November lab verification recorded nine passing FillDB lifecycle scenarios and a measured 22-minute shutdown.

@@ -5,6 +5,8 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 
 ## [Unreleased]
 
+- Remove documentation links to records that are no longer in the repository.
+
 - Document GitHub Repository Sites as the rebuilt lab's content sync path.
 
 - Correct the 90-day action age label in deployment collection. Update the

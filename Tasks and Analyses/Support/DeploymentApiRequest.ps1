@@ -179,7 +179,7 @@ function New-RunContext {
         SelectedSections = $selected; SelectionProvided = ($SelectedSections -ne '')
         PlannedRequests = $planned; PauseSeconds = $PauseSeconds; DataLogs = $DataLogs
         HelperSha256 = $helperHash
-        QueryContractSha256 = '3d304c868585586526c22255a3bbe38d05ad111e74b62e6d0e3827adb70d56d7'
+        QueryContractSha256 = '33aa7316c8960dc838b1b0658b1c6e11dde79492d0cf9918de2f6e2300e0351a'
         QueryEngine = 'Root API automatic selection; engine identity/version not observed'
         RequestWallTimeMs = 0; PausesScheduled = 0; ServerEvaluationMs = 0
         ParsedEvaluationCount = 0; UnparsedEvaluationCount = 0

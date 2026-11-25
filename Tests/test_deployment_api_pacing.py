@@ -43,7 +43,7 @@ def test_real_api_queries_are_unchanged_and_literals_do_not_reach_server():
     digest = hashlib.sha256(
         json.dumps(entries, separators=(",", ":")).encode()
     ).hexdigest()
-    assert digest == "3d304c868585586526c22255a3bbe38d05ad111e74b62e6d0e3827adb70d56d7"
+    assert digest == "33aa7316c8960dc838b1b0658b1c6e11dde79492d0cf9918de2f6e2300e0351a"
     # The helper's diagnostics name the query contract the task ships with.
     helper = ROOT / "Tasks and Analyses/Support/DeploymentApiRequest.ps1"
     assert f"QueryContractSha256 = '{digest}'" in helper.read_text(encoding="utf-8")

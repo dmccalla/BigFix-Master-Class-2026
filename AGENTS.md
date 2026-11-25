@@ -104,11 +104,15 @@ text. US English. Avoid using a semicolon or colon where a period belongs.
 
 ## Lab Sync
 
-**The lab is always in sync with the repo.** A `.bes` change is not done until
-the same file is in the lab custom site `Performance and Config Analysis`.
-Testing a temporary copy in another site does not count. In your report list every `.bes` file you
-changed and say whether the lab copy now matches. If you cannot reach the lab
-say so plainly and leave the item open.
+**GitHub is the source of truth for lab content.** Commit and push every
+`.bes` change. The rebuilt lab will gather the published branch for this repo
+through the `Performance and Config Analysis` [External Repository Site](https://help.hcl-software.com/bigfix/11.0/platform/Platform/Config/c_repository_site.html).
+Use the Repository Site gather for routine content publication once configured.
+
+Verify the gathered site version and changed content in the BigFix Console.
+In your report list every `.bes` file you changed and say whether the lab
+copy is current. Leave lab verification open while the server or Repository
+Site is unavailable.
 
 ## Working Alongside Other Agents
 

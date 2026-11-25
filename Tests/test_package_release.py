@@ -137,6 +137,7 @@ def package_fixture():
             "LICENSE",
             "NOTICE",
             "requirements.txt",
+            "uv.lock",
             "Launchers/Run Diagnostics Workbench.cmd",
             "App/diagnostics_workbench_ui.py",
             "App/run_diagnostics.py",

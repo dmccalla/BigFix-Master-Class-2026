@@ -51,10 +51,10 @@ for the lab practice run. No separate sample download is needed.
   FillDB analysis of raw FillDB performance logs runs `MXFillDBPerf.exe` from
   the BigFix Performance Toolkit, which ships in `Utilities`. An analyzer CSV
   needs no extra tool.
-- Python 3.12 or newer, installed with "Add Python to PATH".
-- uv, installed after Python. In PowerShell, run
+- **uv for the standard installation.** In PowerShell, run
   `winget install --id=astral-sh.uv -e`, reopen PowerShell, and check
-  `uv --version`.
+  `uv --version`. The launcher uses uv to install the versions in `uv.lock`.
+  uv can download Python 3.12 or newer if needed.
 - Microsoft Edge or Google Chrome. The Infographic is rendered by the
   installed browser in the background.
 - Microsoft Word is required to review Mini Report formatting and export PDFs.
@@ -69,7 +69,8 @@ seven days before routine updates use them.
 
 The [User Guide (Word)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_User_Guide.docx)
 and [User Guide (PDF)](Docs/User%20Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf)
-cover setup, data collection, the three-step workflow, and outputs.
+start with an **Installation Checklist**. They also cover data collection, the
+three-step workflow, and outputs.
 
 See [Getting Started](Docs/Reference/Getting_Started.md) for the application workflow
 and outputs. [Data Collection](Docs/Reference/Data_Collection.md) describes the files

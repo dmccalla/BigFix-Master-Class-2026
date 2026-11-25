@@ -10,6 +10,8 @@ for downloads and setup, or [commit history](https://github.com/dmccalla/BigFix-
 - Correct the 90-day action age label in deployment collection. Update the
   deployment query contract hash to match.
 
+- Put the uv-first Installation Checklist after Document Control and the table of contents in the User Guide. Use uv in the Windows launcher when available and include uv.lock in release ZIPs.
+
 - Use Client instead of Agent in the Client Performance guidance text.
 
 - Show advisory PerfMon counter values in amber on the scorecard.

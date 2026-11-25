@@ -78,7 +78,7 @@ function Test-IncludedTrackedFile {
     if ($path.StartsWith("Docs/", [StringComparison]::OrdinalIgnoreCase)) {
         return $path.EndsWith(".pdf", [StringComparison]::OrdinalIgnoreCase)
     }
-    $rootFiles = @("LICENSE", "NOTICE", "pyproject.toml", "requirements.txt")
+    $rootFiles = @("LICENSE", "NOTICE", "pyproject.toml", "requirements.txt", "uv.lock")
     if ($rootFiles -contains $path) { return $true }
 
     $prefixes = @("App/", "Get/", "Inject/", "Lib/", "Assets/", "Fonts/", "Templates/", "SampleData/", "Tasks and Analyses/", "Utilities/", "Launchers/")
@@ -140,6 +140,7 @@ $required = @(
     "LICENSE",
     "NOTICE",
     "requirements.txt",
+    "uv.lock",
     "Docs/User Guide/Master_Class_Diagnostics_Workbench_User_Guide.pdf",
     "Launchers/Run Diagnostics Workbench.cmd",
     "App/diagnostics_workbench_ui.py",
@@ -246,12 +247,16 @@ try {
     $startHere = @"
 $productName $version
 
-1. Double-click Launchers\Run Diagnostics Workbench.cmd. The first run creates
-   a private Python environment for the tool. Python 3.12 or newer is required.
-2. On the Folders step, choose the sample data at SampleData\BigFix Master Class 2026
-   to try the Workbench without a deployment, or your own collected data.
-3. Read Docs\User Guide\Master_Class_Diagnostics_Workbench_User_Guide.pdf
-   before class. It covers setup, data collection and report generation.
+1. Extract the full package to a writable local folder.
+2. Install uv before starting the app. Run this command in PowerShell.
+   winget install --id=astral-sh.uv -e
+   Reopen PowerShell and run uv --version. The launcher uses uv.lock to
+   install the package versions for this release. uv can download
+   Python 3.12 or newer if needed.
+3. Double-click Launchers\Run Diagnostics Workbench.cmd. Try SampleData\BigFix Master Class 2026
+   on the Folders step.
+4. For setup help, see the Installation Checklist near the front of
+   Docs\User Guide\Master_Class_Diagnostics_Workbench_User_Guide.pdf.
 
 Windows may block the .cmd launcher because it was downloaded from the Internet.
 If it will not run, right-click the .cmd file and select Properties. On the

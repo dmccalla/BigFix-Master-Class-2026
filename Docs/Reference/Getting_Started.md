@@ -7,11 +7,9 @@ deployment is needed to follow it.
 ## Before You Start
 
 - Windows 11.
-- Python 3.12 or newer. Install it from python.org and tick **Add Python to
-  PATH** during setup.
-- uv, installed after Python. In PowerShell, run
+- **uv.** Install it before opening the app. In PowerShell, run
   `winget install --id=astral-sh.uv -e`, reopen PowerShell, and check
-  `uv --version`.
+  `uv --version`. uv can download Python 3.12 or newer if needed.
 - Microsoft Edge or Google Chrome. Edge is already on Windows.
 - Microsoft Word and Excel are the preferred and tested applications for
   opening the Mini Reports and Excel workbooks. LibreOffice and other
@@ -22,10 +20,9 @@ deployment is needed to follow it.
 1. Place the project folder somewhere you can write to, such as `Documents`.
    Keep the folder structure as it is.
 2. Open `Launchers` and double-click **Run Diagnostics Workbench.cmd**.
-3. The first run explains that the Workbench keeps its packages in its own
-   private environment, a `.venv` folder next to the code. Press a key to
-   continue. Creating the environment and installing the packages takes
-   about a minute. Later runs skip this and open the app straight away.
+3. Continue at the first-run prompt. The launcher uses uv and `uv.lock` to
+   install the release's package versions into its private `.venv` folder.
+   Wait for the app to open on **Folders**.
 
 ### Unblock the Windows launcher
 
@@ -35,9 +32,10 @@ Windows may block the `.cmd` launcher because it was downloaded from the Interne
 
 *The screenshot uses Run Diagnostics Workbench.cmd as an example. The same steps apply to this tool's `.cmd` launcher.*
 
-If the launcher reports that Python was not found or is too old, install
-Python 3.12 or newer and run the launcher again. If an install fails part
-way through, delete the `.venv` folder and run the launcher again.
+If you cannot install uv, install Python 3.12 or newer from python.org,
+select **Add Python to PATH**, and run the launcher to use pip. If setup
+fails, read the launcher error and retry. For an incomplete pip setup,
+close the app, rename its `.venv` folder, and run the launcher again.
 
 ## Step 1: Folders
 

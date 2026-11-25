@@ -9,7 +9,7 @@ REM ===================================================================
 REM  Master Class Diagnostics Workbench - one-click launcher (Windows)
 REM
 REM  Double-click this file. It will:
-REM    1. Find Python (3.12 or newer is required)
+REM    1. Use uv for locked packages, or find Python for the pip fallback.
 REM    2. Create a PRIVATE environment (.venv) for this tool and install
 REM       its packages there. Your own Python install is left untouched.
 REM    3. Open the Workbench
@@ -42,13 +42,6 @@ if exist "%VENV_PY%" (
     )
 )
 
-REM --- Find a Python launcher (only needed to create the .venv) ---------
-set "PY="
-where py >nul 2>nul && set "PY=py -3"
-if not defined PY (
-    where python >nul 2>nul && set "PY=python"
-)
-
 REM --- First-run notice (only when the private env does not exist yet) --
 if not exist "%VENV_PY%" (
     echo.
@@ -60,7 +53,25 @@ if not exist "%VENV_PY%" (
     pause
 )
 
+REM --- Preferred: sync the private environment from the release lockfile.
+where uv >nul 2>nul
+if errorlevel 1 goto :pip
+if not exist "uv.lock" goto :pip
+set "UV_PROJECT_ENVIRONMENT=%CD%\%VENV%"
+echo Setting up the private environment with uv.
+uv sync --no-dev --frozen
+if errorlevel 1 goto :uv_failed
+goto :launch
+
+:pip
 if exist "%VENV_PY%" if not defined BROKEN_VENV goto :launch
+echo Install uv before first launch for the locked setup.
+echo See https://docs.astral.sh/uv/getting-started/installation/
+set "PY="
+where py >nul 2>nul && set "PY=py -3"
+if not defined PY (
+    where python >nul 2>nul && set "PY=python"
+)
 if not defined PY goto :no_python
 if defined BROKEN_VENV (
     echo Removing the broken private environment...
@@ -115,6 +126,10 @@ goto :fail
 :venv_missing
 echo [ERROR] The private environment is missing its Python (%VENV_PY%).
 echo Delete the .venv folder and run this launcher again.
+goto :fail
+:uv_failed
+echo [ERROR] uv could not set up the private environment.
+echo Check the messages above, then run the launcher again.
 goto :fail
 :pip_failed
 echo [ERROR] Installing packages failed. See the messages above.
